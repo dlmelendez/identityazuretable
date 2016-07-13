@@ -1,0 +1,187 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{FC2B604C-548E-4981-876B-F3C4D1C3987B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ElCamino.AspNet.Identity.AzureTable</RootNamespace>
+    <AssemblyName>ElCamino.AspNet.Identity.AzureTable</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;net45</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;net45</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Signed|AnyCPU'">
+    <OutputPath>bin\Signed\</OutputPath>
+    <DefineConstants>TRACE;net45</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.AspNet.Identity.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Identity.Core.2.2.1\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Azure.KeyVault.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Azure.KeyVault.Core.1.0.0\lib\net40\Microsoft.Azure.KeyVault.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Data.Edm, Version=5.7.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Data.Edm.5.7.0\lib\net40\Microsoft.Data.Edm.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Data.OData, Version=5.7.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Data.OData.5.7.0\lib\net40\Microsoft.Data.OData.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Data.Services.Client, Version=5.7.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Data.Services.Client.5.7.0\lib\net40\Microsoft.Data.Services.Client.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAzure.Configuration, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.WindowsAzure.ConfigurationManager.3.2.1\lib\net40\Microsoft.WindowsAzure.Configuration.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAzure.Storage, Version=7.1.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\WindowsAzure.Storage.7.1.2\lib\net40\Microsoft.WindowsAzure.Storage.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Spatial, Version=5.7.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Spatial.5.7.0\lib\net40\System.Spatial.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Configuration\IdentityConfigurationSection.cs">
+      <Link>IdentityConfigurationSection.cs</Link>
+    </Compile>
+    <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Constants.cs">
+      <Link>Constants.cs</Link>
+    </Compile>
+    <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Helpers\BaseKeyHelper.cs">
+      <Link>BaseKeyHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Helpers\BatchOperationHelper.cs">
+      <Link>BatchOperationHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Helpers\KeyHelper.cs">
+      <Link>KeyHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Helpers\TableQueryHelper.cs">
+      <Link>TableQueryHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Helpers\UriEncodeKeyHelper.cs">
+      <Link>UriEncodeKeyHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\IdentityCloudContext.cs">
+      <Link>IdentityCloudContext.cs</Link>
+    </Compile>
+    <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\IdentityResources.Designer.cs">
+      <Link>IdentityResources.Designer.cs</Link>
+    </Compile>
+    <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Model\IdentityConfiguration.cs">
+      <Link>IdentityConfiguration.cs</Link>
+    </Compile>
+    <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Model\IdentityRole.cs">
+      <Link>IdentityRole.cs</Link>
+    </Compile>
+    <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Model\IdentityUser.cs">
+      <Link>IdentityUser.cs</Link>
+    </Compile>
+    <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Model\IdentityUserClaim.cs">
+      <Link>IdentityUserClaim.cs</Link>
+    </Compile>
+    <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Model\IdentityUserIndex.cs">
+      <Link>IdentityUserIndex.cs</Link>
+    </Compile>
+    <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Model\IdentityUserLogin.cs">
+      <Link>IdentityUserLogin.cs</Link>
+    </Compile>
+    <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Model\IdentityUserRole.cs">
+      <Link>IdentityUserRole.cs</Link>
+    </Compile>
+    <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Model\IGenerateKeys.cs">
+      <Link>IGenerateKeys.cs</Link>
+    </Compile>
+    <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\RoleStore.cs">
+      <Link>RoleStore.cs</Link>
+    </Compile>
+    <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\UserStore.cs">
+      <Link>UserStore.cs</Link>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\ElCamino.AspNetCore.Identity.AzureTable\IdentityResources.resx">
+      <Link>IdentityResources.resx</Link>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Configuration\" />
+    <Folder Include="Helpers\" />
+    <Folder Include="Model\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  -->
+  <Target Name="AfterBuild" Condition=" '$(Configuration)' == 'Signed' ">
+    <Delete Files="$(TargetDir)*.nupkg" />
+    <!-- Create NuGet Package -->
+    <Exec Command="$(SolutionDir)3rdParty\NuGet\Nuget.exe pack $(ProjectPath) -Prop Configuration=$(Configuration) -Symbols -OutputDirectory $(TargetDir)" />
+    <Delete Files="$(TargetDir)*.zip" />
+    <!-- 7-zip dlls-->
+    <Exec Command="$(SolutionDir)3rdParty\7-zip\7z.exe a $(TargetDir)$(TargetName)_$(Configuration).zip $(TargetPath) $(TargetDir)$(TargetName).pdb" />
+  </Target>
+</Project>

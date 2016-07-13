@@ -1,0 +1,26 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/sample/packages
+/sample/.vs
+/sample/samplemvc/bin
+/sample/samplemvc/obj
+*.user
+*.vspscc
+*.suo
+/sample/samplemvccore/bin
+/sample/samplemvccore/obj
+*.lock.json
+/src/.vs
+/src/artifacts
+/src/ElCamino.AspNet.Identity.AzureTable/bin
+/src/ElCamino.AspNet.Identity.AzureTable/obj
+/src/ElCamino.AspNetCore.Identity.AzureTable/bin
+/src/ElCamino.AspNetCore.Identity.AzureTable/obj
+/src/packages
+/tests/ElCamino.AspNet.Identity.AzureTable.Tests/bin
+/tests/ElCamino.AspNet.Identity.AzureTable.Tests/obj
+/tests/ElCamino.AspNetCore.Identity.AzureTable.Tests/bin
+/tests/ElCamino.AspNetCore.Identity.AzureTable.Tests/obj
+/src/TestResults

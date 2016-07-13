@@ -1,0 +1,48 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AAD16B60-811E-47BB-A0E0-1B24733B2A06}"
+	ProjectSection(SolutionItems) = preProject
+		global.json = global.json
+	EndProjectSection
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ElCamino.AspNetCore.Identity.AzureTable", "src\ElCamino.AspNetCore.Identity.AzureTable\ElCamino.AspNetCore.Identity.AzureTable.xproj", "{5FBD2375-18B4-426A-A875-7D99521A4DD0}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ElCamino.AspNetCore.Identity.AzureTable.Tests", "tests\ElCamino.AspNetCore.Identity.AzureTable.Tests\ElCamino.AspNetCore.Identity.AzureTable.Tests.xproj", "{B97DCC75-93CD-41C7-B7BE-D8DA6EA3C468}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+		Signed|Any CPU = Signed|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5FBD2375-18B4-426A-A875-7D99521A4DD0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FBD2375-18B4-426A-A875-7D99521A4DD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FBD2375-18B4-426A-A875-7D99521A4DD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FBD2375-18B4-426A-A875-7D99521A4DD0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FBD2375-18B4-426A-A875-7D99521A4DD0}.Signed|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FBD2375-18B4-426A-A875-7D99521A4DD0}.Signed|Any CPU.Build.0 = Debug|Any CPU
+		{B97DCC75-93CD-41C7-B7BE-D8DA6EA3C468}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B97DCC75-93CD-41C7-B7BE-D8DA6EA3C468}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B97DCC75-93CD-41C7-B7BE-D8DA6EA3C468}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B97DCC75-93CD-41C7-B7BE-D8DA6EA3C468}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B97DCC75-93CD-41C7-B7BE-D8DA6EA3C468}.Signed|Any CPU.ActiveCfg = Debug|Any CPU
+		{B97DCC75-93CD-41C7-B7BE-D8DA6EA3C468}.Signed|Any CPU.Build.0 = Debug|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 1
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs33
+		SccProjectUniqueName0 = src\\ElCamino.AspNetCore.Identity.AzureTable\\ElCamino.AspNetCore.Identity.AzureTable.xproj
+		SccProjectName0 = src/ElCamino.AspNetCore.Identity.AzureTable
+		SccAuxPath0 = https://tfs.codeplex.com/tfs/tfs33
+		SccLocalPath0 = src\\ElCamino.AspNetCore.Identity.AzureTable
+		SccProvider0 = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+	EndGlobalSection
+EndGlobal

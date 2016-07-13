@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <licenseUrl>https://github.com/dlmelendez/identityazuretable/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/dlmelendez/identityazuretable/</projectUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <description>$description$</description>
+    <releaseNotes>
+      Release $version$ This project is an open source high performance plugin to ASP.NET Identity framework using Azure Table Storage.
+      * Updating package dependencies.
+      * Moved source control to github.
+    </releaseNotes>
+    <copyright>Copyright 2016</copyright>
+    <tags>ASP.NET Identity 2.0 Azure Table Storage MVC UserStore RoleStore UserManager multi-tenant RA-GRS geo-redundant Microsoft.AspNet.Identity</tags>
+    <dependencies>
+      <dependency id="Microsoft.WindowsAzure.ConfigurationManager" version="3.2.1" />
+      <dependency id="WindowsAzure.Storage" version="7.1.2.0" />
+    </dependencies>
+  </metadata>
+</package>
