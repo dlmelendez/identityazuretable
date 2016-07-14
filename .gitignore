@@ -25,3 +25,4 @@
 /tests/ElCamino.AspNetCore.Identity.AzureTable.Tests/obj
 /src/TestResults
 /packages
+/TestResults
