@@ -94,25 +94,25 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Configuration\IdentityConfigurationSection.cs">
-      <Link>IdentityConfigurationSection.cs</Link>
+      <Link>Configuration\IdentityConfigurationSection.cs</Link>
     </Compile>
     <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Constants.cs">
       <Link>Constants.cs</Link>
     </Compile>
     <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Helpers\BaseKeyHelper.cs">
-      <Link>BaseKeyHelper.cs</Link>
+      <Link>Helpers\BaseKeyHelper.cs</Link>
     </Compile>
     <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Helpers\BatchOperationHelper.cs">
-      <Link>BatchOperationHelper.cs</Link>
+      <Link>Helpers\BatchOperationHelper.cs</Link>
     </Compile>
     <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Helpers\KeyHelper.cs">
-      <Link>KeyHelper.cs</Link>
+      <Link>Helpers\KeyHelper.cs</Link>
     </Compile>
     <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Helpers\TableQueryHelper.cs">
-      <Link>TableQueryHelper.cs</Link>
+      <Link>Helpers\TableQueryHelper.cs</Link>
     </Compile>
     <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Helpers\UriEncodeKeyHelper.cs">
-      <Link>UriEncodeKeyHelper.cs</Link>
+      <Link>Helpers\UriEncodeKeyHelper.cs</Link>
     </Compile>
     <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\IdentityCloudContext.cs">
       <Link>IdentityCloudContext.cs</Link>
@@ -121,28 +121,28 @@
       <Link>IdentityResources.Designer.cs</Link>
     </Compile>
     <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Model\IdentityConfiguration.cs">
-      <Link>IdentityConfiguration.cs</Link>
+      <Link>Model\IdentityConfiguration.cs</Link>
     </Compile>
     <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Model\IdentityRole.cs">
-      <Link>IdentityRole.cs</Link>
+      <Link>Model\IdentityRole.cs</Link>
     </Compile>
     <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Model\IdentityUser.cs">
-      <Link>IdentityUser.cs</Link>
+      <Link>Model\IdentityUser.cs</Link>
     </Compile>
     <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Model\IdentityUserClaim.cs">
-      <Link>IdentityUserClaim.cs</Link>
+      <Link>Model\IdentityUserClaim.cs</Link>
     </Compile>
     <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Model\IdentityUserIndex.cs">
-      <Link>IdentityUserIndex.cs</Link>
+      <Link>Model\IdentityUserIndex.cs</Link>
     </Compile>
     <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Model\IdentityUserLogin.cs">
-      <Link>IdentityUserLogin.cs</Link>
+      <Link>Model\IdentityUserLogin.cs</Link>
     </Compile>
     <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Model\IdentityUserRole.cs">
-      <Link>IdentityUserRole.cs</Link>
+      <Link>Model\IdentityUserRole.cs</Link>
     </Compile>
     <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Model\IGenerateKeys.cs">
-      <Link>IGenerateKeys.cs</Link>
+      <Link>Model\IGenerateKeys.cs</Link>
     </Compile>
     <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\RoleStore.cs">
       <Link>RoleStore.cs</Link>
@@ -165,11 +165,7 @@
       <Link>IdentityResources.resx</Link>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Configuration\" />
-    <Folder Include="Helpers\" />
-    <Folder Include="Model\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
