@@ -1,0 +1,123 @@
+﻿<div>
+    <h1>ElCamino.AspNet.Identity.AzureTable </h1>
+<h2><a href="https://github.com/dlmelendez/identityazuretable/tree/master/sample/samplemvc">Sample Mvc Website</a></h2>
+Included in the source is a MVC 5.1 Website project that is an example of removing the EntityFramework and Identity EntityFramework references and replacing them with the Azure Table storage provider. The source of the sample project can be found Source Code
+ /sample/samplemvc and the walk-through can be found here Sample Mvc.<br>
+<h2>Overview</h2>
+The sample Mvc web application is a standard web application that uses the Individual User Accounts authentication type. The EntityFramework references have been removed and replaced with the Azure Table storage provider.<br>
+<h2>Walk-Through of the SampleMvc</h2>
+Remove the NuGet packages EntityFramework and Microsoft.AspNet.Identity.EntityFramework packages using the Manage NuGet Packages.<br>
+Remove this using statement throughout the application.<br>
+<del>using Microsoft.AspNet.Identity.EntityFramework;</del><br>
+Add the NuGet package or the assembly ElCamino.AspNet.Identity.AzureTable to the web application.
+<h3>
+    Changes to <a href="https://github.com/dlmelendez/identityazuretable/blob/master/sample/samplemvc/Models/IdentityModels.cs">
+        /sample/samplemvc/Models/IdentityModels.cs
+    </a>
+</h3>
+Replace the statement<br>
+<del>using Microsoft.AspNet.Identity.EntityFramework;</del><br>
+with:<br>
+<div style="color:Black; background-color:White">
+<pre>
+<span style="color:Blue">using</span> ElCamino.AspNet.Identity.AzureTable;
+<span style="color:Blue">using</span> ElCamino.AspNet.Identity.AzureTable.Model;
+</pre>
+</div>
+...<br>
+Inherit from the IdentityUser class to provide the base user information and Azure Table Row and Partition Key mappings.<br>
+<div style="color:Black; background-color:White">
+<pre>
+    <span style="color:Green">// You can add profile data for the user by adding more properties to your ApplicationUser class, please visit http://go.microsoft.com/fwlink/?LinkID=317594 to learn more.</span>
+    <span style="color:Blue">public</span> <span style="color:Blue">class</span> ApplicationUser : IdentityUser
+    { ...
+</pre>
+</div>
+...<br>
+Inherit from the IdentityCloudContext which provides the Azure connection and table storage schema.<br>
+<div style="color:Black; background-color:White">
+<pre>
+    <span style="color:Blue">public</span> <span style="color:Blue">class</span> ApplicationDbContext : IdentityCloudContext&lt;ApplicationUser&gt;
+    {
+    <span style="color:Blue">public</span> ApplicationDbContext() : <span style="color:Blue">base</span>() { } ...
+</pre>
+</div>
+<h3>
+    Changes to <a href="https://github.com/dlmelendez/identityazuretable/blob/master/sample/samplemvc/App_Start/IdentityConfig.cs">
+        /sample/samplemvc/App_Start/IdentityConfig.cs
+    </a>
+</h3>
+Replace the statement<br>
+<del>using Microsoft.AspNet.Identity.EntityFramework;</del><br>
+with:<br>
+<div style="color:Black; background-color:White">
+<pre>
+<span style="color:Blue">using</span> ElCamino.AspNet.Identity.AzureTable;
+<span style="color:Blue">using</span> ElCamino.AspNet.Identity.AzureTable.Model;
+</pre>
+</div>
+...<br>
+Adding code to create the azure tables. You can skip this step if you manually create the Azure tables AspNetUsers, AspNetIndex, and AspNetRoles<br>
+<div style="color:Black; background-color:White">
+<pre>
+    <span style="color:Blue">public</span> <span style="color:Blue">class</span> ApplicationUserManager : UserManager&lt;ApplicationUser&gt;
+    {
+        ...
+    <span style="color:Gray">///</span> <span style="color:Gray">&lt;summary&gt;</span>
+    <span style="color:Gray">///</span><span style="color:Green"> ElCamino - Creates the Azure Table Storage Tables</span>
+    <span style="color:Gray">///</span> <span style="color:Gray">&lt;/summary&gt;</span>
+    <span style="color:Blue">public</span> <span style="color:Blue">static</span> async <span style="color:Blue">void</span> StartupAsync()
+        {
+    <span style="color:Blue">var</span> azureStore = <span style="color:Blue">new</span> UserStore&lt;ApplicationUser&gt;(<span style="color:Blue">new</span> ApplicationDbContext());
+            await azureStore.CreateTablesIfNotExists();
+        }
+...
+</pre>
+</div>
+<h3>
+    Changes to <a href="https://github.com/dlmelendez/identityazuretable/blob/master/sample/samplemvc/Global.asax.cs">
+        /sample/samplemvc/Global.asax.cs
+    </a>
+</h3>
+Adding code to create the azure tables. You can skip this step if you manually create the Azure tables AspNetUsers, AspNetIndex, and AspNetRoles<br>
+<div style="color:Black; background-color:White">
+<pre>
+<span style="color:Blue">protected</span> <span style="color:Blue">void</span> Application_Start()
+        {
+    <span style="color:Green">//ElCamino - Added to create azure tables</span>
+            ApplicationUserManager.StartupAsync();
+    <span style="color:Green">//safe to remove after tables are created once.</span>
+...
+</pre>
+</div>
+<h3>
+    Changes to <a href="https://github.com/dlmelendez/identityazuretable/blob/master/sample/samplemvc/Web.config">
+        /sample/samplemvc/Web.config
+    </a>
+</h3>
+Remove all references to the EntityFramework.<br>
+Add the default local connection string to the Azure Storage Emulator in the configSection -
+<b>New in 1.2.9.0</b><br>
+<div style="color:Black; background-color:White">
+<pre>
+<span style="color:Blue">&lt;</span><span style="color:#A31515">configuration</span><span style="color:Blue">&gt;</span>
+<span style="color:Blue">&lt;</span><span style="color:#A31515">configSections</span><span style="color:Blue">&gt;</span>
+    <span style="color:Blue">&lt;</span><span style="color:#A31515">section</span> <span style="color:Red">name</span><span style="color:Blue">=</span><span style="color:Black">&quot;</span><span style="color:Blue">elcaminoIdentityConfiguration</span><span style="color:Black">&quot;</span> <span style="color:Red">type</span><span style="color:Blue">=</span><span style="color:Black">&quot;</span><span style="color:Blue">ElCamino.AspNet.Identity.AzureTable.Configuration.IdentityConfigurationSection,ElCamino.AspNet.Identity.AzureTable </span><span style="color:Black">&quot;</span> <span style="color:Blue">/&gt;</span>
+    <span style="color:Blue">&lt;/</span><span style="color:#A31515">configSections</span><span style="color:Blue">&gt;</span>
+    <span style="color:Blue">&lt;</span><span style="color:#A31515">elcaminoIdentityConfiguration</span> <span style="color:Red">tablePrefix</span><span style="color:Blue">=</span><span style="color:Black">&quot;</span><span style="color:Blue">&quot; storageConnectionString=&quot;UseDevelopmentStorage=true</span><span style="color:Black">&quot;</span> <span style="color:Blue">/&gt;</span>
+</pre>
+</div>
+<br>
+Remove the deprecated StorageConnectionString appSetting<br>
+<div style="color:Black; background-color:White">
+<pre>
+...
+    <span style="color:Blue">&lt;</span><span style="color:#A31515">appSettings</span><span style="color:Blue">&gt;</span>
+    <span style="color:Green">&lt;!--Remove the deprecated StorageConnectionString appSetting --&gt;</span>    
+    <span style="color:Green">&lt;!-- &lt;add key=&quot;StorageConnectionString&quot; value=&quot;UseDevelopmentStorage=true&quot; /&gt;--&gt;</span>
+...
+</pre>
+</div>
+<h3>Tip: Don&#39;t forget to start your Azure Storage Emulator if running locally.</h3>
+</div>
+<div></div>

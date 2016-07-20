@@ -266,7 +266,7 @@ Full-Width Styles
 
 .inner {
   position: relative;
-  max-width: 640px;
+  max-width: 1080px;
   padding: 20px 10px;
   margin: 0 auto;
 }
@@ -333,6 +333,16 @@ Full-Width Styles
   text-indent: -5000px;
   overflow: hidden;
   background: url(../images/sprite_download.png) no-repeat bottom left;
+}
+
+.nuget_download_link {
+  display: block;
+  float:left;
+  width: 50px;
+  height:50px;
+  text-indent: -5000px;
+  overflow: hidden;
+  background: url(../images/nuget50x50.png) no-repeat;
 }
 
 .tar_download_link {

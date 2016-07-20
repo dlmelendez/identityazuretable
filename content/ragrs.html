@@ -1,0 +1,43 @@
+﻿<div >
+    Read access geo-redundant storage allows your storage data to be automatically replicated to another region. In addition, this data in the replicated region is accessible for read-only queries.
+    <a href="http://blogs.msdn.com/b/windowsazurestorage/archive/2013/12/11/introducing-read-access-geo-replicated-storage-ra-grs-for-windows-azure-storage.aspx">
+        For more information on the different kinds of storage redundancy.
+    </a>. <b>Your storage account must be set to RA-GRS to support reads on the replicated secondary region.</b><br>
+    <br>
+    Next, enable the preferred secondary read options in the web.config or the IdentityConfiguration class passed into the IdentityCloudContext constructor. The LocationMode property can be left null or empty in which case the default mode in &#39;PrimaryOnly&#39;.
+    The other valid LocationModes can be found <a href="http://msdn.microsoft.com/en-us/library/azure/microsoft.windowsazure.storage.retrypolicies.locationmode.aspx">
+        here
+    </a>.<br>
+    <br>
+    Example of setting up the web.config for a SecondaryThenPrimary access. This is available in versions
+    <b>ElCamino.AspNet.Identity.AzureTable 1.5.2.0</b> and higher.<br>
+    <div style="color:Black; background-color:White">
+<pre>
+<span style="color:Blue">&lt;</span><span style="color:#A31515">configuration</span><span style="color:Blue">&gt;</span>
+<span style="color:Blue">&lt;</span><span style="color:#A31515">configSections</span><span style="color:Blue">&gt;</span>
+        <span style="color:Blue">&lt;</span><span style="color:#A31515">section</span> <span style="color:Red">name</span><span style="color:Blue">=</span><span style="color:Black">&quot;</span><span style="color:Blue">elcaminoIdentityConfiguration</span><span style="color:Black">&quot;</span> <span style="color:Red">type</span><span style="color:Blue">=</span><span style="color:Black">&quot;</span><span style="color:Blue">ElCamino.AspNet.Identity.AzureTable.Configuration.IdentityConfigurationSection,ElCamino.AspNet.Identity.AzureTable </span><span style="color:Black">&quot;</span> <span style="color:Blue">/&gt;</span>
+        <span style="color:Blue">&lt;/</span><span style="color:#A31515">configSections</span><span style="color:Blue">&gt;</span>
+        <span style="color:Blue">&lt;</span><span style="color:#A31515">elcaminoIdentityConfiguration</span> <span style="color:Red">locationMode</span><span style="color:Blue">=</span><span style="color:Black">&quot;</span><span style="color:Blue; font-weight:bold;">SecondaryThenPrimary</span><span style="color:Black">&quot;</span> <span style="color:Red">storageConnectionString</span><span style="color:Blue">=</span><span style="color:Black">&quot;</span><span style="color:Blue">UseDevelopmentStorage=true</span><span style="color:Black">&quot;</span> <span style="color:Blue">/&gt;</span>
+</pre>
+    </div>
+</div>
+    <br />
+    Another example of setting up the appsettings for a SecondaryThenPrimary access. This is available in versions
+<b>ElCamino.AspNetCore.Identity.AzureTable 1.0</b> and higher.<br>
+<div style="color:Black; background-color:White">
+<pre>
+{
+...
+    "IdentityAzureTable": {
+        "IdentityConfiguration": {
+            "TablePrefix": <span style="color:#A31515">"mvc6"</span>
+            "StorageConnectionString": <span style="color:#A31515">"UseDevelopmentStorage=true;"</span>
+            "LocationMode": <span style="color:#A31515; font-weight:bold;">"SecondaryThenPrimary"</span>
+        }
+    }...
+}
+</pre>
+</div>
+
+<div></div>
+
