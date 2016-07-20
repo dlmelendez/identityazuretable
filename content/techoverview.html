@@ -1,11 +1,11 @@
 ﻿<h3>High Level Dependencies</h3>
-<img src="/images/AzureIdentityTableDependency.png" alt="AzureIdentityTableDependency.png" title="AzureIdentityTableDependency.png"><br>
+<img src="images/AzureIdentityTableDependency.png" alt="AzureIdentityTableDependency.png" title="AzureIdentityTableDependency.png"><br>
 ElCamino.AspNet.Identity.AzureTable.dll acts as the data access layer under the Microsoft.AspNet.Identity.Core.dll classes UserManager and RoleManager by implementing the necessary interfaces on the UserStore and RoleStore respectively. These classes consume
  the <a href="https://github.com/dlmelendez/identityazuretable/tree/master/src/ElCamino.AspNetCore.Identity.AzureTable/IdentityCloudContext.cs">
     IdentityCloudContext
 </a> and the other Identity Model classes described below to persist the user and role information according to the business logic dictated by the respective UserManager and RoleManager classes.
 <h3>UserStore and RoleStore Classes</h3>
-<img src="/images/IdentityUserStoreRoleStore.png" alt="IdentityUserStoreRoleStore.png" title="IdentityUserStoreRoleStore.png">
+<img src="images/IdentityUserStoreRoleStore.png" alt="IdentityUserStoreRoleStore.png" title="IdentityUserStoreRoleStore.png">
 <h3>IdentityCloudContext and Connections</h3>
 <a href="https://github.com/dlmelendez/identityazuretable/tree/master/src/ElCamino.AspNetCore.Identity.AzureTable/IdentityCloudContext.cs">IdentityCloudContext</a> that enables access to the Azure Table storage service and exposes the tables.
 <br>
@@ -38,7 +38,7 @@ For example, the default local connection string to the Azure Storage Emulator.<
 </pre>
 </div>
 <h3>Identity Model to Azure Table Relationships</h3>
-<img src="/images/IdentityModelToAzureTable.png" alt="IdentityModelToAzureTable.png" title="IdentityModelToAzureTable.png">
+<img src="images/IdentityModelToAzureTable.png" alt="IdentityModelToAzureTable.png" title="IdentityModelToAzureTable.png">
 <h4>AspNetUsers</h4>
 <table>
     <tbody>
