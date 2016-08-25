@@ -26,3 +26,6 @@
 /src/TestResults
 /packages
 /TestResults
+/src/ElCamino.Identity.AzureTable.DataUtility/bin
+/src/ElCamino.Identity.AzureTable.DataUtility/obj
+/.vs/restore.dg

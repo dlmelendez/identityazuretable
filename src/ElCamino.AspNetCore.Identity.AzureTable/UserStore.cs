@@ -308,11 +308,11 @@ namespace ElCamino.AspNet.Identity.AzureTable
 			return tq;
 		}
 
-		private TableQuery GetUserIdsByIndex(string rowkey)
+		private TableQuery GetUserIdsByIndex(string partitionKey)
 		{
 			TableQuery tq = new TableQuery();
 			tq.SelectColumns = new List<string>() { "Id" };
-			tq.FilterString = TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, rowkey);
+			tq.FilterString = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey);
 			return tq;
 		}
 
@@ -760,18 +760,20 @@ namespace ElCamino.AspNet.Identity.AzureTable
 		//Fixes deletes for non-unique emails for users.
 		private async Task DeleteEmailIndexAsync(string userId, string plainEmail)
 		{
-			//Only query by email rowkey to pickup old partitionkeys from 1.2.9.2 and lower
-			var indexes = (from index in _indexTable.CreateQuery<IdentityUserIndex>()
-						   where index.RowKey.Equals(KeyHelper.GenerateRowKeyUserEmail(plainEmail))
-						   select index).ToList();
-			foreach (IdentityUserIndex de in indexes)
-			{
-				if (de.Id == userId)
+            //Only query by email rowkey to pickup old partitionkeys from 1.2.9.2 and lower
+
+            var indexes = (from index in _indexTable.CreateQuery<IdentityUserIndex>()
+                           where index.PartitionKey.Equals(KeyHelper.GenerateRowKeyUserEmail(plainEmail))
+                            && index.RowKey.Equals(userId)
+                           select index).ToList();
+            foreach (IdentityUserIndex de in indexes)
+            {
+                if (de.Id == userId)
 				{
 					await _indexTable.ExecuteAsync(TableOperation.Delete(de));
 				}
-			}
-		}
+            }
+        }
 
 		public Task SetEmailConfirmedAsync(TUser user, bool confirmed)
 		{
@@ -996,9 +998,9 @@ namespace ElCamino.AspNet.Identity.AzureTable
 			return new IdentityUserIndex()
 			{
 				Id = userid,
-				PartitionKey = userid,
-				RowKey = KeyHelper.GenerateRowKeyUserEmail(email),
-				KeyVersion = KeyHelper.KeyVersion,
+				PartitionKey = KeyHelper.GenerateRowKeyUserEmail(email),
+				RowKey = userid,
+                KeyVersion = KeyHelper.KeyVersion,
 				ETag = Constants.ETagWildcard
 			};
 		}

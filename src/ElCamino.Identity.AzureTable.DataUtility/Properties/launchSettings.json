@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ElCamino.Identity.AzureTable.DataUtility": {
+      "commandName": "Project",
+      "commandLineArgs": "/pagesize:1000 /preview /startpage:10 /maxparallel:1000"
+    }
+  }
+}

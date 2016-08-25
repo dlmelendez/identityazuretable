@@ -104,7 +104,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 
         public override double KeyVersion
         {
-            get { return 1.5; }
+            get { return 1.6; }
         }
     }
 }

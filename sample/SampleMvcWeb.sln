@@ -34,16 +34,4 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 3
-		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs33
-		SccLocalPath0 = .
-		SccProjectUniqueName1 = samplemvc\\samplemvc.csproj
-		SccProjectName1 = samplemvc
-		SccLocalPath1 = samplemvc
-		SccProjectUniqueName2 = samplemvccore\\samplemvccore.xproj
-		SccProjectName2 = samplemvccore
-		SccLocalPath2 = samplemvccore
-	EndGlobalSection
 EndGlobal

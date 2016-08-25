@@ -14,6 +14,7 @@
       Release $version$ This project is an open source high performance plugin to ASP.NET Identity framework using Azure Table Storage.
       * Updating package dependencies.
       * Moved source control to github.
+      * Important! You will need to download ElCamino.Identity.AzureTable.DataUtility.exe for a data migration for this release from the project site.
     </releaseNotes>
     <copyright>Copyright 2016</copyright>
     <tags>ASP.NET Identity 2.0 Azure Table Storage MVC UserStore RoleStore UserManager multi-tenant RA-GRS geo-redundant Microsoft.AspNet.Identity</tags>

@@ -1,0 +1,41 @@
+﻿ElCamino.Identity.AzureTable.DataUtility.exe
+Migrates or previews users to have a new version of an email index created for 1.6 and higher. 
+Make sure the appsettings.json has the correct Azure Storage connection information and is in the same directory as ElCamino.Identity.AzureTable.DataUtility.exe
+noargs, /help or /? - shows this message.
+e.g. ElCamino.Identity.AzureTable.DataUtility.exe /?
+
+/preview - no data is modified. Shows how many users will be affected. Commits no changes to the repository.
+e.g. ElCamino.Identity.AzureTable.DataUtility.exe /preview
+
+/migrate - migrates users to the new email index. Use this after you have done a /preview of your data.
+e.g. ElCamino.Identity.AzureTable.DataUtility.exe /migrate
+
+/pagesize: - (optional) If defined, must be followed with an integer greater than 0 and less than or equal to 1000. Controls how many users to pull back in a single table storage request.
+Can be used with either /preview or /migrate. Use with /preview to see how many pages of data you have with the given page size.
+Default value: 1000 
+e.g. ElCamino.Identity.AzureTable.DataUtility.exe /preview /pagesize:500
+e.g. ElCamino.Identity.AzureTable.DataUtility.exe /migrate /pagesize:500
+
+/startpage: - (optional) If defined, must be followed with an integer greater than 0. Controls which 'page' of user data to start processing.
+Can be used with either /preview or /migrate. Directly related to the /pagesize. Can be used with /finishpage: also. Use with /preview to see how many users would affected.
+Default value: 1 
+e.g. (Skips page 1)
+ElCamino.Identity.AzureTable.DataUtility.exe /preview /pagesize:500 /startpage:2 
+ElCamino.Identity.AzureTable.DataUtility.exe /preview /startpage:2 
+ElCamino.Identity.AzureTable.DataUtility.exe /migrate /pagesize:500 /startpage:2 
+
+/finishpage: - (optional) If defined, must be followed with an integer greater than 0. Controls which 'page' of user data to end processing.
+Can be used with either /preview or /migrate. Directly related to the /pagesize. Can be used with /startpage: also. Use with /preview to see how many users would affected.
+Default value: none, will process all pages of user data.
+e.g. (Processes through page 3 and stops.)
+ElCamino.Identity.AzureTable.DataUtility.exe /preview /finishpage:3 
+e.g. (Skips page 1 and processes through page 3)
+ElCamino.Identity.AzureTable.DataUtility.exe /preview /pagesize:500 /startpage:2 /finishpage:3 
+ElCamino.Identity.AzureTable.DataUtility.exe /preview /startpage:2 /finishpage:3 
+ElCamino.Identity.AzureTable.DataUtility.exe /migrate /pagesize:500 /startpage:2 /finishpage:3 
+
+/maxparallel: - (optional) If defined, must be followed with an integer greater than 0. Controls the maximum parallel processes with the /migrate process.
+Default value is 2 times the amount of processors; this is a very conservative default setting.
+e.g. ElCamino.Identity.AzureTable.DataUtility.exe /migrate /maxparallel:1000
+
+

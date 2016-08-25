@@ -5,12 +5,20 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AAD16B60-811E-47BB-A0E0-1B24733B2A06}"
 	ProjectSection(SolutionItems) = preProject
+		src\ElCamino.AspNet.Identity.AzureTable\ElCamino.AspNet.Identity.AzureTable.nuspec = src\ElCamino.AspNet.Identity.AzureTable\ElCamino.AspNet.Identity.AzureTable.nuspec
 		global.json = global.json
+		License.txt = License.txt
+		NuGet.config = NuGet.config
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ElCamino.AspNetCore.Identity.AzureTable", "src\ElCamino.AspNetCore.Identity.AzureTable\ElCamino.AspNetCore.Identity.AzureTable.xproj", "{5FBD2375-18B4-426A-A875-7D99521A4DD0}"
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ElCamino.AspNetCore.Identity.AzureTable.Tests", "tests\ElCamino.AspNetCore.Identity.AzureTable.Tests\ElCamino.AspNetCore.Identity.AzureTable.Tests.xproj", "{B97DCC75-93CD-41C7-B7BE-D8DA6EA3C468}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElCamino.AspNet.Identity.AzureTable", "src\ElCamino.AspNet.Identity.AzureTable\ElCamino.AspNet.Identity.AzureTable.csproj", "{FC2B604C-548E-4981-876B-F3C4D1C3987B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElCamino.AspNet.Identity.AzureTable.Tests", "tests\ElCamino.AspNet.Identity.AzureTable.Tests\ElCamino.AspNet.Identity.AzureTable.Tests.csproj", "{9AE1AD32-39E4-4EF5-9463-FDA0089BB0FD}"
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ElCamino.Identity.AzureTable.DataUtility", "src\ElCamino.Identity.AzureTable.DataUtility\ElCamino.Identity.AzureTable.DataUtility.xproj", "{56BB5104-E5F7-49BD-A5E9-25B818197F28}"
 EndProject
@@ -33,6 +41,18 @@ Global
 		{B97DCC75-93CD-41C7-B7BE-D8DA6EA3C468}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B97DCC75-93CD-41C7-B7BE-D8DA6EA3C468}.Signed|Any CPU.ActiveCfg = Debug|Any CPU
 		{B97DCC75-93CD-41C7-B7BE-D8DA6EA3C468}.Signed|Any CPU.Build.0 = Debug|Any CPU
+		{FC2B604C-548E-4981-876B-F3C4D1C3987B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC2B604C-548E-4981-876B-F3C4D1C3987B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC2B604C-548E-4981-876B-F3C4D1C3987B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC2B604C-548E-4981-876B-F3C4D1C3987B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC2B604C-548E-4981-876B-F3C4D1C3987B}.Signed|Any CPU.ActiveCfg = Signed|Any CPU
+		{FC2B604C-548E-4981-876B-F3C4D1C3987B}.Signed|Any CPU.Build.0 = Signed|Any CPU
+		{9AE1AD32-39E4-4EF5-9463-FDA0089BB0FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9AE1AD32-39E4-4EF5-9463-FDA0089BB0FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9AE1AD32-39E4-4EF5-9463-FDA0089BB0FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9AE1AD32-39E4-4EF5-9463-FDA0089BB0FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9AE1AD32-39E4-4EF5-9463-FDA0089BB0FD}.Signed|Any CPU.ActiveCfg = Signed|Any CPU
+		{9AE1AD32-39E4-4EF5-9463-FDA0089BB0FD}.Signed|Any CPU.Build.0 = Signed|Any CPU
 		{56BB5104-E5F7-49BD-A5E9-25B818197F28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{56BB5104-E5F7-49BD-A5E9-25B818197F28}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{56BB5104-E5F7-49BD-A5E9-25B818197F28}.Release|Any CPU.ActiveCfg = Release|Any CPU

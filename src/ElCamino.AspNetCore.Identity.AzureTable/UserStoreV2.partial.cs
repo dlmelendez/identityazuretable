@@ -376,15 +376,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 			return tq;
 		}
 
-		private TableQuery GetUserIdsByIndex(string rowkey)
-		{
-			TableQuery tq = new TableQuery();
-			tq.SelectColumns = new List<string>() { "Id" };
-			tq.FilterString = TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, rowkey);
-			return tq;
-		}
+        private TableQuery GetUserIdsByIndex(string partitionKey)
+        {
+            TableQuery tq = new TableQuery();
+            tq.SelectColumns = new List<string>() { "Id" };
+            tq.FilterString = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey);
+            return tq;
+        }
 
-		public virtual Task<TUser> FindByIdAsync(TKey userId)
+        public virtual Task<TUser> FindByIdAsync(TKey userId)
 		{
 			this.ThrowIfDisposed();
 			return this.GetUserAggregateAsync(userId.ToString());
@@ -1078,8 +1078,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 		private async Task DeleteEmailIndexAsync(string userId, string plainEmail)
 		{
 			TableQuery tq = new TableQuery();
-			tq.FilterString = TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, KeyHelper.GenerateRowKeyUserEmail(plainEmail));
-			tq.SelectColumns = new List<string>() { "Id" };
+            tq.FilterString = TableQuery.CombineFilters(
+                TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, KeyHelper.GenerateRowKeyUserEmail(plainEmail)),
+                TableOperators.And,
+                TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, userId));
+            tq.SelectColumns = new List<string>() { "Id" };
 
 			var indexes = _indexTable.ExecuteQuery(tq);
 
@@ -1315,25 +1318,25 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
 
 
-		/// <summary>
-		/// Creates an email index suitable for a crud operation
-		/// </summary>
-		/// <param name="userid">Formatted UserId from the KeyHelper or IdentityUser.Id.ToString()</param>
-		/// <param name="email">Plain email address.</param>
-		/// <returns></returns>
-		private Model.IdentityUserIndex CreateEmailIndex(string userid, string email)
-		{
-			return new Model.IdentityUserIndex()
-			{
-				Id = userid,
-				PartitionKey = userid,
-				RowKey = KeyHelper.GenerateRowKeyUserEmail(email),
-				KeyVersion = KeyHelper.KeyVersion,
-				ETag = Constants.ETagWildcard
-			};
-		}
+        /// <summary>
+        /// Creates an email index suitable for a crud operation
+        /// </summary>
+        /// <param name="userid">Formatted UserId from the KeyHelper or IdentityUser.Id.ToString()</param>
+        /// <param name="email">Plain email address.</param>
+        /// <returns></returns>
+        private Model.IdentityUserIndex CreateEmailIndex(string userid, string email)
+        {
+            return new Model.IdentityUserIndex()
+            {
+                Id = userid,
+                PartitionKey = KeyHelper.GenerateRowKeyUserEmail(email),
+                RowKey = userid,
+                KeyVersion = KeyHelper.KeyVersion,
+                ETag = Constants.ETagWildcard
+            };
+        }
 
-		private Model.IdentityUserIndex CreateLoginIndex(string userid, TUserLogin login)
+        private Model.IdentityUserIndex CreateLoginIndex(string userid, TUserLogin login)
 		{
 			return new Model.IdentityUserIndex()
 			{

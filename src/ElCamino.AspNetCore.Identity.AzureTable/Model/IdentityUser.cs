@@ -3,7 +3,6 @@
 using Microsoft.AspNet.Identity;
 using ElCamino.AspNet.Identity.AzureTable.Helpers;
 #else
-using Microsoft.AspNetCore.Identity;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 #endif
 using Microsoft.WindowsAzure.Storage.Table;
