@@ -10,6 +10,8 @@ using ElCamino.AspNet.Identity.AzureTable.Model;
 using Microsoft.AspNetCore.Identity;
 using ElCamino.AspNetCore.Identity.AzureTable;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
+using Microsoft.AspNetCore.Builder;
+
 #endif
 
 using System.Collections.Generic;
@@ -156,6 +158,62 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
             }
             catch (ArgumentException) { }
         }
+
+        [Fact(DisplayName = "CheckDupUser")]
+        public void CheckDupUser()
+        {
+            using (var store = userFixture.CreateUserStore())
+            {
+                using (var manager = userFixture.CreateUserManager(store))
+                {
+                    var user = GenTestUser();
+                    var user2 = GenTestUser();
+                    var result1 = manager.CreateAsync(user).Result;
+#if net45
+                    Assert.True(result1.Succeeded, string.Concat(result1.Errors));
+#else
+                    Assert.True(result1.Succeeded, string.Concat(result1.Errors.Select(e => e.Code)));
+#endif
+                    user2.UserName = user.UserName;
+                    var result2 = manager.CreateAsync(user2).Result;
+#if net45
+                    Assert.False(result2.Succeeded);
+#else
+                    Assert.False(result2.Succeeded);
+                    Assert.True(new IdentityErrorDescriber().DuplicateUserName(user.UserName).Code 
+                        == result2.Errors.First().Code);
+#endif
+
+                }
+            }
+        }
+
+#if !net45
+
+        [Fact(DisplayName = "CheckDupEmail")]
+        public void CheckDupEmail()
+        {
+            using (var store = userFixture.CreateUserStore())
+            {
+                IdentityOptions options = new IdentityOptions();
+                options.User.RequireUniqueEmail = true;
+                using (var manager = userFixture.CreateUserManager(store, options))
+                {
+                    var user = GenTestUser();
+                    var user2 = GenTestUser();
+                    var result1 = manager.CreateAsync(user).Result;
+                    Assert.True(result1.Succeeded, string.Concat(result1.Errors.Select(e => e.Code)));
+
+                    user2.Email = user.Email;
+                    var result2 = manager.CreateAsync(user2).Result;
+
+                    Assert.False(result2.Succeeded);
+                    Assert.True(new IdentityErrorDescriber().DuplicateEmail(user.Email).Code 
+                        == result2.Errors.First().Code);
+                }
+            }
+        }
+#endif
 
         [Fact(DisplayName = "CreateUser")]
 #if net45

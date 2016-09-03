@@ -42,7 +42,10 @@ namespace samplemvccore
         {
             // Add Elcamino Azure Table Identity services.
 
-            services.AddIdentity<ApplicationUser, IdentityRole>()
+            services.AddIdentity<ApplicationUser, IdentityRole>((options) =>
+            {
+                options.User.RequireUniqueEmail = true;
+            })
                 .AddAzureTableStores<ApplicationDbContext>(new Func<IdentityConfiguration>(() =>
                 {
                     IdentityConfiguration idconfig = new IdentityConfiguration();

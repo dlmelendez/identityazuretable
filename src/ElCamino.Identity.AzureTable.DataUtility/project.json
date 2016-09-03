@@ -1,5 +1,5 @@
 {
-    "version": "1.0.0-*",
+    "version": "1.6.0",
     "buildOptions": {
         "emitEntryPoint": true,
         "compile": {
@@ -30,7 +30,9 @@
     "runtimes": {
         "win7-x64": {}
     },
-
+    "publishOptions": {
+        "includeFiles": ["appsettings.json"]
+    },
     "frameworks": {
         "netcoreapp1.0": {
             "imports": [

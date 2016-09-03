@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Identity;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
 using ElCamino.AspNetCore.Identity.AzureTable;
 #endif
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -36,6 +35,7 @@ namespace Microsoft.Extensions.DependencyInjection
             builder.Services.AddScoped(
                 typeof(IRoleStore<>).MakeGenericType(builder.RoleType),
                 roleStoreType);
+
             return builder;
 		}
 

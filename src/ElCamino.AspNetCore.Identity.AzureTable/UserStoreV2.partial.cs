@@ -1436,9 +1436,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 			ThrowIfDisposed();
 			if (user == null)
 			{
-				throw new ArgumentNullException("user");
+				throw new ArgumentNullException(nameof(user));
 			}
-			return Task.FromResult(user.Id.ToString());
+
+            return Task.FromResult(user.Id != null ? user.Id.ToString() : string.Empty);
 		}
 
 		public virtual Task<string> GetUserNameAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))

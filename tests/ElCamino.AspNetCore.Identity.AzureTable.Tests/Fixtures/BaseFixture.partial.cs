@@ -11,6 +11,7 @@ using ElCamino.AspNet.Identity.AzureTable;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
+using Microsoft.AspNetCore.Builder;
 
 namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 {
@@ -132,8 +133,12 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
             return CreateUserManager(new UserStore<TUser>(context));
         }
 
-        public UserManager<TUser> CreateUserManager(UserStore<TUser> store)
+        public UserManager<TUser> CreateUserManager(UserStore<TUser> store, IdentityOptions options = null)
         {
+            if(options == null)
+            {
+                options = new IdentityOptions();
+            }
             //return new RoleManager<TRole>(store);
             IServiceCollection services = new ServiceCollection();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -141,7 +146,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
             // Add Identity services to the services container.
             services.AddIdentity<TUser, IdentityRole>((config) =>
             {
-
+                config.User.RequireUniqueEmail = options.User.RequireUniqueEmail;
             })
                 //.AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddAzureTableStores<IdentityCloudContext>(new Func<IdentityConfiguration>(() =>
