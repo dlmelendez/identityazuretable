@@ -20,7 +20,7 @@
         "xunit": "2.2.0-beta2-build3300",
         "Microsoft.AspNetCore.Hosting": "1.0.0",
         "Microsoft.AspNetCore.Http": "1.0.0",
-        "Microsoft.AspNetCore.Testing": "1.0.0-rtm-21431",
+        "Microsoft.AspNetCore.Testing": "1.0.0",
         "System.Diagnostics.TraceSource": "4.0.0",
         "Microsoft.Extensions.Configuration.Json": "1.0.0",
         "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.0.0",
@@ -28,7 +28,7 @@
         "dotnet-test-xunit": "2.2.0-preview2-build1029",
         "Microsoft.AspNetCore.Identity": "1.0.0",
         "Microsoft.Extensions.Options.ConfigurationExtensions": "1.0.0",
-        "ElCamino.AspNetCore.Identity.AzureTable": { "version": "1.0.0", "target": "project"}
+        "ElCamino.AspNetCore.Identity.AzureTable": { "version": "1.6.0", "target": "project"}
     },
     "frameworks": {
 
