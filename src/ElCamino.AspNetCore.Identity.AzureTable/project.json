@@ -10,7 +10,7 @@
         "requireLicenseAcceptance": true,
         "owners": [ "David Melendez" ],
         "licenseUrl": "https://github.com/dlmelendez/identityazuretable/blob/master/LICENSE",
-        "releaseNotes": "Supports AspNetCore.Identity 1.0 frameworks for .NET Standard and Core. Important! You will need to download ElCamino.Identity.AzureTable.DataUtility.exe for a data migration for this release from the project site.",
+        "releaseNotes": "Supports AspNetCore.Identity 1.0 frameworks for .NET Standard and Core. Important! You will need to download ElCamino.Identity.AzureTable.DataUtility.exe for a data migration for this release from the project site. Fix for duplicate username and email bug #1.",
         "repository": {
             "type": "git",
             "url": "https://github.com/dlmelendez/identityazuretable.git"
