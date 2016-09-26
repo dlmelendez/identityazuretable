@@ -1,6 +1,6 @@
 ///<script>
 
-var app = angular.module("myApp", ["ngRoute"]);
+var app = angular.module("myApp", ["ngRoute", "projectControllers"]);
 app.config(function($routeProvider) {
     $routeProvider
     .when("/", {
@@ -19,7 +19,11 @@ app.config(function($routeProvider) {
         templateUrl: "content/ragrs.html"
     })
     .when("/techoverview", {
-        templateUrl: "content/techoverview.html"
+        templateUrl: "content/techoverview.html",
+    })
+    .when("/migration", {
+        templateUrl: "content/migration.html",
+        controller: "migrationDetails"
     })
     .otherwise({
         templateUrl : "content/index.html"
