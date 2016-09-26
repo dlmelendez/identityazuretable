@@ -1,5 +1,5 @@
 {
-    "version": "1.6.0",
+    "version": "1.6.1",
     "name": "ElCamino.AspNetCore.Identity.AzureTable",
     "title": "Azure Table Storage Provider for ASP.NET Identity Core",
     "description": "Azure Table Storage Provider to support AspNet Identity Core 1.0 frameworks for .NET Standard and Core.",
@@ -9,8 +9,9 @@
         "tags": [ "ASP.NET", "Identity Core", "Azure", "Table Storage", "MVC", "UserStore", "RoleStore", "UserManager", "multi-tenant", "RA-GRS", "geo-redundant", "Microsoft.AspNetCore.Identity" ],
         "requireLicenseAcceptance": true,
         "owners": [ "David Melendez" ],
+        "iconUrl": "https://dlmelendez.github.io/identityazuretable/images/projectNugetPic.png",
         "licenseUrl": "https://github.com/dlmelendez/identityazuretable/blob/master/LICENSE",
-        "releaseNotes": "Supports AspNetCore.Identity 1.0 frameworks for .NET Standard and Core. Important! You will need to download ElCamino.Identity.AzureTable.DataUtility.exe for a data migration for this release from the project site. Fix for duplicate username and email bug #1.",
+        "releaseNotes": "Supports AspNetCore.Identity 1.0 frameworks for .NET Standard and Core. Important! You will need to download ElCamino.Identity.AzureTable.DataUtility.exe for a data migration for this release from the project site for email and/or login indexes.",
         "repository": {
             "type": "git",
             "url": "https://github.com/dlmelendez/identityazuretable.git"

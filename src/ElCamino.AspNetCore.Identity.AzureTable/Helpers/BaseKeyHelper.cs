@@ -13,15 +13,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 {
     public abstract class BaseKeyHelper
     {
-        public abstract string GenerateRowKeyUserLoginInfo(UserLoginInfo info);
-
 		public abstract string GenerateRowKeyUserLoginInfo(string plainLoginProvider, string plainProviderKey);
 
-		public abstract string GeneratePartitionKeyIndexByLogin(string plainProvider);
+		public abstract string GeneratePartitionKeyIndexByLogin(string plainLoginProvider, string plainProviderKey);
 
         public abstract string GenerateRowKeyUserEmail(string plainEmail);
-
-        public abstract string GeneratePartitionKeyIndexByEmail(string plainEmail);
 
         public abstract string GenerateRowKeyUserName(string plainUserName);
 

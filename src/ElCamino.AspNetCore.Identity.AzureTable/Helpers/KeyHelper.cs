@@ -24,19 +24,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
     {
         private static BaseKeyHelper baseHelper = new UriEncodeKeyHelper();
 
-        public static string GenerateRowKeyUserLoginInfo(this UserLoginInfo info)
+        public static string GenerateRowKeyUserLoginInfo(string plainLoginProvider, string plainProviderKey)
         {
-            return baseHelper.GenerateRowKeyUserLoginInfo(info);
+            return baseHelper.GenerateRowKeyUserLoginInfo(plainLoginProvider, plainProviderKey);
         }
 
-		public static string GenerateRowKeyUserLoginInfo(string plainLoginProvider, string plainProviderKey)
-		{
-			return baseHelper.GenerateRowKeyUserLoginInfo(plainLoginProvider, plainProviderKey);
-		}
-
-		public static string GeneratePartitionKeyIndexByLogin(string plainProvider)
+        public static string GeneratePartitionKeyIndexByLogin(string plainLoginProvider, string plainProviderKey)
         {
-            return baseHelper.GeneratePartitionKeyIndexByLogin(plainProvider);
+            return baseHelper.GeneratePartitionKeyIndexByLogin(plainLoginProvider, plainProviderKey);
         }
 
         public static string GenerateRowKeyUserEmail(string plainEmail)
@@ -44,11 +39,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             return baseHelper.GenerateRowKeyUserEmail(plainEmail);
         }
 
-        [System.Obsolete("User only for 1.2.9.2 and lower. PartitionKey for the email index has changed to the userid to support non-unique email addresses")]
-        public static string GeneratePartitionKeyIndexByEmail(string plainEmail)
-        {
-            return baseHelper.GeneratePartitionKeyIndexByEmail(plainEmail);
-        }
 
         public static string GenerateRowKeyUserName(string plainUserName)
         {

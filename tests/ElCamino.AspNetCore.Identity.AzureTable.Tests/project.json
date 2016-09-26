@@ -1,5 +1,5 @@
 {
-    "version": "1.0.0-*",
+    "version": "1.6.1-*",
     "description": "Testing",
     "authors": [ "Dave Melendez" ],
     "buildOptions": {
@@ -28,14 +28,14 @@
         "dotnet-test-xunit": "2.2.0-preview2-build1029",
         "Microsoft.AspNetCore.Identity": "1.0.0",
         "Microsoft.Extensions.Options.ConfigurationExtensions": "1.0.0",
-        "ElCamino.AspNetCore.Identity.AzureTable": { "version": "1.6.0", "target": "project"}
+        "ElCamino.AspNetCore.Identity.AzureTable": { "version": "1.6.1", "target": "project"}
     },
     "frameworks": {
 
         "netcoreapp1.0": {
             "dependencies": {
              "Microsoft.NETCore.App": {
-                  "version": "1.0.0",
+                  "version": "1.0.1",
                   "type": "platform"
                 }
             },

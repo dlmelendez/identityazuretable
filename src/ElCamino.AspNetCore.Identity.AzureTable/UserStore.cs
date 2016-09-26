@@ -139,7 +139,7 @@ namespace ElCamino.AspNet.Identity.AzureTable
 			((IGenerateKeys)item).GenerateKeys();
 
 			user.Logins.Add(item);
-			IdentityUserIndex index = CreateLoginIndex(item.UserId.ToString(), item);
+			IdentityUserIndex index = CreateLoginIndex(item.UserId.ToString(), item.LoginProvider, item.ProviderKey);
 
 			await Task.WhenAll(_userTable.ExecuteAsync(TableOperation.Insert(item))
 				, _indexTable.ExecuteAsync(TableOperation.InsertOrReplace(index)));
@@ -217,7 +217,7 @@ namespace ElCamino.AspNet.Identity.AzureTable
 			{
 				userBatch.Add(TableOperation.Delete(userLogin));
 
-				IdentityUserIndex indexLogin = CreateLoginIndex(user.Id.ToString(), userLogin);
+				IdentityUserIndex indexLogin = CreateLoginIndex(user.Id.ToString(), userLogin.LoginProvider, userLogin.ProviderKey);
 
 				tasks.Add(_indexTable.ExecuteAsync(TableOperation.Delete(indexLogin)));
 			}
@@ -272,9 +272,9 @@ namespace ElCamino.AspNet.Identity.AzureTable
 				throw new ArgumentNullException("login");
 			}
 
-			string rowKey = login.GenerateRowKeyUserLoginInfo();
-			string partitionKey = KeyHelper.GeneratePartitionKeyIndexByLogin(login.LoginProvider);
-			var loginQuery = GetUserIdByIndex(partitionKey, rowKey);
+            string rowKey = KeyHelper.GenerateRowKeyIdentityUserLogin(login.LoginProvider, login.ProviderKey);
+            string partitionKey = KeyHelper.GeneratePartitionKeyIndexByLogin(login.LoginProvider, login.ProviderKey);
+            var loginQuery = GetUserIdByIndex(partitionKey, rowKey);
 
 			return await GetUserAggregateAsync(loginQuery);
 		}
@@ -723,7 +723,7 @@ namespace ElCamino.AspNet.Identity.AzureTable
 			if (item != null)
 			{
 				user.Logins.Remove(item);
-				IdentityUserIndex index = CreateLoginIndex(item.UserId.ToString(), item);
+				IdentityUserIndex index = CreateLoginIndex(item.UserId.ToString(), item.LoginProvider, item.ProviderKey);
 				await Task.WhenAll(_indexTable.ExecuteAsync(TableOperation.Delete(index)),
 									_userTable.ExecuteAsync(TableOperation.Delete(item)));
 			}
@@ -923,7 +923,7 @@ namespace ElCamino.AspNet.Identity.AzureTable
 			// Update the external logins
 			foreach (var login in user.Logins)
 			{
-				IdentityUserIndex indexLogin = CreateLoginIndex(userNameKey, login);
+				IdentityUserIndex indexLogin = CreateLoginIndex(userNameKey, login.LoginProvider, login.ProviderKey);
 				taskList.Add(_indexTable.ExecuteAsync(TableOperation.InsertOrReplace(indexLogin)));
 				login.PartitionKey = userNameKey;
 			}
@@ -1005,14 +1005,14 @@ namespace ElCamino.AspNet.Identity.AzureTable
 			};
 		}
 
-		private IdentityUserIndex CreateLoginIndex(string userid, TUserLogin login)
+		private IdentityUserIndex CreateLoginIndex(string userid, string loginProvider, string providerKey)
 		{
 			return new IdentityUserIndex()
 			{
 				Id = userid,
-				PartitionKey = KeyHelper.GeneratePartitionKeyIndexByLogin(login.LoginProvider),
-				RowKey = login.RowKey,
-				KeyVersion = KeyHelper.KeyVersion,
+				PartitionKey = KeyHelper.GeneratePartitionKeyIndexByLogin(loginProvider, providerKey),
+                RowKey = KeyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey),
+                KeyVersion = KeyHelper.KeyVersion,
 				ETag = Constants.ETagWildcard
 			};
 

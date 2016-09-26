@@ -1,5 +1,5 @@
 {
-    "version": "1.6.0",
+    "version": "1.6.1",
     "buildOptions": {
         "emitEntryPoint": true,
         "compile": {
@@ -20,7 +20,7 @@
     },
     "dependencies": {
         "Microsoft.NETCore.App": {
-            "version": "1.0.0"
+            "version": "1.0.1"
         },
         "Microsoft.Extensions.Configuration.Json": "1.0.0",
         "Microsoft.Extensions.Configuration": "1.0.0",
@@ -38,7 +38,10 @@
             "imports": [
                 "dotnet5.6",
                 "portable-net45+win8"
-            ]
+            ],
+            "buildOptions": {
+                "define": [ "netstandard" ]
+            }
         }
     }
 }

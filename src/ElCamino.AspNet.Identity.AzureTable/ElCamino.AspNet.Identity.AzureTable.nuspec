@@ -8,12 +8,11 @@
     <owners>$author$</owners>
     <licenseUrl>https://github.com/dlmelendez/identityazuretable/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/dlmelendez/identityazuretable/</projectUrl>
+    <iconUrl>https://dlmelendez.github.io/identityazuretable/images/projectNugetPic.png</iconUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>$description$</description>
     <releaseNotes>
       Release $version$ This project is an open source high performance plugin to ASP.NET Identity framework using Azure Table Storage.
-      * Updating package dependencies.
-      * Moved source control to github.
       * Important! You will need to download ElCamino.Identity.AzureTable.DataUtility.exe for a data migration for this release from the project site.
     </releaseNotes>
     <copyright>Copyright 2016</copyright>

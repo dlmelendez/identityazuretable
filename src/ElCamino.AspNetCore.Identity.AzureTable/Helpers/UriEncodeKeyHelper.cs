@@ -22,11 +22,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         public const string ReplaceIllegalChar = "%";
         public const string NewCharForIllegalChar = "_";
 
-        public override string GenerateRowKeyUserLoginInfo(UserLoginInfo info)
-        {
-            string strTemp = string.Format("{0}_{1}", EscapeKey(info.LoginProvider), EscapeKey(info.ProviderKey));
-            return string.Format(Constants.RowKeyConstants.FormatterIdentityUserLogin, strTemp);
-        }
 
 		public override string GenerateRowKeyUserLoginInfo(string plainLoginProvider, string plainProviderKey)
 		{
@@ -35,20 +30,16 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 		}
 
 
-		public override string GeneratePartitionKeyIndexByLogin(string plainProvider)
+		public override string GeneratePartitionKeyIndexByLogin(string plainLoginProvider, string plainProviderKey)
         {
-            return EscapeKey(plainProvider);
+            string strTemp = string.Format("{0}_{1}", EscapeKey(plainLoginProvider), EscapeKey(plainProviderKey));
+            return string.Format(Constants.RowKeyConstants.FormatterIdentityUserLogin, strTemp);
         }
 
         public override string GenerateRowKeyUserEmail(string plainEmail)
         {
             return string.Format(Constants.RowKeyConstants.FormatterIdentityUserEmail,
                     EscapeKey(plainEmail));
-        }
-
-        public override string GeneratePartitionKeyIndexByEmail(string plainEmail)
-        {
-            return EscapeKey(plainEmail).Substring(0, 1);
         }
 
         public override string GenerateRowKeyUserName(string plainUserName)
@@ -104,7 +95,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 
         public override double KeyVersion
         {
-            get { return 1.6; }
+            get { return 1.61; }
         }
     }
 }

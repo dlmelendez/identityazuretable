@@ -119,7 +119,6 @@
     <Compile Include="Fixtures\BaseFixture.cs" />
     <Compile Include="Fixtures\RoleFixture.cs" />
     <Compile Include="Fixtures\UserFixture.cs" />
-    <Compile Include="HelperTests\KeyHelperTests.cs" />
     <Compile Include="ModelTests\ApplicationUser.cs" />
     <Compile Include="ModelTests\IdentityUserTests.cs" />
     <Compile Include="ModelTests\IdentityCloudContextTests.cs" />

@@ -3,18 +3,16 @@
 
     "dependencies": {
         "Microsoft.NETCore.App": {
-            "version": "1.0.0",
+            "version": "1.0.1",
             "type": "platform"
         },
         "Microsoft.AspNetCore.Authentication.Cookies": "1.0.0",
         "Microsoft.AspNetCore.Diagnostics": "1.0.0",
-        "Microsoft.AspNetCore.Mvc": "1.0.0",
         "Microsoft.AspNetCore.Razor.Tools": {
             "version": "1.0.0-preview2-final",
             "type": "build"
         },
         "Microsoft.AspNetCore.Server.IISIntegration": "1.0.0",
-        "Microsoft.AspNetCore.Server.Kestrel": "1.0.0",
         "Microsoft.AspNetCore.StaticFiles": "1.0.0",
         "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.0.0",
         "Microsoft.Extensions.Configuration.Json": "1.0.0",
@@ -32,8 +30,13 @@
             "version": "1.0.0-preview2-final",
             "type": "build"
         },
-        "ElCamino.AspNetCore.Identity.AzureTable": "1.0.0",
-        "BundlerMinifier.Core": "2.1.258"
+        "BundlerMinifier.Core": "2.1.258",
+        "Microsoft.AspNetCore.Mvc": "1.0.1",
+        "Microsoft.AspNetCore.Server.Kestrel": "1.0.1",
+        "ElCamino.AspNetCore.Identity.AzureTable": {
+            "version": "1.6.1",
+            "target": "package"
+        }
     },
 
   "tools": {

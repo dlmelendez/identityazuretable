@@ -714,7 +714,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
                         .Any(log => log.LoginProvider == loginInfo.LoginProvider
                             & log.ProviderKey == loginInfo.ProviderKey), "LoginInfo not found: GetLoginsAsync");
 
-                    //DateTime start = DateTime.UtcNow;
+                    DateTime start = DateTime.UtcNow;
 #if net45
                     var loginGetTask2 = manager.FindAsync(loginGetTask.Result.First());
 #else
@@ -722,7 +722,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #endif
 
                     loginGetTask2.Wait();
-                    //output.WriteLine("FindAsync(By Login): {0} seconds", (DateTime.UtcNow - start).TotalSeconds);
+                    Debug.WriteLine(string.Format("FindAsync(By Login): {0} seconds", (DateTime.UtcNow - start).TotalSeconds));
                     Assert.NotNull(loginGetTask2.Result);
 
                 }

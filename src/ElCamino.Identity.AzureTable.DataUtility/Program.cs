@@ -23,16 +23,21 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         private static object ObjectLock = new object();
         private static ConcurrentBag<string> userIdFailures = new ConcurrentBag<string>();
 
-        private static List<string> helpTokens = new List<string>() { "/?", "/help" };
-        private static string previewToken = "/preview";
-        private static string migrateToken = "/migrate";
-        private static string nodeleteToken = "/nodelete";
-        private static string maxdegreesparallelToken = "/maxparallel:";
+        private readonly static List<string> helpTokens = new List<string>() { "/?", "/help" };
+        private const string previewToken = "/preview:";
+        private const string migrateToken = "/migrate:";
+        private readonly static List<string> validCommands = new List<string>() {
+            MigrateIndexFactory.EmailIndex,
+            MigrateIndexFactory.LoginIndex
+        };
+        private const string nodeleteToken = "/nodelete";
+        private const string maxdegreesparallelToken = "/maxparallel:";
         private static int iMaxdegreesparallel = Environment.ProcessorCount * 2;
+        private static string MigrateCommand = string.Empty;
 
-        private static string startPageToken = "/startpage:";
-        private static string finishPageToken = "/finishpage:";
-        private static string pageSizeToken = "/pagesize:";
+        private const string startPageToken = "/startpage:";
+        private const string finishPageToken = "/finishpage:";
+        private const string pageSizeToken = "/pagesize:";
 
 
         private static int iStartPage = -1;
@@ -62,24 +67,17 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
             Console.WriteLine("MaxDegreeOfParallelism: {0}", iMaxdegreesparallel);
             Console.WriteLine("PageSize: {0}", iPageSize);
+            Console.WriteLine("MigrateCommand: {0}", MigrateCommand);
 
+            var migrateIndex = MigrateIndexFactory.CreateMigrateIndex(MigrateCommand);
 
             using (IdentityCloudContext ic = new IdentityCloudContext(idconfig))
             {
                 DateTime startLoad = DateTime.UtcNow;
                 var allDataList = new List<DynamicTableEntity>(iPageSize);
 
-                TableQuery tq = new TableQuery();
-                tq.SelectColumns = new List<string>() { "PartitionKey", "RowKey", "Email" };
-                string partitionFilter = TableQuery.CombineFilters(
-                    TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.GreaterThanOrEqual, Constants.RowKeyConstants.PreFixIdentityUserName),
-                    TableOperators.And,
-                    TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.LessThan, "V_"));
-                string rowFilter = TableQuery.CombineFilters(
-                    TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.GreaterThanOrEqual, Constants.RowKeyConstants.PreFixIdentityUserName),
-                    TableOperators.And,
-                    TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.LessThan, "V_"));
-                tq.FilterString = TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowFilter);
+                TableQuery tq = migrateIndex.GetUserTableQuery();
+
                 tq.TakeCount = iPageSize;
                 TableContinuationToken continueToken = new TableContinuationToken();
 
@@ -93,12 +91,8 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                     var userResults = ic.UserTable.ExecuteQuerySegmentedAsync(tq, continueToken).Result;
                     continueToken = userResults.ContinuationToken;
 
-                    List<Tuple<string, string>> userIds = userResults.Results
-                        .Where(d => !string.IsNullOrWhiteSpace(d.Properties["Email"].StringValue))
-                        .Select(d => new Tuple<string, string>(d.PartitionKey, d.Properties["Email"].StringValue))
-                        .ToList();
 
-                    int batchCount = userIds.Count();
+                    int batchCount = userResults.Count(migrateIndex.UserWhereFilter);
                     iUserTotal += batchCount;
                     iPageCounter++;
 
@@ -106,26 +100,23 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
                     if (includePage)
                     {
-                        var result2 = Parallel.ForEach<Tuple<string, string>>(userIds, new ParallelOptions() { MaxDegreeOfParallelism = iMaxdegreesparallel }, (userId) =>
+                        if (migrateOption)
                         {
-
-                            if (migrateOption)
+                            migrateIndex.ProcessMigrate(ic, userResults.Results, iMaxdegreesparallel,
+                            () =>
                             {
-                                //Add the email index
-                                try
+                                Interlocked.Increment(ref iUserSuccessConvert);
+                            },
+                            (exMessage) =>
+                            {
+                                if (!string.IsNullOrWhiteSpace(exMessage))
                                 {
-                                    IdentityUserIndex index = CreateEmailIndex(userId.Item1, userId.Item2);
-                                    var r = ic.IndexTable.ExecuteAsync(TableOperation.InsertOrReplace(index)).Result;
-                                    Interlocked.Increment(ref iUserSuccessConvert);
+                                    userIdFailures.Add(exMessage);
                                 }
-                                catch (Exception ex)
-                                {
-                                    userIdFailures.Add(string.Format("{0}\t{1}", userId.Item1, ex.Message));
-                                    Interlocked.Increment(ref iUserFailureConvert);
-                                }                               
-                            }
+                                Interlocked.Increment(ref iUserFailureConvert);
+                            });
+                        }
 
-                        });                       
                     }
                     else
                     {
@@ -169,24 +160,6 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
         }
 
-        /// <summary>
-        /// Creates an email index suitable for a crud operation
-        /// </summary>
-        /// <param name="userid">Formatted UserId from the KeyHelper or IdentityUser.Id.ToString()</param>
-        /// <param name="email">Plain email address.</param>
-        /// <returns></returns>
-        private static IdentityUserIndex CreateEmailIndex(string userid, string email)
-        {
-            return new IdentityUserIndex()
-            {
-                Id = userid,
-                PartitionKey = KeyHelper.GenerateRowKeyUserEmail(email),
-                RowKey = userid,
-                KeyVersion = KeyHelper.KeyVersion,
-                ETag = Constants.ETagWildcard
-            };
-        }
-
         private static void DisplayAnyKeyToExit()
         {
             Console.WriteLine("Press any key to exit...");
@@ -208,8 +181,8 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                     DisplayInvalidArgs(args.Where(a => !nonHelpTokens.Any(h => h.StartsWith(a, StringComparison.OrdinalIgnoreCase))).ToList());
                     return false;
                 }
-                bool isPreview = args.Any(a => a.Equals(previewToken, StringComparison.OrdinalIgnoreCase));
-                bool isMigrate = args.Any(a => a.Equals(migrateToken, StringComparison.OrdinalIgnoreCase));
+                bool isPreview = args.Any(a => a.StartsWith(previewToken, StringComparison.OrdinalIgnoreCase));
+                bool isMigrate = args.Any(a => a.StartsWith(migrateToken, StringComparison.OrdinalIgnoreCase));
                 if (isPreview && isMigrate)
                 {
                     DisplayInvalidArgs(new List<string>() { previewToken, migrateToken, "Cannot define /preview and /migrate. Only one can be used." });
@@ -227,6 +200,18 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                     || !ValidateIntToken(finishPageToken, ref iFinishPage)
                     || !ValidateIntToken(pageSizeToken, ref iPageSize))
                     return false;
+
+                if (isPreview)
+                {
+                    if(!ValidateCommandToken(previewToken, ref MigrateCommand))
+                        return false;
+                }
+
+                if (isMigrate)
+                {
+                    if (!ValidateCommandToken(migrateToken, ref MigrateCommand))
+                        return false;
+                }
 
                 if (iPageSize > 1000)
                 {
@@ -256,6 +241,26 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 else
                 {
                     DisplayInvalidArgs(new List<string>() { args, string.Format("{0} must be followed by an int greater than 0. e.g. {0}3", token) });
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private static bool ValidateCommandToken(string token, ref string commandValue)
+        {
+            string args = Environment.GetCommandLineArgs().FirstOrDefault(a => a.StartsWith(token, StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrWhiteSpace(args))
+            {
+                string[] splitArgs = args.Split(":".ToCharArray());
+                if (splitArgs.Length == 2
+                    && validCommands.Any(v=> v.Equals(splitArgs[1].ToLower())))
+                {
+                    commandValue = splitArgs[1];
+                }
+                else
+                {
+                    DisplayInvalidArgs(new List<string>() { args, string.Format("{0} must be followed by a valid command arg {1}", token, string.Join(",", validCommands.ToArray()))});
                     return false;
                 }
             }

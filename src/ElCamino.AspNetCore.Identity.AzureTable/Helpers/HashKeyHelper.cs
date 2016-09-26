@@ -21,20 +21,16 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 {
     public class HashKeyHelper : UriEncodeKeyHelper
     {
-        public override string GenerateRowKeyUserLoginInfo(UserLoginInfo info)
-        {
-            string hash = ConvertKeyToHash(base.GenerateRowKeyUserLoginInfo(info));
-            return string.Format(Constants.RowKeyConstants.FormatterIdentityUserLogin, hash);
-        }
-
 		public override string GenerateRowKeyUserLoginInfo(string plainLoginProvider, string plainProviderKey)
 		{
 			string hash = ConvertKeyToHash(base.GenerateRowKeyUserLoginInfo(plainLoginProvider, plainProviderKey));
 			return string.Format(Constants.RowKeyConstants.FormatterIdentityUserLogin, hash);
 		}
-		public override string GeneratePartitionKeyIndexByLogin(string plainProvider)
+
+		public override string GeneratePartitionKeyIndexByLogin(string plainLoginProvider, string plainProviderKey)
         {
-            return ConvertKeyToHash(base.GeneratePartitionKeyIndexByLogin(plainProvider));
+            string hash = ConvertKeyToHash(base.GenerateRowKeyUserLoginInfo(plainLoginProvider, plainProviderKey));
+            return string.Format(Constants.RowKeyConstants.FormatterIdentityUserLogin, hash);
         }
 
         public override string GenerateRowKeyUserEmail(string plainEmail)
@@ -42,11 +38,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             string hash = ConvertKeyToHash(base.GenerateRowKeyUserEmail(plainEmail));
             return string.Format(Constants.RowKeyConstants.FormatterIdentityUserEmail, hash);
 
-        }
-
-        public override string GeneratePartitionKeyIndexByEmail(string plainEmail)
-        {
-            return ConvertKeyToHash(base.GeneratePartitionKeyIndexByEmail(plainEmail));
         }
 
         public override string GenerateRowKeyUserName(string plainUserName)
