@@ -98,15 +98,15 @@ For example, the default local connection string to the Azure Storage Emulator.<
                 <a href="https://github.com/dlmelendez/identityazuretable/tree/master/src/ElCamino.AspNetCore.Identity.AzureTable/Model/IdentityUserIndex.cs">IdentityUserIndex</a>
             </td>
             <td>User Email Index </td>
-            <td>Escaped(First Char of Email) </td>
             <td>Escaped(User Email) </td>
+            <td>Escaped(UserName) </td>
             <td>Escaped(UserName) </td>
             <td>0 or 1 per user</td>
         </tr>
         <tr>
             <td><a href="https://github.com/dlmelendez/identityazuretable/tree/master/src/ElCamino.AspNetCore.Identity.AzureTable/Model/IdentityUserIndex.cs">IdentityUserIndex</a></td>
             <td>User Login Index </td>
-            <td>Escaped(LoginProvider) </td>
+            <td>Escaped(LoginProvider, ProviderKey) </td>
             <td>Escaped(LoginProvider, ProviderKey) </td>
             <td>Escaped(UserName) </td>
             <td>0 to Many per user</td>
