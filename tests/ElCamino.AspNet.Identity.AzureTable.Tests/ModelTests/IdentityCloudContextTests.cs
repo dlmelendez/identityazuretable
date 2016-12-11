@@ -107,7 +107,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests.ModelTests
             {
                 ic = new IdentityCloudContext(string.Empty);
             }
-            catch (MissingManifestResourceException) {  }
+            catch (ArgumentException) { }
 
             //----------------------------------------------
             var iucc = new IdentityCloudContext();
@@ -123,8 +123,8 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests.ModelTests
             {
                 iucc = new IdentityCloudContext(string.Empty);
             }
-            catch (MissingManifestResourceException) { }
-            
+            catch (ArgumentException) { }
+
             //------------------------------------------
 
             var i2 = new IdentityCloudContext();
@@ -139,7 +139,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests.ModelTests
             {
                 i2 = new IdentityCloudContext(string.Empty);
             }
-            catch (MissingManifestResourceException) { }
+            catch (ArgumentException) { }
             try
             {
                 var i3 = new IdentityCloudContext();
@@ -164,6 +164,6 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests.ModelTests
             catch (ArgumentNullException) { }
         }
 #endif
-    }
+        }
 
 }

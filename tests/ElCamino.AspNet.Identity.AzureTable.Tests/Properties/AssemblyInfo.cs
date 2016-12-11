@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Author: David Melendez")]
 [assembly: AssemblyProduct("Azure Table Storage Provider")]
-[assembly: AssemblyCopyright("Copyright ©  2014 David Melendez, MIT License")]
+[assembly: AssemblyCopyright("Copyright ©  2016 David Melendez, MIT License")]
 [assembly: AssemblyTrademark("")]
 [assembly: NeutralResourcesLanguage("en-US")]
 
@@ -18,7 +18,7 @@ using System.Runtime.InteropServices;
 [assembly: Guid("bb76b9d9-6116-4b9a-8e6a-97c7c6c04cb8")]
 
 //http://semver.org/
-[assembly: AssemblyVersion("1.6.1.0")]
-[assembly: AssemblyFileVersion("1.6.1.0")]
-[assembly: AssemblyInformationalVersion("1.6.1.0")]
+[assembly: AssemblyVersion("1.6.2.0")]
+[assembly: AssemblyFileVersion("1.6.2.0")]
+[assembly: AssemblyInformationalVersion("1.6.2.0")]
 

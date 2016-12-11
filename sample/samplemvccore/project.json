@@ -2,26 +2,22 @@
   "userSecretsId": "aspnet-samplemvccore-32c356d9-cfa7-48d0-a65c-b684f35188a6",
 
     "dependencies": {
-        "Microsoft.NETCore.App": {
-            "version": "1.0.1",
-            "type": "platform"
-        },
-        "Microsoft.AspNetCore.Authentication.Cookies": "1.0.0",
-        "Microsoft.AspNetCore.Diagnostics": "1.0.0",
+        "Microsoft.AspNetCore.Authentication.Cookies": "1.1.0",
+        "Microsoft.AspNetCore.Diagnostics": "1.1.0",
         "Microsoft.AspNetCore.Razor.Tools": {
             "version": "1.0.0-preview2-final",
             "type": "build"
         },
-        "Microsoft.AspNetCore.Server.IISIntegration": "1.0.0",
-        "Microsoft.AspNetCore.StaticFiles": "1.0.0",
-        "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.0.0",
-        "Microsoft.Extensions.Configuration.Json": "1.0.0",
-        "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0",
-        "Microsoft.Extensions.Logging": "1.0.0",
-        "Microsoft.Extensions.Logging.Console": "1.0.0",
-        "Microsoft.Extensions.Logging.Debug": "1.0.0",
-        "Microsoft.Extensions.Options.ConfigurationExtensions": "1.0.0",
-        "Microsoft.VisualStudio.Web.BrowserLink.Loader": "14.0.0",
+        "Microsoft.AspNetCore.Server.IISIntegration": "1.1.0",
+        "Microsoft.AspNetCore.StaticFiles": "1.1.0",
+        "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.1.0",
+        "Microsoft.Extensions.Configuration.Json": "1.1.0",
+        "Microsoft.Extensions.Configuration.UserSecrets": "1.1.0",
+        "Microsoft.Extensions.Logging": "1.1.0",
+        "Microsoft.Extensions.Logging.Console": "1.1.0",
+        "Microsoft.Extensions.Logging.Debug": "1.1.0",
+        "Microsoft.Extensions.Options.ConfigurationExtensions": "1.1.0",
+        "Microsoft.VisualStudio.Web.BrowserLink.Loader": "14.1.0",
         "Microsoft.VisualStudio.Web.CodeGeneration.Tools": {
             "version": "1.0.0-preview2-final",
             "type": "build"
@@ -31,12 +27,9 @@
             "type": "build"
         },
         "BundlerMinifier.Core": "2.1.258",
-        "Microsoft.AspNetCore.Mvc": "1.0.1",
-        "Microsoft.AspNetCore.Server.Kestrel": "1.0.1",
-        "ElCamino.AspNetCore.Identity.AzureTable": {
-            "version": "1.6.1",
-            "target": "package"
-        }
+        "Microsoft.AspNetCore.Mvc": "1.1.0",
+        "Microsoft.AspNetCore.Server.Kestrel": "1.1.0",
+        "ElCamino.AspNetCore.Identity.AzureTable": "1.6.2"
     },
 
   "tools": {
@@ -53,14 +46,16 @@
   },
 
   "frameworks": {
-    "netcoreapp1.0": {
+    "netcoreapp1.1": {
       "imports": [
         "dotnet5.6",
         "portable-net45+win8"
       ]
     }
   },
-
+    "runtimes": {
+        "win81-x64": {}
+    },
   "buildOptions": {
     "emitEntryPoint": true,
     "preserveCompilationContext": true
