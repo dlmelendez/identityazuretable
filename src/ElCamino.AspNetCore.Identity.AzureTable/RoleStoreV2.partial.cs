@@ -6,6 +6,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.WindowsAzure.Storage.Table;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 using System.Threading;
+using System.Collections.Generic;
+using System.Security.Claims;
+using System.Linq;
+using Microsoft.WindowsAzure.Storage;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable
 {
@@ -23,10 +27,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         }
     }
 
-    public class RoleStore<TRole, TContext> : RoleStore<TRole, string, Model.IdentityUserRole, TContext> 
-		//, IQueryableRoleStore<TRole>
-		, IRoleStore<TRole>
-		//TODO: New implementation, IRoleClaimStore<TRole>
+    public class RoleStore<TRole, TContext> : RoleStore<TRole, string, Model.IdentityUserRole, Model.IdentityRoleClaim, TContext> 
 		where TRole : Model.IdentityRole, new()
 		where TContext : IdentityCloudContext, new()
 	{
@@ -42,12 +43,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 		}
 	}
 
-	public class RoleStore<TRole, TKey, TUserRole, TContext> : 
+	public class RoleStore<TRole, TKey, TUserRole, TRoleClaim, TContext> : 
 		//IQueryableRoleStore<TRole>, 
-		IRoleStore<TRole>, IDisposable
+		IRoleStore<TRole>,
+        IRoleClaimStore<TRole>,
+        IDisposable
 		where TRole : Model.IdentityRole<TKey, TUserRole>, new()
 		where TUserRole : Model.IdentityUserRole<TKey>, new()
-		where TContext : IdentityCloudContext, new()
+        where TRoleClaim : Model.IdentityRoleClaim<TKey>, new()
+        where TContext : IdentityCloudContext, new()
 	{
 		private bool _disposed;
 		private CloudTable _roleTable;
@@ -226,7 +230,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 				throw new ArgumentNullException("role");
 			}
 			role.Name = roleName;
-			return Task.FromResult(0);
+			return TaskCacheHelper.CompletedTask;
 		}
 
 
@@ -250,11 +254,90 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 				throw new ArgumentNullException(nameof(role));
 			}
 			role.NormalizedName = normalizedName;
-			return Task.FromResult(0);
-		}
+            return TaskCacheHelper.CompletedTask;
+        }
 
+        public Task<IList<Claim>> GetClaimsAsync(TRole role, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            if (role == null)
+            {
+                throw new ArgumentNullException(nameof(role));
+            }
 
-		public TContext Context { get; private set; }
+            string filter = TableQuery.GenerateFilterCondition("PartitionKey",
+                            QueryComparisons.Equal,
+                            role.Id.ToString());
+
+            TableQuery tq = new TableQuery();
+            tq.FilterString = filter;
+            OperationContext oc = new OperationContext();
+            return Task.Run(() => { return _roleTable.ExecuteQuery(tq)
+                .ToList()
+                .Where(w => w.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityRoleClaim))
+                .Select(s =>
+                {
+                    TRoleClaim trc = (TRoleClaim)Activator.CreateInstance(typeof(TRoleClaim));
+                    trc.ReadEntity(s.Properties, oc);
+                    return trc;
+                })
+                .Select(w => new Claim(w.ClaimType, w.ClaimValue))
+                .ToList() as IList<Claim>;
+                });
+        }
+
+        public async Task AddClaimAsync(TRole role, Claim claim, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            if (role == null)
+            {
+                throw new ArgumentNullException(nameof(role));
+            }
+            if (claim == null)
+            {
+                throw new ArgumentNullException(nameof(claim));
+            }
+
+            TRoleClaim item = Activator.CreateInstance<TRoleClaim>();
+            item.RoleId = role.Id;
+            item.ClaimType = claim.Type;
+            item.ClaimValue = claim.Value;
+            ((Model.IGenerateKeys)item).GenerateKeys();
+
+            await _roleTable.ExecuteAsync(TableOperation.Insert(item));
+        }
+
+        public async Task RemoveClaimAsync(TRole role, Claim claim, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            if (role == null)
+            {
+                throw new ArgumentNullException(nameof(role));
+            }
+            if (claim == null)
+            {
+                throw new ArgumentNullException(nameof(claim));
+            }
+
+            if (string.IsNullOrWhiteSpace(claim.Type))
+            {
+                throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(claim.Type));
+            }
+
+            TRoleClaim item = Activator.CreateInstance<TRoleClaim>();
+            item.RoleId = role.Id;
+            item.ClaimType = claim.Type;
+            item.ClaimValue = claim.Value;
+            item.ETag = Constants.ETagWildcard;
+            ((Model.IGenerateKeys)item).GenerateKeys();
+
+            await _roleTable.ExecuteAsync(TableOperation.Delete(item));
+        }
+
+        public TContext Context { get; private set; }
 
 		//public IQueryable<TRole> Roles
 		//{

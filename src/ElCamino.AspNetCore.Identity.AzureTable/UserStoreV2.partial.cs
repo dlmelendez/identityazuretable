@@ -771,7 +771,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
 		private async Task<TUser> GetUserAggregateAsync(TableQuery queryUser)
 		{
-			return await new TaskFactory<TUser>().StartNew(() =>
+			return await Task.Run(() =>
 			{
 				var user = _indexTable.ExecuteQuery(queryUser).FirstOrDefault();
 				if (user != null)
@@ -827,7 +827,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
 		protected async Task<IEnumerable<TUser>> GetUsersAggregateByIdsAsync(IList<string> userIds)
 		{
-			return await new TaskFactory<IEnumerable<TUser>>().StartNew(() =>
+			return await Task.Run(() =>
 			{
 				return GetUserAggregateQuery(userIds);
 			});
@@ -1049,7 +1049,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 				throw new ArgumentNullException("user");
 			}
 			user.AccessFailedCount = 0;
-			return Task.FromResult<int>(0);
+			return TaskCacheHelper.CompletedTask;
 		}
 
 		public async Task SetEmailAsync(TUser user, string email, CancellationToken cancellationToken = default(CancellationToken))
@@ -1100,7 +1100,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 				throw new ArgumentNullException("user");
 			}
 			user.EmailConfirmed = confirmed;
-			return Task.FromResult<int>(0);
+			return TaskCacheHelper.CompletedTask;
 		}
 
 		public Task SetLockoutEnabledAsync(TUser user, bool enabled, CancellationToken cancellationToken = default(CancellationToken))
@@ -1112,7 +1112,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 				throw new ArgumentNullException("user");
 			}
 			user.LockoutEnabled = enabled;
-			return Task.FromResult<int>(0);
+			return TaskCacheHelper.CompletedTask;
 		}
 
 		public Task SetLockoutEndDateAsync(TUser user, DateTimeOffset? lockoutEnd, CancellationToken cancellationToken = default(CancellationToken))
@@ -1124,7 +1124,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 				throw new ArgumentNullException("user");
 			}
             user.LockoutEndDateUtc = lockoutEnd.HasValue ? new DateTime?(lockoutEnd.Value.DateTime.ToUniversalTime()) : null;
-			return Task.FromResult<int>(0);
+			return TaskCacheHelper.CompletedTask;
 		}
 
 		public Task SetPasswordHashAsync(TUser user, string passwordHash, CancellationToken cancellationToken = default(CancellationToken))
@@ -1137,7 +1137,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 				throw new ArgumentNullException("user");
 			}
 			user.PasswordHash = passwordHash;
-			return Task.FromResult<int>(0);
+			return TaskCacheHelper.CompletedTask;
 		}
 
 		public Task SetPhoneNumberAsync(TUser user, string phoneNumber, CancellationToken cancellationToken = default(CancellationToken))
@@ -1149,7 +1149,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 				throw new ArgumentNullException("user");
 			}
 			user.PhoneNumber = phoneNumber;
-			return Task.FromResult<int>(0);
+			return TaskCacheHelper.CompletedTask;
 		}
 
 		public Task SetPhoneNumberConfirmedAsync(TUser user, bool confirmed, CancellationToken cancellationToken = default(CancellationToken))
@@ -1161,7 +1161,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 				throw new ArgumentNullException("user");
 			}
 			user.PhoneNumberConfirmed = confirmed;
-			return Task.FromResult<int>(0);
+			return TaskCacheHelper.CompletedTask;
 		}
 
 		public Task SetSecurityStampAsync(TUser user, string stamp, CancellationToken cancellationToken = default(CancellationToken))
@@ -1173,7 +1173,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 				throw new ArgumentNullException("user");
 			}
 			user.SecurityStamp = stamp;
-			return Task.FromResult<int>(0);
+			return TaskCacheHelper.CompletedTask;
 		}
 
 		public Task SetTwoFactorEnabledAsync(TUser user, bool enabled, CancellationToken cancellationToken = default(CancellationToken))
@@ -1185,7 +1185,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 				throw new ArgumentNullException("user");
 			}
 			user.TwoFactorEnabled = enabled;
-			return Task.FromResult<int>(0);
+			return TaskCacheHelper.CompletedTask;
 		}
 
 		private void ThrowIfDisposed()
@@ -1458,7 +1458,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 				throw new ArgumentNullException("user");
 			}
 			user.UserName = userName;
-			return Task.FromResult(0);
+			return TaskCacheHelper.CompletedTask;
 		}
 
 		public virtual Task<string> GetNormalizedUserNameAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
@@ -1481,7 +1481,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 				throw new ArgumentNullException("user");
 			}
 			user.NormalizedUserName = normalizedName;
-			return Task.FromResult(0);
+			return TaskCacheHelper.CompletedTask;
 		}
 
 		public virtual Task<string> GetNormalizedEmailAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
@@ -1504,7 +1504,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 				throw new ArgumentNullException("user");
 			}
 			user.NormalizedEmail = normalizedEmail;
-			return Task.FromResult(0);
+			return TaskCacheHelper.CompletedTask;
 		}
 
 	}

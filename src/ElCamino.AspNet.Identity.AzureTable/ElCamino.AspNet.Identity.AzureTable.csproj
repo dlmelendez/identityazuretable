@@ -111,6 +111,9 @@
     <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Helpers\TableQueryHelper.cs">
       <Link>Helpers\TableQueryHelper.cs</Link>
     </Compile>
+    <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Helpers\TaskCacheHelper.cs">
+      <Link>Helpers\TaskCacheHelper.cs</Link>
+    </Compile>
     <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\Helpers\UriEncodeKeyHelper.cs">
       <Link>Helpers\UriEncodeKeyHelper.cs</Link>
     </Compile>

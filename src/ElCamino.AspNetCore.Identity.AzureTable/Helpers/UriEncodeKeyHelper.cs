@@ -71,6 +71,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             return string.Format(Constants.RowKeyConstants.FormatterIdentityUserClaim, strTemp);
 
         }
+#if !net45
+        public override string GenerateRowKeyIdentityRoleClaim(string claimType, string claimValue)
+        {
+            string strTemp = string.Format("{0}_{1}", EscapeKey(claimType), EscapeKey(claimValue));
+            return string.Format(Constants.RowKeyConstants.FormatterIdentityRoleClaim, strTemp);
+
+        }
+#endif
 
         public override string ParsePartitionKeyIdentityRoleFromRowKey(string rowKey)
         {
@@ -95,7 +103,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 
         public override double KeyVersion
         {
-            get { return 1.62; }
+            get { return 1.65; }
         }
     }
 }

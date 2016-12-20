@@ -49,7 +49,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 
         public async Task<IList<TableResult>> ExecuteBatchAsync(CloudTable table)
         {
-            return await new TaskFactory<IList<TableResult>>().StartNew(
+            return await Task.Run(
             () =>
             {
                 ConcurrentBag<TableResult> results = new ConcurrentBag<TableResult>();

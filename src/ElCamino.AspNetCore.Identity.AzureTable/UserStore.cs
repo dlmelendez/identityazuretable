@@ -585,7 +585,7 @@ namespace ElCamino.AspNet.Identity.AzureTable
 
 		private async Task<TUser> GetUserAggregateAsync(TableQuery queryUser)
 		{
-			return await new TaskFactory<TUser>().StartNew(() =>
+			return await Task.Run(() =>
 			{
 				var user = _indexTable.ExecuteQuery(queryUser).FirstOrDefault();
 				if (user != null)
@@ -615,7 +615,7 @@ namespace ElCamino.AspNet.Identity.AzureTable
 
 		protected async Task<IEnumerable<TUser>> GetUsersAggregateByIdsAsync(IList<string> userIds)
 		{
-			return await new TaskFactory<IEnumerable<TUser>>().StartNew(() =>
+			return await Task.Run(() =>
 			{
 				return GetUserAggregateQuery(userIds);
 			});
@@ -737,7 +737,7 @@ namespace ElCamino.AspNet.Identity.AzureTable
 				throw new ArgumentNullException("user");
 			}
 			user.AccessFailedCount = 0;
-			return Task.FromResult<int>(0);
+			return TaskCacheHelper.CompletedTask;
 		}
 
 		public async Task SetEmailAsync(TUser user, string email)
@@ -783,7 +783,7 @@ namespace ElCamino.AspNet.Identity.AzureTable
 				throw new ArgumentNullException("user");
 			}
 			user.EmailConfirmed = confirmed;
-			return Task.FromResult<int>(0);
+			return TaskCacheHelper.CompletedTask;
 		}
 
 		public Task SetLockoutEnabledAsync(TUser user, bool enabled)
@@ -794,7 +794,7 @@ namespace ElCamino.AspNet.Identity.AzureTable
 				throw new ArgumentNullException("user");
 			}
 			user.LockoutEnabled = enabled;
-			return Task.FromResult<int>(0);
+			return TaskCacheHelper.CompletedTask;
 		}
 
 		public Task SetLockoutEndDateAsync(TUser user, DateTimeOffset lockoutEnd)
@@ -805,7 +805,7 @@ namespace ElCamino.AspNet.Identity.AzureTable
 				throw new ArgumentNullException("user");
 			}
 			user.LockoutEndDateUtc = (lockoutEnd == DateTimeOffset.MinValue) ? null : new DateTime?(lockoutEnd.UtcDateTime);
-			return Task.FromResult<int>(0);
+			return TaskCacheHelper.CompletedTask;
 		}
 
 		public Task SetPasswordHashAsync(TUser user, string passwordHash)
@@ -817,7 +817,7 @@ namespace ElCamino.AspNet.Identity.AzureTable
 				throw new ArgumentNullException("user");
 			}
 			user.PasswordHash = passwordHash;
-			return Task.FromResult<int>(0);
+			return TaskCacheHelper.CompletedTask;
 		}
 
 		public Task SetPhoneNumberAsync(TUser user, string phoneNumber)
@@ -828,7 +828,7 @@ namespace ElCamino.AspNet.Identity.AzureTable
 				throw new ArgumentNullException("user");
 			}
 			user.PhoneNumber = phoneNumber;
-			return Task.FromResult<int>(0);
+			return TaskCacheHelper.CompletedTask;
 		}
 
 		public Task SetPhoneNumberConfirmedAsync(TUser user, bool confirmed)
@@ -839,7 +839,7 @@ namespace ElCamino.AspNet.Identity.AzureTable
 				throw new ArgumentNullException("user");
 			}
 			user.PhoneNumberConfirmed = confirmed;
-			return Task.FromResult<int>(0);
+			return TaskCacheHelper.CompletedTask;
 		}
 
 		public Task SetSecurityStampAsync(TUser user, string stamp)
@@ -850,7 +850,7 @@ namespace ElCamino.AspNet.Identity.AzureTable
 				throw new ArgumentNullException("user");
 			}
 			user.SecurityStamp = stamp;
-			return Task.FromResult<int>(0);
+			return TaskCacheHelper.CompletedTask;
 		}
 
 		public Task SetTwoFactorEnabledAsync(TUser user, bool enabled)
@@ -861,7 +861,7 @@ namespace ElCamino.AspNet.Identity.AzureTable
 				throw new ArgumentNullException("user");
 			}
 			user.TwoFactorEnabled = enabled;
-			return Task.FromResult<int>(0);
+			return TaskCacheHelper.CompletedTask;
 		}
 
 		private void ThrowIfDisposed()

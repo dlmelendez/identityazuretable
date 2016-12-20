@@ -1,5 +1,6 @@
-﻿// MIT License Copyright 2014 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
+﻿// MIT License Copyright 2016 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 using System;
+using System.Linq;
 #if net45
 using Microsoft.AspNet.Identity;
 using ElCamino.AspNet.Identity.AzureTable;
@@ -12,6 +13,8 @@ using ElCamino.AspNetCore.Identity.AzureTable.Model;
 using Xunit;
 using Xunit.Abstractions;
 using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
+using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
+using System.Security.Claims;
 
 namespace ElCamino.AspNet.Identity.AzureTable.Tests
 {
@@ -57,6 +60,98 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
         }
 #endif
 
+#if !net45
+
+        private Claim GenRoleClaim()
+        {
+            return new Claim(Constants.AccountClaimTypes.AccountTestUserClaim, Guid.NewGuid().ToString());
+        }
+
+        [Fact(DisplayName = "AddRemoveRoleClaim")]
+        [Trait("Identity.Azure.UserStoreV2", "")]
+        public void AddRemoveRoleClaim()
+        {
+            using (RoleStore<IdentityRole> store = roleFixture.CreateRoleStore())
+            {
+                using (RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager(store))
+                {
+                    string roleNew = string.Format("TestRole_{0}", Guid.NewGuid());
+                    var role = new IdentityRole(roleNew);
+                    var start = DateTime.UtcNow;
+                    var createTask = manager.CreateAsync(role);
+                    createTask.Wait();
+
+                    output.WriteLine("CreateRoleAsync: {0} seconds", (DateTime.UtcNow - start).TotalSeconds);
+                    Claim c1 = GenRoleClaim();
+                    Claim c2 = GenRoleClaim();
+
+                    AddRoleClaimHelper(role, c1);
+                    AddRoleClaimHelper(role, c2);
+                    
+                    RemoveRoleClaimHelper(role, c1);
+
+                }
+            }
+        }
+
+        [Fact(DisplayName = "AddRoleClaim")]
+        [Trait("Identity.Azure.UserStoreV2", "")]
+        public void AddRoleClaim()
+        {
+            using (RoleStore<IdentityRole> store = roleFixture.CreateRoleStore())
+            {
+                using (RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager(store))
+                {
+                    string roleNew = string.Format("TestRole_{0}", Guid.NewGuid());
+                    var role = new IdentityRole(roleNew);
+                    var start = DateTime.UtcNow;
+                    var createTask = manager.CreateAsync(role);
+                    createTask.Wait();
+
+                    output.WriteLine("CreateRoleAsync: {0} seconds", (DateTime.UtcNow - start).TotalSeconds);
+
+                    AddRoleClaimHelper(role, GenRoleClaim());
+                }
+            }
+        }
+
+        private void AddRoleClaimHelper(IdentityRole role, Claim claim)
+        {
+            using (RoleStore<IdentityRole> store = roleFixture.CreateRoleStore())
+            {
+                using (RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager(store))
+                {
+                    var userClaimTask = manager.AddClaimAsync(role, claim);
+
+                    userClaimTask.Wait();
+                    var claimsTask = manager.GetClaimsAsync(role);
+
+                    claimsTask.Wait();
+                    Assert.True(claimsTask.Result.ToList().Any(c => c.Value == claim.Value & c.ValueType == claim.ValueType), "Claim not found");
+                }
+            }
+
+        }
+
+        private void RemoveRoleClaimHelper(IdentityRole role, Claim claim)
+        {
+            using (RoleStore<IdentityRole> store = roleFixture.CreateRoleStore())
+            {
+                using (RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager(store))
+                {
+                    var userClaimTask = manager.RemoveClaimAsync(role, claim);
+
+                    userClaimTask.Wait();
+                    var claimsTask = manager.GetClaimsAsync(role);
+
+                    claimsTask.Wait();
+                    Assert.False(claimsTask.Result.ToList().Any(c => c.Value == claim.Value & c.ValueType == claim.ValueType), "Claim not found");
+                }
+            }
+
+        }
+
+#endif
         [Fact(DisplayName = "CreateRole")]
 #if net45
         [Trait("Identity.Azure.RoleStore", "")]

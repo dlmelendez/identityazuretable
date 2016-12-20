@@ -70,6 +70,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             string hash = ConvertKeyToHash(base.GenerateRowKeyIdentityUserClaim(claimType, claimValue));
             return string.Format(Constants.RowKeyConstants.FormatterIdentityUserClaim, hash);
         }
+#if !net45
+        public override string GenerateRowKeyIdentityRoleClaim(string claimType, string claimValue)
+        {
+            string hash = ConvertKeyToHash(base.GenerateRowKeyIdentityRoleClaim(claimType, claimValue));
+            return string.Format(Constants.RowKeyConstants.FormatterIdentityRoleClaim, hash);
+        }
+#endif
 
         public override string ParsePartitionKeyIdentityRoleFromRowKey(string rowKey)
         {
@@ -87,7 +94,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         {
             get
             {
-                return 2.0;
+                return 1.65;
             }
         }
 

@@ -28,7 +28,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         public abstract string GeneratePartitionKeyIdentityRole(string plainRoleName);
 
         public abstract string GenerateRowKeyIdentityUserClaim(string claimType, string claimValue);
-
+#if !net45
+        public abstract string GenerateRowKeyIdentityRoleClaim(string claimType, string claimValue);
+#endif
         public abstract string GenerateRowKeyIdentityUserLogin(string loginProvider, string providerKey);
 
         public abstract string ParsePartitionKeyIdentityRoleFromRowKey(string rowKey);
