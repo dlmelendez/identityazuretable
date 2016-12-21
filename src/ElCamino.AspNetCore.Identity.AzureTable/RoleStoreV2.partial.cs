@@ -265,17 +265,19 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             {
                 throw new ArgumentNullException(nameof(role));
             }
+            string partitionFilter = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, role.Id.ToString());
 
-            string filter = TableQuery.GenerateFilterCondition("PartitionKey",
-                            QueryComparisons.Equal,
-                            role.Id.ToString());
+            string rowFilter1 = TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.GreaterThanOrEqual, Constants.RowKeyConstants.PreFixIdentityUserToken);
+            string rowFilter2 = TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.LessThan, "U_");
+            string rowFilter = TableQuery.CombineFilters(rowFilter1, TableOperators.Or, rowFilter2);
+
+            string filter = TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowFilter);
 
             TableQuery tq = new TableQuery();
             tq.FilterString = filter;
             OperationContext oc = new OperationContext();
             return Task.Run(() => { return _roleTable.ExecuteQuery(tq)
                 .ToList()
-                .Where(w => w.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityRoleClaim))
                 .Select(s =>
                 {
                     TRoleClaim trc = (TRoleClaim)Activator.CreateInstance(typeof(TRoleClaim));

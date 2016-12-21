@@ -1,5 +1,5 @@
 {
-    "version": "1.6.2-*",
+    "version": "1.6.5-*",
     "description": "Testing",
     "authors": [ "Dave Melendez" ],
     "buildOptions": {
@@ -29,7 +29,7 @@
         "Microsoft.AspNetCore.Identity": "1.1.0",
         "Microsoft.Extensions.Options.ConfigurationExtensions": "1.1.0",
         "ElCamino.AspNetCore.Identity.AzureTable": {
-            "version": "1.6.2",
+            "version": "1.6.5",
             "target": "project"
         }
     },

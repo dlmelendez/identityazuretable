@@ -1,5 +1,5 @@
 {
-    "version": "1.6.2",
+    "version": "1.6.5",
     "name": "ElCamino.AspNetCore.Identity.AzureTable",
     "title": "Azure Table Storage Provider for ASP.NET Identity Core",
     "description": "Azure Table Storage Provider to support AspNet Identity Core 1.1 frameworks for .NET Standard and Core.",
@@ -11,7 +11,7 @@
         "owners": [ "David Melendez" ],
         "iconUrl": "https://dlmelendez.github.io/identityazuretable/images/projectNugetPic.png",
         "licenseUrl": "https://github.com/dlmelendez/identityazuretable/blob/master/LICENSE",
-        "releaseNotes": "Supports AspNetCore.Identity 1.1 frameworks for .NET Standard and Core. Updating for Identity Core 1.1. Important! Check https://dlmelendez.github.io/identityazuretable/#/migration for data migration information.",
+        "releaseNotes": "Supports AspNetCore.Identity 1.1 frameworks for .NET Standard and Core. Implementing support for RoleClaims and external UserTokens. Minor threading improvements. Important! Check https://dlmelendez.github.io/identityazuretable/#/migration for data migration information.",
         "repository": {
             "type": "git",
             "url": "https://github.com/dlmelendez/identityazuretable.git"

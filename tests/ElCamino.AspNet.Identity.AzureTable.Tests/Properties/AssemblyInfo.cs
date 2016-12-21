@@ -1,4 +1,4 @@
-﻿// MIT License Copyright 2014 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
+﻿// MIT License Copyright 2016 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
 using System.Reflection;
 using System.Resources;
@@ -18,7 +18,7 @@ using System.Runtime.InteropServices;
 [assembly: Guid("bb76b9d9-6116-4b9a-8e6a-97c7c6c04cb8")]
 
 //http://semver.org/
-[assembly: AssemblyVersion("1.6.2.0")]
-[assembly: AssemblyFileVersion("1.6.2.0")]
-[assembly: AssemblyInformationalVersion("1.6.2.0")]
+[assembly: AssemblyVersion("1.6.5.0")]
+[assembly: AssemblyFileVersion("1.6.5.0")]
+[assembly: AssemblyInformationalVersion("1.6.5.0")]
 

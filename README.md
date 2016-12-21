@@ -7,4 +7,4 @@ Project site at https://dlmelendez.github.io/identityazuretable/.
 
 Identity 2.0 - Use ElCamino.AspNet.Identity.AzureTable, sample Mvc5 app: https://github.com/dlmelendez/identityazuretable/tree/master/sample/samplemvc
 
-Identity Core 1.0 - Use ElCamino.AspNetCore.Identity.AzureTable, sample Mvc6 app: https://github.com/dlmelendez/identityazuretable/tree/master/sample/samplemvccore
+Identity Core 1.x - Use ElCamino.AspNetCore.Identity.AzureTable, sample Mvc6 app: https://github.com/dlmelendez/identityazuretable/tree/master/sample/samplemvccore

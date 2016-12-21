@@ -637,9 +637,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 		private IEnumerable<DynamicTableEntity> GetUserAggregateQuery(string userId)
 		{
 			TableQuery tq = new TableQuery();
-			tq.FilterString = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, userId);
+			string partitionFilter = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, userId);
 
-			return _userTable.ExecuteQuery(tq);
+            string rowFilter1 = TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.LessThan, Constants.RowKeyConstants.PreFixIdentityUserToken);
+            string rowFilter2 = TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.GreaterThanOrEqual, "U_");
+            string rowFilter = TableQuery.CombineFilters(rowFilter1, TableOperators.Or, rowFilter2);
+
+            tq.FilterString = TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowFilter);
+
+            return _userTable.ExecuteQuery(tq);
 		}
 
 		protected IEnumerable<TUser> GetUserAggregateQuery(IList<string> userIds)

@@ -13,7 +13,7 @@
     <description>$description$</description>
     <releaseNotes>
       Release $version$ This project is an open source high performance plugin to ASP.NET Identity framework using Azure Table Storage.
-      * Updating dependancy references.
+      * Minor threading improvements.
       * Important! Check https://dlmelendez.github.io/identityazuretable/#/migration for data migration information.
     </releaseNotes>
     <copyright>Copyright 2016</copyright>

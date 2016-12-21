@@ -29,7 +29,7 @@
         "BundlerMinifier.Core": "2.1.258",
         "Microsoft.AspNetCore.Mvc": "1.1.0",
         "Microsoft.AspNetCore.Server.Kestrel": "1.1.0",
-        "ElCamino.AspNetCore.Identity.AzureTable": "1.6.2"
+        "ElCamino.AspNetCore.Identity.AzureTable": "1.6.5"
     },
 
   "tools": {
