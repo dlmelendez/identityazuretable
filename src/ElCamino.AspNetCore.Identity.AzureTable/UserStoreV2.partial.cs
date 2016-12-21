@@ -50,7 +50,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 		}
 	}
 
-	public class UserStore<TUser, TRole, TContext> : UserStore<TUser, TRole, string, Model.IdentityUserLogin, Model.IdentityUserRole, Model.IdentityUserClaim, TContext>
+	public class UserStore<TUser, TRole, TContext> : UserStore<TUser, TRole, string, Model.IdentityUserLogin, Model.IdentityUserRole, Model.IdentityUserClaim, Model.IdentityUserToken, TContext>
 		, IUserStore<TUser>
 		where TUser : Model.IdentityUser, new()
 		where TRole : Model.IdentityRole<string, Model.IdentityUserRole>, new()
@@ -62,7 +62,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 		}
 	}
 
-    public class UserStore<TUser, TRole, TKey, TUserLogin, TUserRole, TUserClaim, TContext> : 
+    public class UserStore<TUser, TRole, TKey, TUserLogin, TUserRole, TUserClaim, TUserToken, TContext> : 
 		IUserLoginStore<TUser>
 		, IUserClaimStore<TUser>
 		, IUserRoleStore<TUser>
@@ -73,14 +73,16 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 		, IUserTwoFactorStore<TUser>
 		, IUserLockoutStore<TUser>
 		, IUserStore<TUser>
-		, IDisposable
+        , IUserAuthenticationTokenStore<TUser>
+        , IDisposable
 		where TUser : Model.IdentityUser<TKey, TUserLogin, TUserRole, TUserClaim>, new()
 		where TRole : Model.IdentityRole<TKey, TUserRole>, new()
 		where TKey : IEquatable<TKey>
 		where TUserLogin : Model.IdentityUserLogin<TKey>, new()
 		where TUserRole : Model.IdentityUserRole<TKey>, new()
 		where TUserClaim : Model.IdentityUserClaim<TKey>, new()
-		where TContext : IdentityCloudContext, new()
+        where TUserToken : Model.IdentityUserToken<TKey>, new()
+        where TContext : IdentityCloudContext, new()
     {
 		private bool _disposed;
 
@@ -1507,6 +1509,108 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 			return TaskCacheHelper.CompletedTask;
 		}
 
-	}
+        private async Task<TUserToken> FindUserTokenAsync(TUser user, string loginProvider, string tokenName)
+        {
+            var tableOp = TableOperation.Retrieve<TUserToken>(user.Id.ToString(), 
+                KeyHelper.GenerateRowKeyIdentityUserToken(loginProvider, tokenName));
+
+            var result = await _userTable.ExecuteAsync(tableOp);
+
+            if(result.Result != null)
+            {
+                return (TUserToken)result.Result;
+            }
+
+            return default(TUserToken);
+        }
+
+        public async Task SetTokenAsync(TUser user, string loginProvider, string tokenName, string tokenValue, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+            if (string.IsNullOrWhiteSpace(tokenName))
+            {
+                throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(tokenName));
+            }
+            if (string.IsNullOrWhiteSpace(loginProvider))
+            {
+                throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(loginProvider));
+            }
+            if (tokenValue == null)
+            {
+                tokenValue = string.Empty;
+            }
+
+            var item = await FindUserTokenAsync(user, loginProvider, tokenName);
+            if(item == null)
+            {
+                item = Activator.CreateInstance<TUserToken>();
+                item.TokenName = tokenName;
+                item.TokenValue = tokenValue;
+                item.PartitionKey = user.Id.ToString();
+                item.LoginProvider = loginProvider;
+                ((Model.IGenerateKeys)item).GenerateKeys();
+            }
+            else
+            {
+                item.TokenValue = tokenValue;
+            }
+
+            await _userTable.ExecuteAsync(TableOperation.InsertOrReplace(item as TableEntity));
+        }
+
+        public async Task RemoveTokenAsync(TUser user, string loginProvider, string tokenName, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+            if (string.IsNullOrWhiteSpace(tokenName))
+            {
+                throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(tokenName));
+            }
+            if (string.IsNullOrWhiteSpace(loginProvider))
+            {
+                throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(loginProvider));
+            }
+
+            var item = await FindUserTokenAsync(user, loginProvider, tokenName);
+            if (item != null)
+            {
+                await _userTable.ExecuteAsync(TableOperation.Delete(item as TableEntity));
+            }
+
+        }
+
+        public async Task<string> GetTokenAsync(TUser user, string loginProvider, string tokenName, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+            if (string.IsNullOrWhiteSpace(tokenName))
+            {
+                throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(tokenName));
+            }
+            if (string.IsNullOrWhiteSpace(loginProvider))
+            {
+                throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(loginProvider));
+            }
+
+            var item = await FindUserTokenAsync(user, loginProvider, tokenName);
+            return item?.TokenValue;
+        }
+    }
 }
 #endif

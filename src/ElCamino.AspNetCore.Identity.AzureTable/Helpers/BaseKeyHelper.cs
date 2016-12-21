@@ -30,6 +30,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         public abstract string GenerateRowKeyIdentityUserClaim(string claimType, string claimValue);
 #if !net45
         public abstract string GenerateRowKeyIdentityRoleClaim(string claimType, string claimValue);
+
+        public abstract string GenerateRowKeyIdentityUserToken(string loginProvider, string tokenName);
 #endif
         public abstract string GenerateRowKeyIdentityUserLogin(string loginProvider, string providerKey);
 

@@ -76,8 +76,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         {
             string strTemp = string.Format("{0}_{1}", EscapeKey(claimType), EscapeKey(claimValue));
             return string.Format(Constants.RowKeyConstants.FormatterIdentityRoleClaim, strTemp);
-
         }
+
+        public override string GenerateRowKeyIdentityUserToken(string loginProvider, string name)
+        {
+            string strTemp = string.Format("{0}_{1}", EscapeKey(loginProvider), EscapeKey(name));
+            return string.Format(Constants.RowKeyConstants.FormatterIdentityUserToken, strTemp);
+        }
+
 #endif
 
         public override string ParsePartitionKeyIdentityRoleFromRowKey(string rowKey)

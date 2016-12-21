@@ -729,6 +729,59 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
             }
         }
 
+#if !net45
+        [Fact(DisplayName = "AddRemoveUserToken")]
+        [Trait("Identity.Azure.UserStoreV2", "")]
+        public void AddRemoveUserToken()
+        {
+            using (var store = userFixture.CreateUserStore())
+            {
+                using (var manager = userFixture.CreateUserManager(store))
+                {
+                    var user = GenTestUser();
+                    WriteLineObject<IdentityUser>(user);
+                    var taskUser = manager.CreateAsync(user, DefaultUserPassword);
+                    taskUser.Wait();
+                    Assert.True(taskUser.Result.Succeeded, string.Concat(taskUser.Result.Errors));
+
+                    string tokenValue = Guid.NewGuid().ToString();
+                    string tokenName = string.Format("TokenName{0}", Guid.NewGuid().ToString());
+                    string tokenName2 = string.Format("TokenName2{0}", Guid.NewGuid().ToString());
+
+                    manager.SetAuthenticationTokenAsync(user,
+                        Constants.LoginProviders.GoogleProvider.LoginProvider,
+                        tokenName,
+                        tokenValue).Wait();
+
+                    string getTokenValue = manager.GetAuthenticationTokenAsync(user,
+                        Constants.LoginProviders.GoogleProvider.LoginProvider,
+                        tokenName).Result;
+                    Assert.NotNull(tokenName);
+                    Assert.Equal(getTokenValue, tokenValue);
+
+                    manager.SetAuthenticationTokenAsync(user,
+                        Constants.LoginProviders.GoogleProvider.LoginProvider,
+                        tokenName2,
+                        tokenValue).Wait();
+
+                    manager.RemoveAuthenticationTokenAsync(user,
+                        Constants.LoginProviders.GoogleProvider.LoginProvider,
+                        tokenName).Wait();
+
+                    getTokenValue = manager.GetAuthenticationTokenAsync(user,
+                        Constants.LoginProviders.GoogleProvider.LoginProvider,
+                        tokenName).Result;
+                    Assert.Null(getTokenValue);
+
+                    getTokenValue = manager.GetAuthenticationTokenAsync(user,
+                        Constants.LoginProviders.GoogleProvider.LoginProvider,
+                        tokenName2).Result;
+                    Assert.NotNull(getTokenValue);
+                    Assert.Equal(getTokenValue, tokenValue);
+                }
+            }
+        }
+#endif
 
         [Fact(DisplayName = "AddRemoveUserLogin")]
 #if net45
@@ -1176,7 +1229,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
                     Assert.True(userClaimTask.Result.Succeeded, string.Concat(userClaimTask.Result.Errors));
 #else
                     Assert.True(userClaimTask.Result.Succeeded, string.Concat(userClaimTask.Result.Errors.Select(e => e.Code)));
-#endif                             
+#endif
 #if net45
                     var claimsTask = manager.GetClaimsAsync(user.Id);
 #else
@@ -1190,7 +1243,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 
         }
 
-        #if !net45
+#if !net45
         [Fact(DisplayName = "GetUsersByClaim")]
         [Trait("Identity.Azure.UserStoreV2", "")]
         public void GetUsersByClaim()

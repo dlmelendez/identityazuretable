@@ -71,6 +71,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         {
             return hashHelper.GenerateRowKeyIdentityRoleClaim(claimType, claimValue);
         }
+
+        public static string GenerateRowKeyIdentityUserToken(string loginProvider, string name)
+        {
+            return hashHelper.GenerateRowKeyIdentityUserToken(loginProvider, name);
+        }
+
 #endif
         public static string GenerateRowKeyIdentityUserLogin(string loginProvider, string providerKey)
         {

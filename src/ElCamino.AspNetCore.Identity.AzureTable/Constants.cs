@@ -35,12 +35,14 @@ public static class Constants
             public const string PreFixIdentityUserRole      = "R_";
             public const string PreFixIdentityUserLogin     = "L_";
             public const string PreFixIdentityUserEmail     = "E_";
+            public const string PreFixIdentityUserToken     = "T_";
             public const string PreFixIdentityUserName      = "U_";
 
             public const string FormatterIdentityUserClaim  = PreFixIdentityUserClaim + "{0}";
             public const string FormatterIdentityUserRole   = PreFixIdentityUserRole + "{0}";
             public const string FormatterIdentityUserLogin  = PreFixIdentityUserLogin + "{0}";
             public const string FormatterIdentityUserEmail  = PreFixIdentityUserEmail + "{0}";
+            public const string FormatterIdentityUserToken  = PreFixIdentityUserToken + "{0}";
             public const string FormatterIdentityUserName   = PreFixIdentityUserName + "{0}";
             #endregion
 
