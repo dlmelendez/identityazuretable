@@ -50,8 +50,8 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
     </Reference>
-    <Reference Include="ElCamino.AspNet.Identity.AzureTable, Version=1.6.2.0, Culture=neutral, PublicKeyToken=dccd6cad85dcd411, processorArchitecture=MSIL">
-      <HintPath>..\packages\ElCamino.AspNet.Identity.AzureTable.1.6.2.0\lib\net45\ElCamino.AspNet.Identity.AzureTable.dll</HintPath>
+    <Reference Include="ElCamino.AspNet.Identity.AzureTable, Version=1.6.5.0, Culture=neutral, PublicKeyToken=dccd6cad85dcd411, processorArchitecture=MSIL">
+      <HintPath>..\packages\ElCamino.AspNet.Identity.AzureTable.1.6.5\lib\net45\ElCamino.AspNet.Identity.AzureTable.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.AspNet.Identity.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -125,8 +125,8 @@
     <Reference Include="Microsoft.WindowsAzure.ServiceRuntime, Version=2.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
       <Private>False</Private>
     </Reference>
-    <Reference Include="Microsoft.WindowsAzure.Storage, Version=7.2.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\WindowsAzure.Storage.7.2.1\lib\net40\Microsoft.WindowsAzure.Storage.dll</HintPath>
+    <Reference Include="Microsoft.WindowsAzure.Storage, Version=8.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\WindowsAzure.Storage.8.0.0\lib\net45\Microsoft.WindowsAzure.Storage.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">

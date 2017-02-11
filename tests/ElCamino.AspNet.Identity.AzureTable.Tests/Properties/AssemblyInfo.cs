@@ -1,4 +1,4 @@
-﻿// MIT License Copyright 2016 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
+﻿// MIT License Copyright 2017 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
 using System.Reflection;
 using System.Resources;
@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Author: David Melendez")]
 [assembly: AssemblyProduct("Azure Table Storage Provider")]
-[assembly: AssemblyCopyright("Copyright ©  2016 David Melendez, MIT License")]
+[assembly: AssemblyCopyright("Copyright ©  2017 David Melendez, MIT License")]
 [assembly: AssemblyTrademark("")]
 [assembly: NeutralResourcesLanguage("en-US")]
 

@@ -17,7 +17,7 @@
       * Updated Windows Storage reference to v8.0
       * Important! Check https://dlmelendez.github.io/identityazuretable/#/migration for data migration information.
     </releaseNotes>
-    <copyright>Copyright 2016</copyright>
+    <copyright>Copyright 2017</copyright>
     <tags>ASP.NET Identity 2.0 Azure Table Storage MVC UserStore RoleStore UserManager multi-tenant RA-GRS geo-redundant Microsoft.AspNet.Identity</tags>
     <dependencies>
       <dependency id="Microsoft.WindowsAzure.ConfigurationManager" version="3.2.3" />

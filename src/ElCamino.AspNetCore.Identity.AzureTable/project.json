@@ -4,7 +4,7 @@
     "title": "Azure Table Storage Provider for ASP.NET Identity Core",
     "description": "Azure Table Storage Provider to support AspNet Identity Core 1.1 frameworks for .NET Standard and Core.",
     "authors": [ "David Melendez" ],
-    "copyright": "Copyright ©  2016 David Melendez, MIT License",
+    "copyright": "Copyright ©  2017 David Melendez, MIT License",
     "packOptions": {
         "tags": [ "ASP.NET", "Identity Core", "Azure", "Table Storage", "MVC", "UserStore", "RoleStore", "UserManager", "multi-tenant", "RA-GRS", "geo-redundant", "Microsoft.AspNetCore.Identity" ],
         "requireLicenseAcceptance": true,

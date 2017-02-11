@@ -1,4 +1,4 @@
-// MIT License Copyright 2016 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
+// MIT License Copyright 2017 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 #if !net45
 using Microsoft.WindowsAzure.Storage.Table;
 using System;
