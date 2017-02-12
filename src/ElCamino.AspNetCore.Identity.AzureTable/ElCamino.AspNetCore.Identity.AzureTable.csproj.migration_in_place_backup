@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>Azure Table Storage Provider to support AspNet Identity Core 1.1 frameworks for .NET Standard and Core.</Description>
+    <Copyright>Copyright ©  2017 David Melendez, MIT License</Copyright>
+    <AssemblyTitle>Azure Table Storage Provider for ASP.NET Identity Core</AssemblyTitle>
+    <VersionPrefix>1.6.5</VersionPrefix>
+    <Authors>David Melendez</Authors>
+    <TargetFrameworks>net451;netstandard1.3</TargetFrameworks>
+    <AssemblyName>ElCamino.AspNetCore.Identity.AzureTable</AssemblyName>
+    <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <PackageId>ElCamino.AspNetCore.Identity.AzureTable</PackageId>
+    <PackageTags>ASP.NET;Identity Core;Azure;Table Storage;MVC;UserStore;RoleStore;UserManager;multi-tenant;RA-GRS;geo-redundant;Microsoft.AspNetCore.Identity</PackageTags>
+    <PackageReleaseNotes>Supports AspNetCore.Identity 1.1 frameworks for .NET Standard and Core. Implementing support for RoleClaims and external UserTokens. Minor threading improvements. Updated Windows Storage reference to v8.0. Important! Check https://dlmelendez.github.io/identityazuretable/#/migration for data migration information.</PackageReleaseNotes>
+    <PackageIconUrl>https://dlmelendez.github.io/identityazuretable/images/projectNugetPic.png</PackageIconUrl>
+    <PackageLicenseUrl>https://github.com/dlmelendez/identityazuretable/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/dlmelendez/identityazuretable.git</RepositoryUrl>
+    <PackageTargetFallback Condition=" '$(TargetFramework)' == 'netstandard1.3' ">$(PackageTargetFallback);dotnet5.6;dnxcore50;portable-net451+win8</PackageTargetFallback>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="1.1.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="1.1.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+    <PackageReference Include="WindowsAzure.Storage" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net451' ">
+    <DefineConstants>$(DefineConstants);net451</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
+    <DefineConstants>$(DefineConstants);netstandard</DefineConstants>
+  </PropertyGroup>
+
+</Project>

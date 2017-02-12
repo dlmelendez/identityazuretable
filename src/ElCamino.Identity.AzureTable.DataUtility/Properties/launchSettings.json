@@ -1,5 +1,20 @@
 {
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:1878/",
+      "sslPort": 0
+    }
+  },
   "profiles": {
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
     "ElCamino.Identity.AzureTable.DataUtility": {
       "commandName": "Project",
       "commandLineArgs": "/pagesize:1000 /migrate:loginindex /startpage:1 /finishpage:1"

@@ -1,0 +1,52 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>Testing</Description>
+    <VersionPrefix>1.6.5</VersionPrefix>
+    <Authors>Dave Melendez</Authors>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <AssemblyName>ElCamino.AspNetCore.Identity.AzureTable.Tests</AssemblyName>
+    <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <PackageId>ElCamino.AspNetCore.Identity.AzureTable.Tests</PackageId>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <RuntimeIdentifiers>win7-x64</RuntimeIdentifiers>
+    <PackageTargetFallback>$(PackageTargetFallback);dotnet5.4;dnxcore50;portable-net451+win8</PackageTargetFallback>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\ElCamino.AspNet.Identity.AzureTable.Tests\*.cs;..\ElCamino.AspNet.Identity.AzureTable.Tests\Fixtures\*.cs;..\ElCamino.AspNet.Identity.AzureTable.Tests\HelperTests\*.cs;..\ElCamino.AspNet.Identity.AzureTable.Tests\ModelTests\*.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
+    <Content Include="config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ElCamino.AspNetCore.Identity.AzureTable\ElCamino.AspNetCore.Identity.AzureTable.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0-preview-20170106-08" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0-beta5-build1225" />
+    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+    <PackageReference Include="WindowsAzure.Storage" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="1.1.0" />
+    <PackageReference Include="xunit" Version="2.2.0-beta5-build3474" />
+    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="1.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="1.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Testing" Version="1.0.0" />
+    <PackageReference Include="System.Diagnostics.TraceSource" Version="4.3.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="1.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="1.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="1.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="1.1.0" />
+  </ItemGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp1.1' ">
+    <DefineConstants>$(DefineConstants);netstandard</DefineConstants>
+  </PropertyGroup>
+
+</Project>
