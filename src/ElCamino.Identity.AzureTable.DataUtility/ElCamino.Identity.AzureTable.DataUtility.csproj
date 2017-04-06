@@ -13,6 +13,7 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <EnableDefaultContentItems>false</EnableDefaultContentItems>
+    <Version>1.6.6</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,7 +31,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.1.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="1.1.0" />
-    <PackageReference Include="WindowsAzure.Storage" Version="8.0.0" />
+    <PackageReference Include="WindowsAzure.Storage" Version="8.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="1.1.0" />
   </ItemGroup>
 
