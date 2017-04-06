@@ -24,11 +24,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NetStandard.Library" Version="1.6.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="1.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="1.1.1" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="1.1.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
-    <PackageReference Include="WindowsAzure.Storage" Version="8.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
+    <PackageReference Include="WindowsAzure.Storage" Version="8.1.1" />
     <PackageReference Include="Microsoft.Data.Services.Client" Version="5.8.2" />
     <PackageReference Include="System.Linq.Queryable" Version="4.3.0" />
   </ItemGroup>
