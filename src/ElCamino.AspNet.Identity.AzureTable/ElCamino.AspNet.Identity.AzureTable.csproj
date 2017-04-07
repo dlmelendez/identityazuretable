@@ -170,11 +170,11 @@
   </Target>
   -->
   <Target Name="AfterBuild" Condition=" '$(Configuration)' == 'Signed' ">
-    <Delete Files="$(TargetDir)*.nupkg" />
+    <!--<Delete Files="$(TargetDir)*.nupkg" />-->
     <!-- Create NuGet Package -->
-    <Exec Command="$(SolutionDir)3rdParty\NuGet\Nuget.exe pack $(ProjectPath) -Prop Configuration=$(Configuration) -Symbols -OutputDirectory $(TargetDir)" />
-    <Delete Files="$(TargetDir)*.zip" />
+    <!--<Exec Command="$(SolutionDir)3rdParty\NuGet\Nuget.exe pack $(ProjectPath) -Prop Configuration=$(Configuration) -Symbols -OutputDirectory $(TargetDir)" />
+    <Delete Files="$(TargetDir)*.zip" />-->
     <!-- 7-zip dlls-->
-    <Exec Command="$(SolutionDir)3rdParty\7-zip\7z.exe a $(TargetDir)$(TargetName)_$(Configuration).zip $(TargetPath) $(TargetDir)$(TargetName).pdb" />
+    <!--<Exec Command="$(SolutionDir)3rdParty\7-zip\7z.exe a $(TargetDir)$(TargetName)_$(Configuration).zip $(TargetPath) $(TargetDir)$(TargetName).pdb" />-->
   </Target>
 </Project>
