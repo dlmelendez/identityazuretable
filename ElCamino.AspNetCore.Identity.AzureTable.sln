@@ -1,7 +1,6 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26114.2
+VisualStudioVersion = 15.0.26228.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElCamino.AspNetCore.Identity.AzureTable", "src\ElCamino.AspNetCore.Identity.AzureTable\ElCamino.AspNetCore.Identity.AzureTable.csproj", "{5FBD2375-18B4-426A-A875-7D99521A4DD0}"
 EndProject
@@ -20,20 +19,20 @@ Global
 		{5FBD2375-18B4-426A-A875-7D99521A4DD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5FBD2375-18B4-426A-A875-7D99521A4DD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5FBD2375-18B4-426A-A875-7D99521A4DD0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5FBD2375-18B4-426A-A875-7D99521A4DD0}.Signed|Any CPU.ActiveCfg = Debug|Any CPU
-		{5FBD2375-18B4-426A-A875-7D99521A4DD0}.Signed|Any CPU.Build.0 = Debug|Any CPU
+		{5FBD2375-18B4-426A-A875-7D99521A4DD0}.Signed|Any CPU.ActiveCfg = Release|Any CPU
+		{5FBD2375-18B4-426A-A875-7D99521A4DD0}.Signed|Any CPU.Build.0 = Release|Any CPU
 		{B97DCC75-93CD-41C7-B7BE-D8DA6EA3C468}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B97DCC75-93CD-41C7-B7BE-D8DA6EA3C468}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B97DCC75-93CD-41C7-B7BE-D8DA6EA3C468}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B97DCC75-93CD-41C7-B7BE-D8DA6EA3C468}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B97DCC75-93CD-41C7-B7BE-D8DA6EA3C468}.Signed|Any CPU.ActiveCfg = Debug|Any CPU
-		{B97DCC75-93CD-41C7-B7BE-D8DA6EA3C468}.Signed|Any CPU.Build.0 = Debug|Any CPU
+		{B97DCC75-93CD-41C7-B7BE-D8DA6EA3C468}.Signed|Any CPU.ActiveCfg = Release|Any CPU
+		{B97DCC75-93CD-41C7-B7BE-D8DA6EA3C468}.Signed|Any CPU.Build.0 = Release|Any CPU
 		{56BB5104-E5F7-49BD-A5E9-25B818197F28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{56BB5104-E5F7-49BD-A5E9-25B818197F28}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{56BB5104-E5F7-49BD-A5E9-25B818197F28}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{56BB5104-E5F7-49BD-A5E9-25B818197F28}.Release|Any CPU.Build.0 = Release|Any CPU
-		{56BB5104-E5F7-49BD-A5E9-25B818197F28}.Signed|Any CPU.ActiveCfg = Debug|Any CPU
-		{56BB5104-E5F7-49BD-A5E9-25B818197F28}.Signed|Any CPU.Build.0 = Debug|Any CPU
+		{56BB5104-E5F7-49BD-A5E9-25B818197F28}.Signed|Any CPU.ActiveCfg = Release|Any CPU
+		{56BB5104-E5F7-49BD-A5E9-25B818197F28}.Signed|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

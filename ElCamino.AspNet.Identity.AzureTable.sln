@@ -1,7 +1,6 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26114.2
+VisualStudioVersion = 15.0.26228.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AAD16B60-811E-47BB-A0E0-1B24733B2A06}"
 	ProjectSection(SolutionItems) = preProject
@@ -13,97 +12,57 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElCamino.AspNet.Identity.Az
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElCamino.AspNet.Identity.AzureTable", "src\ElCamino.AspNet.Identity.AzureTable\ElCamino.AspNet.Identity.AzureTable.csproj", "{FC2B604C-548E-4981-876B-F3C4D1C3987B}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{BA05020C-7EA8-439F-BA00-E3CC77DBDE0C}"
-EndProject
-Project("{13B669BE-BB05-4DDF-9536-439F39A36129}") = "ElCamino.AspNetCore.Identity.AzureTable", "src\ElCamino.AspNetCore.Identity.AzureTable\ElCamino.AspNetCore.Identity.AzureTable.csproj", "{94006212-DCDE-4519-B3B2-CD51FF0C32CD}"
-EndProject
-Project("{13B669BE-BB05-4DDF-9536-439F39A36129}") = "ElCamino.Identity.AzureTable.DataUtility", "src\ElCamino.Identity.AzureTable.DataUtility\ElCamino.Identity.AzureTable.DataUtility.csproj", "{7F88C1D4-ED89-459B-8C77-6841C17ACAF6}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{DF46725C-4A3B-4DCF-9A69-C3854642A571}"
-EndProject
-Project("{13B669BE-BB05-4DDF-9536-439F39A36129}") = "ElCamino.AspNetCore.Identity.AzureTable.Tests", "tests\ElCamino.AspNetCore.Identity.AzureTable.Tests\ElCamino.AspNetCore.Identity.AzureTable.Tests.csproj", "{F72B42CD-F129-467F-A947-B8FD77259B48}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
-		Signed|Any CPU = Signed|Any CPU
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
+		Signed|Any CPU = Signed|Any CPU
+		Signed|x64 = Signed|x64
+		Signed|x86 = Signed|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{9AE1AD32-39E4-4EF5-9463-FDA0089BB0FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9AE1AD32-39E4-4EF5-9463-FDA0089BB0FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9AE1AD32-39E4-4EF5-9463-FDA0089BB0FD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9AE1AD32-39E4-4EF5-9463-FDA0089BB0FD}.Debug|x64.Build.0 = Debug|Any CPU
+		{9AE1AD32-39E4-4EF5-9463-FDA0089BB0FD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9AE1AD32-39E4-4EF5-9463-FDA0089BB0FD}.Debug|x86.Build.0 = Debug|Any CPU
 		{9AE1AD32-39E4-4EF5-9463-FDA0089BB0FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9AE1AD32-39E4-4EF5-9463-FDA0089BB0FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9AE1AD32-39E4-4EF5-9463-FDA0089BB0FD}.Release|x64.ActiveCfg = Release|Any CPU
+		{9AE1AD32-39E4-4EF5-9463-FDA0089BB0FD}.Release|x64.Build.0 = Release|Any CPU
+		{9AE1AD32-39E4-4EF5-9463-FDA0089BB0FD}.Release|x86.ActiveCfg = Release|Any CPU
+		{9AE1AD32-39E4-4EF5-9463-FDA0089BB0FD}.Release|x86.Build.0 = Release|Any CPU
 		{9AE1AD32-39E4-4EF5-9463-FDA0089BB0FD}.Signed|Any CPU.ActiveCfg = Signed|Any CPU
 		{9AE1AD32-39E4-4EF5-9463-FDA0089BB0FD}.Signed|Any CPU.Build.0 = Signed|Any CPU
+		{9AE1AD32-39E4-4EF5-9463-FDA0089BB0FD}.Signed|x64.ActiveCfg = Signed|Any CPU
+		{9AE1AD32-39E4-4EF5-9463-FDA0089BB0FD}.Signed|x64.Build.0 = Signed|Any CPU
+		{9AE1AD32-39E4-4EF5-9463-FDA0089BB0FD}.Signed|x86.ActiveCfg = Signed|Any CPU
+		{9AE1AD32-39E4-4EF5-9463-FDA0089BB0FD}.Signed|x86.Build.0 = Signed|Any CPU
 		{FC2B604C-548E-4981-876B-F3C4D1C3987B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FC2B604C-548E-4981-876B-F3C4D1C3987B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC2B604C-548E-4981-876B-F3C4D1C3987B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{FC2B604C-548E-4981-876B-F3C4D1C3987B}.Debug|x64.Build.0 = Debug|Any CPU
+		{FC2B604C-548E-4981-876B-F3C4D1C3987B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FC2B604C-548E-4981-876B-F3C4D1C3987B}.Debug|x86.Build.0 = Debug|Any CPU
 		{FC2B604C-548E-4981-876B-F3C4D1C3987B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC2B604C-548E-4981-876B-F3C4D1C3987B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC2B604C-548E-4981-876B-F3C4D1C3987B}.Release|x64.ActiveCfg = Release|Any CPU
+		{FC2B604C-548E-4981-876B-F3C4D1C3987B}.Release|x64.Build.0 = Release|Any CPU
+		{FC2B604C-548E-4981-876B-F3C4D1C3987B}.Release|x86.ActiveCfg = Release|Any CPU
+		{FC2B604C-548E-4981-876B-F3C4D1C3987B}.Release|x86.Build.0 = Release|Any CPU
 		{FC2B604C-548E-4981-876B-F3C4D1C3987B}.Signed|Any CPU.ActiveCfg = Signed|Any CPU
 		{FC2B604C-548E-4981-876B-F3C4D1C3987B}.Signed|Any CPU.Build.0 = Signed|Any CPU
-		{94006212-DCDE-4519-B3B2-CD51FF0C32CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{94006212-DCDE-4519-B3B2-CD51FF0C32CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{94006212-DCDE-4519-B3B2-CD51FF0C32CD}.Debug|x64.ActiveCfg = Debug|x64
-		{94006212-DCDE-4519-B3B2-CD51FF0C32CD}.Debug|x64.Build.0 = Debug|x64
-		{94006212-DCDE-4519-B3B2-CD51FF0C32CD}.Debug|x86.ActiveCfg = Debug|x86
-		{94006212-DCDE-4519-B3B2-CD51FF0C32CD}.Debug|x86.Build.0 = Debug|x86
-		{94006212-DCDE-4519-B3B2-CD51FF0C32CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{94006212-DCDE-4519-B3B2-CD51FF0C32CD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{94006212-DCDE-4519-B3B2-CD51FF0C32CD}.Release|x64.ActiveCfg = Release|x64
-		{94006212-DCDE-4519-B3B2-CD51FF0C32CD}.Release|x64.Build.0 = Release|x64
-		{94006212-DCDE-4519-B3B2-CD51FF0C32CD}.Release|x86.ActiveCfg = Release|x86
-		{94006212-DCDE-4519-B3B2-CD51FF0C32CD}.Release|x86.Build.0 = Release|x86
-		{7F88C1D4-ED89-459B-8C77-6841C17ACAF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7F88C1D4-ED89-459B-8C77-6841C17ACAF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7F88C1D4-ED89-459B-8C77-6841C17ACAF6}.Debug|x64.ActiveCfg = Debug|x64
-		{7F88C1D4-ED89-459B-8C77-6841C17ACAF6}.Debug|x64.Build.0 = Debug|x64
-		{7F88C1D4-ED89-459B-8C77-6841C17ACAF6}.Debug|x86.ActiveCfg = Debug|x86
-		{7F88C1D4-ED89-459B-8C77-6841C17ACAF6}.Debug|x86.Build.0 = Debug|x86
-		{7F88C1D4-ED89-459B-8C77-6841C17ACAF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7F88C1D4-ED89-459B-8C77-6841C17ACAF6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7F88C1D4-ED89-459B-8C77-6841C17ACAF6}.Release|x64.ActiveCfg = Release|x64
-		{7F88C1D4-ED89-459B-8C77-6841C17ACAF6}.Release|x64.Build.0 = Release|x64
-		{7F88C1D4-ED89-459B-8C77-6841C17ACAF6}.Release|x86.ActiveCfg = Release|x86
-		{7F88C1D4-ED89-459B-8C77-6841C17ACAF6}.Release|x86.Build.0 = Release|x86
-		{F72B42CD-F129-467F-A947-B8FD77259B48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F72B42CD-F129-467F-A947-B8FD77259B48}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F72B42CD-F129-467F-A947-B8FD77259B48}.Debug|x64.ActiveCfg = Debug|x64
-		{F72B42CD-F129-467F-A947-B8FD77259B48}.Debug|x64.Build.0 = Debug|x64
-		{F72B42CD-F129-467F-A947-B8FD77259B48}.Debug|x86.ActiveCfg = Debug|x86
-		{F72B42CD-F129-467F-A947-B8FD77259B48}.Debug|x86.Build.0 = Debug|x86
-		{F72B42CD-F129-467F-A947-B8FD77259B48}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F72B42CD-F129-467F-A947-B8FD77259B48}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F72B42CD-F129-467F-A947-B8FD77259B48}.Release|x64.ActiveCfg = Release|x64
-		{F72B42CD-F129-467F-A947-B8FD77259B48}.Release|x64.Build.0 = Release|x64
-		{F72B42CD-F129-467F-A947-B8FD77259B48}.Release|x86.ActiveCfg = Release|x86
-		{F72B42CD-F129-467F-A947-B8FD77259B48}.Release|x86.Build.0 = Release|x86
+		{FC2B604C-548E-4981-876B-F3C4D1C3987B}.Signed|x64.ActiveCfg = Signed|Any CPU
+		{FC2B604C-548E-4981-876B-F3C4D1C3987B}.Signed|x64.Build.0 = Signed|Any CPU
+		{FC2B604C-548E-4981-876B-F3C4D1C3987B}.Signed|x86.ActiveCfg = Signed|Any CPU
+		{FC2B604C-548E-4981-876B-F3C4D1C3987B}.Signed|x86.Build.0 = Signed|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 2
-		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs33
-		SccProjectUniqueName0 = tests\\ElCamino.AspNet.Identity.AzureTable.Tests\\ElCamino.AspNet.Identity.AzureTable.Tests.csproj
-		SccProjectName0 = tests/ElCamino.AspNet.Identity.AzureTable.Tests
-		SccAuxPath0 = https://tfs.codeplex.com/tfs/tfs33
-		SccLocalPath0 = tests\\ElCamino.AspNet.Identity.AzureTable.Tests
-		SccProvider0 = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccProjectUniqueName1 = src\\ElCamino.AspNet.Identity.AzureTable\\ElCamino.AspNet.Identity.AzureTable.csproj
-		SccProjectName1 = src/ElCamino.AspNet.Identity.AzureTable
-		SccAuxPath1 = https://tfs.codeplex.com/tfs/tfs33
-		SccLocalPath1 = src\\ElCamino.AspNet.Identity.AzureTable
-		SccProvider1 = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{94006212-DCDE-4519-B3B2-CD51FF0C32CD} = {BA05020C-7EA8-439F-BA00-E3CC77DBDE0C}
-		{7F88C1D4-ED89-459B-8C77-6841C17ACAF6} = {BA05020C-7EA8-439F-BA00-E3CC77DBDE0C}
-		{F72B42CD-F129-467F-A947-B8FD77259B48} = {DF46725C-4A3B-4DCF-9A69-C3854642A571}
 	EndGlobalSection
 EndGlobal
