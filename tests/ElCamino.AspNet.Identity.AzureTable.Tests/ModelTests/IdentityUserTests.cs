@@ -12,7 +12,11 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests.ModelTests
     public class IdentityUserTests
     {
         [Fact(DisplayName = "IdentityUserCtors")]
+#if net45
         [Trait("Identity.Azure.Model", "")]
+#else
+        [Trait("IdentityCore.Azure.Model", "")]
+#endif
         public void IdentityUserCtors()
         {
             Assert.NotNull(new IdentityUser(Guid.NewGuid().ToString()));

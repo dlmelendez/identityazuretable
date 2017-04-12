@@ -36,7 +36,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.RoleStore", "")]
 #else
-        [Trait("Identity.Azure.RoleStoreV2", "")]
+        [Trait("IdentityCore.Azure.RoleStore", "")]
 #endif
         public void RoleStoreCtors()
         {
@@ -68,7 +68,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
         }
 
         [Fact(DisplayName = "AddRemoveRoleClaim")]
-        [Trait("Identity.Azure.UserStoreV2", "")]
+        [Trait("IdentityCore.Azure.UserStore", "")]
         public void AddRemoveRoleClaim()
         {
             using (RoleStore<IdentityRole> store = roleFixture.CreateRoleStore())
@@ -95,7 +95,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
         }
 
         [Fact(DisplayName = "AddRoleClaim")]
-        [Trait("Identity.Azure.UserStoreV2", "")]
+        [Trait("IdentityCore.Azure.UserStore", "")]
         public void AddRoleClaim()
         {
             using (RoleStore<IdentityRole> store = roleFixture.CreateRoleStore())
@@ -152,11 +152,31 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
         }
 
 #endif
+
+        [Fact(DisplayName = "CreateRoleTable")]
+#if net45
+        [Trait("Identity.Azure.RoleStore", "")]
+#else
+        [Trait("IdentityCore.Azure.RoleStore", "")]
+#endif
+        public void CreateRoleTable()
+        {
+#if net45
+            using (RoleStore<IdentityRole> store = new RoleStore<IdentityRole>())
+#else
+            using (RoleStore<IdentityRole> store = roleFixture.CreateRoleStore())
+#endif
+            {
+                var r = store.CreateTableIfNotExistsAsync().Result;
+                Xunit.Assert.True(store.Context.RoleTable.ExistsAsync().Result);
+            }
+        }
+
         [Fact(DisplayName = "CreateRole")]
 #if net45
         [Trait("Identity.Azure.RoleStore", "")]
 #else
-        [Trait("Identity.Azure.RoleStoreV2", "")]
+        [Trait("IdentityCore.Azure.RoleStore", "")]
 #endif
         public void CreateRole()
         {    
@@ -192,7 +212,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.RoleStore", "")]
 #else
-        [Trait("Identity.Azure.RoleStoreV2", "")]
+        [Trait("IdentityCore.Azure.RoleStore", "")]
 #endif
         public void ThrowIfDisposed()
         {
@@ -213,7 +233,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.RoleStore", "")]
 #else
-        [Trait("Identity.Azure.RoleStoreV2", "")]
+        [Trait("IdentityCore.Azure.RoleStore", "")]
 #endif
         public void UpdateRole()
         {
@@ -254,7 +274,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.RoleStore", "")]
 #else
-        [Trait("Identity.Azure.RoleStoreV2", "")]
+        [Trait("IdentityCore.Azure.RoleStore", "")]
 #endif
         public void UpdateRole2()
         {
@@ -285,7 +305,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.RoleStore", "")]
 #else
-        [Trait("Identity.Azure.RoleStoreV2", "")]
+        [Trait("IdentityCore.Azure.RoleStore", "")]
 #endif
         public void DeleteRole()
         {
@@ -325,7 +345,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.RoleStore", "")]
 #else
-        [Trait("Identity.Azure.RoleStoreV2", "")]
+        [Trait("IdentityCore.Azure.RoleStore", "")]
 #endif
         public void FindRoleById()
         {
@@ -349,7 +369,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.RoleStore", "")]
 #else
-        [Trait("Identity.Azure.RoleStoreV2", "")]
+        [Trait("IdentityCore.Azure.RoleStore", "")]
 #endif
         public void FindRoleByName()
         {

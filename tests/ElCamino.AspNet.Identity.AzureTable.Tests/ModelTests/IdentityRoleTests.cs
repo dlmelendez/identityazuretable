@@ -13,7 +13,11 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.ModelTests
     public class IdentityRoleTests
     {
         [Fact(DisplayName = "IdentityRoleSet_Id")]
+#if net45
         [Trait("Identity.Azure.Model", "")]
+#else
+        [Trait("IdentityCore.Azure.Model", "")]
+#endif
         public void IdentityRoleSet_Id()
         {
             var role = new IdentityRole();

@@ -13,7 +13,11 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.ModelTests
     public class IdentityUserClaimTests
     {
         [Fact(DisplayName = "IdentityUserClaimGet_UserId")]
+#if net45
         [Trait("Identity.Azure.Model", "")]
+#else
+        [Trait("IdentityCore.Azure.Model", "")]
+#endif
         public void IdentityUserClaimGet_UserId()
         {
             var uc = new IdentityUserClaim();

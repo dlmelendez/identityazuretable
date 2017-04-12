@@ -337,7 +337,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 		{
             ThrowIfDisposed();
 
-			string rowKey = KeyHelper.GenerateRowKeyUserLoginInfo(loginProvider, providerKey);
+			string rowKey = KeyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey);
 			string partitionKey = KeyHelper.GeneratePartitionKeyIndexByLogin(loginProvider, providerKey);
 			var loginQuery = GetUserIdByIndex(partitionKey, rowKey);
 

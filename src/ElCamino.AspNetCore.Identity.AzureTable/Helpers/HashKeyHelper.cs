@@ -21,15 +21,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 {
     public class HashKeyHelper : UriEncodeKeyHelper
     {
-		public override string GenerateRowKeyUserLoginInfo(string plainLoginProvider, string plainProviderKey)
-		{
-			string hash = ConvertKeyToHash(base.GenerateRowKeyUserLoginInfo(plainLoginProvider, plainProviderKey));
-			return string.Format(Constants.RowKeyConstants.FormatterIdentityUserLogin, hash);
-		}
 
 		public override string GeneratePartitionKeyIndexByLogin(string plainLoginProvider, string plainProviderKey)
         {
-            string hash = ConvertKeyToHash(base.GenerateRowKeyUserLoginInfo(plainLoginProvider, plainProviderKey));
+            string hash = ConvertKeyToHash(base.GenerateRowKeyIdentityUserLogin(plainLoginProvider, plainProviderKey));
             return string.Format(Constants.RowKeyConstants.FormatterIdentityUserLogin, hash);
         }
 

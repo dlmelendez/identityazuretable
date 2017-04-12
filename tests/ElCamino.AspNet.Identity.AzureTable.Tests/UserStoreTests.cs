@@ -148,7 +148,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.UserStore", "")]
 #else
-        [Trait("Identity.Azure.UserStoreV2", "")]
+        [Trait("IdentityCore.Azure.UserStore", "")]
 #endif
         public void UserStoreCtors()
         {
@@ -159,6 +159,11 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
             catch (ArgumentException) { }
         }
 
+#if net45
+        [Trait("Identity.Azure.UserStore", "")]
+#else
+        [Trait("IdentityCore.Azure.UserStore", "")]
+#endif
         [Fact(DisplayName = "CheckDupUser")]
         public void CheckDupUser()
         {
@@ -191,6 +196,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if !net45
 
         [Fact(DisplayName = "CheckDupEmail")]
+        [Trait("IdentityCore.Azure.UserStore", "")]
         public void CheckDupEmail()
         {
             using (var store = userFixture.CreateUserStore())
@@ -219,7 +225,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.UserStore", "")]
 #else
-        [Trait("Identity.Azure.UserStoreV2", "")]
+        [Trait("IdentityCore.Azure.UserStore", "")]
 #endif
         public void CreateUserTest()
         {
@@ -333,7 +339,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.UserStore", "")]
 #else
-        [Trait("Identity.Azure.UserStoreV2", "")]
+        [Trait("IdentityCore.Azure.UserStore", "")]
 #endif
         public void DeleteUser()
         {
@@ -391,7 +397,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.UserStore", "")]
 #else
-        [Trait("Identity.Azure.UserStoreV2", "")]
+        [Trait("IdentityCore.Azure.UserStore", "")]
 #endif
         public void UpdateApplicationUser()
         {
@@ -435,7 +441,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.UserStore", "")]
 #else
-        [Trait("Identity.Azure.UserStoreV2", "")]
+        [Trait("IdentityCore.Azure.UserStore", "")]
 #endif
         public void UpdateUser()
         {
@@ -455,9 +461,12 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 
                     try
                     {
-                        store.UpdateAsync(null);
+                        store.UpdateAsync(null).Wait();
                     }
-                    catch (ArgumentException) { }
+                    catch (AggregateException ag)
+                    {
+                        Assert.True(ag.InnerException is ArgumentException);
+                    }
                 }
             }
         }
@@ -466,7 +475,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.UserStore", "")]
 #else
-        [Trait("Identity.Azure.UserStoreV2", "")]
+        [Trait("IdentityCore.Azure.UserStore", "")]
 #endif
         public void ChangeUserName()
         {
@@ -540,9 +549,12 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 
                     try
                     {
-                        store.UpdateAsync(null);
+                        store.UpdateAsync(null).Wait();
                     }
-                    catch (ArgumentException) { }
+                    catch (AggregateException ag)
+                    {
+                        Assert.True(ag.InnerException is ArgumentException);
+                    }
                 }
             }
         }
@@ -551,7 +563,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.UserStore", "")]
 #else
-        [Trait("Identity.Azure.UserStoreV2", "")]
+        [Trait("IdentityCore.Azure.UserStore", "")]
 #endif
         public void FindUserByEmail()
         {
@@ -576,7 +588,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.UserStore", "")]
 #else
-        [Trait("Identity.Azure.UserStoreV2", "")]
+        [Trait("IdentityCore.Azure.UserStore", "")]
 #endif
         public void FindUsersByEmail()
         {
@@ -637,7 +649,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.UserStore", "")]
 #else
-        [Trait("Identity.Azure.UserStoreV2", "")]
+        [Trait("IdentityCore.Azure.UserStore", "")]
 #endif
         public void FindUserById()
         {
@@ -680,7 +692,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.UserStore", "")]
 #else
-        [Trait("Identity.Azure.UserStoreV2", "")]
+        [Trait("IdentityCore.Azure.UserStore", "")]
 #endif
         public void AddUserLogin()
         {
@@ -731,7 +743,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 
 #if !net45
         [Fact(DisplayName = "AddRemoveUserToken")]
-        [Trait("Identity.Azure.UserStoreV2", "")]
+        [Trait("IdentityCore.Azure.UserStore", "")]
         public void AddRemoveUserToken()
         {
             using (var store = userFixture.CreateUserStore())
@@ -787,7 +799,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.UserStore", "")]
 #else
-        [Trait("Identity.Azure.UserStoreV2", "")]
+        [Trait("IdentityCore.Azure.UserStore", "")]
 #endif
         public void AddRemoveUserLogin()
         {
@@ -878,53 +890,68 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 
                     try
                     {
-                        store.AddLoginAsync(null, loginInfo);
+                        store.AddLoginAsync(null, loginInfo).Wait();
                     }
-                    catch (ArgumentException) { }
+                    catch (AggregateException ag)
+                    {
+                        Assert.True(ag.InnerException is ArgumentException);
+                    }
 
                     try
                     {
-                        store.AddLoginAsync(user, null);
+                        store.AddLoginAsync(user, null).Wait();
                     }
-                    catch (ArgumentException) { }
-
-                    try
+                    catch (AggregateException ag)
                     {
-#if net45
-                        store.RemoveLoginAsync(null, loginInfo);
-#else
-                        store.RemoveLoginAsync(null, loginInfo.ProviderKey, loginInfo.LoginProvider);
-#endif
-
+                        Assert.True(ag.InnerException is ArgumentException);
                     }
-                    catch (ArgumentException) { }
 
                     try
                     {
 #if net45
-                        store.RemoveLoginAsync(user, null);
+                        store.RemoveLoginAsync(null, loginInfo).Wait();
 #else
-                        store.RemoveLoginAsync(user, null, null);
+                        store.RemoveLoginAsync(null, loginInfo.ProviderKey, loginInfo.LoginProvider).Wait();
 #endif
+
                     }
-                    catch (ArgumentException) { }
+                    catch (AggregateException ag)
+                    {
+                        Assert.True(ag.InnerException is ArgumentException);
+                    }
 
                     try
                     {
 #if net45
-                        store.FindAsync(null);
+                        store.RemoveLoginAsync(user, null).Wait();
 #else
-                        store.FindByLoginAsync(null, null);
+                        store.RemoveLoginAsync(user, null, null).Wait();
 #endif
-
                     }
-                    catch (ArgumentException) { }
+                    catch (AggregateException ag)
+                    {
+                        Assert.True(ag.InnerException is ArgumentException);
+                    }
 
                     try
                     {
-                        store.GetLoginsAsync(null);
+#if net45
+                        store.FindAsync(null).Wait();
+#else
+                        store.FindByLoginAsync(null, null).Wait();
+#endif
+
                     }
-                    catch (ArgumentException) { }
+                    catch (AggregateException ag)
+                    {
+                        Assert.True(ag.InnerException is ArgumentException);
+                    }
+
+                    try
+                    {
+                        store.GetLoginsAsync(null).Wait();
+                    }
+                    catch (ArgumentNullException) { }
                 }
             }
         }
@@ -933,7 +960,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.UserStore", "")]
 #else
-        [Trait("Identity.Azure.UserStoreV2", "")]
+        [Trait("IdentityCore.Azure.UserStore", "")]
 #endif
         public void AddUserRole()
         {
@@ -944,7 +971,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 
 #if !net45
         [Fact(DisplayName = "GetUsersByRole")]
-        [Trait("Identity.Azure.UserStoreV2", "")]
+        [Trait("IdentityCore.Azure.UserStore", "")]
         public void GetUsersByRole()
         {
             string strUserRole = string.Format("{0}_{1}", Constants.AccountRoles.AccountTestUserRole, Guid.NewGuid().ToString("N"));
@@ -1016,7 +1043,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.UserStore", "")]
 #else
-        [Trait("Identity.Azure.UserStoreV2", "")]
+        [Trait("IdentityCore.Azure.UserStore", "")]
 #endif
         public void AddRemoveUserRole()
         {
@@ -1089,40 +1116,61 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 
                     try
                     {
-                        store.AddToRoleAsync(null, roleName);
+                        store.AddToRoleAsync(null, roleName).Wait();
                     }
-                    catch (ArgumentException) { }
+                    catch (AggregateException ag)
+                    {
+                        Assert.True(ag.InnerException is ArgumentException);
+                    }
 
                     try
                     {
-                        store.AddToRoleAsync(user, null);
+                        store.AddToRoleAsync(user, null).Wait();
                     }
-                    catch (ArgumentException) { }
+                    catch (AggregateException ag)
+                    {
+                        Assert.True(ag.InnerException is ArgumentException);
+                    }
 
                     try
                     {
-                        store.AddToRoleAsync(user, Guid.NewGuid().ToString());
+                        store.AddToRoleAsync(user, Guid.NewGuid().ToString()).Wait();
                     }
-                    catch (ArgumentException) { }
+                    catch (AggregateException ag)
+                    {
+                        Assert.True(ag.InnerException is ArgumentException);
+                    }
 
                     try
                     {
-                        store.RemoveFromRoleAsync(null, roleName);
+                        store.RemoveFromRoleAsync(null, roleName).Wait();
                     }
-                    catch (ArgumentException) { }
+                    catch (AggregateException ag)
+                    {
+                        Assert.True(ag.InnerException is ArgumentException);
+                    }
 
                     try
                     {
-                        store.RemoveFromRoleAsync(user, null);
+                        store.RemoveFromRoleAsync(user, null).Wait();
                     }
-                    catch (ArgumentException) { }
+                    catch (AggregateException ag)
+                    {
+                        Assert.True(ag.InnerException is ArgumentException);
+                    }
 
                     try
                     {
-                        store.GetRolesAsync(null);
+                        store.GetRolesAsync(null).Wait();
                     }
+#if net45
                     catch (ArgumentException) { }
-
+#else
+                    catch (AggregateException ag)
+                    {
+                        Assert.True(ag.InnerException is ArgumentException);
+                    }
+#endif
                 }
             }
         }
@@ -1131,7 +1179,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.UserStore", "")]
 #else
-        [Trait("Identity.Azure.UserStoreV2", "")]
+        [Trait("IdentityCore.Azure.UserStore", "")]
 #endif
         public void IsUserInRole()
         {
@@ -1159,15 +1207,29 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
                    
                     try
                     {
-                        store.IsInRoleAsync(null, roleName);
+                        store.IsInRoleAsync(null, roleName).Wait();
                     }
+#if net45
                     catch (ArgumentException) { }
+#else
+                    catch (AggregateException ag)
+                    {
+                        Assert.True(ag.InnerException is ArgumentException);
+                    }
+#endif
 
                     try
                     {
-                        store.IsInRoleAsync(user, null);
+                        store.IsInRoleAsync(user, null).Wait();
                     }
+#if net45
                     catch (ArgumentException) { }
+#else
+                    catch (AggregateException ag)
+                    {
+                        Assert.True(ag.InnerException is ArgumentException);
+                    }
+#endif
                 }
             }
         }
@@ -1176,7 +1238,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.UserStore", "")]
 #else
-        [Trait("Identity.Azure.UserStoreV2", "")]
+        [Trait("IdentityCore.Azure.UserStore", "")]
 #endif
         public async Task GenerateUsers()
         {
@@ -1204,7 +1266,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.UserStore", "")]
 #else
-        [Trait("Identity.Azure.UserStoreV2", "")]
+        [Trait("IdentityCore.Azure.UserStore", "")]
 #endif
         public void AddUserClaim()
         {
@@ -1245,7 +1307,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 
 #if !net45
         [Fact(DisplayName = "GetUsersByClaim")]
-        [Trait("Identity.Azure.UserStoreV2", "")]
+        [Trait("IdentityCore.Azure.UserStore", "")]
         public void GetUsersByClaim()
         {
             var claim = GenUserClaim();
@@ -1278,7 +1340,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.UserStore", "")]
 #else
-        [Trait("Identity.Azure.UserStoreV2", "")]
+        [Trait("IdentityCore.Azure.UserStore", "")]
 #endif
         public void AddRemoveUserClaim()
         {
@@ -1351,39 +1413,51 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 
                     try
                     {
-                        store.AddClaimAsync(user, null);
+                        store.AddClaimAsync(user, null).Wait();
                     }
-                    catch (ArgumentException) { }
+                    catch (AggregateException ag)
+                    {
+                        Assert.True(ag.InnerException is ArgumentException);
+                    }
 
                     try
                     {
-                        store.RemoveClaimAsync(null, claim);
+                        store.RemoveClaimAsync(null, claim).Wait();
                     }
-                    catch (ArgumentException) { }
+                    catch (AggregateException ag)
+                    {
+                        Assert.True(ag.InnerException is ArgumentException);
+                    }
 
                     try
                     {
-                        store.RemoveClaimAsync(user, null);
+                        store.RemoveClaimAsync(user, null).Wait();
                     }
-                    catch (ArgumentException) { }
+                    catch (AggregateException ag)
+                    {
+                        Assert.True(ag.InnerException is ArgumentException);
+                    }
 
                     try
                     {
-                        store.RemoveClaimAsync(user, new Claim(string.Empty, Guid.NewGuid().ToString()));
+                        store.RemoveClaimAsync(user, new Claim(string.Empty, Guid.NewGuid().ToString())).Wait();
                     }
-                    catch (ArgumentException) { }
+                    catch (AggregateException ag)
+                    {
+                        Assert.True(ag.InnerException is ArgumentException);
+                    }
 
                     try
                     {
-                        store.RemoveClaimAsync(user, new Claim(claim.Type, null));
+                        store.RemoveClaimAsync(user, new Claim(claim.Type, null)).Wait();
                     }
-                    catch (ArgumentException) { }
+                    catch (ArgumentNullException) { }
 
                     try
                     {
-                        store.GetClaimsAsync(null);
+                        store.GetClaimsAsync(null).Wait();
                     }
-                    catch (ArgumentException) { }
+                    catch (ArgumentNullException) { }
                 }
             }
         }
@@ -1392,7 +1466,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.UserStore", "")]
 #else
-        [Trait("Identity.Azure.UserStoreV2", "")]
+        [Trait("IdentityCore.Azure.UserStore", "")]
 #endif
         public void ThrowIfDisposed()
         {

@@ -26,7 +26,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.UserStore.Properties", "")]
 #else
-        [Trait("Identity.Azure.UserStore.PropertiesV2", "")]
+        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
 #endif
         public void AccessFailedCount()
         {
@@ -164,7 +164,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.UserStore.Properties", "")]
 #else
-        [Trait("Identity.Azure.UserStore.PropertiesV2", "")]
+        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
 #endif
         public void EmailNone()
         {
@@ -186,7 +186,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.UserStore.Properties", "")]
 #else
-        [Trait("Identity.Azure.UserStore.PropertiesV2", "")]
+        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
 #endif
         public void Email()
         {
@@ -237,7 +237,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.UserStore.Properties", "")]
 #else
-        [Trait("Identity.Azure.UserStore.PropertiesV2", "")]
+        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
 #endif
         public void EmailConfirmed()
         {
@@ -309,7 +309,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.UserStore.Properties", "")]
 #else
-        [Trait("Identity.Azure.UserStore.PropertiesV2", "")]
+        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
 #endif
         public void LockoutEnabled()
         {
@@ -424,7 +424,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.UserStore.Properties", "")]
 #else
-        [Trait("Identity.Azure.UserStore.PropertiesV2", "")]
+        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
 #endif
         public void PhoneNumber()
         {
@@ -490,7 +490,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.UserStore.Properties", "")]
 #else
-        [Trait("Identity.Azure.UserStore.PropertiesV2", "")]
+        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
 #endif
         public void PhoneNumberConfirmed()
         {
@@ -563,7 +563,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.UserStore.Properties", "")]
 #else
-        [Trait("Identity.Azure.UserStore.PropertiesV2", "")]
+        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
 #endif
         public void TwoFactorEnabled()
         {
@@ -620,7 +620,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.UserStore.Properties", "")]
 #else
-        [Trait("Identity.Azure.UserStore.PropertiesV2", "")]
+        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
 #endif
         public void PasswordHash()
         {
@@ -836,7 +836,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
         [Trait("Identity.Azure.UserStore.Properties", "")]
 #else
-        [Trait("Identity.Azure.UserStore.PropertiesV2", "")]
+        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
 #endif
         public void SecurityStamp()
         {

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ElCamino.AspNetCore.Identity.AzureTable {
+namespace ElCamino.AspNet.Identity.AzureTable {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager(typeof(IdentityResources));
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ElCamino.AspNet.Identity.AzureTable.IdentityResources", typeof(IdentityResources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

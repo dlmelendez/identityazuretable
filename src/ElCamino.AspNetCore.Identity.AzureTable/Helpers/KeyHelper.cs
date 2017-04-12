@@ -26,10 +26,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 #if !net45
         private static BaseKeyHelper hashHelper = new HashKeyHelper();
 #endif
-        public static string GenerateRowKeyUserLoginInfo(string plainLoginProvider, string plainProviderKey)
-        {
-            return baseHelper.GenerateRowKeyUserLoginInfo(plainLoginProvider, plainProviderKey);
-        }
 
         public static string GeneratePartitionKeyIndexByLogin(string plainLoginProvider, string plainProviderKey)
         {
