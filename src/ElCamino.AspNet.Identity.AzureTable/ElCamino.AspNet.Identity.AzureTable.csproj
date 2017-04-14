@@ -13,7 +13,7 @@
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
-    <PackageId>ElCamino.AspNetCore.Identity.AzureTable</PackageId>
+    <PackageId>ElCamino.AspNet.Identity.AzureTable</PackageId>
     <PackageTags>ASP.NET;Identity 2.0;Azure Table Storage;MVC;UserStore;RoleStore;UserManager;multi-tenant;RA-GRS;geo-redundant;Microsoft.AspNet.Identity</PackageTags>
     <PackageReleaseNotes>
       This project is an open source high performance plugin to ASP.NET Identity framework using Azure Table Storage.
