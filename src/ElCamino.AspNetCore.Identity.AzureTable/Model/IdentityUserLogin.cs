@@ -25,7 +25,7 @@ public class IdentityUserLogin : IdentityUserLogin<string>, IGenerateKeys
         /// Generates Row and Id keys.
         /// Partition key is equal to the UserId
         /// </summary>
-        public void GenerateKeys()
+        public virtual void GenerateKeys()
         {
             Id = Guid.NewGuid().ToString();
             RowKey = PeekRowKey();
@@ -38,7 +38,7 @@ public class IdentityUserLogin : IdentityUserLogin<string>, IGenerateKeys
         /// Generates the RowKey without setting it on the object.
         /// </summary>
         /// <returns></returns>
-        public string PeekRowKey()
+        public virtual string PeekRowKey()
         {
             return KeyHelper.GenerateRowKeyIdentityUserLogin(LoginProvider, ProviderKey);
         }
