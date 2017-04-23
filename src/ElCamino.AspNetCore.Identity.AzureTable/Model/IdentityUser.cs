@@ -37,7 +37,7 @@ public class IdentityUser : IdentityUser<string, IdentityUserLogin, IdentityUser
         /// Generates Row, Partition and Id keys.
         /// All are the same in this case
         /// </summary>
-        public void GenerateKeys()
+        public virtual void GenerateKeys()
         {
             Id = PeekRowKey();
             PartitionKey = Id;
@@ -49,7 +49,7 @@ public class IdentityUser : IdentityUser<string, IdentityUserLogin, IdentityUser
         /// In this case, just returns a key based on username
         /// </summary>
         /// <returns></returns>
-        public string PeekRowKey()
+        public virtual string PeekRowKey()
         {
             return KeyHelper.GenerateRowKeyUserName(UserName);
         }

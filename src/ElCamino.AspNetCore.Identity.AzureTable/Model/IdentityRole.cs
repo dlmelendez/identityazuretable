@@ -24,7 +24,7 @@ public class IdentityRole : IdentityRole<string, IdentityUserRole>, IGenerateKey
         /// Generates Row and Id keys.
         /// Partition key is equal to the UserId
         /// </summary>
-        public void GenerateKeys()
+        public virtual void GenerateKeys()
         {
             RowKey = PeekRowKey();
             PartitionKey = KeyHelper.GeneratePartitionKeyIdentityRole(Name);
@@ -35,7 +35,7 @@ public class IdentityRole : IdentityRole<string, IdentityUserRole>, IGenerateKey
         /// Generates the RowKey without setting it on the object.
         /// </summary>
         /// <returns></returns>
-        public string PeekRowKey()
+        public virtual string PeekRowKey()
         {
             return KeyHelper.GenerateRowKeyIdentityRole(Name);
         }

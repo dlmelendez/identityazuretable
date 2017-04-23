@@ -33,7 +33,7 @@ namespace ElCamino.AspNet.Identity.AzureTable
 		}
 
 		/// <summary>
-		/// Simple table queries allowed. Projections are only allowed for TUser types. 
+		/// Simple table queries allowed. Projections are only allowed for TUser types.
 		/// </summary>
 		public override IQueryable<TUser> Users
 		{
@@ -65,7 +65,7 @@ namespace ElCamino.AspNet.Identity.AzureTable
 		, IUserLockoutStore<TUser, TKey>
 		, IUserStore<TUser, TKey>
 		, IDisposable
-		where TUser : IdentityUser<TKey, TUserLogin, TUserRole, TUserClaim>, new()
+		where TUser : IdentityUser<TKey, TUserLogin, TUserRole, TUserClaim>, IGenerateKeys, new()
 		where TRole : IdentityRole<TKey, TUserRole>, new()
 		where TKey : IEquatable<TKey>
 		where TUserLogin : IdentityUserLogin<TKey>, new()
@@ -544,7 +544,7 @@ namespace ElCamino.AspNet.Identity.AzureTable
 				user.ETag = vUser.ETag;
 				user.Timestamp = vUser.Timestamp;
 
-				//Roles                            
+				//Roles
 				foreach (var log in userResults.Where(u => u.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserRole)
 					 && u.PartitionKey.Equals(userId)))
 				{
@@ -955,7 +955,7 @@ namespace ElCamino.AspNet.Identity.AzureTable
 
 			List<Task> tasks = new List<Task>(2);
 
-			string userNameKey = KeyHelper.GenerateRowKeyUserName(user.UserName);
+			string userNameKey = user.PeekRowKey();
 			if (user.Id.ToString() != userNameKey)
 			{
 				tasks.Add(Task.FromResult<TUser>(ChangeUserName(user)));
