@@ -15,18 +15,19 @@
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <PackageId>ElCamino.AspNetCore.Identity.AzureTable</PackageId>
     <PackageTags>ASP.NET;Identity 2.0;Azure Table Storage;MVC;UserStore;RoleStore;UserManager;multi-tenant;RA-GRS;geo-redundant;Microsoft.AspNet.Identity</PackageTags>
-    <PackageReleaseNotes>
-      This project is an open source high performance plugin to ASP.NET Identity framework using Azure Table Storage.
-      * Updated references
-      * Important! Check https://dlmelendez.github.io/identityazuretable/#/migration for data migration information.
-    </PackageReleaseNotes>
+    <PackageReleaseNotes>This project is an open source high performance plugin to ASP.NET Identity framework using Azure Table Storage.
+ 
+Updated references
+Important! Check https://dlmelendez.github.io/identityazuretable/#/migration for data migration information.
+</PackageReleaseNotes>
     <PackageIconUrl>https://dlmelendez.github.io/identityazuretable/images/projectNugetPic.png</PackageIconUrl>
     <PackageLicenseUrl>https://github.com/dlmelendez/identityazuretable/blob/master/LICENSE</PackageLicenseUrl>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/dlmelendez/identityazuretable.git</RepositoryUrl>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>1.6.6</Version>
+    <Version>1.6.7</Version>
+    <PackageProjectUrl>https://dlmelendez.github.io/identityazuretable</PackageProjectUrl>
 
   </PropertyGroup>
 

@@ -8,6 +8,8 @@ using ElCamino.AspNet.Identity.AzureTable.Model;
 using Microsoft.AspNetCore.Identity;
 using ElCamino.AspNetCore.Identity.AzureTable;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
+using Microsoft.AspNetCore.Builder;
+
 #endif
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -32,10 +34,23 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
         {
             using (var store = userFixture.CreateUserStore())
             {
+#if net45
                 using (var manager = userFixture.CreateUserManager(store))
                 {
-#if net45
                     manager.MaxFailedAccessAttemptsBeforeLockout = 2;
+                    manager.DefaultAccountLockoutTimeSpan = TimeSpan.FromHours(2);
+#else
+                var idOptions = new IdentityOptions()
+                {
+                    Lockout = new LockoutOptions()
+                    {
+                        DefaultLockoutTimeSpan = TimeSpan.FromHours(2),
+                        MaxFailedAccessAttempts = 2
+                    }
+                };
+
+                using (var manager = userFixture.CreateUserManager(store, idOptions))
+                {
 #endif
                     var user = CreateTestUser<ApplicationUser>();
 #if net45
@@ -50,7 +65,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #if net45
                     var taskAccessFailed = manager.AccessFailedAsync(user.Id);
 #else
-                    var taskAccessFailed =  manager.AccessFailedAsync(user);
+                    var taskAccessFailed = manager.AccessFailedAsync(user);
 #endif
 
                     taskAccessFailed.Wait();
@@ -61,11 +76,27 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 #endif
 
 #if net45
+                    manager.AccessFailedAsync(user.Id).Wait();
+                    manager.AccessFailedAsync(user.Id).Wait();
+#else
+                    manager.AccessFailedAsync(user).Wait();
+                    manager.AccessFailedAsync(user).Wait();
+#endif
+                    DateTime dtUtc = DateTime.UtcNow;
+
+#if net45
                     user = manager.FindById(user.Id);
+                    Assert.True(user.LockoutEndDateUtc.HasValue);
+                    Assert.True(user.LockoutEndDateUtc.Value < dtUtc.Add(manager.DefaultAccountLockoutTimeSpan));
+                    Assert.True(user.LockoutEndDateUtc.Value > dtUtc.Add(manager.DefaultAccountLockoutTimeSpan.Add(TimeSpan.FromMinutes(-1.0))));
+
 #else
                     var userTaskFindById = manager.FindByIdAsync(user.Id);
                     userTaskFindById.Wait();
                     user = userTaskFindById.Result;
+                    Assert.True(user.LockoutEndDateUtc.HasValue);
+                    Assert.True(user.LockoutEndDateUtc.Value < dtUtc.Add(idOptions.Lockout.DefaultLockoutTimeSpan));
+                    Assert.True(user.LockoutEndDateUtc.Value > dtUtc.Add(idOptions.Lockout.DefaultLockoutTimeSpan.Add(TimeSpan.FromMinutes(-1.0))));
 #endif
 
 #if net45
@@ -76,6 +107,13 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 
                     taskAccessReset.Wait();
                     Assert.True(taskAccessReset.Result.Succeeded, string.Concat(taskAccessReset.Result.Errors));
+
+#if net45
+                    user = manager.FindById(user.Id);
+#else
+                    user = manager.FindByIdAsync(user.Id).Result;
+#endif
+                    Assert.True(user.AccessFailedCount == 0);
 
                     try
                     {
@@ -111,9 +149,9 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
             }
         }
 
-        private void SetValidateEmail(UserManager<ApplicationUser> manager, 
+        private void SetValidateEmail(UserManager<ApplicationUser> manager,
             UserStore<ApplicationUser> store,
-            ApplicationUser user, 
+            ApplicationUser user,
             string strNewEmail)
         {
             string originalEmail = user.Email;
@@ -148,7 +186,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
                 query.FilterString = TableQuery.GenerateFilterCondition("Id", QueryComparisons.Equal, user.Id);
                 query.Take(1);
                 var results = store.Context.IndexTable.ExecuteQuerySegmentedAsync(query, new TableContinuationToken()).Result;
-                Assert.True(results.Where(x=> x.RowKey.StartsWith("E_")).Count() == 0, string.Format("Email index not deleted for user {0}", user.Id));
+                Assert.True(results.Where(x => x.RowKey.StartsWith("E_")).Count() == 0, string.Format("Email index not deleted for user {0}", user.Id));
             }
             //Should not find old by old email.
             if (!string.IsNullOrWhiteSpace(originalEmail))
@@ -382,7 +420,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 
 
                     var minOffSet = DateTimeOffset.MinValue;
-                    var taskSet2 = store.SetLockoutEndDateAsync(user, minOffSet); 
+                    var taskSet2 = store.SetLockoutEndDateAsync(user, minOffSet);
                     taskSet2.Wait();
 #if net45
                     Assert.Null(user.LockoutEndDateUtc);
@@ -397,7 +435,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
                         store.GetLockoutEnabledAsync(null);
                     }
                     catch (ArgumentException) { }
-                   
+
 
                     try
                     {

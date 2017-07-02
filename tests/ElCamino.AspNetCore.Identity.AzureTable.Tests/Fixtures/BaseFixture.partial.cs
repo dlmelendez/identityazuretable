@@ -147,6 +147,8 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
             services.AddIdentity<TUser, IdentityRole>((config) =>
             {
                 config.User.RequireUniqueEmail = options.User.RequireUniqueEmail;
+                config.Lockout.DefaultLockoutTimeSpan = options.Lockout.DefaultLockoutTimeSpan;
+                config.Lockout.MaxFailedAccessAttempts = options.Lockout.MaxFailedAccessAttempts;
             })
                 //.AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddAzureTableStores<IdentityCloudContext>(new Func<IdentityConfiguration>(() =>

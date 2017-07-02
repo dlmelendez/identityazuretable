@@ -1125,7 +1125,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 			{
 				throw new ArgumentNullException("user");
 			}
-            user.LockoutEndDateUtc = lockoutEnd.HasValue ? new DateTime?(lockoutEnd.Value.DateTime.ToUniversalTime()) : null;
+            user.LockoutEndDateUtc = lockoutEnd.HasValue ? new DateTime?(lockoutEnd.Value.DateTime) : null;
 			return TaskCacheHelper.CompletedTask;
 		}
 
