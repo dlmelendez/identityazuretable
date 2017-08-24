@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ElCamino.Identity.AzureTable.DataUtility
 {
-    public interface IMigrateIndex
+    public interface IMigration
     {
         TableQuery GetUserTableQuery();
 

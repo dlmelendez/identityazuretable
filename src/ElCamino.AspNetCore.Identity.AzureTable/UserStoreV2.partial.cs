@@ -744,6 +744,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 					trole.Timestamp = log.Timestamp;
 					user.Roles.Add(trole);
 				}
+                //Claims
 				foreach (var log in userResults.Where(u => u.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserClaim)
 					 && u.PartitionKey.Equals(userId)))
 				{
@@ -753,10 +754,20 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 					tclaim.RowKey = log.RowKey;
 					tclaim.ETag = log.ETag;
 					tclaim.Timestamp = log.Timestamp;
-					user.Claims.Add(tclaim);
-				}
-				//Logins
-				foreach (var log in userResults.Where(u => u.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserLogin)
+                    //Added for 1.7 rowkey change
+                    if (KeyHelper.GenerateRowKeyIdentityUserClaim(tclaim.ClaimType, tclaim.ClaimValue) == tclaim.RowKey)
+                    {
+                        user.Claims.Add(tclaim);
+                    }
+#if DEBUG
+                    else
+                    {
+                        Debug.WriteLine("Claim partition and row keys not added to user: " + log.PartitionKey + " " + log.RowKey);
+                    }
+#endif
+                }
+                //Logins
+                foreach (var log in userResults.Where(u => u.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserLogin)
 					 && u.PartitionKey.Equals(userId)))
 				{
 					TUserLogin tlogin = Activator.CreateInstance<TUserLogin>();

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ElCamino.Identity.AzureTable.DataUtility
 {
-    public class EmailMigrateIndex : IMigrateIndex
+    public class EmailMigrateIndex : IMigration
     {
         public TableQuery GetUserTableQuery()
         {

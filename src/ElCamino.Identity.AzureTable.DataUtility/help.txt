@@ -1,30 +1,35 @@
 ﻿ElCamino.Identity.AzureTable.DataUtility.exe
-Migrates or previews users to have a new version of an email and/or login index. 
+Migrates or previews users to have a new version of an email, login indexes and/or update the claim users rowkey.
 Migration paths:
 <= 1.5.4	email index	>= 1.6
 <= 1.6		login index	>= 1.6.1
+<= 1.6.6	claim rowkey >= 1.7
 e.g. Upgrading from 1.5.2 you will need to do both email and login index migration.
 e.g. Upgrading from 1.6 to 1.6.1 you will need to do only a login index migration.
+e.g. Upgrading from 1.6.1 to 1.7 you will need to do a login index migration and claim rowkey migration.
 
 Make sure the appsettings.json has the correct Azure Storage connection information and is in the same directory as ElCamino.Identity.AzureTable.DataUtility.exe
 noargs, /help or /? - shows this message.
 e.g. ElCamino.Identity.AzureTable.DataUtility.exe /?
 
 /preview:<string migration command token> - no data is modified. Shows how many users will be affected. Commits no changes to the repository.
-Must be followed with a valid migration command token of 'emailindex' or 'loginindex'
+Must be followed with a valid migration command token of 'emailindex', 'loginindex' or 'claimrowkey'
 e.g. ElCamino.Identity.AzureTable.DataUtility.exe /preview:emailindex
 e.g. ElCamino.Identity.AzureTable.DataUtility.exe /preview:loginindex
+e.g. ElCamino.Identity.AzureTable.DataUtility.exe /preview:claimrowkey
 
 /migrate:<string migration command token> - migrates users to the new email index. Use this after you have done a /preview: of your data.
-Must be followed with a valid migration command token of 'emailindex' or 'loginindex'
+Must be followed with a valid migration command token of emailindex', 'loginindex' or 'claimrowkey'
 e.g. ElCamino.Identity.AzureTable.DataUtility.exe /migrate:emailindex
 e.g. ElCamino.Identity.AzureTable.DataUtility.exe /migrate:loginindex
+e.g. ElCamino.Identity.AzureTable.DataUtility.exe /migrate:claimrowkey
 
 /pagesize:<int> - (optional) If defined, must be followed with an integer greater than 0 and less than or equal to 1000. Controls how many users to pull back in a single table storage request.
 Can be used with either /preview: or /migrate:. Use with /preview: to see how many pages of data you have with the given page size.
 Default value: 1000 
 e.g. ElCamino.Identity.AzureTable.DataUtility.exe /preview:loginindex /pagesize:500
 e.g. ElCamino.Identity.AzureTable.DataUtility.exe /migrate:loginindex /pagesize:500
+e.g. ElCamino.Identity.AzureTable.DataUtility.exe /migrate:claimrowkey /pagesize:100
 
 /startpage:<int> - (optional) If defined, must be followed with an integer greater than 0. Controls which 'page' of user data to start processing.
 Can be used with either /preview: or /migrate:. Directly related to the /pagesize. Can be used with /finishpage: also. Use with /preview: to see how many users would affected.
@@ -46,6 +51,6 @@ ElCamino.Identity.AzureTable.DataUtility.exe /migrate:loginindex /pagesize:500 /
 
 /maxparallel:<int> - (optional) If defined, must be followed with an integer greater than 0. Controls the maximum parallel processes with the /migrate: process.
 Default value is 2 times the amount of processors; this is a very conservative default setting.
-e.g. ElCamino.Identity.AzureTable.DataUtility.exe /migrate:emailindex /maxparallel:1000
+e.g. ElCamino.Identity.AzureTable.DataUtility.exe /migrate:emailindex /maxparallel:10
 
 

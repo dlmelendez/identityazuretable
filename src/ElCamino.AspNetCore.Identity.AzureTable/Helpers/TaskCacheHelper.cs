@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 
 #if net45
 namespace ElCamino.AspNet.Identity.AzureTable.Helpers

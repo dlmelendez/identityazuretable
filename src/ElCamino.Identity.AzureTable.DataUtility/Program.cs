@@ -27,8 +27,9 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         private const string previewToken = "/preview:";
         private const string migrateToken = "/migrate:";
         private readonly static List<string> validCommands = new List<string>() {
-            MigrateIndexFactory.EmailIndex,
-            MigrateIndexFactory.LoginIndex
+            MigrationFactory.EmailIndex,
+            MigrationFactory.LoginIndex,
+            MigrationFactory.ClaimRowkey
         };
         private const string nodeleteToken = "/nodelete";
         private const string maxdegreesparallelToken = "/maxparallel:";
@@ -69,7 +70,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             Console.WriteLine("PageSize: {0}", iPageSize);
             Console.WriteLine("MigrateCommand: {0}", MigrateCommand);
 
-            var migrateIndex = MigrateIndexFactory.CreateMigrateIndex(MigrateCommand);
+            var migrateIndex = MigrationFactory.CreateMigration(MigrateCommand);
 
             using (IdentityCloudContext ic = new IdentityCloudContext(idconfig))
             {

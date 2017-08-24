@@ -95,7 +95,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         {
             get
             {
-                return 1.67;
+                return 1.70;
             }
         }
 

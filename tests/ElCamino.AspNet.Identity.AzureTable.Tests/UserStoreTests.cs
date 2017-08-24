@@ -85,9 +85,15 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
             output.WriteLine("{0}", strLine);
         }
 
+        private static string GenClaimValue()
+        {
+            string strValue = "EAABdGMzTwv8BALkEPOvXXRz3LNo6l77ymX75OO3gzadoxYLOs7KrMBi2zdjqULQ2CJAGUgwwsEGRFo2XIp0JPvoJEvaQdXgXZB1UzX8plkawZAdC93btP6lZBHettE0kfB91RODbWaj1aJbr3ejytBKq7vyP4mWq8lA9DWzCgZDZD";
+            string strGuid = Guid.NewGuid().ToString("N");
+            return strValue + strGuid;
+        }
         private static Claim GenAdminClaim()
         {
-            return new Claim(Constants.AccountClaimTypes.AccountTestAdminClaim, Guid.NewGuid().ToString());
+            return new Claim(Constants.AccountClaimTypes.AccountTestAdminClaim, GenClaimValue());
         }
 
         private Claim GenAdminClaimEmptyValue()
@@ -97,7 +103,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
 
         private Claim GenUserClaim()
         {
-            return new Claim(Constants.AccountClaimTypes.AccountTestUserClaim, Guid.NewGuid().ToString());
+            return new Claim(Constants.AccountClaimTypes.AccountTestUserClaim, GenClaimValue());
         }
         private static UserLoginInfo GenGoogleLogin()
         {
@@ -373,7 +379,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
                     Assert.True(taskUserDel.Result.Succeeded, string.Concat(taskUser.Result.Errors));
                     output.WriteLine("DeleteAsync: {0} seconds", (DateTime.UtcNow - start).TotalSeconds);
 
-                    Thread.Sleep(1000);
+                    Thread.Sleep(2000);
 
                     var findUserTask = manager.FindByIdAsync(user.Id);
                     findUserTask.Wait();
@@ -658,7 +664,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
                 using (var manager = userFixture.CreateUserManager(store))
                 {
                     var user = CurrentUser;
-                    DateTime start = DateTime.UtcNow;
+                    DateTime start = DateTime.UtcNow; 
                     var findUserTask = manager.FindByIdAsync(user.Id);
                     findUserTask.Wait();
                     output.WriteLine("FindByIdAsync: {0} seconds", (DateTime.UtcNow - start).TotalSeconds);
@@ -668,8 +674,13 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
             }
         }
 
+#if net45
         [Fact(DisplayName = "FindUserByName")]
         [Trait("Identity.Azure.UserStore", "")]
+#else
+        [Fact(DisplayName = "FindUserByName")]
+        [Trait("IdentityCore.Azure.UserStore", "")]
+#endif
         public void FindUserByName()
         {
             using (var store = userFixture.CreateUserStore())
@@ -1329,8 +1340,13 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
                     output.WriteLine("GenerateUsers(): {0} user count", userCount);
                     output.WriteLine("GenerateUsers(): {0} seconds", (DateTime.UtcNow - start2).TotalSeconds);
 
+                    DateTime start3 = DateTime.UtcNow;
                     var users = manager.GetUsersForClaimAsync(claim).Result;
+                    output.WriteLine("GetUsersForClaimAsync(): {0} seconds", (DateTime.UtcNow - start3).TotalSeconds);
+                    output.WriteLine("GetUsersForClaimAsync(): {0} user count", users.Count());
                     Assert.Equal(users.Count(), userCount);
+
+
                 }
             }
         }

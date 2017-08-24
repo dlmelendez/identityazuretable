@@ -31,7 +31,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
         [Trait("IdentityCore.Azure.UserStore.Properties", "")]
 #endif
         public void AccessFailedCount()
-        {
+        {            
             using (var store = userFixture.CreateUserStore())
             {
 #if net45
@@ -83,7 +83,7 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests
                     manager.AccessFailedAsync(user).Wait();
 #endif
                     DateTime dtUtc = DateTime.UtcNow;
-
+                    
 #if net45
                     user = manager.FindById(user.Id);
                     Assert.True(user.LockoutEndDateUtc.HasValue);

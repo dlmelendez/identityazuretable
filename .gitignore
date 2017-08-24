@@ -30,4 +30,4 @@
 /src/ElCamino.Identity.AzureTable.DataUtility/obj
 /.vs/restore.dg
 /TEST-Results.xml
-/.vs/ElCamino.Master/v15/sqlite3/storage.ide
+/.vs

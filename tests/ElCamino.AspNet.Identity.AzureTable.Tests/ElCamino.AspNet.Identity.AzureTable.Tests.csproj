@@ -4,6 +4,7 @@
     <PackageTargetFallback>net45</PackageTargetFallback>
     <RootNamespace>ElCamino.Web.Identity.AzureTable.Tests</RootNamespace>
     <AssemblyName>ElCamino.Web.Identity.AzureTable.Tests</AssemblyName>
+    <Version>1.7.0</Version>
 
   </PropertyGroup>
   <PropertyGroup>
@@ -15,7 +16,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;net45</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;net45;NET451;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>0618</NoWarn>
