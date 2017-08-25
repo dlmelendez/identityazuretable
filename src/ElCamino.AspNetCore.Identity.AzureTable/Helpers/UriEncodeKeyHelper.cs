@@ -5,17 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-#if net45
-using Microsoft.AspNet.Identity;
-#else
 using Microsoft.AspNetCore.Identity;
-#endif
 
-#if net45
-namespace ElCamino.AspNet.Identity.AzureTable.Helpers
-#else
 namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
-#endif
 {
     public class UriEncodeKeyHelper : BaseKeyHelper
     {
@@ -23,7 +15,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         public const string NewCharForIllegalChar = "_";
 
 
-		public override string GeneratePartitionKeyIndexByLogin(string plainLoginProvider, string plainProviderKey)
+        public override string GeneratePartitionKeyIndexByLogin(string plainLoginProvider, string plainProviderKey)
         {
             string strTemp = string.Format("{0}_{1}", EscapeKey(plainLoginProvider), EscapeKey(plainProviderKey));
             return string.Format(Constants.RowKeyConstants.FormatterIdentityUserLogin, strTemp);
@@ -62,9 +54,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         {
             string strTemp = string.Format("{0}_{1}", EscapeKey(claimType), EscapeKey(claimValue));
             return string.Format(Constants.RowKeyConstants.FormatterIdentityUserClaim, strTemp);
-
         }
-#if !net45
+
         public override string GenerateRowKeyIdentityRoleClaim(string claimType, string claimValue)
         {
             string strTemp = string.Format("{0}_{1}", EscapeKey(claimType), EscapeKey(claimValue));
@@ -76,8 +67,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             string strTemp = string.Format("{0}_{1}", EscapeKey(loginProvider), EscapeKey(name));
             return string.Format(Constants.RowKeyConstants.FormatterIdentityUserToken, strTemp);
         }
-
-#endif
 
         public override string ParsePartitionKeyIdentityRoleFromRowKey(string rowKey)
         {

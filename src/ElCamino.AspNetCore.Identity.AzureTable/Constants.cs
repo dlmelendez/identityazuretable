@@ -6,13 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-#if net45
-namespace ElCamino.AspNet.Identity.AzureTable
-#else
 namespace ElCamino.AspNetCore.Identity.AzureTable
-#endif
 {
-public static class Constants
+    public static class Constants
     {
         public const string ETagWildcard = "*";
 
@@ -31,19 +27,19 @@ public static class Constants
         public static class RowKeyConstants
         {
             #region Identity User
-            public const string PreFixIdentityUserClaim     = "C_";
-            public const string PreFixIdentityUserRole      = "R_";
-            public const string PreFixIdentityUserLogin     = "L_";
-            public const string PreFixIdentityUserEmail     = "E_";
-            public const string PreFixIdentityUserToken     = "T_";
-            public const string PreFixIdentityUserName      = "U_";
+            public const string PreFixIdentityUserClaim = "C_";
+            public const string PreFixIdentityUserRole = "R_";
+            public const string PreFixIdentityUserLogin = "L_";
+            public const string PreFixIdentityUserEmail = "E_";
+            public const string PreFixIdentityUserToken = "T_";
+            public const string PreFixIdentityUserName = "U_";
 
-            public const string FormatterIdentityUserClaim  = PreFixIdentityUserClaim + "{0}";
-            public const string FormatterIdentityUserRole   = PreFixIdentityUserRole + "{0}";
-            public const string FormatterIdentityUserLogin  = PreFixIdentityUserLogin + "{0}";
-            public const string FormatterIdentityUserEmail  = PreFixIdentityUserEmail + "{0}";
-            public const string FormatterIdentityUserToken  = PreFixIdentityUserToken + "{0}";
-            public const string FormatterIdentityUserName   = PreFixIdentityUserName + "{0}";
+            public const string FormatterIdentityUserClaim = PreFixIdentityUserClaim + "{0}";
+            public const string FormatterIdentityUserRole = PreFixIdentityUserRole + "{0}";
+            public const string FormatterIdentityUserLogin = PreFixIdentityUserLogin + "{0}";
+            public const string FormatterIdentityUserEmail = PreFixIdentityUserEmail + "{0}";
+            public const string FormatterIdentityUserToken = PreFixIdentityUserToken + "{0}";
+            public const string FormatterIdentityUserName = PreFixIdentityUserName + "{0}";
             #endregion
 
             #region Identity Role

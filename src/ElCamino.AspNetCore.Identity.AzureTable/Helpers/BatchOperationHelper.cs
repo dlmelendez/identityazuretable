@@ -1,21 +1,17 @@
 ﻿// MIT License Copyright 2017 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
-using Microsoft.WindowsAzure.Storage.Table;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.Storage.Table;
 
-#if net45
-namespace ElCamino.AspNet.Identity.AzureTable.Helpers
-#else
 namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
-#endif
 {
     /// <summary>
-    /// Used to instantiate multiple TableBatchOperations when the 
+    /// Used to instantiate multiple TableBatchOperations when the
     /// TableOperation maximum is reached on a single TableBatchOperation
     /// </summary>
     internal class BatchOperationHelper
@@ -48,18 +44,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         }
 
         public async Task<IList<TableResult>> ExecuteBatchAsync(CloudTable table)
-        {
-            return await Task.Run(
-            () =>
+         => await Task.Run(() =>
             {
                 ConcurrentBag<TableResult> results = new ConcurrentBag<TableResult>();
-				//TODO: Fix for Core 5.0 
-#if net45
-				Parallel.ForEach(_batches,
-#else
-				_batches.ForEach(
-#endif
-			async (batchOperation) =>
+                //TODO: Fix for Core 5.0
+                _batches.ForEach(async (batchOperation) =>
                 {
                     var x = await table.ExecuteBatchAsync(batchOperation);
                     x.ToList().ForEach((tr) => { results.Add(tr); });
@@ -67,7 +56,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
                 Clear();
                 return results.ToList();
             });
-        }
 
         public void Clear()
         {

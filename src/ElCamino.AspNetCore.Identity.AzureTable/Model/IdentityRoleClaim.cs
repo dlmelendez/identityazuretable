@@ -1,11 +1,11 @@
 // MIT License Copyright 2017 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
-#if !net45
-using Microsoft.WindowsAzure.Storage.Table;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.Storage.Table;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
@@ -56,8 +56,5 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         public virtual string ClaimValue { get; set; }
 
         public virtual TKey RoleId { get; set; }
-
     }
-
 }
-#endif

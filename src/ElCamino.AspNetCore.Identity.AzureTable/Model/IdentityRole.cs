@@ -1,22 +1,14 @@
 ﻿// MIT License Copyright 2017 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
-#if net45
-using Microsoft.AspNet.Identity;
-using ElCamino.AspNet.Identity.AzureTable.Helpers;
-#else
-using Microsoft.AspNetCore.Identity;
-using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
-#endif
-using Microsoft.WindowsAzure.Storage.Table;
+
 using System.Collections.Generic;
 using System.Data.Services.Common;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.WindowsAzure.Storage.Table;
+using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 
-#if net45
-namespace ElCamino.AspNet.Identity.AzureTable.Model
-#else
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
-#endif
 {
-public class IdentityRole : IdentityRole<string, IdentityUserRole>, IGenerateKeys
+    public class IdentityRole : IdentityRole<string, IdentityUserRole>, IGenerateKeys
     {
         public IdentityRole() : base() { }
 
@@ -50,7 +42,7 @@ public class IdentityRole : IdentityRole<string, IdentityUserRole>, IGenerateKey
 
         [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
         public override string Id
-		{
+        {
             get
             {
                 return RowKey;
@@ -63,10 +55,7 @@ public class IdentityRole : IdentityRole<string, IdentityUserRole>, IGenerateKey
     }
 
     public class IdentityRole<TKey, TUserRole> : TableEntity
-#if net45
-		 ,IRole<TKey>
-#endif
-		where TUserRole : IdentityUserRole<TKey>
+        where TUserRole : IdentityUserRole<TKey>
     {
 
         public IdentityRole() : base()
@@ -79,10 +68,9 @@ public class IdentityRole : IdentityRole<string, IdentityUserRole>, IGenerateKey
 
         public string Name { get; set; }
 
-		public string NormalizedName { get; set; }
+        public string NormalizedName { get; set; }
 
-		[Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
+        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
         public ICollection<TUserRole> Users { get; private set; }
-
     }
 }
