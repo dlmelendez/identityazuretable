@@ -1,22 +1,16 @@
 ﻿// MIT License Copyright 2017 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
-using Microsoft.WindowsAzure.Storage.Table;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-#if net45
-using ElCamino.AspNet.Identity.AzureTable.Helpers;
-
-namespace ElCamino.AspNet.Identity.AzureTable.Model
-#else
+using Microsoft.WindowsAzure.Storage.Table;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
-#endif
 {
-public class IdentityUserRole : IdentityUserRole<string>, IGenerateKeys
+    public class IdentityUserRole : IdentityUserRole<string>, IGenerateKeys
     {
         public IdentityUserRole() { }
 
@@ -66,21 +60,15 @@ public class IdentityUserRole : IdentityUserRole<string>, IGenerateKeys
                 PartitionKey = value;
             }
         }
-
-
     }
-
 
     public class IdentityUserRole<TKey> : TableEntity
     {
-
         [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
         public virtual TKey RoleId { get; set; }
 
         public virtual TKey UserId { get; set; }
 
         public string RoleName { get; set; }
-
     }
-
 }

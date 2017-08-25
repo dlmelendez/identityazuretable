@@ -1,14 +1,13 @@
 ﻿// MIT License Copyright 2017 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
-#if !net45
 using System;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Internal;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.TestsExp
 {
@@ -36,16 +35,17 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.TestsExp
             // Add Identity services to the services container.
             services.AddIdentity<IdentityUser, IdentityRole>((config) =>
             {
-                
+
             })
-                //.AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddAzureTableStores<IdentityCloudContext>(new Func<IdentityConfiguration>(() =>
+            //.AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddAzureTableStores<IdentityCloudContext>(new Func<IdentityConfiguration>(() =>
+            {
+                return new IdentityConfiguration()
                 {
-                    return new IdentityConfiguration() {
-                        StorageConnectionString = Configuration.GetValue<string>("IdentityAzureTable:identityConfiguration:storageConnectionString")
-                    };
-                }))
-                .AddDefaultTokenProviders();
+                    StorageConnectionString = Configuration.GetValue<string>("IdentityAzureTable:identityConfiguration:storageConnectionString")
+                };
+            }))
+            .AddDefaultTokenProviders();
 
             // Add MVC services to the services container.
             //services.AddMvc();
@@ -57,8 +57,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.TestsExp
         {
             // Add cookie-based authentication to the request pipeline.
             app.UseIdentity();
-            
         }
     }
 }
-#endif
