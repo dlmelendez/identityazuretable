@@ -1,21 +1,11 @@
 ﻿// MIT License Copyright 2017 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
+using System;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Table;
-using System;
-#if net45
-using ElCamino.AspNet.Identity.AzureTable.Configuration;
-using Microsoft.Azure;
-using ElCamino.AspNet.Identity.AzureTable.Model;
-#else
-using ElCamino.AspNetCore.Identity.AzureTable.Model;
-#endif
 using Microsoft.WindowsAzure.Storage.RetryPolicies;
+using ElCamino.AspNetCore.Identity.AzureTable.Model;
 
-#if net45
-namespace ElCamino.AspNet.Identity.AzureTable
-#else
 namespace ElCamino.AspNetCore.Identity.AzureTable
-#endif
 {
     public class IdentityCloudContext : IDisposable
     {
@@ -26,39 +16,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         private CloudTable _indexTable;
         private CloudTable _userTable;
 
-#if net45
-		public IdentityCloudContext() 
-        {
-            IdentityConfiguration config = IdentityConfigurationSection.GetCurrent();
-            //For backwards compat for those who do not use the new configSection.
-            if (config == null)
-            {
-                config = new IdentityConfiguration()
-                {
-                    StorageConnectionString =  CloudConfigurationManager.GetSetting(Constants.AppSettingsKeys.DefaultStorageConnectionStringKey),
-                    TablePrefix = string.Empty
-                };
-            }
-            Initialize(config);
-        }
-
-        [System.Obsolete("Please use the default constructor IdentityCloudContext() to load the configSection from web/app.config or " +
-            "the constructor IdentityCloudContext(IdentityConfiguration config) for more options.")]
-        public IdentityCloudContext(string connectionStringKey)
-        {
-            string strConnection = CloudConfigurationManager.GetSetting(connectionStringKey);
-            Initialize(new IdentityConfiguration()
-            {
-                StorageConnectionString = string.IsNullOrWhiteSpace(strConnection) ?
-                    connectionStringKey : strConnection,
-                TablePrefix = string.Empty
-            });
-            
-        }
-#else
-		public IdentityCloudContext() { }
-#endif
-		public IdentityCloudContext(IdentityConfiguration config)
+        public IdentityCloudContext() { }
+        public IdentityCloudContext(IdentityConfiguration config)
         {
             if (config == null)
             {
@@ -67,12 +26,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             Initialize(config);
         }
 
-
         private void Initialize(IdentityConfiguration config)
         {
             _config = config;
             _client = CloudStorageAccount.Parse(_config.StorageConnectionString).CreateCloudTableClient();
-			_client.DefaultRequestOptions.PayloadFormat = TablePayloadFormat.Json;
+            _client.DefaultRequestOptions.PayloadFormat = TablePayloadFormat.Json;
             if (!string.IsNullOrWhiteSpace(_config.LocationMode))
             {
                 LocationMode mode = LocationMode.PrimaryOnly;
@@ -86,7 +44,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 }
             }
             _indexTable = _client.GetTableReference(FormatTableNameWithPrefix(Constants.TableNames.IndexTable));
-            _roleTable = _client.GetTableReference(FormatTableNameWithPrefix(Constants.TableNames.RolesTable)); 
+            _roleTable = _client.GetTableReference(FormatTableNameWithPrefix(Constants.TableNames.RolesTable));
             _userTable = _client.GetTableReference(FormatTableNameWithPrefix(Constants.TableNames.UsersTable));
         }
 
@@ -163,5 +121,4 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
         }
     }
-
 }
