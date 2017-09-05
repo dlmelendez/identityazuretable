@@ -4,11 +4,13 @@ using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
 using Xunit;
 using Xunit.Abstractions;
 using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
+using Microsoft.AspNetCore.Identity;
+using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser;
+using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {

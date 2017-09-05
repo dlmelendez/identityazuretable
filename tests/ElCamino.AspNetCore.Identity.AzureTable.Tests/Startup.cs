@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
+using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser;
+using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.TestsExp
 {

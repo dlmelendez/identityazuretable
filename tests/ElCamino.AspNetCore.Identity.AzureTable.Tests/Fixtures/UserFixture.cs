@@ -1,7 +1,6 @@
 ﻿// MIT License Copyright 2017 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
 using System;
-using Microsoft.AspNetCore.Identity;
 using ElCamino.AspNetCore.Identity.AzureTable;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
 using ElCamino.AspNetCore.Identity.AzureTable.Tests;

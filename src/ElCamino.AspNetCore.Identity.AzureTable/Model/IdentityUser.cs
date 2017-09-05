@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage.Table;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
+using Microsoft.WindowsAzure.Storage;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 {
@@ -62,7 +63,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         }
     }
 
-    public class IdentityUser<TKey, TLogin, TRole, TClaim> : TableEntity
+    public class IdentityUser<TKey, TLogin, TRole, TClaim> : Microsoft.AspNetCore.Identity.IdentityUser<TKey>, ITableEntity
         where TKey : IEquatable<TKey>
         where TLogin : IdentityUserLogin<TKey>
         where TRole : IdentityUserRole<TKey>
@@ -87,36 +88,31 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 
         #endregion
 
-        public virtual string NormalizedEmail { get; set; }
-
-        public virtual string NormalizedUserName { get; set; }
-
-        //Not sure if this is needed.
-        public virtual string ConcurrencyStamp { get; set; } = Guid.NewGuid().ToString();
-
-        public virtual int AccessFailedCount { get; set; }
-
-        public virtual string Email { get; set; }
-
-        public virtual bool EmailConfirmed { get; set; }
 
         [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
-        public virtual TKey Id { get; set; }
+        public override TKey Id { get; set; }
 
-        public virtual bool LockoutEnabled { get; set; }
+        //TODO: Figure out the backcompat story for LockoutEndDateUtc to LockoutEnd property
+        //public virtual DateTime? LockoutEndDateUtc { get; set; }
 
-        public virtual DateTime? LockoutEndDateUtc { get; set; }
+        public override DateTimeOffset? LockoutEnd { get => base.LockoutEnd; set => base.LockoutEnd = value; }
 
-        public virtual string PasswordHash { get; set; }
 
-        public virtual string PhoneNumber { get; set; }
+        public string PartitionKey { get; set; }
+        public string RowKey { get; set; }
+        public DateTimeOffset Timestamp { get; set; }
+        public string ETag { get; set; }
 
-        public virtual bool PhoneNumberConfirmed { get; set; }
+        public void ReadEntity(IDictionary<string, EntityProperty> properties, OperationContext operationContext)
+        {
+            TableEntity.ReadUserObject(this, properties, operationContext);
+        }
 
-        public virtual string SecurityStamp { get; set; }
-
-        public virtual bool TwoFactorEnabled { get; set; }
-
-        public virtual string UserName { get; set; }
+        public IDictionary<string, EntityProperty> WriteEntity(OperationContext operationContext)
+        {
+            return TableEntity.WriteUserObject(this, operationContext);
+        }
     }
+
+    
 }

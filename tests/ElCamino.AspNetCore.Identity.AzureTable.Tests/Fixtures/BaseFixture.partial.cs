@@ -3,12 +3,15 @@
 using System;
 using ElCamino.AspNetCore.Identity.AzureTable;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
-using Microsoft.AspNetCore.Identity;
+using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser;
+using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
+using Microsoft.AspNetCore.Identity;
 
 namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 {

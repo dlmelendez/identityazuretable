@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.Storage.Table;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
+using Microsoft.WindowsAzure.Storage;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 {
@@ -50,15 +51,24 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         }
     }
 
-    public class IdentityUserLogin<TKey> : TableEntity
+    public class IdentityUserLogin<TKey> : Microsoft.AspNetCore.Identity.IdentityUserLogin<TKey>
+        , ITableEntity
+        where TKey : IEquatable<TKey>
     {
-        public virtual string LoginProvider { get; set; }
+        public string PartitionKey { get; set; }
+        public string RowKey { get; set; }
+        public DateTimeOffset Timestamp { get; set; }
+        public string ETag { get; set; }
 
-        public virtual string ProviderKey { get; set; }
+        public void ReadEntity(IDictionary<string, EntityProperty> properties, OperationContext operationContext)
+        {
+            TableEntity.ReadUserObject(this, properties, operationContext);
+        }
 
-        public virtual string ProviderDisplayName { get; set; }
-
-        public virtual TKey UserId { get; set; }
+        public IDictionary<string, EntityProperty> WriteEntity(OperationContext operationContext)
+        {
+            return TableEntity.WriteUserObject(this, operationContext);
+        }
 
         public virtual string Id { get; set; }
     }

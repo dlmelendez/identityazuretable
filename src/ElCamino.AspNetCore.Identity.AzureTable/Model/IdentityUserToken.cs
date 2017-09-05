@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
+using Microsoft.WindowsAzure.Storage;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 {
@@ -34,7 +35,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// <returns></returns>
         public string PeekRowKey()
         {
-            return KeyHelper.GenerateRowKeyIdentityUserToken(LoginProvider, TokenName);
+            return KeyHelper.GenerateRowKeyIdentityUserToken(LoginProvider, Name);
         }
 
         [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
@@ -51,27 +52,35 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         }
     }
 
-    public class IdentityUserToken<TKey> : TableEntity
+    public class IdentityUserToken<TKey> : Microsoft.AspNetCore.Identity.IdentityUserToken<TKey>
+        , ITableEntity
+        where TKey : IEquatable<TKey>
     {
-        /// <summary>
-        /// Gets or sets the primary key of the user that the token belongs to.
-        /// </summary>
-        public virtual TKey UserId { get; set; }
+        public string PartitionKey { get; set; }
+        public string RowKey { get; set; }
+        public DateTimeOffset Timestamp { get; set; }
+        public string ETag { get; set; }
 
-        /// <summary>
-        /// Gets or sets the LoginProvider this token is from.
-        /// </summary>
-        public virtual string LoginProvider { get; set; }
+        public void ReadEntity(IDictionary<string, EntityProperty> properties, OperationContext operationContext)
+        {
+            TableEntity.ReadUserObject(this, properties, operationContext);
+        }
 
+        public IDictionary<string, EntityProperty> WriteEntity(OperationContext operationContext)
+        {
+            return TableEntity.WriteUserObject(this, operationContext);
+        }
+
+        //TODO: Figure out migration path for Name and Value properties
         /// <summary>
         /// Gets or sets the name of the token.
         /// </summary>
-        public virtual string TokenName { get; set; }
+        //public virtual string TokenName { get; set; }
 
         /// <summary>
         /// Gets or sets the token value.
         /// </summary>
-        public virtual string TokenValue { get; set; }
+        //public virtual string TokenValue { get; set; }
 
     }
 

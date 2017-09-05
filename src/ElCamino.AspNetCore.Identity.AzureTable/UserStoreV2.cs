@@ -47,17 +47,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
     }
 
     public class UserStore<TUser, TRole, TKey, TUserLogin, TUserRole, TUserClaim, TUserToken, TContext> :
-        IUserLoginStore<TUser>
-        , IUserClaimStore<TUser>
+        UserStoreBase<TUser, TKey, TUserClaim, TUserLogin, TUserToken>
         , IUserRoleStore<TUser>
-        , IUserPasswordStore<TUser>
-        , IUserSecurityStampStore<TUser>
-        , IUserEmailStore<TUser>
-        , IUserPhoneNumberStore<TUser>
-        , IUserTwoFactorStore<TUser>
-        , IUserLockoutStore<TUser>
-        , IUserStore<TUser>
-        , IUserAuthenticationTokenStore<TUser>
         , IDisposable
         where TUser : Model.IdentityUser<TKey, TUserLogin, TUserRole, TUserClaim>, new()
         where TRole : Model.IdentityRole<TKey, TUserRole>, new()
@@ -74,13 +65,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         private CloudTable _roleTable;
         private CloudTable _indexTable;
 
-        public UserStore(TContext context)
+        public UserStore(TContext context) : base(new IdentityErrorDescriber())
         {
             this.Context = context ?? throw new ArgumentNullException(nameof(context));
             this._userTable = context.UserTable;
             this._indexTable = context.IndexTable;
             this._roleTable = context.RoleTable;
         }
+
+        public override IQueryable<TUser> Users => throw new NotImplementedException();
 
         public Task CreateTablesIfNotExists()
         {
@@ -93,7 +86,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return Task.WhenAll(tasks);
         }
 
-        public virtual async Task AddClaimsAsync(TUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken = default(CancellationToken))
+        public override async Task AddClaimsAsync(TUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -116,7 +109,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             await bop.ExecuteBatchAsync(_userTable);
         }
-
+       
         public virtual async Task AddClaimAsync(TUser user, Claim claim)
         {
             ThrowIfDisposed();
@@ -134,7 +127,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             await _userTable.ExecuteAsync(TableOperation.Insert(item));
         }
 
-        public virtual Task AddLoginAsync(TUser user, UserLoginInfo login, CancellationToken cancellationToken = default(CancellationToken))
+        public override Task AddLoginAsync(TUser user, UserLoginInfo login, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -182,7 +175,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return _userTable.ExecuteAsync(TableOperation.Insert(item));
         }
 
-        public async virtual Task<IdentityResult> CreateAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
+        public async override Task<IdentityResult> CreateAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -211,7 +204,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
         }
 
-        public async virtual Task<IdentityResult> DeleteAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
+        public async override Task<IdentityResult> DeleteAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -262,8 +255,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
         }
 
-        public void Dispose()
+        
+        public new void Dispose()
         {
+            base.Dispose();
             this.Dispose(true);
         }
 
@@ -283,8 +278,69 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
         }
 
-        public virtual Task<TUser> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken = default(CancellationToken))
+        protected override async Task<TUserLogin> FindUserLoginAsync(TKey userId, string loginProvider, string providerKey, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+            return await FindUserLoginAsync(userId.ToString(), loginProvider, providerKey);
+        }
+
+        private async Task<TUserLogin> FindUserLoginAsync(string userId, string loginProvider, string providerKey)
+        {
+            string rowKey = KeyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey);
+
+            TableQuery tq = new TableQuery();
+            tq.TakeCount = 1;
+            tq.FilterString = TableQuery.CombineFilters(
+                TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, userId),
+                TableOperators.And,
+                TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, rowKey));
+
+            var result = await _userTable.ExecuteQueryAsync(tq);
+            var log = result.FirstOrDefault();
+            if (log != null)
+            {
+                TUserLogin tlogin = Activator.CreateInstance<TUserLogin>();
+                tlogin.ReadEntity(log.Properties, new OperationContext());
+                tlogin.PartitionKey = log.PartitionKey;
+                tlogin.RowKey = log.RowKey;
+                tlogin.ETag = log.ETag;
+                tlogin.Timestamp = log.Timestamp;
+                return tlogin;
+            }
+
+            return null;
+        }
+
+        protected override async Task<TUserLogin> FindUserLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            string rowKey = KeyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey);
+            string partitionKey = KeyHelper.GeneratePartitionKeyIndexByLogin(loginProvider, providerKey);
+            var loginQuery = GetUserIdByIndex(partitionKey, rowKey);
+
+            var indexInfo = (await _indexTable.ExecuteQueryAsync(loginQuery)).FirstOrDefault();
+            if (indexInfo != null)
+            {
+                string userId = indexInfo.Properties["Id"].StringValue;
+                return await FindUserLoginAsync(userId, loginProvider, providerKey);
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Overridden for better performance.
+        /// </summary>
+        /// <param name="loginProvider"></param>
+        /// <param name="providerKey"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public override Task<TUser> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
 
             string rowKey = KeyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey);
@@ -294,7 +350,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return GetUserAggregateAsync(loginQuery);
         }
 
-        public Task<TUser> FindByEmailAsync(string plainEmail, CancellationToken cancellationToken = default(CancellationToken))
+        public override Task<TUser> FindByEmailAsync(string plainEmail, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             this.ThrowIfDisposed();
@@ -305,6 +361,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             this.ThrowIfDisposed();
             return this.GetUsersAggregateByIndexQueryAsync(FindByEmailQuery(plainEmail));
+        }
+
+        protected override Task<TUser> FindUserAsync(TKey userId, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            this.ThrowIfDisposed();
+            return this.GetUserAggregateAsync(userId.ToString());
         }
 
         private TableQuery FindByEmailQuery(string plainEmail)
@@ -330,36 +393,22 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return tq;
         }
 
-        public virtual Task<TUser> FindByIdAsync(TKey userId)
-        {
-            this.ThrowIfDisposed();
-            return this.GetUserAggregateAsync(userId.ToString());
-        }
-
-        public Task<TUser> FindByIdAsync(string userId, CancellationToken cancellationToken = default(CancellationToken))
+        public override Task<TUser> FindByIdAsync(string userId, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             this.ThrowIfDisposed();
-            return this.GetUserAggregateAsync(userId.ToString());
+            return this.GetUserAggregateAsync(userId);
         }
 
-        public Task<TUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken = default(CancellationToken))
+        public override Task<TUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             this.ThrowIfDisposed();
             return this.GetUserAggregateAsync(KeyHelper.GenerateRowKeyUserName(normalizedUserName));
         }
 
-        public Task<int> GetAccessFailedCountAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
 
-            return Task.FromResult<int>(user.AccessFailedCount);
-        }
-
-        public virtual Task<IList<Claim>> GetClaimsAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
+        public override Task<IList<Claim>> GetClaimsAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             this.ThrowIfDisposed();
@@ -368,43 +417,19 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return Task.FromResult<IList<Claim>>(user.Claims.Select(c => new Claim(c.ClaimType, c.ClaimValue)).ToList());
         }
 
-        public Task<string> GetEmailAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
 
-            return Task.FromResult<string>(user.Email);
-        }
+        //TODO: Visit the LockoutEndDate 
+        //public override Task<DateTimeOffset?> GetLockoutEndDateAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
+        //{
+        //    cancellationToken.ThrowIfCancellationRequested();
+        //    this.ThrowIfDisposed();
+        //    if (user == null) throw new ArgumentNullException(nameof(user));
 
-        public Task<bool> GetEmailConfirmedAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
+        //    return Task.FromResult<DateTimeOffset?>(user.LockoutEndDateUtc);
+        //}
 
-            return Task.FromResult<bool>(user.EmailConfirmed);
-        }
 
-        public Task<bool> GetLockoutEnabledAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
-
-            return Task.FromResult<bool>(user.LockoutEnabled);
-        }
-
-        public Task<DateTimeOffset?> GetLockoutEndDateAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
-
-            return Task.FromResult<DateTimeOffset?>(user.LockoutEndDateUtc);
-        }
-
-        public virtual Task<IList<UserLoginInfo>> GetLoginsAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
+        public override Task<IList<UserLoginInfo>> GetLoginsAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             this.ThrowIfDisposed();
@@ -413,32 +438,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return Task.FromResult<IList<UserLoginInfo>>((from l in user.Logins select new UserLoginInfo(l.LoginProvider, l.ProviderKey, l.ProviderDisplayName)).ToList<UserLoginInfo>());
         }
 
-        public Task<string> GetPasswordHashAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
-
-            return Task.FromResult<string>(user.PasswordHash);
-        }
-
-        public Task<string> GetPhoneNumberAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
-
-            return Task.FromResult<string>(user.PhoneNumber);
-        }
-
-        public Task<bool> GetPhoneNumberConfirmedAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
-
-            return Task.FromResult<bool>(user.PhoneNumberConfirmed);
-        }
 
         public async virtual Task<IList<string>> GetRolesAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -531,23 +530,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 rowFilter);
         }
 
-        public Task<string> GetSecurityStampAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
-
-            return Task.FromResult<string>(user.SecurityStamp);
-        }
-
-        public Task<bool> GetTwoFactorEnabledAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
-
-            return Task.FromResult<bool>(user.TwoFactorEnabled);
-        }
 
         private async Task<TUser> GetUserAggregateAsync(string userId)
         {
@@ -747,24 +729,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         protected Task<IEnumerable<TUser>> GetUsersAggregateByIdsAsync(IList<string> userIds)
          => Task.Run(() => GetUserAggregateQueryAsync(userIds));
 
-        public Task<bool> HasPasswordAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
-
-            return Task.FromResult<bool>(user.PasswordHash != null);
-        }
-
-        public Task<int> IncrementAccessFailedCountAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
-
-            user.AccessFailedCount++;
-            return Task.FromResult<int>(user.AccessFailedCount);
-        }
 
         public async virtual Task<bool> IsInRoleAsync(TUser user, string roleName, CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -831,7 +795,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
 
         }
-        public async Task ReplaceClaimAsync(TUser user, Claim claim, Claim newClaim, CancellationToken cancellationToken = default(CancellationToken))
+
+        public override async Task ReplaceClaimAsync(TUser user, Claim claim, Claim newClaim, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -863,7 +828,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             await bop.ExecuteBatchAsync(_userTable);
         }
 
-        public async Task RemoveClaimsAsync(TUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken = default(CancellationToken))
+        public override async Task RemoveClaimsAsync(TUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -906,7 +871,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
         }
 
-        public virtual async Task RemoveLoginAsync(TUser user, string loginProvider, string providerKey, CancellationToken cancellationToken = default(CancellationToken))
+        public override async Task RemoveLoginAsync(TUser user, string loginProvider, string providerKey, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             this.ThrowIfDisposed();
@@ -922,17 +887,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
         }
 
-        public Task ResetAccessFailedCountAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
-
-            user.AccessFailedCount = 0;
-            return Task.CompletedTask;
-        }
-
-        public async Task SetEmailAsync(TUser user, string email, CancellationToken cancellationToken = default(CancellationToken))
+        public override async Task SetEmailAsync(TUser user, string email, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             this.ThrowIfDisposed();
@@ -968,95 +923,19 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
         }
 
-        public Task SetEmailConfirmedAsync(TUser user, bool confirmed, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
+        //TODO: Revisit LockoutEnd property
+        //public override Task SetLockoutEndDateAsync(TUser user, DateTimeOffset? lockoutEnd, CancellationToken cancellationToken = default(CancellationToken))
+        //{
+        //    cancellationToken.ThrowIfCancellationRequested();
+        //    this.ThrowIfDisposed();
+        //    if (user == null) throw new ArgumentNullException(nameof(user));
 
-            user.EmailConfirmed = confirmed;
-            return Task.CompletedTask;
-        }
+        //    user.LockoutEndDateUtc = lockoutEnd.HasValue ? new DateTime?(lockoutEnd.Value.DateTime) : null;
+        //    return Task.CompletedTask;
+        //}
+                
 
-        public Task SetLockoutEnabledAsync(TUser user, bool enabled, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
-
-            user.LockoutEnabled = enabled;
-            return Task.CompletedTask;
-        }
-
-        public Task SetLockoutEndDateAsync(TUser user, DateTimeOffset? lockoutEnd, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
-
-            user.LockoutEndDateUtc = lockoutEnd.HasValue ? new DateTime?(lockoutEnd.Value.DateTime) : null;
-            return Task.CompletedTask;
-        }
-
-        public Task SetPasswordHashAsync(TUser user, string passwordHash, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
-
-            user.PasswordHash = passwordHash;
-            return Task.CompletedTask;
-        }
-
-        public Task SetPhoneNumberAsync(TUser user, string phoneNumber, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
-
-            user.PhoneNumber = phoneNumber;
-            return Task.CompletedTask;
-        }
-
-        public Task SetPhoneNumberConfirmedAsync(TUser user, bool confirmed, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
-
-            user.PhoneNumberConfirmed = confirmed;
-            return Task.CompletedTask;
-        }
-
-        public Task SetSecurityStampAsync(TUser user, string stamp, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
-
-            user.SecurityStamp = stamp;
-            return Task.CompletedTask;
-        }
-
-        public Task SetTwoFactorEnabledAsync(TUser user, bool enabled, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
-
-            user.TwoFactorEnabled = enabled;
-            return Task.CompletedTask;
-        }
-
-        private void ThrowIfDisposed()
-        {
-            if (this._disposed)
-            {
-                throw new ObjectDisposedException(base.GetType().Name);
-            }
-        }
-
-        private async Task<TUser> ChangeUserNameAsync(TUser user)
+       private async Task<TUser> ChangeUserNameAsync(TUser user)
         {
             List<Task> taskList = new List<Task>(50);
             string userNameKey = KeyHelper.GenerateRowKeyUserName(user.UserName);
@@ -1129,7 +1008,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         }
 
 
-        public async virtual Task<IdentityResult> UpdateAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
+        public override async Task<IdentityResult> UpdateAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -1244,7 +1123,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return lUsers.SelectMany(u => u).ToList();
         }
 
-        public Task<IList<TUser>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken = default(CancellationToken))
+        public override Task<IList<TUser>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -1273,7 +1152,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return new List<TUser>();
         }
 
-        public virtual Task<string> GetUserIdAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
+        /// <summary>
+        /// Base returns null as default, override returns string.empty as default
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public override Task<string> GetUserIdAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -1282,63 +1167,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return Task.FromResult(user.Id != null ? user.Id.ToString() : string.Empty);
         }
 
-        public virtual Task<string> GetUserNameAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
-
-            return Task.FromResult(user.UserName);
-        }
-
-        public virtual Task SetUserNameAsync(TUser user, string userName, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
-
-            user.UserName = userName;
-            return Task.CompletedTask;
-        }
-
-        public virtual Task<string> GetNormalizedUserNameAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
-
-            return Task.FromResult(user.NormalizedUserName);
-        }
-
-        public virtual Task SetNormalizedUserNameAsync(TUser user, string normalizedName, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
-
-            user.NormalizedUserName = normalizedName;
-            return Task.CompletedTask;
-        }
-
-        public virtual Task<string> GetNormalizedEmailAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
-
-            return Task.FromResult(user.NormalizedEmail);
-        }
-
-        public virtual Task SetNormalizedEmailAsync(TUser user, string normalizedEmail, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
-
-            user.NormalizedEmail = normalizedEmail;
-            return Task.CompletedTask;
-        }
-
+       
         private async Task<TUserToken> FindUserTokenAsync(TUser user, string loginProvider, string tokenName)
         {
             var tableOp = TableOperation.Retrieve<TUserToken>(user.Id.ToString(),
@@ -1354,83 +1183,65 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return default(TUserToken);
         }
 
-        public async Task SetTokenAsync(TUser user, string loginProvider, string tokenName, string tokenValue, CancellationToken cancellationToken)
+        protected override async Task<TUserToken> FindTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
+            var tableOp = TableOperation.Retrieve<TUserToken>(user.Id.ToString(),
+                KeyHelper.GenerateRowKeyIdentityUserToken(loginProvider, name));
 
-            if (user == null) throw new ArgumentNullException(nameof(user));
-            if (string.IsNullOrWhiteSpace(tokenName))
+            var result = await _userTable.ExecuteAsync(tableOp);
+
+            if (result.Result != null)
             {
-                throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(tokenName));
-            }
-            if (string.IsNullOrWhiteSpace(loginProvider))
-            {
-                throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(loginProvider));
+                return (TUserToken)result.Result;
             }
 
-            if (tokenValue == null)
-            {
-                tokenValue = string.Empty;
-            }
-
-            var item = await FindUserTokenAsync(user, loginProvider, tokenName);
-            if (item == null)
-            {
-                item = Activator.CreateInstance<TUserToken>();
-                item.TokenName = tokenName;
-                item.TokenValue = tokenValue;
-                item.PartitionKey = user.Id.ToString();
-                item.LoginProvider = loginProvider;
-                ((Model.IGenerateKeys)item).GenerateKeys();
-            }
-            else
-            {
-                item.TokenValue = tokenValue;
-            }
-
-            await _userTable.ExecuteAsync(TableOperation.InsertOrReplace(item as TableEntity));
+            return default(TUserToken);
         }
 
-        public async Task RemoveTokenAsync(TUser user, string loginProvider, string tokenName, CancellationToken cancellationToken)
+        protected override TUserToken CreateUserToken(TUser user, string loginProvider, string name, string value)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
-
-            if (user == null) throw new ArgumentNullException(nameof(user));
-            if (string.IsNullOrWhiteSpace(tokenName))
-            {
-                throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(tokenName));
-            }
-            if (string.IsNullOrWhiteSpace(loginProvider))
-            {
-                throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(loginProvider));
-            }
-
-            var item = await FindUserTokenAsync(user, loginProvider, tokenName);
-            if (item != null)
-            {
-                await _userTable.ExecuteAsync(TableOperation.Delete(item as TableEntity));
-            }
+            TUserToken item = base.CreateUserToken(user, loginProvider, name, value);
+            ((Model.IGenerateKeys)item).GenerateKeys();
+            item.PartitionKey = user.Id.ToString();
+            return item;
         }
 
-        public async Task<string> GetTokenAsync(TUser user, string loginProvider, string tokenName, CancellationToken cancellationToken)
+        protected override async Task AddUserTokenAsync(TUserToken token)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
-
-            if (user == null) throw new ArgumentNullException(nameof(user));
-            if (string.IsNullOrWhiteSpace(tokenName))
-            {
-                throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(tokenName));
-            }
-            if (string.IsNullOrWhiteSpace(loginProvider))
-            {
-                throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(loginProvider));
-            }
-
-            var item = await FindUserTokenAsync(user, loginProvider, tokenName);
-            return item?.TokenValue;
+            await _userTable.ExecuteAsync(TableOperation.InsertOrReplace(token as ITableEntity));
         }
+
+        //public override async Task SetTokenAsync(TUser user, string loginProvider, string tokenName, string tokenValue, CancellationToken cancellationToken)
+        //{
+
+        //    if (tokenValue == null)
+        //    {
+        //        tokenValue = string.Empty;
+        //    }
+
+        //    await base.SetTokenAsync(user, loginProvider, tokenName, tokenValue, cancellationToken);
+        //}
+
+        protected override async Task RemoveUserTokenAsync(TUserToken token)
+        {
+            await _userTable.ExecuteAsync(TableOperation.Delete(token as ITableEntity));
+        }
+
+        //public override async Task RemoveTokenAsync(TUser user, string loginProvider, string tokenName, CancellationToken cancellationToken)
+        //{
+
+        //    if (string.IsNullOrWhiteSpace(tokenName))
+        //    {
+        //        throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(tokenName));
+        //    }
+        //    if (string.IsNullOrWhiteSpace(loginProvider))
+        //    {
+        //        throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(loginProvider));
+        //    }
+
+        //    await base.RemoveTokenAsync(user, loginProvider, tokenName, cancellationToken);
+        //}
+
+        
     }
 }

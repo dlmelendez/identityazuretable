@@ -7,14 +7,15 @@ using System.Security.Claims;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Builder;
 using Xunit;
 using Xunit.Abstractions;
 using ElCamino.AspNetCore.Identity.AzureTable;
-using ElCamino.AspNetCore.Identity.AzureTable.Model;
+using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser;
+using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
 using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
 using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
+using Microsoft.AspNetCore.Identity;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {
@@ -107,7 +108,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                 Email = id.ToString() + "@live.com",
                 UserName = id.ToString("N"),
                 LockoutEnabled = false,
-                LockoutEndDateUtc = null,
+                LockoutEnd = null,
                 PhoneNumber = "555-555-5555",
                 TwoFactorEnabled = false,
             };
@@ -123,7 +124,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                 Email = id.ToString() + "@live.com",
                 UserName = id.ToString("N"),
                 LockoutEnabled = false,
-                LockoutEndDateUtc = null,
+                LockoutEnd = null,
                 PhoneNumber = "555-555-5555",
                 TwoFactorEnabled = false,
                 FirstName = "Jim",
@@ -193,11 +194,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             WriteLineObject(CreateTestUserAsync<ApplicationUser>());
         }
 
-        public static Task<T> CreateUserAsync<T>() where T : IdentityUser, new()
+        public static Task<T> CreateUserAsync<T>() where T : Model.IdentityUser, new()
          => CreateTestUserAsync<T>();
 
         private static async Task<T> CreateTestUserAsync<T>(bool createPassword = true, bool createEmail = true,
-            string emailAddress = null) where T : IdentityUser, new()
+            string emailAddress = null) where T : Model.IdentityUser, new()
         {
             string strValidConnection = userFixture.GetConfig().StorageConnectionString;
 
@@ -296,7 +297,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     }
 
                     user = await manager.FindByIdAsync(user.Id);
-                    WriteLineObject<IdentityUser>(user);
+                    WriteLineObject(user);
 
                     var sw = new Stopwatch();
                     sw.Start();
@@ -775,7 +776,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     var getout = string.Format("{0} ms", sw.Elapsed.TotalMilliseconds);
                     Debug.WriteLine(getout);
                     output.WriteLine(getout);
-                    Assert.True(roles.Contains(roleName), "Role not found");
+                    Assert.True(roles.Contains(roleName), "Role not found"); 
 
                     sw.Start();
                     var roles2 = await manager.IsInRoleAsync(user, roleName);

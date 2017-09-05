@@ -10,6 +10,9 @@ using ElCamino.AspNetCore.Identity.AzureTable;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
 using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
 using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
+using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser;
+using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
+
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {
@@ -45,9 +48,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
                     DateTime dtUtc = DateTime.UtcNow;
                     user = await manager.FindByIdAsync(user.Id);
-                    Assert.True(user.LockoutEndDateUtc.HasValue);
-                    Assert.True(user.LockoutEndDateUtc.Value < dtUtc.Add(idOptions.Lockout.DefaultLockoutTimeSpan));
-                    Assert.True(user.LockoutEndDateUtc.Value > dtUtc.Add(idOptions.Lockout.DefaultLockoutTimeSpan.Add(TimeSpan.FromMinutes(-1.0))));
+                    Assert.True(user.LockoutEnd.HasValue);
+                    Assert.True(user.LockoutEnd.Value < dtUtc.Add(idOptions.Lockout.DefaultLockoutTimeSpan));
+                    Assert.True(user.LockoutEnd.Value > dtUtc.Add(idOptions.Lockout.DefaultLockoutTimeSpan.Add(TimeSpan.FromMinutes(-1.0))));
 
                     var resetAccessFailedCountResult = await manager.ResetAccessFailedCountAsync(user);
                     Assert.True(resetAccessFailedCountResult.Succeeded, string.Concat(resetAccessFailedCountResult.Errors));
@@ -184,17 +187,17 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     Assert.Equal(offSet, lockoutEndDate);
 
                     DateTime tmpDate = DateTime.UtcNow.AddDays(1);
-                    user.LockoutEndDateUtc = tmpDate;
+                    user.LockoutEnd = tmpDate;
                     lockoutEndDate = await store.GetLockoutEndDateAsync(user);
                     Assert.Equal<DateTimeOffset?>(new DateTimeOffset?(tmpDate), lockoutEndDate);
 
-                    user.LockoutEndDateUtc = null;
+                    user.LockoutEnd = null;
                     lockoutEndDate = await store.GetLockoutEndDateAsync(user);
                     Assert.Equal<DateTimeOffset?>(new DateTimeOffset?(), lockoutEndDate);
 
                     var minOffSet = DateTimeOffset.MinValue;
                     var setLockoutEndDateResult2 = store.SetLockoutEndDateAsync(user, minOffSet);
-                    Assert.NotNull(user.LockoutEndDateUtc);
+                    Assert.NotNull(user.LockoutEnd);
 
                     await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetLockoutEnabledAsync(null));
                     await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetLockoutEndDateAsync(null));
@@ -300,10 +303,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     user.PasswordHash = passwordHash;
 
                     await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetPasswordHashAsync(null));
-                    await Assert.ThrowsAsync<ArgumentNullException>(() => store.HasPasswordAsync(null));
-                    await Assert.ThrowsAsync<ArgumentNullException>(() => store.SetPasswordHashAsync(null, passwordHash));
-                    // TODO: check why existed
-                    // await Assert.ThrowsAsync<ArgumentNullException>(() => store.SetPasswordHashAsync(user, null));
                 }
             }
         }

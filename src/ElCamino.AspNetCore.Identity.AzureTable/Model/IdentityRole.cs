@@ -5,6 +5,8 @@ using System.Data.Services.Common;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.WindowsAzure.Storage.Table;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
+using System;
+using Microsoft.WindowsAzure.Storage;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 {
@@ -54,9 +56,24 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         }
     }
 
-    public class IdentityRole<TKey, TUserRole> : TableEntity
+    public class IdentityRole<TKey, TUserRole> : Microsoft.AspNetCore.Identity.IdentityRole<TKey>, ITableEntity
+        where TKey : IEquatable<TKey>
         where TUserRole : IdentityUserRole<TKey>
     {
+        public string PartitionKey { get; set; }
+        public string RowKey { get; set; }
+        public DateTimeOffset Timestamp { get; set; }
+        public string ETag { get; set; }
+
+        public void ReadEntity(IDictionary<string, EntityProperty> properties, OperationContext operationContext)
+        {
+            TableEntity.ReadUserObject(this, properties, operationContext);
+        }
+
+        public IDictionary<string, EntityProperty> WriteEntity(OperationContext operationContext)
+        {
+            return TableEntity.WriteUserObject(this, operationContext);
+        }
 
         public IdentityRole() : base()
         {
@@ -64,11 +81,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         }
 
         [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
-        public virtual TKey Id { get; set; }
+        public override TKey Id { get; set; }
 
-        public string Name { get; set; }
-
-        public string NormalizedName { get; set; }
 
         [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
         public ICollection<TUserRole> Users { get; private set; }

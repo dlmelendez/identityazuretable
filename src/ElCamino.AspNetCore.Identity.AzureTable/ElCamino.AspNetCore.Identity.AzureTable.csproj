@@ -6,7 +6,7 @@
     <AssemblyTitle>Azure Table Storage Provider for ASP.NET Identity Core</AssemblyTitle>
     <VersionPrefix>2.0.0</VersionPrefix>
     <Authors>David Melendez</Authors>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
     <AssemblyName>ElCamino.AspNetCore.Identity.AzureTable</AssemblyName>
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
@@ -14,7 +14,7 @@
     <PackageId>ElCamino.AspNetCore.Identity.AzureTable</PackageId>
     <PackageTags>ASP.NET;Identity Core;Azure;Table Storage;MVC;UserStore;RoleStore;UserManager;multi-tenant;RA-GRS;geo-redundant;Microsoft.AspNetCore.Identity</PackageTags>
     <PackageReleaseNotes>
-      Supports AspNetCore.Identity 2.x frameworks for .NET Core.
+      Supports AspNetCore.Identity 2.x frameworks for .NET Core. Beta release.
       Important! Check https://dlmelendez.github.io/identityazuretable/#/migration for data migration information.</PackageReleaseNotes>
     <PackageIconUrl>https://dlmelendez.github.io/identityazuretable/images/projectNugetPic.png</PackageIconUrl>
     <PackageLicenseUrl>https://github.com/dlmelendez/identityazuretable/blob/master/LICENSE</PackageLicenseUrl>
@@ -22,17 +22,23 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/dlmelendez/identityazuretable.git</RepositoryUrl>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>2.0.0</Version>
+    <Version>2.0.0-beta0</Version>
     <PackageProjectUrl>https://dlmelendez.github.io/identityazuretable</PackageProjectUrl>
+    <AssetTargetFallback Condition=" '$(TargetFramework)' == 'net461' ">$(AssetTargetFallback);net45;</AssetTargetFallback>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="2.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="WindowsAzure.Storage" Version="8.4.0" />
     <PackageReference Include="Microsoft.Data.Services.Client" Version="5.8.2" />
     <PackageReference Include="System.Linq.Queryable" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
+    <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
 
 </Project>

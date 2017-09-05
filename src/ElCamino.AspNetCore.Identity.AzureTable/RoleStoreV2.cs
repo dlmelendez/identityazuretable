@@ -41,20 +41,18 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
     }
 
     public class RoleStore<TRole, TKey, TUserRole, TRoleClaim, TContext> :
-        //IQueryableRoleStore<TRole>,
-        IRoleStore<TRole>,
-        IRoleClaimStore<TRole>,
-        IDisposable
+        RoleStoreBase<TRole, TKey, TUserRole, TRoleClaim>
         where TRole : Model.IdentityRole<TKey, TUserRole>, new()
         where TUserRole : Model.IdentityUserRole<TKey>, new()
         where TRoleClaim : Model.IdentityRoleClaim<TKey>, new()
         where TContext : IdentityCloudContext, new()
+        where TKey : IEquatable<TKey>
     {
         private bool _disposed;
         private CloudTable _roleTable;
         private IdentityErrorDescriber _errorDescriber = new IdentityErrorDescriber();
 
-        public RoleStore(TContext context)
+        public RoleStore(TContext context) : base(new IdentityErrorDescriber())
         {
             Context = context ?? throw new ArgumentNullException("context");
             _roleTable = context.RoleTable;
@@ -63,7 +61,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         public Task<bool> CreateTableIfNotExistsAsync()
          => Context.RoleTable.CreateIfNotExistsAsync();
 
-        public async virtual Task<IdentityResult> CreateAsync(TRole role, CancellationToken cancellationToken = default(CancellationToken))
+        public override async Task<IdentityResult> CreateAsync(TRole role, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -79,7 +77,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return IdentityResult.Success;
         }
 
-        public async virtual Task<IdentityResult> DeleteAsync(TRole role, CancellationToken cancellationToken = default(CancellationToken))
+        public override async Task<IdentityResult> DeleteAsync(TRole role, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -93,8 +91,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return IdentityResult.Success;
         }
 
-        public void Dispose()
+        public new void Dispose()
         {
+            base.Dispose();
             this.Dispose(true);
         }
 
@@ -112,7 +111,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
         }
 
-        public async Task<TRole> FindByIdAsync(string roleId, CancellationToken cancellationToken = default(CancellationToken))
+        public override async Task<TRole> FindByIdAsync(string roleId, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             this.ThrowIfDisposed();
@@ -124,7 +123,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return tresult.Result == null ? null : (TRole)tresult.Result;
         }
 
-        public async Task<TRole> FindByNameAsync(string roleName, CancellationToken cancellationToken = default(CancellationToken))
+        public override async Task<TRole> FindByNameAsync(string roleName, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             this.ThrowIfDisposed();
@@ -136,17 +135,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             TableResult tresult = await _roleTable.ExecuteAsync(getOperation);
             return tresult.Result == null ? null : (TRole)tresult.Result;
         }
+       
 
-
-        private void ThrowIfDisposed()
-        {
-            if (this._disposed)
-            {
-                throw new ObjectDisposedException(base.GetType().Name);
-            }
-        }
-
-        public async virtual Task<IdentityResult> UpdateAsync(TRole role, CancellationToken cancellationToken = default(CancellationToken))
+        public override async Task<IdentityResult> UpdateAsync(TRole role, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -181,68 +172,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
 
             return IdentityResult.Failed(_errorDescriber.InvalidRoleName(role.Name));
-        }
-
-        public Task<string> GetRoleIdAsync(TRole role, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
-            if (role == null)
-            {
-                throw new ArgumentNullException(nameof(role));
-            }
-            return Task.FromResult(role.Id.ToString());
-        }
+        }      
 
 
-        public Task<string> GetRoleNameAsync(TRole role, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
-            if (role == null)
-            {
-                throw new ArgumentNullException(nameof(role));
-            }
-            return Task.FromResult(role.Name);
-        }
-
-        public Task SetRoleNameAsync(TRole role, string roleName, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
-            if (role == null)
-            {
-                throw new ArgumentNullException(nameof(role));
-            }
-            role.Name = roleName;
-            return Task.CompletedTask;
-        }
-
-
-        public virtual Task<string> GetNormalizedRoleNameAsync(TRole role, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
-            if (role == null)
-            {
-                throw new ArgumentNullException(nameof(role));
-            }
-            return Task.FromResult(role.NormalizedName);
-        }
-
-        public virtual Task SetNormalizedRoleNameAsync(TRole role, string normalizedName, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            ThrowIfDisposed();
-            if (role == null)
-            {
-                throw new ArgumentNullException(nameof(role));
-            }
-            role.NormalizedName = normalizedName;
-            return Task.CompletedTask;
-        }
-
-        public async Task<IList<Claim>> GetClaimsAsync(TRole role, CancellationToken cancellationToken = default(CancellationToken))
+        public override async Task<IList<Claim>> GetClaimsAsync(TRole role, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -273,7 +206,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 .ToList() as IList<Claim>;
         }
 
-        public async Task AddClaimAsync(TRole role, Claim claim, CancellationToken cancellationToken = default(CancellationToken))
+        public override async Task AddClaimAsync(TRole role, Claim claim, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -295,7 +228,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             await _roleTable.ExecuteAsync(TableOperation.Insert(item));
         }
 
-        public async Task RemoveClaimAsync(TRole role, Claim claim, CancellationToken cancellationToken = default(CancellationToken))
+        public override async Task RemoveClaimAsync(TRole role, Claim claim, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -325,12 +258,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
         public TContext Context { get; private set; }
 
-        //public IQueryable<TRole> Roles
-        //{
-        //	get
-        //	{
-        //		return _roleTable.CreateQuery<TRole>();
-        //	}
-        //}
+        public override IQueryable<TRole> Roles
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
     }
 }
