@@ -17,7 +17,7 @@
     },
     "ElCamino.Identity.AzureTable.DataUtility": {
       "commandName": "Project",
-      "commandLineArgs": "/pagesize:1000 /migrate:loginindex /startpage:1 /finishpage:1"
+      "commandLineArgs": "/pagesize:1000 /migrate:roleandclaimindex "
     }
   }
 }

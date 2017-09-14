@@ -29,7 +29,8 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         private readonly static List<string> validCommands = new List<string>() {
             MigrationFactory.EmailIndex,
             MigrationFactory.LoginIndex,
-            MigrationFactory.ClaimRowkey
+            MigrationFactory.ClaimRowkey,
+            MigrationFactory.RoleAndClaimIndex
         };
         private const string nodeleteToken = "/nodelete";
         private const string maxdegreesparallelToken = "/maxparallel:";

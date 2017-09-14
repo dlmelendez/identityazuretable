@@ -701,6 +701,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                 {
                     int userCount = 4;
                     var sw2 = new Stopwatch();
+                    sw2.Start();
                     ApplicationUser tempUser = null;
                     for (int i = 0; i < userCount; i++)
                     {
@@ -716,7 +717,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     output.WriteLine("GenerateUsers(): {0} user count", userCount);
                     output.WriteLine("GenerateUsers(): {0} seconds", sw2.Elapsed.TotalSeconds);
 
+                    sw2.Reset();
+                    sw2.Start();
                     var users = await manager.GetUsersInRoleAsync(strUserRole);
+                    output.WriteLine("GetUsersInRoleAsync(): {0} seconds", sw2.Elapsed.TotalSeconds);
                     Assert.Equal(userCount, users.Count);
                 }
             }
@@ -885,25 +889,29 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             {
                 using (var manager = userFixture.CreateUserManager(store))
                 {
-                    int userCount = 4;// 101;
-                    DateTime start2 = DateTime.UtcNow;
+                    int userCount = 51;// 101;
+                    Stopwatch sw = new Stopwatch();
+                    sw.Start();
                     ApplicationUser tempUser = null;
                     for (int i = 0; i < userCount; i++)
                     {
-                        var sw = new Stopwatch();
+                        var sw2 = new Stopwatch();
                         output.WriteLine("CreateTestUserLite()");
-                        sw.Start();
+                        sw2.Start();
                         tempUser = await CreateTestUserLiteAsync(true, true);
-                        sw.Stop();
-                        output.WriteLine("CreateTestUserLite(): {0} seconds", sw.Elapsed.TotalSeconds);
+                        sw2.Stop();
+                        output.WriteLine("CreateTestUserLite(): {0} seconds", sw2.Elapsed.TotalSeconds);
                         await AddUserClaimHelper(tempUser, claim);
                     }
+                    sw.Stop();
                     output.WriteLine("GenerateUsers(): {0} user count", userCount);
-                    output.WriteLine("GenerateUsers(): {0} seconds", (DateTime.UtcNow - start2).TotalSeconds);
+                    output.WriteLine("GenerateUsers(): {0} seconds", sw.Elapsed.TotalSeconds);
 
-                    DateTime start3 = DateTime.UtcNow;
+                    sw.Reset();
+                    sw.Start();
                     var users = await manager.GetUsersForClaimAsync(claim);
-                    output.WriteLine("GetUsersForClaimAsync(): {0} seconds", (DateTime.UtcNow - start3).TotalSeconds);
+                    sw.Stop();
+                    output.WriteLine("GetUsersForClaimAsync(): {0} seconds", sw.Elapsed.TotalSeconds);
                     output.WriteLine("GetUsersForClaimAsync(): {0} user count", users.Count());
                     Assert.Equal(users.Count(), userCount);
                 }
@@ -927,9 +935,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     var claims = await manager.GetClaimsAsync(user);
                     Assert.True(claims.Any(c => c.Value == claim.Value & c.ValueType == claim.ValueType), "Claim not found");
 
-                    var userRemoveClaimTask = manager.RemoveClaimAsync(user, claim);
-                    userRemoveClaimTask.Wait();
-                    Assert.True(addClaimResult.Succeeded, string.Concat(addClaimResult.Errors));
+                    var userRemoveClaimResult = await manager.RemoveClaimAsync(user, claim);
+                    Assert.True(userRemoveClaimResult.Succeeded, string.Concat(userRemoveClaimResult.Errors));
 
                     var claims2 = await manager.GetClaimsAsync(user);
                     Assert.True(!claims2.Any(c => c.Value == claim.Value & c.ValueType == claim.ValueType), "Claim not removed");
@@ -939,6 +946,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     var addClaimResult2 = await manager.AddClaimAsync(user, claimEmpty);
                     var removeClaimResult2 = await manager.RemoveClaimAsync(user, claimEmpty);
                     Assert.True(addClaimResult2.Succeeded, string.Concat(addClaimResult2.Errors));
+                    Assert.True(removeClaimResult2.Succeeded, string.Concat(removeClaimResult2.Errors));
 
                     await Assert.ThrowsAsync<ArgumentNullException>(() => store.AddClaimAsync(null, claim));
                     await Assert.ThrowsAsync<ArgumentNullException>(() => store.AddClaimAsync(user, null));

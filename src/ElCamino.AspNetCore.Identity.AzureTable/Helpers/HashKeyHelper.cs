@@ -13,6 +13,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 {
     public class HashKeyHelper : UriEncodeKeyHelper
     {
+        private static readonly SHA256 sha = SHA256.Create();
+
         public override string GeneratePartitionKeyIndexByLogin(string plainLoginProvider, string plainProviderKey)
         {
             string hash = ConvertKeyToHash(base.GenerateRowKeyIdentityUserLogin(plainLoginProvider, plainProviderKey));
@@ -84,10 +86,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 
         public static string ConvertKeyToHash(string input)
         {
-            using (SHA256 sha = SHA256.Create())
-            {
-                return GetHash(sha, input);
-            }
+            return GetHash(sha, input);
         }
 
         private static string GetHash(SHA256 shaHash, string input)

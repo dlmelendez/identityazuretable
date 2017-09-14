@@ -92,10 +92,35 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
         public override TKey Id { get; set; }
 
-        //TODO: Figure out the backcompat story for LockoutEndDateUtc to LockoutEnd property
-        //public virtual DateTime? LockoutEndDateUtc { get; set; }
+        public virtual DateTime? LockoutEndDateUtc { get; set; }
 
-        public override DateTimeOffset? LockoutEnd { get => base.LockoutEnd; set => base.LockoutEnd = value; }
+        /// <summary>
+        /// LockoutEnd is stored as LockoutEndDateUtc for backwards compat.
+        /// </summary>
+        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
+        public override DateTimeOffset? LockoutEnd
+        {
+            get
+            {
+                if(LockoutEndDateUtc.HasValue)
+                {
+                    return new DateTimeOffset?(new DateTimeOffset(LockoutEndDateUtc.Value));
+                }
+
+                return null;
+            }
+            set
+            {
+                if(value.HasValue)
+                {
+                    LockoutEndDateUtc = value.Value.UtcDateTime;
+                }
+                else
+                {
+                    LockoutEndDateUtc = null;
+                }
+            }
+        }
 
 
         public string PartitionKey { get; set; }

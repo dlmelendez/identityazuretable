@@ -94,6 +94,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             if (claims == null) throw new ArgumentNullException("claims");
 
             BatchOperationHelper bop = new BatchOperationHelper();
+
+            List<Task> tasks = new List<Task>();
+
             foreach (Claim c in claims)
             {
                 TUserClaim item = Activator.CreateInstance<TUserClaim>();
@@ -105,9 +108,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 user.Claims.Add(item);
 
                 bop.Add(TableOperation.Insert(item));
+                tasks.Add(_indexTable.ExecuteAsync(TableOperation.InsertOrReplace(CreateClaimIndex(user.Id.ToString(), c.Type, c.Value))));
             }
 
-            await bop.ExecuteBatchAsync(_userTable);
+            tasks.Add(bop.ExecuteBatchAsync(_userTable));
+            await Task.WhenAll(tasks);
         }
        
         public virtual async Task AddClaimAsync(TUser user, Claim claim)
@@ -124,7 +129,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             user.Claims.Add(item);
 
-            await _userTable.ExecuteAsync(TableOperation.Insert(item));
+            List<Task> tasks = new List<Task>(2);
+
+            tasks.Add(_userTable.ExecuteAsync(TableOperation.Insert(item)));
+            tasks.Add(_indexTable.ExecuteAsync(TableOperation.InsertOrReplace(CreateClaimIndex(user.Id.ToString(), claim.Type, claim.Value))));
+
+            await Task.WhenAll(tasks);
         }
 
         public override Task AddLoginAsync(TUser user, UserLoginInfo login, CancellationToken cancellationToken = default(CancellationToken))
@@ -147,7 +157,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 , _indexTable.ExecuteAsync(TableOperation.InsertOrReplace(index)));
         }
 
-        public virtual Task AddToRoleAsync(TUser user, string roleName, CancellationToken cancellationToken = default(CancellationToken))
+        public virtual async Task AddToRoleAsync(TUser user, string roleName, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             this.ThrowIfDisposed();
@@ -172,7 +182,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             user.Roles.Add(item);
             roleT.Users.Add(item);
 
-            return _userTable.ExecuteAsync(TableOperation.Insert(item));
+            List<Task> tasks = new List<Task>(2);
+
+            tasks.Add(_userTable.ExecuteAsync(TableOperation.Insert(item)));
+            tasks.Add(_indexTable.ExecuteAsync(TableOperation.InsertOrReplace(CreateRoleIndex(user.Id.ToString(), roleName))));
+
+            await Task.WhenAll(tasks);
         }
 
         public async override Task<IdentityResult> CreateAsync(TUser user, CancellationToken cancellationToken = default(CancellationToken))
@@ -369,6 +384,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             this.ThrowIfDisposed();
             return this.GetUserAggregateAsync(userId.ToString());
         }
+
+        private TableQuery GetUserByRoleQuery(string plainRoleName)
+             => GetUserIdsByIndex(KeyHelper.GenerateRowKeyIdentityUserRole(plainRoleName));
+
+        private TableQuery GetUserByClaimQuery(Claim claim)
+         => GetUserIdsByIndex(KeyHelper.GenerateRowKeyIdentityUserClaim(claim.Type, claim.Value));
 
         private TableQuery FindByEmailQuery(string plainEmail)
          => GetUserIdsByIndex(KeyHelper.GenerateRowKeyUserEmail(plainEmail));
@@ -785,14 +806,17 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             // Claim ctor doesn't allow Claim.Value to be null. Need to allow string.empty.
 
+            List<Task> tasks = new List<Task>(2);
+
             TUserClaim local = (from uc in user.Claims
                                 where uc.RowKey == KeyHelper.GenerateRowKeyIdentityUserClaim(claim.Type, claim.Value)
                                 select uc).FirstOrDefault();
-            {
-                user.Claims.Remove(local);
-                TableOperation deleteOperation = TableOperation.Delete(local);
-                await _userTable.ExecuteAsync(deleteOperation);
-            }
+            user.Claims.Remove(local);
+            TableOperation deleteOperation = TableOperation.Delete(local);
+            tasks.Add(_indexTable.ExecuteAsync(TableOperation.Delete(CreateClaimIndex(user.Id.ToString(), local.ClaimType, local.ClaimValue))));
+            tasks.Add(_userTable.ExecuteAsync(deleteOperation));
+
+            await Task.WhenAll(tasks);
 
         }
 
@@ -810,11 +834,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             TUserClaim local = (from uc in user.Claims
                                 where uc.RowKey == KeyHelper.GenerateRowKeyIdentityUserClaim(claim.Type, claim.Value)
                                 select uc).FirstOrDefault();
+
+            List<Task> tasks = new List<Task>(3);
+
             if (local != null)
             {
                 user.Claims.Remove(local);
                 TableOperation deleteOperation = TableOperation.Delete(local);
                 bop.Add(deleteOperation);
+                tasks.Add(_indexTable.ExecuteAsync(TableOperation.Delete(CreateClaimIndex(user.Id.ToString(), local.ClaimType, local.ClaimValue))));
             }
             TUserClaim item = Activator.CreateInstance<TUserClaim>();
             item.UserId = user.Id;
@@ -825,7 +853,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             user.Claims.Add(item);
 
             bop.Add(TableOperation.Insert(item));
-            await bop.ExecuteBatchAsync(_userTable);
+            tasks.Add(_indexTable.ExecuteAsync(TableOperation.Delete(CreateClaimIndex(user.Id.ToString(), item.ClaimType, item.ClaimValue))));
+            tasks.Add(bop.ExecuteBatchAsync(_userTable));
+
+            await Task.WhenAll(tasks);
         }
 
         public override async Task RemoveClaimsAsync(TUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken = default(CancellationToken))
@@ -837,6 +868,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             // Claim ctor doesn't allow Claim.Value to be null. Need to allow string.empty.
             BatchOperationHelper bop = new BatchOperationHelper();
+            List<Task> tasks = new List<Task>();
 
             foreach (Claim claim in claims)
             {
@@ -847,9 +879,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                     user.Claims.Remove(local);
                     TableOperation deleteOperation = TableOperation.Delete(local);
                     bop.Add(deleteOperation);
+                    tasks.Add(_indexTable.ExecuteAsync(TableOperation.Delete(CreateClaimIndex(user.Id.ToString(), local.ClaimType, local.ClaimValue))));
                 }
             }
-            await bop.ExecuteBatchAsync(_userTable);
+            tasks.Add(bop.ExecuteBatchAsync(_userTable));
+            await Task.WhenAll(tasks);
         }
 
 
@@ -867,7 +901,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 user.Roles.Remove(item);
                 TableOperation deleteOperation = TableOperation.Delete(item);
 
-                await _userTable.ExecuteAsync(deleteOperation);
+                List<Task> tasks = new List<Task>(2);
+
+                tasks.Add(_userTable.ExecuteAsync(deleteOperation));
+                tasks.Add(_indexTable.ExecuteAsync(TableOperation.Delete(CreateRoleIndex(user.Id.ToString(), roleName))));
+
+                await Task.WhenAll(tasks);
             }
         }
 
@@ -1048,6 +1087,37 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
         public TContext Context { get; private set; }
 
+        private Model.IdentityUserIndex CreateClaimIndex(string userid, string claimType, string claimValue)
+        {
+            return new Model.IdentityUserIndex()
+            {
+                Id = userid,
+                PartitionKey = KeyHelper.GenerateRowKeyIdentityUserClaim(claimType, claimValue),
+                RowKey = userid,
+                KeyVersion = KeyHelper.KeyVersion,
+                ETag = Constants.ETagWildcard
+            };
+        }
+
+
+        /// <summary>
+        ///  Creates an role -> users index suitable for a crud operation
+        /// </summary>
+        /// <param name="userid">Formatted UserId from the KeyHelper or IdentityUser.Id.ToString()</param>
+        /// <param name="plainRoleName">Plain role name</param>
+        /// <returns></returns>
+        private Model.IdentityUserIndex CreateRoleIndex(string userid, string plainRoleName)
+        {
+            return new Model.IdentityUserIndex()
+            {
+                Id = userid,
+                PartitionKey = KeyHelper.GenerateRowKeyIdentityUserRole(plainRoleName),
+                RowKey = userid,
+                KeyVersion = KeyHelper.KeyVersion,
+                ETag = Constants.ETagWildcard
+            };
+        }
+
         /// <summary>
         /// Creates an email index suitable for a crud operation
         /// </summary>
@@ -1079,61 +1149,25 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
         }
 
-        protected async Task<IList<TUser>> GetUsersByRowkeyAsync(string rowKey)
-        {
-#if DEBUG
-            DateTime startIndex = DateTime.UtcNow;
-#endif
-            ConcurrentBag<List<TUser>> lUsers = new ConcurrentBag<List<TUser>>();
-            TableContinuationToken token = new TableContinuationToken();
-            const int takeCount = 100;
-            const int taskMax = 10;
-            TableQuery tq = new TableQuery();
-            tq.FilterString = TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal,
-                rowKey);
-            tq.SelectColumns = new List<string>() { "PartitionKey" };
-            tq.TakeCount = takeCount;
-            List<Task> taskBatch = new List<Task>(taskMax);
-            Func<List<string>, Task> getUsers = async (ids) =>
-            {
-                lUsers.Add((await GetUserAggregateQueryAsync(ids)).ToList());
-            };
-            while (token != null)
-            {
-                var response = await _userTable.ExecuteQuerySegmentedAsync(tq, token);
-                var tempUserIds = response.ToList().Select(u => u.PartitionKey).Distinct().ToList();
-                taskBatch.Add(getUsers(tempUserIds));
-                if (taskBatch.Count % taskMax == 0)
-                {
-                    await Task.WhenAll(taskBatch.ToArray());
-                    taskBatch.Clear();
-                }
-                token = response.ContinuationToken;
-            }
-
-            if (taskBatch.Count > 0)
-            {
-                await Task.WhenAll(taskBatch.ToArray());
-                taskBatch.Clear();
-            }
-#if DEBUG
-            Debug.WriteLine("GetUsersByRowkeyAsync (Threaded query): {0} seconds", (DateTime.UtcNow - startIndex).TotalSeconds);
-#endif
-
-            return lUsers.SelectMany(u => u).ToList();
-        }
-
-        public override Task<IList<TUser>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken = default(CancellationToken))
+        public override async Task<IList<TUser>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
 
-            if (claim == null) throw new ArgumentNullException(nameof(claim));
+            if (claim == null)
+            {
+                throw new ArgumentNullException(nameof(claim));
+            }
             if (string.IsNullOrWhiteSpace(claim.Type))
+            {
                 throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(claim.Type));
+            }
             if (string.IsNullOrWhiteSpace(claim.Value))
+            {
                 throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(claim.Value));
-            return GetUsersByRowkeyAsync(KeyHelper.GenerateRowKeyIdentityUserClaim(claim.Type, claim.Value));
+            }
+
+            return (await this.GetUsersAggregateByIndexQueryAsync(GetUserByClaimQuery(claim))).ToList();
         }
 
         public async Task<IList<TUser>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken = default(CancellationToken))
@@ -1146,7 +1180,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 {
                     throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(roleName));
                 }
-                return await GetUsersByRowkeyAsync(KeyHelper.GenerateRowKeyIdentityUserRole(roleName));
+
+                return (await this.GetUsersAggregateByIndexQueryAsync(GetUserByRoleQuery(roleName))).ToList();
             }
 
             return new List<TUser>();
@@ -1211,36 +1246,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             await _userTable.ExecuteAsync(TableOperation.InsertOrReplace(token as ITableEntity));
         }
 
-        //public override async Task SetTokenAsync(TUser user, string loginProvider, string tokenName, string tokenValue, CancellationToken cancellationToken)
-        //{
-
-        //    if (tokenValue == null)
-        //    {
-        //        tokenValue = string.Empty;
-        //    }
-
-        //    await base.SetTokenAsync(user, loginProvider, tokenName, tokenValue, cancellationToken);
-        //}
 
         protected override async Task RemoveUserTokenAsync(TUserToken token)
         {
             await _userTable.ExecuteAsync(TableOperation.Delete(token as ITableEntity));
         }
-
-        //public override async Task RemoveTokenAsync(TUser user, string loginProvider, string tokenName, CancellationToken cancellationToken)
-        //{
-
-        //    if (string.IsNullOrWhiteSpace(tokenName))
-        //    {
-        //        throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(tokenName));
-        //    }
-        //    if (string.IsNullOrWhiteSpace(loginProvider))
-        //    {
-        //        throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(loginProvider));
-        //    }
-
-        //    await base.RemoveTokenAsync(user, loginProvider, tokenName, cancellationToken);
-        //}
+        
 
         
     }

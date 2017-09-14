@@ -71,16 +71,22 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
             return TableEntity.WriteUserObject(this, operationContext);
         }
 
-        //TODO: Figure out migration path for Name and Value properties
+        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
+        public override string Name { get => base.Name; set => base.Name = value; }
+
+        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
+        public override string Value { get => base.Value; set => base.Value = value; }
+
+        //These properties are more descriptive fields in storage, also allows for backcompat
         /// <summary>
         /// Gets or sets the name of the token.
         /// </summary>
-        //public virtual string TokenName { get; set; }
+        public virtual string TokenName { get => base.Name; set => base.Name = value; }
 
         /// <summary>
         /// Gets or sets the token value.
         /// </summary>
-        //public virtual string TokenValue { get; set; }
+        public virtual string TokenValue { get => base.Value; set => base.Value = value; }
 
     }
 
