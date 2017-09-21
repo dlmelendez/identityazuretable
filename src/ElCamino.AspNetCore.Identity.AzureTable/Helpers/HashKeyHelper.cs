@@ -7,22 +7,15 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-#if net45
-using Microsoft.AspNet.Identity;
-#else
 using Microsoft.AspNetCore.Identity;
-#endif
 
-#if net45
-namespace ElCamino.AspNet.Identity.AzureTable.Helpers
-#else
 namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
-#endif
 {
     public class HashKeyHelper : UriEncodeKeyHelper
     {
+        private static readonly SHA256 sha = SHA256.Create();
 
-		public override string GeneratePartitionKeyIndexByLogin(string plainLoginProvider, string plainProviderKey)
+        public override string GeneratePartitionKeyIndexByLogin(string plainLoginProvider, string plainProviderKey)
         {
             string hash = ConvertKeyToHash(base.GenerateRowKeyIdentityUserLogin(plainLoginProvider, plainProviderKey));
             return string.Format(Constants.RowKeyConstants.FormatterIdentityUserLogin, hash);
@@ -65,7 +58,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             string hash = ConvertKeyToHash(base.GenerateRowKeyIdentityUserClaim(claimType, claimValue));
             return string.Format(Constants.RowKeyConstants.FormatterIdentityUserClaim, hash);
         }
-#if !net45
+
         public override string GenerateRowKeyIdentityRoleClaim(string claimType, string claimValue)
         {
             string hash = ConvertKeyToHash(base.GenerateRowKeyIdentityRoleClaim(claimType, claimValue));
@@ -77,7 +70,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             string hash = ConvertKeyToHash(base.GenerateRowKeyIdentityUserToken(loginProvider, name));
             return string.Format(Constants.RowKeyConstants.FormatterIdentityUserToken, hash);
         }
-#endif
 
         public override string ParsePartitionKeyIdentityRoleFromRowKey(string rowKey)
         {
@@ -88,23 +80,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         {
             string hash = ConvertKeyToHash(base.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey));
             return string.Format(Constants.RowKeyConstants.FormatterIdentityUserLogin, hash);
-
         }
 
-        public override double KeyVersion
-        {
-            get
-            {
-                return 1.70;
-            }
-        }
+        public override double KeyVersion => 2.0;
 
         public static string ConvertKeyToHash(string input)
         {
-            using (SHA256 sha = SHA256.Create())
-            {
-                return GetHash(sha, input);
-            }
+            return GetHash(sha, input);
         }
 
         private static string GetHash(SHA256 shaHash, string input)
@@ -113,7 +95,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             byte[] data = shaHash.ComputeHash(Encoding.Unicode.GetBytes(input));
             Debug.WriteLine(string.Format("Key Size before hash: {0} bytes", Encoding.Unicode.GetBytes(input).Length));
 
-            // Create a new Stringbuilder to collect the bytes 
+            // Create a new StringBuilder to collect the bytes 
             // and create a string.
             StringBuilder sBuilder = new StringBuilder(32);
 

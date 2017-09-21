@@ -1,29 +1,17 @@
 ﻿// MIT License Copyright 2017 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
-#if net45
-using Microsoft.AspNet.Identity;
-using ElCamino.AspNet.Identity.AzureTable.Helpers;
-#else
-using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
-#endif
-using Microsoft.WindowsAzure.Storage.Table;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.Storage.Table;
+using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
+using Microsoft.WindowsAzure.Storage;
 
-#if net45
-namespace ElCamino.AspNet.Identity.AzureTable.Model
-#else
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
-#endif
 {
-public class IdentityUser : IdentityUser<string, IdentityUserLogin, IdentityUserRole, IdentityUserClaim>
-#if net45
-		, IUser
-        , IUser<string>
-#endif
-		, IGenerateKeys
+    public class IdentityUser : IdentityUser<string, IdentityUserLogin, IdentityUserRole, IdentityUserClaim>, IGenerateKeys
     {
         public IdentityUser() { }
 
@@ -58,22 +46,13 @@ public class IdentityUser : IdentityUser<string, IdentityUserLogin, IdentityUser
 
         public override string Id
         {
-            get
-            {
-                return RowKey;
-            }
-            set
-            {
-                RowKey = value;
-            }
+            get => RowKey;
+            set => RowKey = value;
         }
 
         public override string UserName
         {
-            get
-            {
-                return base.UserName;
-            }
+            get => base.UserName;
             set
             {
                 if (!string.IsNullOrWhiteSpace(value))
@@ -84,12 +63,9 @@ public class IdentityUser : IdentityUser<string, IdentityUserLogin, IdentityUser
         }
     }
 
-    public class IdentityUser<TKey, TLogin, TRole, TClaim> : TableEntity
-#if net45
-        ,IUser<TKey>
-#endif
-		where TKey : IEquatable<TKey>
-		where TLogin : IdentityUserLogin<TKey>
+    public class IdentityUser<TKey, TLogin, TRole, TClaim> : Microsoft.AspNetCore.Identity.IdentityUser<TKey>, ITableEntity
+        where TKey : IEquatable<TKey>
+        where TLogin : IdentityUserLogin<TKey>
         where TRole : IdentityUserRole<TKey>
         where TClaim : IdentityUserClaim<TKey>
     {
@@ -100,51 +76,68 @@ public class IdentityUser : IdentityUser<string, IdentityUserLogin, IdentityUser
             this.Logins = new List<TLogin>(10);
         }
 
-		#region Collections
+        #region Collections
         [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
         public ICollection<TClaim> Claims { get; private set; }
 
-		[Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
-		public ICollection<TLogin> Logins { get; private set; }
-
-		[Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
-		public ICollection<TRole> Roles { get; private set; }
-
-		#endregion
-#if !net45
-		public virtual string NormalizedEmail { get; set; }
-
-		public virtual string NormalizedUserName { get; set; }
-
-		//Not sure if this is needed.
-		public virtual string ConcurrencyStamp { get; set; } = Guid.NewGuid().ToString();
-
-#endif
-		public virtual int AccessFailedCount { get; set; }
-
-        public virtual string Email { get; set; }
-
-		public virtual bool EmailConfirmed { get; set; }
+        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
+        public ICollection<TLogin> Logins { get; private set; }
 
         [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
-        public virtual TKey Id { get; set; }
+        public ICollection<TRole> Roles { get; private set; }
 
-        public virtual bool LockoutEnabled { get; set; }
+        #endregion
+
+
+        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
+        public override TKey Id { get; set; }
 
         public virtual DateTime? LockoutEndDateUtc { get; set; }
 
-        public virtual string PasswordHash { get; set; }
+        /// <summary>
+        /// LockoutEnd is stored as LockoutEndDateUtc for backwards compat.
+        /// </summary>
+        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
+        public override DateTimeOffset? LockoutEnd
+        {
+            get
+            {
+                if(LockoutEndDateUtc.HasValue)
+                {
+                    return new DateTimeOffset?(new DateTimeOffset(LockoutEndDateUtc.Value));
+                }
 
-        public virtual string PhoneNumber { get; set; }
+                return null;
+            }
+            set
+            {
+                if(value.HasValue)
+                {
+                    LockoutEndDateUtc = value.Value.UtcDateTime;
+                }
+                else
+                {
+                    LockoutEndDateUtc = null;
+                }
+            }
+        }
 
-        public virtual bool PhoneNumberConfirmed { get; set; }
 
-        public virtual string SecurityStamp { get; set; }
+        public string PartitionKey { get; set; }
+        public string RowKey { get; set; }
+        public DateTimeOffset Timestamp { get; set; }
+        public string ETag { get; set; }
 
-        public virtual bool TwoFactorEnabled { get; set; }
+        public void ReadEntity(IDictionary<string, EntityProperty> properties, OperationContext operationContext)
+        {
+            TableEntity.ReadUserObject(this, properties, operationContext);
+        }
 
-        public virtual string UserName { get; set; }
+        public IDictionary<string, EntityProperty> WriteEntity(OperationContext operationContext)
+        {
+            return TableEntity.WriteUserObject(this, operationContext);
+        }
+    }
 
-	}
-
+    
 }

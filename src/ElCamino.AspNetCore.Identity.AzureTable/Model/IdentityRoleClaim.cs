@@ -1,12 +1,13 @@
 // MIT License Copyright 2017 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
-#if !net45
-using Microsoft.WindowsAzure.Storage.Table;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.Storage.Table;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
+using Microsoft.WindowsAzure.Storage;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 {
@@ -49,15 +50,22 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         }
     }
 
-    public class IdentityRoleClaim<TKey> : TableEntity
+    public class IdentityRoleClaim<TKey> : Microsoft.AspNetCore.Identity.IdentityRoleClaim<TKey>, ITableEntity
+        where TKey : IEquatable<TKey>
     {
-        public virtual string ClaimType { get; set; }
+        public string PartitionKey { get; set; }
+        public string RowKey { get; set; }
+        public DateTimeOffset Timestamp { get; set; }
+        public string ETag { get; set; }
 
-        public virtual string ClaimValue { get; set; }
+        public void ReadEntity(IDictionary<string, EntityProperty> properties, OperationContext operationContext)
+        {
+            TableEntity.ReadUserObject(this, properties, operationContext);
+        }
 
-        public virtual TKey RoleId { get; set; }
-
+        public IDictionary<string, EntityProperty> WriteEntity(OperationContext operationContext)
+        {
+            return TableEntity.WriteUserObject(this, operationContext);
+        }
     }
-
 }
-#endif

@@ -1,17 +1,17 @@
 ﻿// MIT License Copyright 2017 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
-#if !net45
 using System;
 using ElCamino.AspNetCore.Identity.AzureTable;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection;
-using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
-using ElCamino.AspNet.Identity.AzureTable;
+using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser;
+using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Json;
-using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+
+using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
+using Microsoft.AspNetCore.Identity;
 
 namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 {
@@ -21,7 +21,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
         where TContext : IdentityCloudContext, new()
     {
 
-#region IDisposable Support
+        #region IDisposable Support
         protected bool disposedValue = false;
 
         protected virtual void Dispose(bool disposing)
@@ -44,12 +44,12 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
         {
             Dispose(true);
         }
-#endregion
+        #endregion
 
         public IdentityConfiguration GetConfig()
         {
             var configuration = new ConfigurationBuilder()
-                .AddJsonFile("config.json", reloadOnChange:true, optional:false);
+                .AddJsonFile("config.json", reloadOnChange: true, optional: false);
 
             var root = configuration.Build();
 
@@ -108,10 +108,9 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
             }))
             .AddDefaultTokenProviders();
             services.AddLogging();
-           
+
             return services.BuildServiceProvider().GetService(typeof(RoleManager<TRole>)) as RoleManager<TRole>;
         }
-
 
         public UserStore<TUser> CreateUserStore()
         {
@@ -135,7 +134,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 
         public UserManager<TUser> CreateUserManager(UserStore<TUser> store, IdentityOptions options = null)
         {
-            if(options == null)
+            if (options == null)
             {
                 options = new IdentityOptions();
             }
@@ -151,18 +150,12 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
                 config.Lockout.MaxFailedAccessAttempts = options.Lockout.MaxFailedAccessAttempts;
             })
                 //.AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddAzureTableStores<IdentityCloudContext>(new Func<IdentityConfiguration>(() =>
-                {
-                    return GetConfig();
-                }))
+                .AddAzureTableStores<IdentityCloudContext>(new Func<IdentityConfiguration>(
+                    () => GetConfig()))
                 .AddDefaultTokenProviders();
             services.AddLogging();
 
             return services.BuildServiceProvider().GetService(typeof(UserManager<TUser>)) as UserManager<TUser>;
         }
-
-
-
     }
 }
-#endif

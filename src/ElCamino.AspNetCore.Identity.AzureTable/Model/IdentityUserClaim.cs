@@ -1,22 +1,16 @@
 ﻿// MIT License Copyright 2017 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
-using Microsoft.WindowsAzure.Storage.Table;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-#if net45
-using ElCamino.AspNet.Identity.AzureTable.Helpers;
-
-namespace ElCamino.AspNet.Identity.AzureTable.Model
-#else
+using Microsoft.WindowsAzure.Storage.Table;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
+using Microsoft.WindowsAzure.Storage;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
-#endif
 {
-public class IdentityUserClaim : IdentityUserClaim<string>, IGenerateKeys
+    public class IdentityUserClaim : IdentityUserClaim<string>, IGenerateKeys
     {
         public IdentityUserClaim() { }
 
@@ -42,7 +36,7 @@ public class IdentityUserClaim : IdentityUserClaim<string>, IGenerateKeys
 
         public double KeyVersion { get; set; }
 
-       [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
+        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
         public override string UserId
         {
             get
@@ -56,16 +50,25 @@ public class IdentityUserClaim : IdentityUserClaim<string>, IGenerateKeys
         }
     }
 
-    public class IdentityUserClaim<TKey> : TableEntity
+    public class IdentityUserClaim<TKey> : Microsoft.AspNetCore.Identity.IdentityUserClaim<TKey>,  
+        ITableEntity
+        where TKey : IEquatable<TKey>
     {
-        public virtual string ClaimType { get; set; }
+        public new string Id { get; set; }
+        public string PartitionKey { get; set; }
+        public string RowKey { get; set; }
+        public DateTimeOffset Timestamp { get; set; }
+        public string ETag { get; set; }
 
-        public virtual string ClaimValue { get; set; }
+        public void ReadEntity(IDictionary<string, EntityProperty> properties, OperationContext operationContext)
+        {
+            TableEntity.ReadUserObject(this, properties, operationContext);
+        }
 
-        public string Id { get; set; }
-
-        public virtual TKey UserId { get; set; }
-
+        public IDictionary<string, EntityProperty> WriteEntity(OperationContext operationContext)
+        {
+            return TableEntity.WriteUserObject(this, operationContext);
+        }
+       
     }
-
 }

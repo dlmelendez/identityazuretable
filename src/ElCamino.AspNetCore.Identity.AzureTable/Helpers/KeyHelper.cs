@@ -7,18 +7,9 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-#if net45
-using Microsoft.AspNet.Identity;
-#else
 using Microsoft.AspNetCore.Identity;
-#endif
 
-
-#if net45
-namespace ElCamino.AspNet.Identity.AzureTable.Helpers
-#else
 namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
-#endif
 {
     public static class KeyHelper
     {
@@ -61,7 +52,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             return hashHelper.GenerateRowKeyIdentityUserClaim(claimType, claimValue);
         }
 
-#if !net45
         public static string GenerateRowKeyIdentityRoleClaim(string claimType, string claimValue)
         {
             return hashHelper.GenerateRowKeyIdentityRoleClaim(claimType, claimValue);
@@ -76,7 +66,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             return baseHelper.GenerateRowKeyIdentityUserClaim(claimType, claimValue);
         }
 
-#endif
         public static string GenerateRowKeyIdentityUserLogin(string loginProvider, string providerKey)
         {
             return baseHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey);

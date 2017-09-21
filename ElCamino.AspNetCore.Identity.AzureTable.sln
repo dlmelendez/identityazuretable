@@ -1,12 +1,18 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.4
+VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElCamino.AspNetCore.Identity.AzureTable", "src\ElCamino.AspNetCore.Identity.AzureTable\ElCamino.AspNetCore.Identity.AzureTable.csproj", "{5FBD2375-18B4-426A-A875-7D99521A4DD0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElCamino.AspNetCore.Identity.AzureTable", "src\ElCamino.AspNetCore.Identity.AzureTable\ElCamino.AspNetCore.Identity.AzureTable.csproj", "{5FBD2375-18B4-426A-A875-7D99521A4DD0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElCamino.AspNetCore.Identity.AzureTable.Tests", "tests\ElCamino.AspNetCore.Identity.AzureTable.Tests\ElCamino.AspNetCore.Identity.AzureTable.Tests.csproj", "{B97DCC75-93CD-41C7-B7BE-D8DA6EA3C468}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElCamino.AspNetCore.Identity.AzureTable.Tests", "tests\ElCamino.AspNetCore.Identity.AzureTable.Tests\ElCamino.AspNetCore.Identity.AzureTable.Tests.csproj", "{B97DCC75-93CD-41C7-B7BE-D8DA6EA3C468}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElCamino.Identity.AzureTable.DataUtility", "src\ElCamino.Identity.AzureTable.DataUtility\ElCamino.Identity.AzureTable.DataUtility.csproj", "{56BB5104-E5F7-49BD-A5E9-25B818197F28}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElCamino.Identity.AzureTable.DataUtility", "src\ElCamino.Identity.AzureTable.DataUtility\ElCamino.Identity.AzureTable.DataUtility.csproj", "{56BB5104-E5F7-49BD-A5E9-25B818197F28}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EF35BCF8-88F2-4DDD-AD83-B2A095393CE4}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,5 +42,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4D0D5C8A-8A12-4507-98B5-A03F69C5EA67}
 	EndGlobalSection
 EndGlobal

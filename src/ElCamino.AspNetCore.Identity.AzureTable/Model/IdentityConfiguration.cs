@@ -2,11 +2,7 @@
 
 using Newtonsoft.Json;
 
-#if net45
-namespace ElCamino.AspNet.Identity.AzureTable.Model
-#else
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
-#endif
 {
     [JsonObject("identityConfiguration")]
     public class IdentityConfiguration
@@ -19,6 +15,5 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 
         [JsonProperty("locationMode")]
         public string LocationMode { get; set; }
-
     }
 }
