@@ -1,8 +1,8 @@
 ﻿<h1>Getting Started</h1>
-You will need to setup your development environment to use this solution. This guide assumes you are familiar with using Visual Studio 2015 and you will need above the Basic version to execute the unit test project. Development requirements:<br>
+You will need to setup your development environment to use this solution. This guide assumes you are familiar with using Visual Studio 2017. Development requirements:<br>
 <ul>
     <li>
-        Visual Studio 2015 <a href="http://visualstudio.com">http://visualstudio.com</a>
+        Visual Studio 2017 <a href="http://visualstudio.com">http://visualstudio.com</a>
     </li>
     <li>
         Azure SDK <a href="http://azure.microsoft.com/en-us/downloads/">http://azure.microsoft.com/en-us/downloads/</a>
@@ -14,29 +14,29 @@ You will need to setup your development environment to use this solution. This g
         </a>
     </li>
 </ul>
-<h2>Identity 2.0</h2>
+<h2>Identity Core</h2>
+<p>ElCamino.AspNetCore.Identity.AzureTable (ASP.NET Identity Core framework) <a class="nuget_download_link" href="https://www.nuget.org/packages/ElCamino.AspNetCore.Identity.AzureTable/">NuGet</a></p>
+<br />Semantic versioning of this package follows the major release of <a href="https://github.com/aspnet/Identity/tree/2.0.0">Microsoft.AspNetCore.Identity</a>. Included in the source are MVC 6 Website projects (targeting .NET Core 1.x and 2.x) that are examples of removing the EntityFramework and Identity EntityFramework references and replacing them with the Azure Table storage provider. The source of the sample projects can be found
+<a href="https://github.com/dlmelendez/identityazuretable/tree/master/sample/">
+    Source Code
+</a> and the latest walk-through can be found here <a href="#/walkthroughcore2">
+    Sample Mvc Core 2 Walkthrough
+</a>.<br>
+<h2>Identity 2.0 (deprecated)</h2>
 <p>ElCamino.AspNet.Identity.AzureTable (ASP.NET Identity 2.0 framework) <a class="nuget_download_link" href="https://www.nuget.org/packages/ElCamino.AspNet.Identity.AzureTable/">NuGet</a></p>
-<br />Use this package to target the .NET Framework 4.5 and <a href="http://www.asp.net/identity/overview/getting-started/introduction-to-aspnet-identity">Microsoft.AspNet.Identity.Core 2.2</a> for Mvc 5. Included in the source is a MVC 5 Website project (targeting .NET Framework 4.5) that is an example of removing the EntityFramework and Identity EntityFramework references and replacing them with the Azure Table storage provider. The source of the sample project can be found
-<a href="https://github.com/dlmelendez/identityazuretable/tree/master/sample/samplemvc">
-    Source Code
-</a> /sample/samplemvc and the walk-through can be found here <a href="#/walkthrough">
-    Sample Mvc Walkthrough
-</a>.<br>
-<h2>Identity Core 1.0</h2>
-<p>ElCamino.AspNetCore.Identity.AzureTable (ASP.NET Identity Core 1.0 framework) <a class="nuget_download_link" href="https://www.nuget.org/packages/ElCamino.AspNetCore.Identity.AzureTable/">NuGet</a></p>
-<br />Use this package to target the .NET Framework 4.51 or .NET Core 1.0 and <a href="https://github.com/aspnet/Identity/tree/1.0.0">Microsoft.AspNetCore.Identity 1.0</a> for Mvc 6. Included in the source is a MVC 6 Website project (targeting .NET Core 1.0) that is an example of removing the EntityFramework and Identity EntityFramework references and replacing them with the Azure Table storage provider. The source of the sample project can be found
-<a href="https://github.com/dlmelendez/identityazuretable/tree/master/sample/samplemvccore">
-    Source Code
-</a> /sample/samplemvccore and the walk-through can be found here <a href="#/walkthroughcore">
-    Sample Mvc Core Walkthrough
-</a>.<br>
+<br />No new development will happen on this package. The code is archived in branch <a href="https://github.com/dlmelendez/identityazuretable/tree/rel/1.7">rel/1.7</a>. However, you should follow the <a href="#/migration">migration plan</a> to upgrade to Identity Core 2.0 with package ElCamino.AspNetCore.Identity.AzureTable. Use this package to target the .NET Framework 4.5 and <a href="http://www.asp.net/identity/overview/getting-started/introduction-to-aspnet-identity">Microsoft.AspNet.Identity.Core 2.2</a> for Mvc 5. Included in the source is a MVC 5 Website project (targeting .NET Framework 4.5) that is an example of removing the EntityFramework and Identity EntityFramework references and replacing them with the Azure Table storage provider. The sample project can be found
+<a href="https://github.com/dlmelendez/identityazuretable/tree/rel/1.7/sample/samplemvc">
+    in the source code
+</a>, <a href="#/walkthrough">
+    Sample Mvc Walkthrough</a> and <a href="#/techoverview">technical overview</a>.<br>
+
 <h1>Read access geo-redundant storage (RA-GRS) support </h1>
  <a href="#/ragrs">
     Read access geo-redundant storage &#40;RA-GRS&#41;
 </a>.<br>
 <h1>Technical Overview</h1>
 Want more details about what is going on under the hood in plain English and plenty of pictures? Visit
-<a href="#/techoverview">
+<a href="#/techoverview2">
     Technical Overview
 </a>.
 <div></div>
