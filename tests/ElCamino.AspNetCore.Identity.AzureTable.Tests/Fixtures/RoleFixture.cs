@@ -17,41 +17,16 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
         where TRole : IdentityRole, new()
         where TContext : IdentityCloudContext, new()
     {
-        private IdentityRole currentRole;
 
         public RoleFixture() : base()
         {
         }
 
-        public async Task CreateRoleAsync()
-        {
-            using (RoleManager<TRole> manager = CreateRoleManager())
-            {
-                string roleNew = string.Format("TestRole_{0}", Guid.NewGuid());
-
-                var role = new TRole() { Name = roleNew };
-                role.GenerateKeys();
-                await manager.CreateAsync(role);
-                currentRole = role;
-            }
-        }
-
+       
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
         }
 
-        public IdentityRole CurrentRole
-        {
-            get
-            {
-                if(currentRole == null)
-                {
-                    CreateRoleAsync().Wait();
-                }
-
-                return currentRole;
-            }
-        }
     }
 }

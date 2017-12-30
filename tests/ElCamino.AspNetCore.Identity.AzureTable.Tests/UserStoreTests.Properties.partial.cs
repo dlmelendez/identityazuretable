@@ -154,9 +154,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
             if (!string.IsNullOrWhiteSpace(strNewEmail))
             {
-                var taskFind = manager.FindByEmailAsync(strNewEmail);
-                taskFind.Wait();
-                Assert.Equal(strNewEmail, taskFind.Result.Email);
+                var taskFind = await manager.FindByEmailAsync(strNewEmail);
+                Assert.Equal(strNewEmail, taskFind.Email);
             }
             else
             {
@@ -164,15 +163,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                 query.SelectColumns = new List<string>() { "Id" };
                 query.FilterString = TableQuery.GenerateFilterCondition("Id", QueryComparisons.Equal, user.Id);
                 query.Take(1);
-                var results = store.Context.IndexTable.ExecuteQuerySegmentedAsync(query, new TableContinuationToken()).Result;
+                var results = await store.Context.IndexTable.ExecuteQuerySegmentedAsync(query, new TableContinuationToken());
                 Assert.True(!results.Any(x => x.RowKey.StartsWith("E_")), string.Format("Email index not deleted for user {0}", user.Id));
             }
             //Should not find old by old email.
             if (!string.IsNullOrWhiteSpace(originalEmail))
             {
-                var taskFind = manager.FindByEmailAsync(originalEmail);
-                taskFind.Wait();
-                Assert.Null(taskFind.Result);
+                var taskFind = await manager.FindByEmailAsync(originalEmail);
+                Assert.Null(taskFind);
             }
 
         }

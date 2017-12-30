@@ -181,9 +181,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
         [Fact(DisplayName = "UpdateApplicationUser")]
         [Trait("IdentityCore.Azure.UserStoreV2", "")]
-        public override void UpdateApplicationUser()
+        public override Task UpdateApplicationUser()
         {
-            base.UpdateApplicationUser();
+            return base.UpdateApplicationUser();
         }
 
         [Fact(DisplayName = "UpdateUser")]

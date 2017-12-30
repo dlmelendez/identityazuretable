@@ -180,9 +180,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
         [Fact(DisplayName = "UpdateApplicationUser")]
         [Trait("IdentityCore.Azure.UserStore", "")]
-        public override void UpdateApplicationUser()
+        public override Task UpdateApplicationUser()
         {
-            base.UpdateApplicationUser();
+            return base.UpdateApplicationUser();
         }
 
         [Fact(DisplayName = "UpdateUser")]
@@ -236,11 +236,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             //--Also limiting table creation to once per test run
             if (!tablesCreated)
             {
-                using (var store = userFixture.CreateUserStore())
-                {
-                    var taskCreateTables = store.CreateTablesIfNotExists();
-                    taskCreateTables.Wait();
-                }
+                Task.Run(async () => {
+                    using (var store = userFixture.CreateUserStore())
+                    {
+                        await store.CreateTablesIfNotExists().ConfigureAwait(continueOnCapturedContext: false);
+                    }
+                }).Wait();
+                
 
                 tablesCreated = true;
             }
@@ -496,7 +498,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             }
         }
 
-        public virtual void UpdateApplicationUser()
+        public virtual async Task UpdateApplicationUser()
         {
             using (var store = userFixture.CreateUserStore())
             {
@@ -504,17 +506,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                 {
                     var user = GetTestAppUser();
                     WriteLineObject<TUser>(user);
-                    var taskUser = manager.CreateAsync(user, DefaultUserPassword);
-                    taskUser.Wait();
-                    Assert.True(taskUser.Result.Succeeded, string.Concat(taskUser.Result.Errors));
+                    var taskUser = await manager.CreateAsync(user, DefaultUserPassword);
+                    Assert.True(taskUser.Succeeded, string.Concat(taskUser.Errors));
 
                     string oFirstName = user.FirstName;
                     string oLastName = user.LastName;
 
-                    var taskFind1 = manager.FindByNameAsync(user.UserName);
-                    taskFind1.Wait();
-                    Assert.Equal(oFirstName, taskFind1.Result.FirstName);
-                    Assert.Equal(oLastName, taskFind1.Result.LastName);
+                    var taskFind1 = await manager.FindByNameAsync(user.UserName);
+                    Assert.Equal(oFirstName, taskFind1.FirstName);
+                    Assert.Equal(oLastName, taskFind1.LastName);
 
                     string cFirstName = string.Format("John_{0}", Guid.NewGuid());
                     string cLastName = string.Format("Doe_{0}", Guid.NewGuid());
@@ -522,14 +522,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     user.FirstName = cFirstName;
                     user.LastName = cLastName;
 
-                    var taskUserUpdate = manager.UpdateAsync(user);
-                    taskUserUpdate.Wait();
-                    Assert.True(taskUserUpdate.Result.Succeeded, string.Concat(taskUserUpdate.Result.Errors));
+                    var taskUserUpdate = await manager.UpdateAsync(user);
+                    Assert.True(taskUserUpdate.Succeeded, string.Concat(taskUserUpdate.Errors));
 
-                    var taskFind = manager.FindByNameAsync(user.UserName);
-                    taskFind.Wait();
-                    Assert.Equal(cFirstName, taskFind.Result.FirstName);
-                    Assert.Equal(cLastName, taskFind.Result.LastName);
+                    var taskFind = await manager.FindByNameAsync(user.UserName);
+                    Assert.Equal(cFirstName, taskFind.FirstName);
+                    Assert.Equal(cLastName, taskFind.LastName);
                 }
             }
         }
@@ -932,10 +930,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         {
             using (var rstore = userFixture.CreateRoleStore())
             {
-                var userRole = rstore.FindByNameAsync(roleName);
-                userRole.Wait();
+                var userRole = await rstore.FindByNameAsync(roleName);
 
-                if (userRole.Result == null)
+                if (userRole == null)
                 {
                     var r = (TRole)Activator.CreateInstance(typeof(TRole), new object[1] { roleName });
 

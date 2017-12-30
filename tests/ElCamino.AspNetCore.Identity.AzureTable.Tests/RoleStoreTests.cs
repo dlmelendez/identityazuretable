@@ -17,7 +17,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {
     public class RoleStoreTests : IClassFixture<RoleFixture<IdentityUser, IdentityRole, IdentityCloudContext>>
     {
-        private IdentityRole CurrentRole;
         private readonly ITestOutputHelper output;
         private RoleFixture<IdentityUser, IdentityRole, IdentityCloudContext> roleFixture;
 
@@ -25,9 +24,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         {
             this.output = output;
             roleFixture = roleFix;
-
-            CreateRoleTable().Wait();
-            CurrentRole = roleFix.CurrentRole;
+            Task.Run(async() => {
+                await CreateRoleTable().ConfigureAwait(continueOnCapturedContext: false);
+            }).Wait();
+            
         }
 
         [Fact(DisplayName = "RoleStoreCtors")]
@@ -91,7 +91,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     await AddRoleClaimAsyncHelper(role, GenRoleClaim());
                 }
             }
-        }
+        } 
 
         private async Task AddRoleClaimAsyncHelper(IdentityRole role, Claim claim)
         {
@@ -157,6 +157,17 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         {
             using (RoleStore<IdentityRole> store = roleFixture.CreateRoleStore())
             {
+                var role = await CreateRoleAsync();
+
+                WriteLineObject<IdentityRole>(role);
+                await Assert.ThrowsAsync<ArgumentNullException>(() => store.CreateAsync(null));
+            }
+        }
+
+        protected async Task<IdentityRole> CreateRoleAsync()
+        {
+            using (RoleStore<IdentityRole> store = roleFixture.CreateRoleStore())
+            {
                 using (RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager(store))
                 {
                     string roleNew = string.Format("TestRole_{0}", Guid.NewGuid());
@@ -167,13 +178,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     sw.Stop();
 
                     output.WriteLine("CreateRoleAsync: {0} seconds", sw.Elapsed.TotalSeconds);
-
-                    CurrentRole = role;
-                    WriteLineObject<IdentityRole>(CurrentRole);
-                    await Assert.ThrowsAsync<ArgumentNullException>(() => store.CreateAsync(null));
+                    return role;
                 }
             }
         }
+
 
         [Fact(DisplayName = "ThrowIfDisposed")]
         [Trait("IdentityCore.Azure.RoleStore", "")]
@@ -203,11 +212,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     role.Name = Guid.NewGuid() + role.Name;
                     await manager.UpdateAsync(role);
 
-                    var findTask = manager.FindByIdAsync(role.RowKey);
+                    var rRole = await manager.FindByIdAsync(role.RowKey);
 
-                    Assert.NotNull(findTask.Result);
-                    Assert.Equal(role.RowKey, findTask.Result.RowKey);
-                    Assert.NotEqual<string>(roleNew, findTask.Result.Name);
+                    Assert.NotNull(rRole);
+                    Assert.Equal(role.RowKey, rRole.RowKey);
+                    Assert.NotEqual<string>(roleNew, rRole.Name);
                     await Assert.ThrowsAsync<ArgumentNullException>(() => store.UpdateAsync(null));
                 }
             }
@@ -229,11 +238,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     role.Name = role.Name + Guid.NewGuid();
                     await manager.UpdateAsync(role);
 
-                    var findTask = manager.FindByIdAsync(role.RowKey);
-                    findTask.Wait();
-                    Assert.NotNull(findTask.Result);
-                    Assert.Equal(role.RowKey, findTask.Result.RowKey);
-                    Assert.NotEqual<string>(roleNew, findTask.Result.Name);
+                    var rRole = await manager.FindByIdAsync(role.RowKey);
+
+                    Assert.NotNull(rRole);
+                    Assert.Equal(role.RowKey, rRole.RowKey);
+                    Assert.NotEqual<string>(roleNew, rRole.Name);
                 }
             }
         }
@@ -268,19 +277,20 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         [Trait("IdentityCore.Azure.RoleStore", "")]
         public async Task FindRoleById()
         {
+            var role = await CreateRoleAsync();
             using (RoleStore<IdentityRole> store = roleFixture.CreateRoleStore())
             {
                 using (RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager(store))
                 {
                     var sw = new Stopwatch();
                     sw.Start();
-                    var result = await manager.FindByIdAsync(CurrentRole.Id);
+                    var result = await manager.FindByIdAsync(role.Id);
                     sw.Stop();
                     output.WriteLine("FindByIdAsync: {0} seconds", sw.Elapsed.TotalSeconds);
 
                     Assert.NotNull(result);
                     WriteLineObject<IdentityRole>(result);
-                    Assert.Equal(CurrentRole.Id, result.RowKey);
+                    Assert.Equal(role.Id, result.RowKey);
                 }
             }
         }
@@ -289,18 +299,20 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         [Trait("IdentityCore.Azure.RoleStore", "")]
         public async Task FindRoleByName()
         {
+            var role = await CreateRoleAsync();
+
             using (RoleStore<IdentityRole> store = roleFixture.CreateRoleStore())
             {
                 using (RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager(store))
                 {
                     var sw = new Stopwatch();
                     sw.Start();
-                    var result = await manager.FindByNameAsync(CurrentRole.Name);
+                    var result = await manager.FindByNameAsync(role.Name);
                     sw.Stop();
                     output.WriteLine("FindByNameAsync: {0} seconds", sw.Elapsed.TotalSeconds);
 
                     Assert.NotNull(result);
-                    Assert.Equal(CurrentRole.Name, result.Name);
+                    Assert.Equal(role.Name, result.Name);
                 }
             }
         }
