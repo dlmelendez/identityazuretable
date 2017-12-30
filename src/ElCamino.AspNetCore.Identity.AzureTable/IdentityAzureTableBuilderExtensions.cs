@@ -55,7 +55,7 @@ namespace Microsoft.Extensions.DependencyInjection
             where TContext : IdentityCloudContext, new()
         {
             Type contextType = typeof(TContext);
-            Type userStoreType = typeof(UserStore<,,>).MakeGenericType(builder.UserType, builder.RoleType, contextType);
+            Type userStoreType = typeof(IUserStore<>).MakeGenericType(builder.UserType);
 
             var userStore = ActivatorUtilities.GetServiceOrCreateInstance(builder.Services.BuildServiceProvider(),
                 userStoreType) as dynamic;
