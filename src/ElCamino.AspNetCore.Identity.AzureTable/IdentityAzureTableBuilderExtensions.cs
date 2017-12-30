@@ -30,6 +30,27 @@ namespace Microsoft.Extensions.DependencyInjection
             return builder;
         }
 
+        public static IdentityBuilder AddAzureTableStoresV2<TContext>(this IdentityBuilder builder, Func<IdentityConfiguration> configAction)
+            where TContext : IdentityCloudContext, new()
+        {
+            builder.Services.AddSingleton<IdentityConfiguration>(new Func<IServiceProvider, IdentityConfiguration>(p => configAction()));
+
+            Type contextType = typeof(TContext);
+            Type userStoreType = typeof(UserStoreV2<,,>).MakeGenericType(builder.UserType, builder.RoleType, contextType);
+            Type roleStoreType = typeof(RoleStore<,>).MakeGenericType(builder.RoleType, contextType);
+
+            builder.Services.AddScoped(contextType, contextType);
+
+            builder.Services.AddScoped(
+                typeof(IUserStore<>).MakeGenericType(builder.UserType),
+                userStoreType);
+            builder.Services.AddScoped(
+                typeof(IRoleStore<>).MakeGenericType(builder.RoleType),
+                roleStoreType);
+
+            return builder;
+        }
+
         public static IdentityBuilder CreateAzureTablesIfNotExists<TContext>(this IdentityBuilder builder)
             where TContext : IdentityCloudContext, new()
         {

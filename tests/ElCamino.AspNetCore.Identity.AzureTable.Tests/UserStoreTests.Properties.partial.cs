@@ -10,17 +10,92 @@ using ElCamino.AspNetCore.Identity.AzureTable;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
 using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
 using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
-using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser;
+using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser<string>;
 using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
 
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {
-    public partial class UserStoreTests : IClassFixture<UserFixture<ApplicationUser, IdentityRole, IdentityCloudContext>>
+    public partial class UserStoreTests : BaseUserStoreTests<ApplicationUser, IdentityRole, IdentityCloudContext, UserStore<ApplicationUser, IdentityRole, IdentityCloudContext>>
     {
         [Fact(DisplayName = "AccessFailedCount")]
         [Trait("IdentityCore.Azure.UserStore.Properties", "")]
-        public async Task AccessFailedCount()
+        public override Task AccessFailedCount()
+        {
+            return base.AccessFailedCount();
+        }
+
+        [Fact(DisplayName = "Email")]
+        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
+        public override Task Email()
+        {
+            return base.Email();
+        }
+
+        [Fact(DisplayName = "EmailConfirmed")]
+        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
+        public override Task EmailConfirmed()
+        {
+            return base.EmailConfirmed();
+        }
+
+        [Fact(DisplayName = "EmailNone")]
+        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
+        public override Task EmailNone()
+        {
+            return base.EmailNone();
+        }
+
+        [Fact(DisplayName = "LockoutEnabled")]
+        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
+        public override Task LockoutEnabled()
+        {
+            return base.LockoutEnabled();
+        }
+
+        [Fact(DisplayName = "PasswordHash")]
+        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
+        public override Task PasswordHash()
+        {
+            return base.PasswordHash();
+        }
+
+        [Fact(DisplayName = "PhoneNumber")]
+        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
+        public override Task PhoneNumber()
+        {
+            return base.PhoneNumber();
+        }
+
+        [Fact(DisplayName = "PhoneNumberConfirmed")]
+        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
+        public override Task PhoneNumberConfirmed()
+        {
+            return base.PhoneNumberConfirmed();
+        }
+
+        [Fact(DisplayName = "SecurityStamp")]
+        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
+        public override Task SecurityStamp()
+        {
+            return base.SecurityStamp();
+        }
+
+        [Fact(DisplayName = "TwoFactorEnabled")]
+        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
+        public override Task TwoFactorEnabled()
+        {
+            return base.TwoFactorEnabled();
+        }
+    }
+
+    public partial class BaseUserStoreTests<TUser, TRole, TContext, TUserStore> : IClassFixture<UserFixture<TUser, TRole, TContext, TUserStore>>
+        where TUser : IdentityUser, IApplicationUser, new()
+        where TRole : IdentityRole, new()
+        where TContext : IdentityCloudContext, new()
+        where TUserStore : UserStoreV2<TUser, TRole, TContext>
+    {
+        public virtual async Task AccessFailedCount()
         {
             using (var store = userFixture.CreateUserStore())
             {
@@ -33,9 +108,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     }
                 };
 
-                using (var manager = userFixture.CreateUserManager(store, idOptions))
+                using (var manager = userFixture.CreateUserManager(idOptions))
                 {
-                    var user = await CreateTestUserAsync<ApplicationUser>();
+                    var user = await CreateTestUserLiteAsync(createPassword: true, createEmail: true);
                     var accessFailedCount = await manager.GetAccessFailedCountAsync(user);
 
                     Assert.Equal<int>(user.AccessFailedCount, accessFailedCount);
@@ -65,9 +140,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             }
         }
 
-        private async Task SetValidateEmailAsync(UserManager<ApplicationUser> manager,
-            UserStore<ApplicationUser> store,
-            ApplicationUser user,
+        private async Task SetValidateEmailAsync(UserManager<TUser> manager,
+            TUserStore store,
+            TUser user,
             string strNewEmail)
         {
             string originalEmail = user.Email;
@@ -102,15 +177,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
         }
 
-        [Fact(DisplayName = "EmailNone")]
-        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
-        public async Task EmailNone()
+        public virtual async Task EmailNone()
         {
             using (var store = userFixture.CreateUserStore())
             {
-                using (var manager = userFixture.CreateUserManager(store))
+                using (var manager = userFixture.CreateUserManager())
                 {
-                    var user = await CreateTestUserAsync<ApplicationUser>(false, false);
+                    var user = await CreateTestUserLiteAsync(createPassword: false, createEmail: false); 
                     string strNewEmail = string.Format("{0}@hotmail.com", Guid.NewGuid().ToString("N"));
                     await SetValidateEmailAsync(manager, store, user, strNewEmail);
                     await SetValidateEmailAsync(manager, store, user, string.Empty);
@@ -118,15 +191,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             }
         }
 
-        [Fact(DisplayName = "Email")]
-        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
-        public async Task Email()
+        public virtual async Task Email()
         {
             using (var store = userFixture.CreateUserStore())
             {
-                using (var manager = userFixture.CreateUserManager(store))
+                using (var manager = userFixture.CreateUserManager())
                 {
-                    var user = CurrentUser;
+                    var user = await CreateTestUserLiteAsync(createPassword: true, createEmail: true);
 
                     string strNewEmail = string.Format("{0}@gmail.com", Guid.NewGuid().ToString("N"));
                     await SetValidateEmailAsync(manager, store, user, strNewEmail);
@@ -139,15 +210,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             }
         }
 
-        [Fact(DisplayName = "EmailConfirmed")]
-        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
-        public async Task EmailConfirmed()
+        public virtual async Task EmailConfirmed()
         {
             using (var store = userFixture.CreateUserStore())
             {
-                using (var manager = userFixture.CreateUserManager(store))
+                using (var manager = userFixture.CreateUserManager())
                 {
-                    var user = await CreateTestUserAsync<ApplicationUser>();
+                    var user = await CreateTestUserLiteAsync(createPassword: true, createEmail: true);
                     var token = await manager.GenerateEmailConfirmationTokenAsync(user);
                     Assert.False(string.IsNullOrWhiteSpace(token), "GenerateEmailConfirmationToken failed.");
 
@@ -164,15 +233,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             }
         }
 
-        [Fact(DisplayName = "LockoutEnabled")]
-        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
-        public async Task LockoutEnabled()
+        public virtual async Task LockoutEnabled()
         {
             using (var store = userFixture.CreateUserStore())
             {
-                using (var manager = userFixture.CreateUserManager(store))
+                using (var manager = userFixture.CreateUserManager())
                 {
-                    var user = CurrentUser;
+                    var user = await CreateTestUserLiteAsync(createPassword: true, createEmail: true);
                     var enableLockoutResult = await manager.SetLockoutEnabledAsync(user, true);
                     Assert.True(enableLockoutResult.Succeeded, string.Concat(enableLockoutResult.Errors));
 
@@ -207,15 +274,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             }
         }
 
-        [Fact(DisplayName = "PhoneNumber")]
-        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
-        public async Task PhoneNumber()
+        public virtual async Task PhoneNumber()
         {
             using (var store = userFixture.CreateUserStore())
             {
-                using (var manager = userFixture.CreateUserManager(store))
+                using (var manager = userFixture.CreateUserManager())
                 {
-                    var user = CurrentUser;
+                    var user = await CreateTestUserLiteAsync(createPassword: true, createEmail: true);
 
                     string strNewPhoneNumber = "542-887-3434";
                     var setPhoneNumberResult = await manager.SetPhoneNumberAsync(user, strNewPhoneNumber);
@@ -232,15 +297,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             }
         }
 
-        [Fact(DisplayName = "PhoneNumberConfirmed")]
-        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
-        public async Task PhoneNumberConfirmed()
+        public virtual async Task PhoneNumberConfirmed()
         {
             using (var store = userFixture.CreateUserStore())
             {
-                using (var manager = userFixture.CreateUserManager(store))
+                using (var manager = userFixture.CreateUserManager())
                 {
-                    var user = await CreateTestUserAsync<ApplicationUser>();
+                    var user = await CreateTestUserLiteAsync(createPassword: true, createEmail: true);
                     string strNewPhoneNumber = "425-555-1111";
                     var token = await manager.GenerateChangePhoneNumberTokenAsync(user, strNewPhoneNumber);
                     Assert.False(string.IsNullOrWhiteSpace(token), "GeneratePhoneConfirmationToken failed.");
@@ -258,15 +321,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             }
         }
 
-        [Fact(DisplayName = "TwoFactorEnabled")]
-        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
-        public async Task TwoFactorEnabled()
+        public virtual async Task TwoFactorEnabled()
         {
             using (var store = userFixture.CreateUserStore())
             {
-                using (var manager = userFixture.CreateUserManager(store))
+                using (var manager = userFixture.CreateUserManager())
                 {
-                    var user = CurrentUser;
+                    var user = await CreateTestUserLiteAsync(createPassword: true, createEmail: true);
 
                     bool twoFactorEnabled = true;
                     var setTwoFactorEnabledResult = await manager.SetTwoFactorEnabledAsync(user, twoFactorEnabled);
@@ -281,17 +342,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             }
         }
 
-        [Fact(DisplayName = "PasswordHash")]
-        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
-        public async Task PasswordHash()
+        public virtual async Task PasswordHash()
         {
             using (var store = userFixture.CreateUserStore())
             {
-                using (var manager = userFixture.CreateUserManager(store))
+                using (var manager = userFixture.CreateUserManager())
                 {
-                    var user = CurrentUser;
+                    var user = await CreateTestUserLiteAsync(createPassword:true, createEmail:true);
                     string passwordPlain = Guid.NewGuid().ToString("N");
-                    string passwordHash = new PasswordHasher<ApplicationUser>().HashPassword(user, passwordPlain);
+                    string passwordHash = new PasswordHasher<TUser>().HashPassword(user, passwordPlain);
                     await store.SetPasswordHashAsync(user, passwordHash);
 
                     var hasPasswordHash = await manager.HasPasswordAsync(user);
@@ -307,15 +366,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             }
         }
 
-        [Fact(DisplayName = "SecurityStamp")]
-        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
-        public async Task SecurityStamp()
+        public virtual async Task SecurityStamp()
         {
             using (var store = userFixture.CreateUserStore())
             {
-                using (var manager = userFixture.CreateUserManager(store))
+                using (var manager = userFixture.CreateUserManager())
                 {
-                    var user = await CreateTestUserAsync<ApplicationUser>();
+                    var user = await CreateTestUserLiteAsync(createPassword: true, createEmail: true);
                     var stamp = await manager.GetSecurityStampAsync(user);
                     Assert.Equal<string>(user.SecurityStamp, stamp);
 

@@ -11,6 +11,7 @@ using ElCamino.AspNetCore.Identity.AzureTable.Model;
 using Microsoft.AspNetCore.Identity;
 using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser;
 using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {
@@ -23,8 +24,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         public RoleStoreTests(RoleFixture<IdentityUser, IdentityRole, IdentityCloudContext> roleFix, ITestOutputHelper output)
         {
             this.output = output;
-            CurrentRole = roleFix.CurrentRole;
             roleFixture = roleFix;
+
+            CreateRoleTable().Wait();
+            CurrentRole = roleFix.CurrentRole;
         }
 
         [Fact(DisplayName = "RoleStoreCtors")]
@@ -32,13 +35,17 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         public void RoleStoreCtors()
         {
             Assert.Throws<ArgumentNullException>(() => roleFixture.CreateRoleStore(null));
+            var rs = new RoleStore<IdentityRole>();
+            Assert.NotNull(rs);
+            rs.Dispose();
+            using (var rstore = roleFixture.CreateRoleStore()) { }
         }
 
         private Claim GenRoleClaim()
          => new Claim(Constants.AccountClaimTypes.AccountTestUserClaim, Guid.NewGuid().ToString());
 
         [Fact(DisplayName = "AddRemoveRoleClaim")]
-        [Trait("IdentityCore.Azure.UserStore", "")]
+        [Trait("IdentityCore.Azure.RoleStore", "")]
         public async Task AddRemoveRoleClaim()
         {
             using (RoleStore<IdentityRole> store = roleFixture.CreateRoleStore())
@@ -65,7 +72,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         }
 
         [Fact(DisplayName = "AddRoleClaim")]
-        [Trait("IdentityCore.Azure.UserStore", "")]
+        [Trait("IdentityCore.Azure.RoleStore", "")]
         public async Task AddRoleClaim()
         {
             using (RoleStore<IdentityRole> store = roleFixture.CreateRoleStore())
@@ -96,6 +103,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     var claims = await manager.GetClaimsAsync(role);
                     Assert.True(claims.ToList().Any(c => c.Value == claim.Value & c.ValueType == claim.ValueType), "Claim not found");
                 }
+
+                await Assert.ThrowsAsync<ArgumentNullException>(() => store.AddClaimAsync(null, claim));
+                await Assert.ThrowsAsync<ArgumentNullException>(() => store.AddClaimAsync(role, null));
+                await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetClaimsAsync(null));
+
+
             }
         }
 
@@ -109,6 +122,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     var claims = await manager.GetClaimsAsync(role);
                     Assert.False(claims.ToList().Any(c => c.Value == claim.Value & c.ValueType == claim.ValueType), "Claim not found");
                 }
+
+                await Assert.ThrowsAsync<ArgumentNullException>(() => store.RemoveClaimAsync(null, claim));
+                await Assert.ThrowsAsync<ArgumentNullException>(() => store.RemoveClaimAsync(role, null));
+
+                var c1 = new Claim(string.Empty, claim.Value);
+                await Assert.ThrowsAsync<ArgumentException>(() => store.RemoveClaimAsync(role, c1));
             }
         }
 
@@ -121,6 +140,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                 var r = await store.CreateTableIfNotExistsAsync();
                 Assert.True(await store.Context.RoleTable.ExistsAsync());
             }
+
+            ServiceCollection services = new ServiceCollection();
+            // Adding coverage for CreateAzureTablesIfNotExists();
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddAzureTableStoresV2<IdentityCloudContext>(new Func<IdentityConfiguration>(() =>
+                {
+                    return roleFixture.GetConfig();
+                }))
+                .CreateAzureTablesIfNotExists<IdentityCloudContext>();
         }
 
         [Fact(DisplayName = "CreateRole")]

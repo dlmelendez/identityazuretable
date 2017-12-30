@@ -11,7 +11,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EF35BCF8-88F2-4DDD-AD83-B2A095393CE4}"
 	ProjectSection(SolutionItems) = preProject
 		LICENSE = LICENSE
+		ModelClasses.dgml = ModelClasses.dgml
 		README.md = README.md
+		StoreClasses.dgml = StoreClasses.dgml
 	EndProjectSection
 EndProject
 Global

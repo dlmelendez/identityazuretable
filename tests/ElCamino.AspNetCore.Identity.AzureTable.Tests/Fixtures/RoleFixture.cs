@@ -12,14 +12,15 @@ using Microsoft.AspNetCore.Identity;
 
 namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 {
-    public partial class RoleFixture<TUser, TRole, TContext> : BaseFixture<TUser, TRole, TContext>
+    public partial class RoleFixture<TUser, TRole, TContext> : BaseFixture<TUser, TRole, TContext, UserStore<TUser, TRole, TContext>>
         where TUser : IdentityUser, new()
         where TRole : IdentityRole, new()
         where TContext : IdentityCloudContext, new()
     {
+        private IdentityRole currentRole;
+
         public RoleFixture() : base()
         {
-            CreateRoleAsync().Wait();
         }
 
         public async Task CreateRoleAsync()
@@ -31,7 +32,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
                 var role = new TRole() { Name = roleNew };
                 role.GenerateKeys();
                 await manager.CreateAsync(role);
-                CurrentRole = role;
+                currentRole = role;
             }
         }
 
@@ -40,6 +41,17 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
             base.Dispose(disposing);
         }
 
-        public IdentityRole CurrentRole { get; private set; }
+        public IdentityRole CurrentRole
+        {
+            get
+            {
+                if(currentRole == null)
+                {
+                    CreateRoleAsync().Wait();
+                }
+
+                return currentRole;
+            }
+        }
     }
 }
