@@ -206,7 +206,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     var findTask = manager.FindByIdAsync(role.RowKey);
 
                     Assert.NotNull(findTask.Result);
-                    Assert.Equal<string>(role.RowKey, findTask.Result.RowKey);
+                    Assert.Equal(role.RowKey, findTask.Result.RowKey);
                     Assert.NotEqual<string>(roleNew, findTask.Result.Name);
                     await Assert.ThrowsAsync<ArgumentNullException>(() => store.UpdateAsync(null));
                 }
@@ -232,7 +232,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     var findTask = manager.FindByIdAsync(role.RowKey);
                     findTask.Wait();
                     Assert.NotNull(findTask.Result);
-                    Assert.Equal<string>(role.RowKey, findTask.Result.RowKey);
+                    Assert.Equal(role.RowKey, findTask.Result.RowKey);
                     Assert.NotEqual<string>(roleNew, findTask.Result.Name);
                 }
             }
@@ -280,7 +280,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
                     Assert.NotNull(result);
                     WriteLineObject<IdentityRole>(result);
-                    Assert.Equal<string>(CurrentRole.Id, result.RowKey);
+                    Assert.Equal(CurrentRole.Id, result.RowKey);
                 }
             }
         }
@@ -300,7 +300,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     output.WriteLine("FindByNameAsync: {0} seconds", sw.Elapsed.TotalSeconds);
 
                     Assert.NotNull(result);
-                    Assert.Equal<string>(CurrentRole.Name, result.Name);
+                    Assert.Equal(CurrentRole.Name, result.Name);
                 }
             }
         }

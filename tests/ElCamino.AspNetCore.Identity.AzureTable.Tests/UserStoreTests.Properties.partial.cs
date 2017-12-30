@@ -150,13 +150,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             Assert.True(emailResult.Succeeded, string.Concat(emailResult.Errors));
 
             var email = await manager.GetEmailAsync(user);
-            Assert.Equal<string>(strNewEmail, email);
+            Assert.Equal(strNewEmail, email);
 
             if (!string.IsNullOrWhiteSpace(strNewEmail))
             {
                 var taskFind = manager.FindByEmailAsync(strNewEmail);
                 taskFind.Wait();
-                Assert.Equal<string>(strNewEmail, taskFind.Result.Email);
+                Assert.Equal(strNewEmail, taskFind.Result.Email);
             }
             else
             {
@@ -287,7 +287,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     Assert.True(setPhoneNumberResult.Succeeded, string.Concat(setPhoneNumberResult.Errors));
 
                     var phoneNumber = await manager.GetPhoneNumberAsync(user);
-                    Assert.Equal<string>(strNewPhoneNumber, phoneNumber);
+                    Assert.Equal(strNewPhoneNumber, phoneNumber);
 
                     await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetPhoneNumberAsync(null));
                     await Assert.ThrowsAsync<ArgumentNullException>(() => store.SetPhoneNumberAsync(null, strNewPhoneNumber));
@@ -357,7 +357,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     Assert.True(hasPasswordHash, "PasswordHash not set");
 
                     var passwordHashResult = await store.GetPasswordHashAsync(user);
-                    Assert.Equal<string>(passwordHash, passwordHashResult);
+                    Assert.Equal(passwordHash, passwordHashResult);
 
                     user.PasswordHash = passwordHash;
 
@@ -374,7 +374,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                 {
                     var user = await CreateTestUserLiteAsync(createPassword: true, createEmail: true);
                     var stamp = await manager.GetSecurityStampAsync(user);
-                    Assert.Equal<string>(user.SecurityStamp, stamp);
+                    Assert.Equal(user.SecurityStamp, stamp);
 
                     string strNewSecurityStamp = Guid.NewGuid().ToString("N");
                     await store.SetSecurityStampAsync(user, strNewSecurityStamp);

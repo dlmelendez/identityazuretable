@@ -1445,18 +1445,18 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 throw new ArgumentNullException(nameof(claim));
             }
 
-            Func<string, string> getTableQueryFilterByUserId = (userId) =>
-             {
-                 string rowFilter = TableQuery.CombineFilters(
-                     TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, userId),
-                     TableOperators.Or,
-                     TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, KeyHelper.GenerateRowKeyIdentityUserClaim(claim.Type, claim.Value)));
+            string getTableQueryFilterByUserId(string userId)
+            {
+                string rowFilter = TableQuery.CombineFilters(
+                    TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, userId),
+                    TableOperators.Or,
+                    TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, KeyHelper.GenerateRowKeyIdentityUserClaim(claim.Type, claim.Value)));
 
-                 string tqFilter = TableQuery.CombineFilters(
-                     TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, userId), TableOperators.And,
-                     rowFilter);
-                 return tqFilter;
-             };
+                string tqFilter = TableQuery.CombineFilters(
+                    TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, userId), TableOperators.And,
+                    rowFilter);
+                return tqFilter;
+            }
 
             return (await this.GetUsersAggregateByIndexQueryAsync(GetUserByClaimQuery(claim), (userId) => {
                 return GetUserAggregateQueryAsync(userId, setFilterByUserId: getTableQueryFilterByUserId, whereRole: null, whereClaim: (uc) => 

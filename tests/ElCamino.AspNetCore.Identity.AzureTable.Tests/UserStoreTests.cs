@@ -145,10 +145,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
         //[Fact(DisplayName = "GenerateUsers", Skip = "true")]
         //[Trait("IdentityCore.Azure.UserStore", "")]
-        public override Task GenerateUsers()
-        {
-            return base.GenerateUsers();
-        }
+        //public override Task GenerateUsers()
+        //{
+        //    return base.GenerateUsers();
+        //}
 
         [Fact(DisplayName = "GetUsersByClaim")]
         [Trait("IdentityCore.Azure.UserStore", "")]
@@ -513,8 +513,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
                     var taskFind1 = manager.FindByNameAsync(user.UserName);
                     taskFind1.Wait();
-                    Assert.Equal<string>(oFirstName, taskFind1.Result.FirstName);
-                    Assert.Equal<string>(oLastName, taskFind1.Result.LastName);
+                    Assert.Equal(oFirstName, taskFind1.Result.FirstName);
+                    Assert.Equal(oLastName, taskFind1.Result.LastName);
 
                     string cFirstName = string.Format("John_{0}", Guid.NewGuid());
                     string cLastName = string.Format("Doe_{0}", Guid.NewGuid());
@@ -528,8 +528,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
                     var taskFind = manager.FindByNameAsync(user.UserName);
                     taskFind.Wait();
-                    Assert.Equal<string>(cFirstName, taskFind.Result.FirstName);
-                    Assert.Equal<string>(cLastName, taskFind.Result.LastName);
+                    Assert.Equal(cFirstName, taskFind.Result.FirstName);
+                    Assert.Equal(cLastName, taskFind.Result.LastName);
                 }
             }
         }
@@ -635,14 +635,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     foreach(var cRole in changedUserRoles)
                     {
                         var findUsersInRole = await manager.GetUsersInRoleAsync(cRole);
-                        Assert.True(findUsersInRole.Any(fr => fr.Id == changedUser.Id));
+                        Assert.Contains(findUsersInRole, fr => fr.Id == changedUser.Id);
                     }
 
                     //Check claims indexes
                     foreach (var cClaim in changedUserClaims)
                     {
                         var findUsersInClaim = await manager.GetUsersForClaimAsync(cClaim);
-                        Assert.True(findUsersInClaim.Any(fr => fr.Id == changedUser.Id));
+                        Assert.Contains(findUsersInClaim, fr => fr.Id == changedUser.Id);
                     }
 
                     //Check token
@@ -669,7 +669,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     sw.Stop();
                     output.WriteLine("FindByEmailAsync: {0} seconds", sw.Elapsed.TotalSeconds);
 
-                    Assert.Equal<string>(user.Email, findUserResult.Email);
+                    Assert.Equal(user.Email, findUserResult.Email);
                 }
             }
         }
@@ -704,7 +704,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     var userToChange = listCreated.Last();
                     await manager.SetEmailAsync(userToChange, strEmailChanged);
                     var changedResult = await manager.FindByEmailAsync(strEmailChanged);
-                    Assert.Equal<string>(userToChange.Id, changedResult.Id);
+                    Assert.Equal(userToChange.Id, changedResult.Id);
                     Assert.NotEqual<string>(strEmail, changedResult.Email);
 
                     //Make sure changed user doesn't show up in previous query
@@ -731,7 +731,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     sw.Stop();
                     output.WriteLine("FindByIdAsync: {0} seconds", sw.Elapsed.TotalSeconds);
 
-                    Assert.Equal<string>(user.Id, result.Id);
+                    Assert.Equal(user.Id, result.Id);
                 }
             }
         }
@@ -750,7 +750,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     sw.Stop();
                     output.WriteLine("FindByNameAsync: {0} seconds", sw.Elapsed.TotalSeconds);
 
-                    Assert.Equal<string>(user.UserName, result.UserName);
+                    Assert.Equal(user.UserName, result.UserName);
                 }
             }
         }
@@ -1033,28 +1033,28 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             }
         }
 
-        public virtual async Task GenerateUsers()
-        {
-            using (var store = userFixture.CreateUserStore())
-            {
-                using (var manager = userFixture.CreateUserManager())
-                {
-                    int userCount = 1000;
-                    DateTime start2 = DateTime.UtcNow;
-                    for (int i = 0; i < userCount; i++)
-                    {
-                        var sw = new Stopwatch();
-                        output.WriteLine("CreateTestUserLite()");
-                        sw.Start();
-                        await CreateTestUserLiteAsync(true, true);
-                        sw.Stop();
-                        output.WriteLine("CreateTestUserLite(): {0} seconds", sw.Elapsed.TotalSeconds);
-                    }
-                    output.WriteLine("GenerateUsers(): {0} user count", userCount);
-                    output.WriteLine("GenerateUsers(): {0} seconds", (DateTime.UtcNow - start2).TotalSeconds);
-                }
-            }
-        }
+        //public virtual async Task GenerateUsers()
+        //{
+        //    using (var store = userFixture.CreateUserStore())
+        //    {
+        //        using (var manager = userFixture.CreateUserManager())
+        //        {
+        //            int userCount = 1000;
+        //            DateTime start2 = DateTime.UtcNow;
+        //            for (int i = 0; i < userCount; i++)
+        //            {
+        //                var sw = new Stopwatch();
+        //                output.WriteLine("CreateTestUserLite()");
+        //                sw.Start();
+        //                await CreateTestUserLiteAsync(true, true);
+        //                sw.Stop();
+        //                output.WriteLine("CreateTestUserLite(): {0} seconds", sw.Elapsed.TotalSeconds);
+        //            }
+        //            output.WriteLine("GenerateUsers(): {0} user count", userCount);
+        //            output.WriteLine("GenerateUsers(): {0} seconds", (DateTime.UtcNow - start2).TotalSeconds);
+        //        }
+        //    }
+        //}
 
         public virtual async Task AddUserClaim()
         {

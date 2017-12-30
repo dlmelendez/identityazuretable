@@ -14,7 +14,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.ModelTests
         {
             var role = new IdentityRole();
             role.Id = Guid.NewGuid().ToString();
-            Assert.Equal<string>(role.RowKey, role.Id);
+            Assert.Equal(role.RowKey, role.Id);
         }
     }
 }

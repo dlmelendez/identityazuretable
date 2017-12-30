@@ -146,10 +146,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
         //[Fact(DisplayName = "GenerateUsers", Skip = "true")]
         //[Trait("IdentityCore.Azure.UserStoreV2", "")]
-        public override Task GenerateUsers()
-        {
-            return base.GenerateUsers();
-        }
+        //public override Task GenerateUsers()
+        //{
+        //    return base.GenerateUsers();
+        //}
 
         [Fact(DisplayName = "GetUsersByClaim")]
         [Trait("IdentityCore.Azure.UserStoreV2", "")]
