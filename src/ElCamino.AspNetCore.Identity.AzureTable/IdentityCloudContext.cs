@@ -93,6 +93,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             get
             {
+                ThrowIfDisposed();
                 return _client;
             }
         }

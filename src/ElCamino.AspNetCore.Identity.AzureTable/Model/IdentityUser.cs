@@ -11,11 +11,11 @@ using Microsoft.WindowsAzure.Storage;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 {
-    public class IdentityUser : IdentityUser<string, IdentityUserLogin, IdentityUserRole, IdentityUserClaim>, IGenerateKeys
+    public class IdentityUserV2 : IdentityUser<string>, IGenerateKeys
     {
-        public IdentityUser() { }
+        public IdentityUserV2() : base() { }
 
-        public IdentityUser(string userName)
+        public IdentityUserV2(string userName)
             : this()
         {
             this.UserName = userName;
@@ -63,17 +63,72 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         }
     }
 
-    public class IdentityUser<TKey, TLogin, TRole, TClaim> : Microsoft.AspNetCore.Identity.IdentityUser<TKey>, ITableEntity
+    public class IdentityUser : IdentityUser<string, IdentityUserLogin, IdentityUserRole, IdentityUserClaim, IdentityUserToken>, IGenerateKeys
+    {
+        public IdentityUser() : base() { }
+
+        public IdentityUser(string userName)
+            : this()
+        {
+            this.UserName = userName;
+        }
+
+        /// <summary>
+        /// Generates Row, Partition and Id keys.
+        /// All are the same in this case
+        /// </summary>
+        public void GenerateKeys()
+        {
+            Id = PeekRowKey();
+            PartitionKey = Id;
+            KeyVersion = KeyHelper.KeyVersion;
+        }
+
+        /// <summary>
+        /// Generates the RowKey without setting it on the object.
+        /// In this case, just returns a key based on username
+        /// </summary>
+        /// <returns></returns>
+        public string PeekRowKey()
+        {
+            return KeyHelper.GenerateRowKeyUserName(UserName);
+        }
+
+        public double KeyVersion { get; set; }
+
+        public override string Id
+        {
+            get => RowKey;
+            set => RowKey = base.Id = value;
+        }
+
+        public override string UserName
+        {
+            get => base.UserName;
+            set
+            {
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    base.UserName = value.Trim();
+                }
+            }
+        }
+    }
+
+
+    public class IdentityUser<TKey, TLogin, TRole, TClaim, TToken> : IdentityUser<TKey>
         where TKey : IEquatable<TKey>
         where TLogin : IdentityUserLogin<TKey>
         where TRole : IdentityUserRole<TKey>
         where TClaim : IdentityUserClaim<TKey>
+        where TToken : IdentityUserToken<TKey>
     {
         public IdentityUser()
         {
             this.Claims = new List<TClaim>(10);
             this.Roles = new List<TRole>(10);
             this.Logins = new List<TLogin>(10);
+            this.Tokens = new List<TToken>(10);
         }
 
         #region Collections
@@ -86,11 +141,23 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
         public ICollection<TRole> Roles { get; private set; }
 
+        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
+        public ICollection<TToken> Tokens { get; private set; }
+
         #endregion
+
+    }
+
+    public class IdentityUser<TKey> : Microsoft.AspNetCore.Identity.IdentityUser<TKey>, ITableEntity
+        where TKey : IEquatable<TKey>
+    {
+        public IdentityUser()
+        {
+        }
 
 
         [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
-        public override TKey Id { get; set; }
+        public override TKey Id { get => base.Id; set => base.Id = value; }
 
         public virtual DateTime? LockoutEndDateUtc { get; set; }
 

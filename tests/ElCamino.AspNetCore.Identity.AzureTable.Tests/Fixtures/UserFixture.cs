@@ -4,30 +4,27 @@ using System;
 using ElCamino.AspNetCore.Identity.AzureTable;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
 using ElCamino.AspNetCore.Identity.AzureTable.Tests;
+using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
+using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser<string>;
+
 
 namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 {
-    public partial class UserFixture<TUser, TRole, TContext> : BaseFixture<TUser, TRole, TContext>
-        where TUser : IdentityUser, new()
+    public partial class UserFixture<TUser, TRole, TContext, TUserStore> : BaseFixture<TUser, TRole, TContext, TUserStore>
+        where TUser : IdentityUser, IApplicationUser, new()
         where TRole : IdentityRole, new()
         where TContext : IdentityCloudContext, new()
+        where TUserStore : UserStoreV2<TUser, TRole, TContext>
     {
         public UserFixture() : base()
         {
         }
 
-        public void Init()
-        {
-            CurrentUser = UserStoreTests.CreateUserAsync<TUser>().Result;
-            CurrentEmailUser = UserStoreTests.CreateUserAsync<TUser>().Result;
-        }
-
+      
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
         }
 
-        public TUser CurrentUser { get;  set; }
-        public TUser CurrentEmailUser { get;  set; }
     }
 }

@@ -9,7 +9,7 @@ using Microsoft.WindowsAzure.Storage.Table;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 {
-    internal class IdentityUserIndex : TableEntity
+    public class IdentityUserIndex : TableEntity
     {
         /// <summary>
         /// Holds the userid entity key

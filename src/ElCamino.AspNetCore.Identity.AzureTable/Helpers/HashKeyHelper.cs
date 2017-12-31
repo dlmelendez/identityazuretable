@@ -25,7 +25,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         {
             string hash = ConvertKeyToHash(base.GenerateRowKeyUserEmail(plainEmail));
             return string.Format(Constants.RowKeyConstants.FormatterIdentityUserEmail, hash);
-
         }
 
         public override string GenerateRowKeyUserName(string plainUserName)
@@ -38,14 +37,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         {
             string hash = ConvertKeyToHash(base.GenerateRowKeyIdentityUserRole(plainRoleName));
             return string.Format(Constants.RowKeyConstants.FormatterIdentityUserRole, hash);
-
         }
 
         public override string GenerateRowKeyIdentityRole(string plainRoleName)
         {
             string hash = ConvertKeyToHash(base.GenerateRowKeyIdentityRole(plainRoleName));
             return string.Format(Constants.RowKeyConstants.FormatterIdentityRole, hash);
-
         }
 
         public override string GeneratePartitionKeyIdentityRole(string plainRoleName)
@@ -82,7 +79,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             return string.Format(Constants.RowKeyConstants.FormatterIdentityUserLogin, hash);
         }
 
-        public override double KeyVersion => 2.0;
+        public override double KeyVersion => 2.1;
 
         public static string ConvertKeyToHash(string input)
         {

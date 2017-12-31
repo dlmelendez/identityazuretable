@@ -12,6 +12,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.ModelTests
         public void IdentityUserCtors()
         {
             Assert.NotNull(new IdentityUser(Guid.NewGuid().ToString()));
+            Assert.NotNull(new IdentityUserV2(Guid.NewGuid().ToString()));
         }
     }
 }

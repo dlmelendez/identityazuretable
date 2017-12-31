@@ -4,10 +4,18 @@ using ElCamino.AspNetCore.Identity.AzureTable.Model;
 
 namespace ElCamino.Web.Identity.AzureTable.Tests.ModelTests
 {
-    public class ApplicationUser : IdentityUser
+    public class ApplicationUser : IdentityUser, IApplicationUser
     {
         public string FirstName { get; set; }
 
         public string LastName { get; set; }
     }
+
+    public class ApplicationUserV2 : IdentityUserV2, IApplicationUser
+    {
+        public string FirstName { get; set; }
+
+        public string LastName { get; set; }
+    }
+
 }
