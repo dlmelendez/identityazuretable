@@ -755,9 +755,25 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
         public virtual async Task AddUserLogin()
         {
-            var user = await CreateTestUserLiteAsync(createPassword:false);
-            WriteLineObject(user);
-            await AddUserLoginAsyncHelper(user, GenGoogleLogin());
+            using (var manager = userFixture.CreateUserManager())
+            {
+                var user = await CreateTestUserLiteAsync(createPassword: false);
+                WriteLineObject(user);
+                var loginInfo = GenGoogleLogin();
+                await AddUserLoginAsyncHelper(user, loginInfo);
+
+                var loginsResult = await manager.GetLoginsAsync(user);
+                Assert.Contains(loginsResult,
+                    (log) => log.LoginProvider == loginInfo.LoginProvider
+                        && log.ProviderKey == loginInfo.ProviderKey); //, "LoginInfo not found: GetLoginsAsync");
+
+                var sw = new Stopwatch();
+                sw.Start();
+                var loginResult2 = await manager.FindByLoginAsync(loginsResult.First().LoginProvider, loginsResult.First().ProviderKey);
+                sw.Stop();
+                Debug.WriteLine(string.Format("FindAsync(By Login): {0} seconds", sw.Elapsed.TotalSeconds));
+                Assert.Equal(user.Id, loginResult2.Id);
+            }
         }
 
         public async Task AddUserLoginAsyncHelper(TUser user, UserLoginInfo loginInfo)
@@ -767,19 +783,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                 using (var manager = userFixture.CreateUserManager())
                 {
                     var loginResult = await manager.AddLoginAsync(user, loginInfo);
-                    Assert.True(loginResult.Succeeded, string.Concat(loginResult.Errors));
-
-                    var loginsResult = await manager.GetLoginsAsync(user);
-                    Assert.True(loginsResult
-                        .Any(log => log.LoginProvider == loginInfo.LoginProvider
-                            & log.ProviderKey == loginInfo.ProviderKey), "LoginInfo not found: GetLoginsAsync");
-
-                    var sw = new Stopwatch();
-                    sw.Start();
-                    var loginResult2 = await manager.FindByLoginAsync(loginsResult.First().LoginProvider, loginsResult.First().ProviderKey);
-                    sw.Stop();
-                    Debug.WriteLine(string.Format("FindAsync(By Login): {0} seconds", sw.Elapsed.TotalSeconds));
-                    Assert.NotNull(loginResult2);
+                    Assert.True(loginResult.Succeeded, string.Concat(loginResult.Errors));                    
                 }
             }
         }
@@ -849,9 +853,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     Assert.True(addLoginResult.Succeeded, string.Concat(addLoginResult.Errors));
 
                     var getLoginResult = await manager.GetLoginsAsync(user);
-                    Assert.True(getLoginResult
-                        .Any(log => log.LoginProvider == loginInfo.LoginProvider
-                            & log.ProviderKey == loginInfo.ProviderKey), "LoginInfo not found: GetLoginsAsync");
+                    Assert.Contains(getLoginResult,
+                        (log) => log.LoginProvider == loginInfo.LoginProvider
+                            && log.ProviderKey == loginInfo.ProviderKey); //, "LoginInfo not found: GetLoginsAsync");
 
                     var getLoginResult2 = await manager.FindByLoginAsync(getLoginResult.First().LoginProvider, getLoginResult.First().ProviderKey);
                     Assert.NotNull(getLoginResult2);
@@ -862,7 +866,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     Assert.True(userRemoveLoginResult.Succeeded, string.Concat(userRemoveLoginResult.Errors));
 
                     var loginGetResult3 = await manager.GetLoginsAsync(user);
-                    Assert.True(!loginGetResult3.Any(), "LoginInfo not removed");
+                    Assert.DoesNotContain(loginGetResult3, (log) => true);// , "LoginInfo not removed");
 
                     //Negative cases
                     var loginFindNeg = await manager.FindByLoginAsync("asdfasdf", "http://4343443dfaksjfaf");
@@ -1055,11 +1059,22 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
         public virtual async Task AddUserClaim()
         {
-            var user = await CreateTestUserLiteAsync();
-            WriteLineObject<TUser>(user);
-            await AddUserClaimHelper(user, GenUserClaim());
-            await AddUserClaimHelper(user, GenUserClaimEmptyType());
+            using (var manager = userFixture.CreateUserManager())
+            {
 
+                var user = await CreateTestUserLiteAsync();
+                WriteLineObject<TUser>(user);
+                var c1 = GenUserClaim();
+                var c2 = GenUserClaimEmptyType();
+
+                await AddUserClaimHelper(user, c1);
+                await AddUserClaimHelper(user, c2);
+
+                var claims = await manager.GetClaimsAsync(user);
+                Assert.Contains(claims, (c) => c.Value == c1.Value && c.ValueType == c1.ValueType); //, "Claim not found");
+                Assert.Contains(claims, (c) => c.Value == c2.Value && c.ValueType == c2.ValueType); //, "Claim not found");
+
+            }
         }
 
         protected async Task AddUserClaimHelper(TUser user, Claim claim)
@@ -1068,9 +1083,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             {
                 var userClaim = await manager.AddClaimAsync(user, claim);
                 Assert.True(userClaim.Succeeded, string.Concat(userClaim.Errors.Select(e => e.Code)));
-
-                var claims = await manager.GetClaimsAsync(user);
-                Assert.True(claims.Any(c => c.Value == claim.Value & c.ValueType == claim.ValueType), "Claim not found");
             }
         }
 
@@ -1081,7 +1093,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             {
                 using (var manager = userFixture.CreateUserManager())
                 {
-                    int userCount = 51;// 101;
+                    int userCount = 101;
                     Stopwatch sw = new Stopwatch();
                     sw.Start();
                     TUser tempUser = null;
@@ -1099,7 +1111,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     output.WriteLine("GenerateUsers(): {0} user count", userCount);
                     output.WriteLine("GenerateUsers(): {0} seconds", sw.Elapsed.TotalSeconds);
 
-                    sw.Reset();
+                    sw.Reset();                   
                     sw.Start();
                     var users = await manager.GetUsersForClaimAsync(claim);
                     sw.Stop();
@@ -1126,13 +1138,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     Assert.True(addClaimResult.Succeeded, string.Concat(addClaimResult.Errors));
 
                     var claims = await manager.GetClaimsAsync(user);
-                    Assert.True(claims.Any(c => c.Value == claim.Value & c.Type == claim.Type), "Claim not found");
+                    Assert.Contains(claims, (c) => c.Value == claim.Value && c.Type == claim.Type); //, "Claim not found");
 
                     var userRemoveClaimResult = await manager.RemoveClaimAsync(user, claim);
                     Assert.True(userRemoveClaimResult.Succeeded, string.Concat(userRemoveClaimResult.Errors));
 
                     var claims2 = await manager.GetClaimsAsync(user);
-                    Assert.True(!claims2.Any(c => c.Value == claim.Value & c.Type == claim.Type), "Claim not removed");
+                    Assert.DoesNotContain(claims2, (c) => c.Value == claim.Value && c.Type == claim.Type); //, "Claim not removed");
 
                     //adding test for removing an empty claim
                     Claim claimEmpty = GenAdminClaimEmptyValue();
@@ -1165,15 +1177,16 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     
 
                     var claims = await manager.GetClaimsAsync(user);
-                    Assert.True(claims.Any(c => c.Value == claim.Value & c.Type == claim.Type), "Claim not found");
+                    Assert.Contains(claims, (c) => c.Value == claim.Value && c.Type == claim.Type); //, "Claim not found");
+                    
 
                     Claim nClaim = new Claim(claim.Type, "new claim value here");
                     var userReplaceClaimResult = await manager.ReplaceClaimAsync(user, claim, nClaim);
                     Assert.True(userReplaceClaimResult.Succeeded, string.Concat(userReplaceClaimResult.Errors));
 
                     var claims2 = await manager.GetClaimsAsync(user);
-                    Assert.False(claims2.Any(c => c.Value == claim.Value & c.Type == claim.Type), "Claim not replaced, old claim found");
-                    Assert.True(claims2.Any(c => c.Value == nClaim.Value & c.Type == nClaim.Type), "Claim not replaced, new claim not found.");
+                    Assert.DoesNotContain(claims2, (c) => c.Value == claim.Value && c.Type == claim.Type); //, "Claim not replaced, old claim found");
+                    Assert.Contains(claims2, (c) => c.Value == nClaim.Value && c.Type == nClaim.Type); //, "Claim not replaced, new claim not found.");
 
 
                     await Assert.ThrowsAsync<ArgumentNullException>(() => store.ReplaceClaimAsync(null, claim, nClaim));
@@ -1182,7 +1195,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
                     await store.RemoveClaimAsync(user, nClaim);
                     claims2 = await manager.GetClaimsAsync(user);
-                    Assert.False(claims2.Any(c => c.Value == nClaim.Value & c.Type == nClaim.Type), "Claim not removed, new claim found.");
+                    Assert.DoesNotContain(claims2, (c) => c.Value == nClaim.Value && c.Type == nClaim.Type); //, "Claim not removed, new claim found.");
                 }
             }
         }

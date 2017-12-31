@@ -48,7 +48,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
 
 
-            return (await this.GetUsersAggregateByIndexQueryAsync(GetUserByClaimQuery(claim), (userId) => {
+            return (await GetUsersAggregateByIndexQueryAsync(GetUserByClaimQuery(claim), (userId) => {
                 return GetUserAggregateQueryAsync(userId, setFilterByUserId: null, whereRole: null, whereClaim: (uc) =>
                 {
                     return uc.RowKey == KeyHelper.GenerateRowKeyIdentityUserClaim(claim.Type, claim.Value);
@@ -811,39 +811,44 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             List<Task> tasks = new List<Task>(listTqs.Count);
             listTqs.ForEach((q) =>
             {
-                tasks.Add(Task.Run(async () =>
-                {
-                    (await _userTable.ExecuteQueryAsync(q))
-                    .ToList()
-                    .GroupBy(g => g.PartitionKey)
-                    .ToList().ForEach((s) =>
-                    {
-                        var userAgg = MapUserAggregate(s.Key, s);
-                        bool addUser = true;
-                        if (whereClaim != null)
-                        {
-                            if(!userAgg.Claims.Any(whereClaim))
-                            {
-                                addUser = false;
-                            }
-                        }
-                        if(whereRole != null)
-                        {
-                            if (!userAgg.Roles.Any(whereRole))
-                            {
-                                addUser = false;
-                            }
-                        }
-                        if (addUser)
-                        {
-                            bag.Add(MapUserAggregate(s.Key, s).User);
-                        }
-                    });
-                }));
+                tasks.Add(
+                     _userTable.ExecuteQueryAsync(q)
+                     .ContinueWith((taskResults) =>
+                     {
+                         //ContinueWith returns completed task. Calling .Result is safe here.
+                         var r = taskResults.Result;
+                         r.ToList()
+                         .GroupBy(g => g.PartitionKey)
+                         .ToList().ForEach((s) =>
+                         {
+                             var userAgg = MapUserAggregate(s.Key, s);
+                             bool addUser = true;
+                             if (whereClaim != null)
+                             {
+                                 if (!userAgg.Claims.Any(whereClaim))
+                                 {
+                                     addUser = false;
+                                 }
+                             }
+                             if (whereRole != null)
+                             {
+                                 if (!userAgg.Roles.Any(whereRole))
+                                 {
+                                     addUser = false;
+                                 }
+                             }
+                             if (addUser)
+                             {
+                                 bag.Add(userAgg.User);
+                             }
+                         });
+                     }, TaskContinuationOptions.ExecuteSynchronously)                   
+                    );
             });
-            await Task.WhenAll(tasks.ToArray());
+            await Task.WhenAll(tasks);
 #if DEBUG
             Debug.WriteLine("GetUserAggregateQuery (GetUserAggregateTotal): {0} seconds", (DateTime.UtcNow - startUserAggTotal).TotalSeconds);
+            Debug.WriteLine("GetUserAggregateQuery (Return Count): {0} userIds", bag.Count());
 #endif
             return bag;
         }
@@ -948,7 +953,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 {
                     TUserClaim tclaim = MapTableEntity<TUserClaim>(log);
                     //Added for 1.7 rowkey change
-                    if (KeyHelper.GenerateRowKeyIdentityUserClaim(tclaim.ClaimType, tclaim.ClaimValue) == tclaim.RowKey)
+                    if (KeyHelper.GenerateRowKeyIdentityUserClaim(tclaim.ClaimType, tclaim.ClaimValue).Equals(tclaim.RowKey))
                     {
                         claims.Add(tclaim);
                     }
@@ -1012,7 +1017,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 taskBatch.Add(getUsers(tempUserIds));
                 if (taskBatch.Count % taskMax == 0)
                 {
-                    await Task.WhenAll(taskBatch.ToArray());
+                    await Task.WhenAll(taskBatch);
                     taskBatch.Clear();
                 }
                 token = response.ContinuationToken;
@@ -1020,7 +1025,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             if (taskBatch.Count > 0)
             {
-                await Task.WhenAll(taskBatch.ToArray());
+                await Task.WhenAll(taskBatch);
                 taskBatch.Clear();
             }
 #if DEBUG

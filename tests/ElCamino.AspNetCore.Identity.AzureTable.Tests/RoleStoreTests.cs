@@ -100,15 +100,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                 using (RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager(store))
                 {
                     await manager.AddClaimAsync(role, claim);
+                    await Assert.ThrowsAsync<ArgumentNullException>(() => store.AddClaimAsync(null, claim));
+                    await Assert.ThrowsAsync<ArgumentNullException>(() => store.AddClaimAsync(role, null));
+                    await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetClaimsAsync(null));
+
                     var claims = await manager.GetClaimsAsync(role);
-                    Assert.True(claims.ToList().Any(c => c.Value == claim.Value & c.ValueType == claim.ValueType), "Claim not found");
+                    Assert.Contains(claims, (c) => c.Value == claim.Value && c.Type == claim.Type);//, "Claim not found");
                 }
-
-                await Assert.ThrowsAsync<ArgumentNullException>(() => store.AddClaimAsync(null, claim));
-                await Assert.ThrowsAsync<ArgumentNullException>(() => store.AddClaimAsync(role, null));
-                await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetClaimsAsync(null));
-
-
             }
         }
 
@@ -119,15 +117,16 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                 using (RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager(store))
                 {
                     await manager.RemoveClaimAsync(role, claim);
+                    await Assert.ThrowsAsync<ArgumentNullException>(() => store.RemoveClaimAsync(null, claim));
+                    await Assert.ThrowsAsync<ArgumentNullException>(() => store.RemoveClaimAsync(role, null));
+
+                    var c1 = new Claim(string.Empty, claim.Value);
+                    await Assert.ThrowsAsync<ArgumentException>(() => store.RemoveClaimAsync(role, c1));
+
                     var claims = await manager.GetClaimsAsync(role);
-                    Assert.False(claims.ToList().Any(c => c.Value == claim.Value & c.ValueType == claim.ValueType), "Claim not found");
+                    Assert.DoesNotContain(claims, (c) => c.Value == claim.Value && c.Type == claim.Type);  //, "Claim not found");
                 }
 
-                await Assert.ThrowsAsync<ArgumentNullException>(() => store.RemoveClaimAsync(null, claim));
-                await Assert.ThrowsAsync<ArgumentNullException>(() => store.RemoveClaimAsync(role, null));
-
-                var c1 = new Claim(string.Empty, claim.Value);
-                await Assert.ThrowsAsync<ArgumentException>(() => store.RemoveClaimAsync(role, c1));
             }
         }
 
