@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Builder;
 using Xunit;
 using Xunit.Abstractions;
 using ElCamino.AspNetCore.Identity.AzureTable;
+using ElCamino.AspNetCore.Identity.AzureTable.Model;
 using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser;
 using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
 using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
@@ -199,7 +200,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                new UserStoreV2<ApplicationUserV2, IdentityRole, IdentityCloudContext>(null);
+                new UserStoreV2<ApplicationUserV2, IdentityRole, IdentityCloudContext>(null,null);
             });
         }
 
@@ -276,5 +277,46 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         }
 
         #endregion
+
+
+        [Fact(DisplayName = "UserIdNotChangedIfImmutableIdSetUp")]
+        [Trait("IdentityCore.Azure.UserStoreV2.Properties", "")]
+
+        public async Task UserIdNotChangedIfImmutableIdSetUp()
+        {
+            var config = userFixture.GetConfig();
+            config.EnableImmutableUserId = true;
+            var userStore = userFixture.CreateUserStore(userFixture.GetContext(config),config);
+
+            var user = GenTestUser();
+            await userStore.CreateAsync(user);
+
+            var idBefore = user.Id;
+            var pkBefore = user.PartitionKey;
+            var rkBefore = user.RowKey;
+
+            user.UserName += "changed";
+            await userStore.UpdateAsync(user);
+
+            Assert.Equal(idBefore,user.Id);
+            Assert.Equal(pkBefore,user.PartitionKey);
+            Assert.Equal(rkBefore,user.RowKey);
+
+        }
+
+        [Fact(DisplayName = "CanFindByNameIfImmutableIdSetUp")]
+        [Trait("IdentityCore.Azure.UserStoreV2.Properties", "")]
+
+        public async Task CanFindByNameIfImmutableIdSetUp()
+        {
+
+        }
+
+        [Fact(DisplayName = "CanFindByIdIfImmutableIdSetUp")]
+        [Trait("IdentityCore.Azure.UserStoreV2.Properties", "")]
+
+        public async Task CanFindByIdIfImmutableIdSetUp()
+        {
+        }
     }
 }

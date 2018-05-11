@@ -15,5 +15,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 
         [JsonProperty("locationMode")]
         public string LocationMode { get; set; }
+
+        /// <summary>
+        /// If true, then the user ids will never be updated, if false it will change when you change the user name.
+        /// Default : false
+        /// </summary>
+        [JsonProperty("enableImmutableUserId")]
+        public bool EnableImmutableUserId { get; set; }
     }
 }

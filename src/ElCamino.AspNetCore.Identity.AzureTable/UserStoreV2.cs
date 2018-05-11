@@ -29,7 +29,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         where TRole : Model.IdentityRole<string, Model.IdentityUserRole>, new()
         where TContext : IdentityCloudContext, new()
     {
-        public UserStore(TContext context) : base(context) { }
+        public UserStore(TContext context, IdentityConfiguration config) : base(context,config) { }
 
         //Fixing code analysis issue CA1063
         protected override void Dispose(bool disposing)
@@ -203,7 +203,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         where TRole : Model.IdentityRole<string, Model.IdentityUserRole>, new()
         where TContext : IdentityCloudContext, new()
     {
-        public UserStoreV2(TContext context) : base(context) { }
+        public UserStoreV2(TContext context,IdentityConfiguration config) : base(context,config) { }
     }
 
     public class UserStoreV2<TUser, TRole, TKey, TUserLogin, TUserRole, TUserClaim, TUserToken, TContext> :
@@ -224,13 +224,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         protected CloudTable _userTable;
         protected CloudTable _roleTable;
         protected CloudTable _indexTable;
-
-        public UserStoreV2(TContext context) : base(new IdentityErrorDescriber())
+        
+        private IdentityConfiguration _config = null;
+        public UserStoreV2(TContext context,IdentityConfiguration config) : base(new IdentityErrorDescriber())
         {
             this.Context = context ?? throw new ArgumentNullException(nameof(context));
             this._userTable = context.UserTable;
             this._indexTable = context.IndexTable;
             this._roleTable = context.RoleTable;
+            this._config = config;
         }
 
         public override IQueryable<TUser> Users => throw new NotImplementedException();
@@ -1345,9 +1347,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             if (user == null) throw new ArgumentNullException(nameof(user));
 
             List<Task> tasks = new List<Task>(2);
-
-            string userNameKey = KeyHelper.GenerateRowKeyUserName(user.UserName);
-            if (ConvertIdToString(user.Id) != userNameKey)
+            if (!_config.EnableImmutableUserId && 
+                ConvertIdToString(user.Id) != KeyHelper.GenerateRowKeyUserName(user.UserName))
             {
                 tasks.Add(ChangeUserNameAsync(user));
             }
