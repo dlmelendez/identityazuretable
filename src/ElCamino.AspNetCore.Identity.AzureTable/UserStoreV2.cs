@@ -342,6 +342,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             {
                 List<Task> tasks = new List<Task>(2);
                 tasks.Add(_userTable.ExecuteAsync(TableOperation.Insert(user)));
+                if (_config.EnableImmutableUserId)
+                {
+                    tasks.Add(_indexTable.ExecuteAsync(TableOperation.Insert(CreateUserNameIndex(ConvertIdToString(user.Id), user.UserName))));
+                }
 
                 if (!string.IsNullOrWhiteSpace(user.Email))
                 {
@@ -504,6 +508,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return this.GetUserAggregateAsync(FindByEmailQuery(plainEmail));
         }
 
+     
+
         public async Task<IEnumerable<TUser>> FindAllByEmailAsync(string plainEmail)
         {
             List<TUser> result = new List<TUser>();
@@ -536,6 +542,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         protected TableQuery FindByEmailQuery(string plainEmail)
          => GetUserIdsByIndex(KeyHelper.GenerateRowKeyUserEmail(plainEmail));
 
+        protected TableQuery FindByUserNameQuery(string userName)
+            => GetUserIdsByIndex(KeyHelper.GenerateRowKeyUserName(userName));
+
         protected TableQuery GetUserIdByIndex(string partitionkey, string rowkey)
         {
             TableQuery tq = new TableQuery();
@@ -567,7 +576,17 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             this.ThrowIfDisposed();
-            return GetUserAsync(KeyHelper.GenerateRowKeyUserName(normalizedUserName));
+            if (!_config.EnableImmutableUserId)
+            {
+                return GetUserAsync(KeyHelper.GenerateRowKeyUserName(normalizedUserName));
+            }
+            else
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                ThrowIfDisposed();
+                var userId = FindByUserNameQuery(normalizedUserName);
+                return GetUserAggregateAsync(userId);
+            }
         }
 
         protected async Task<TUserClaim> GetUserClaimAsync(TUser user, Claim claim)
@@ -1422,6 +1441,25 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             {
                 Id = userid,
                 PartitionKey = KeyHelper.GenerateRowKeyUserEmail(email),
+                RowKey = userid,
+                KeyVersion = KeyHelper.KeyVersion,
+                ETag = Constants.ETagWildcard
+            };
+        }
+
+        /// <summary>
+        /// Create an index for getting the user id based on his user name,
+        /// Only used if EnableImmutableUserId = true
+        /// </summary>
+        /// <param name="userid"></param>
+        /// <param name="userName"></param>
+        /// <returns></returns>
+        protected Model.IdentityUserIndex CreateUserNameIndex(string userid, string userName)
+        {
+            return new Model.IdentityUserIndex()
+            {
+                Id = userid,
+                PartitionKey = KeyHelper.GenerateRowKeyUserName(userName),
                 RowKey = userid,
                 KeyVersion = KeyHelper.KeyVersion,
                 ETag = Constants.ETagWildcard

@@ -22,9 +22,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {
     public partial class UserStoreV2Tests : BaseUserStoreTests<ApplicationUserV2, IdentityRole, IdentityCloudContext, UserStoreV2<ApplicationUserV2, IdentityRole, IdentityCloudContext>>
     {
-        public UserStoreV2Tests(UserFixture<ApplicationUserV2, IdentityRole, IdentityCloudContext, UserStoreV2<ApplicationUserV2, IdentityRole, IdentityCloudContext>> userFix, ITestOutputHelper output) :
+        public UserStoreV2Tests(
+            UserFixture<ApplicationUserV2, IdentityRole, IdentityCloudContext,
+                UserStoreV2<ApplicationUserV2, IdentityRole, IdentityCloudContext>> userFix, ITestOutputHelper output) :
             base(userFix, output)
-        { }
+        {
+            
+        }
 
         [Fact(DisplayName = "AddRemoveUserClaim")]
         [Trait("IdentityCore.Azure.UserStoreV2", "")]
@@ -284,9 +288,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
         public async Task UserIdNotChangedIfImmutableIdSetUp()
         {
-            var config = userFixture.GetConfig();
-            config.EnableImmutableUserId = true;
-            var userStore = userFixture.CreateUserStore(userFixture.GetContext(config),config);
+            var userStore = GetImmutableUserIdStore();
 
             var user = GenTestUser();
             await userStore.CreateAsync(user);
@@ -298,18 +300,37 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             user.UserName += "changed";
             await userStore.UpdateAsync(user);
 
-            Assert.Equal(idBefore,user.Id);
-            Assert.Equal(pkBefore,user.PartitionKey);
-            Assert.Equal(rkBefore,user.RowKey);
+            Assert.Equal(idBefore, user.Id);
+            Assert.Equal(pkBefore, user.PartitionKey);
+            Assert.Equal(rkBefore, user.RowKey);
 
         }
 
+        private UserStoreV2<ApplicationUserV2, IdentityRole, IdentityCloudContext> GetImmutableUserIdStore()
+        {
+            var config = userFixture.GetConfig();
+            config.EnableImmutableUserId = true;
+            var userStore = userFixture.CreateUserStore(userFixture.GetContext(config), config);
+            return userStore;
+        }
+
+        
         [Fact(DisplayName = "CanFindByNameIfImmutableIdSetUp")]
         [Trait("IdentityCore.Azure.UserStoreV2.Properties", "")]
 
         public async Task CanFindByNameIfImmutableIdSetUp()
         {
+            var userStore = GetImmutableUserIdStore();
 
+            var user = GenTestUser();
+            await userStore.CreateAsync(user);
+
+            var userFound = await userStore.FindByNameAsync(user.UserName);
+
+            Assert.NotNull(user);
+            Assert.Equal(user.Id, userFound.Id);
+            Assert.Equal(user.PartitionKey, userFound.PartitionKey);
+            Assert.Equal(user.RowKey, userFound.RowKey);
         }
 
         [Fact(DisplayName = "CanFindByIdIfImmutableIdSetUp")]
@@ -317,6 +338,17 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
         public async Task CanFindByIdIfImmutableIdSetUp()
         {
+            var userStore = GetImmutableUserIdStore();
+
+            var user = GenTestUser();
+            await userStore.CreateAsync(user);
+
+            var userFound = await userStore.FindByIdAsync(user.Id);
+
+            Assert.NotNull(user);
+            Assert.Equal(user.Id, userFound.Id);
+            Assert.Equal(user.PartitionKey, userFound.PartitionKey);
+            Assert.Equal(user.RowKey, userFound.RowKey);
         }
     }
 }
