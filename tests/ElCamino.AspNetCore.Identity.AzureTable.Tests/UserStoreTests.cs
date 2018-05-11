@@ -198,7 +198,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         {
             Assert.Throws<ArgumentNullException>(() => 
             {
-                new UserStore<ApplicationUser, IdentityRole, IdentityCloudContext>(null);
+                new UserStore<ApplicationUser, IdentityRole, IdentityCloudContext>(null,null);
             });
         }
     }

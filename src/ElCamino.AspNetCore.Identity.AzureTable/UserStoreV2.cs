@@ -29,7 +29,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         where TRole : Model.IdentityRole<string, Model.IdentityUserRole>, new()
         where TContext : IdentityCloudContext, new()
     {
-        public UserStore(TContext context) : base(context) { }
+        public UserStore(TContext context, IdentityConfiguration config) : base(context,config) { }
 
         //Fixing code analysis issue CA1063
         protected override void Dispose(bool disposing)
@@ -203,7 +203,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         where TRole : Model.IdentityRole<string, Model.IdentityUserRole>, new()
         where TContext : IdentityCloudContext, new()
     {
-        public UserStoreV2(TContext context) : base(context) { }
+        public UserStoreV2(TContext context,IdentityConfiguration config) : base(context,config) { }
     }
 
     public class UserStoreV2<TUser, TRole, TKey, TUserLogin, TUserRole, TUserClaim, TUserToken, TContext> :
@@ -224,13 +224,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         protected CloudTable _userTable;
         protected CloudTable _roleTable;
         protected CloudTable _indexTable;
-
-        public UserStoreV2(TContext context) : base(new IdentityErrorDescriber())
+        
+        private IdentityConfiguration _config = null;
+        public UserStoreV2(TContext context,IdentityConfiguration config) : base(new IdentityErrorDescriber())
         {
             this.Context = context ?? throw new ArgumentNullException(nameof(context));
             this._userTable = context.UserTable;
             this._indexTable = context.IndexTable;
             this._roleTable = context.RoleTable;
+            this._config = config;
         }
 
         public override IQueryable<TUser> Users => throw new NotImplementedException();
@@ -340,6 +342,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             {
                 List<Task> tasks = new List<Task>(2);
                 tasks.Add(_userTable.ExecuteAsync(TableOperation.Insert(user)));
+                if (_config.EnableImmutableUserId)
+                {
+                    tasks.Add(_indexTable.ExecuteAsync(TableOperation.Insert(CreateUserNameIndex(ConvertIdToString(user.Id), user.UserName))));
+                }
 
                 if (!string.IsNullOrWhiteSpace(user.Email))
                 {
@@ -502,6 +508,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return this.GetUserAggregateAsync(FindByEmailQuery(plainEmail));
         }
 
+     
+
         public async Task<IEnumerable<TUser>> FindAllByEmailAsync(string plainEmail)
         {
             List<TUser> result = new List<TUser>();
@@ -534,6 +542,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         protected TableQuery FindByEmailQuery(string plainEmail)
          => GetUserIdsByIndex(KeyHelper.GenerateRowKeyUserEmail(plainEmail));
 
+        protected TableQuery FindByUserNameQuery(string userName)
+            => GetUserIdsByIndex(KeyHelper.GenerateRowKeyUserName(userName));
+
         protected TableQuery GetUserIdByIndex(string partitionkey, string rowkey)
         {
             TableQuery tq = new TableQuery();
@@ -565,7 +576,17 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             this.ThrowIfDisposed();
-            return GetUserAsync(KeyHelper.GenerateRowKeyUserName(normalizedUserName));
+            if (!_config.EnableImmutableUserId)
+            {
+                return GetUserAsync(KeyHelper.GenerateRowKeyUserName(normalizedUserName));
+            }
+            else
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                ThrowIfDisposed();
+                var userId = FindByUserNameQuery(normalizedUserName);
+                return GetUserAggregateAsync(userId);
+            }
         }
 
         protected async Task<TUserClaim> GetUserClaimAsync(TUser user, Claim claim)
@@ -1345,9 +1366,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             if (user == null) throw new ArgumentNullException(nameof(user));
 
             List<Task> tasks = new List<Task>(2);
-
-            string userNameKey = KeyHelper.GenerateRowKeyUserName(user.UserName);
-            if (ConvertIdToString(user.Id) != userNameKey)
+            if (!_config.EnableImmutableUserId && 
+                ConvertIdToString(user.Id) != KeyHelper.GenerateRowKeyUserName(user.UserName))
             {
                 tasks.Add(ChangeUserNameAsync(user));
             }
@@ -1421,6 +1441,25 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             {
                 Id = userid,
                 PartitionKey = KeyHelper.GenerateRowKeyUserEmail(email),
+                RowKey = userid,
+                KeyVersion = KeyHelper.KeyVersion,
+                ETag = Constants.ETagWildcard
+            };
+        }
+
+        /// <summary>
+        /// Create an index for getting the user id based on his user name,
+        /// Only used if EnableImmutableUserId = true
+        /// </summary>
+        /// <param name="userid"></param>
+        /// <param name="userName"></param>
+        /// <returns></returns>
+        protected Model.IdentityUserIndex CreateUserNameIndex(string userid, string userName)
+        {
+            return new Model.IdentityUserIndex()
+            {
+                Id = userid,
+                PartitionKey = KeyHelper.GenerateRowKeyUserName(userName),
                 RowKey = userid,
                 KeyVersion = KeyHelper.KeyVersion,
                 ETag = Constants.ETagWildcard

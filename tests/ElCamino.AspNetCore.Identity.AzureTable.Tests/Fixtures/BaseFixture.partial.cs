@@ -71,7 +71,13 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 
         public TContext GetContext()
         {
-            return Activator.CreateInstance(typeof(TContext), new object[1] { GetConfig() }) as TContext;
+            return GetContext(GetConfig());
+        }
+
+        public TContext GetContext(IdentityConfiguration config)
+        {
+            return Activator.CreateInstance(typeof(TContext), new object[1] {GetConfig()}) as TContext;
+
         }
 
         public RoleStore<TRole> CreateRoleStore()
@@ -133,12 +139,12 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 
         public TUserStore CreateUserStore()
         {
-            return CreateUserStore(GetContext());
+            return CreateUserStore(GetContext(),GetConfig());
         }
 
-        public TUserStore CreateUserStore(TContext context)
+        public TUserStore CreateUserStore(TContext context,IdentityConfiguration config)
         {
-            var userStore = Activator.CreateInstance(typeof(TUserStore), new object[1] { context }) as TUserStore;
+            var userStore = Activator.CreateInstance(typeof(TUserStore), new object[2] { context,config }) as TUserStore;
 
             return userStore;
         }
