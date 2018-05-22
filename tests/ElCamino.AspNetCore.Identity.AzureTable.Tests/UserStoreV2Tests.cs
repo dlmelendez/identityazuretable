@@ -332,7 +332,22 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             Assert.Equal(user.PartitionKey, userFound.PartitionKey);
             Assert.Equal(user.RowKey, userFound.RowKey);
         }
+        [Fact(DisplayName = "CanFindByNameIfImmutableIdSetUp")]
+        [Trait("IdentityCore.Azure.UserStoreV2.Properties", "")]
 
+        public async Task CanFindByNameIfImmutableIdSetUpAfterUpdate()
+        {
+            var userStore = GetImmutableUserIdStore();
+
+            var user = GenTestUser();
+            await userStore.CreateAsync(user);
+            user.UserName += "123";
+            await userStore.UpdateAsync(user);
+
+            var userFound = await userStore.FindByNameAsync(user.UserName);
+
+            Assert.NotNull(userFound);
+        }
         [Fact(DisplayName = "CanFindByIdIfImmutableIdSetUp")]
         [Trait("IdentityCore.Azure.UserStoreV2.Properties", "")]
 

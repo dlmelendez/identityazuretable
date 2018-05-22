@@ -1381,6 +1381,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
                     tasks.Add(_indexTable.ExecuteAsync(TableOperation.InsertOrReplace(indexEmail)));
                 }
+                if (_config.EnableImmutableUserId)
+                {
+                    tasks.Add(_indexTable.ExecuteAsync(TableOperation.InsertOrReplace(CreateUserNameIndex(ConvertIdToString(user.Id), user.UserName))));
+                }
             }
 
             try

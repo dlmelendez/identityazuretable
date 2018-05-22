@@ -30,7 +30,8 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             MigrationFactory.EmailIndex,
             MigrationFactory.LoginIndex,
             MigrationFactory.ClaimRowkey,
-            MigrationFactory.RoleAndClaimIndex
+            MigrationFactory.RoleAndClaimIndex,
+            MigrationFactory.UserNameIndex
         };
         private const string nodeleteToken = "/nodelete";
         private const string maxdegreesparallelToken = "/maxparallel:";
