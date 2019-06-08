@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Azure Table Storage Provider to support AspNet Identity Core 2.x frameworks for .NET Core.</Description>
-    <Copyright>Copyright ©  2017 David Melendez, MIT License</Copyright>
+    <Copyright>Copyright ©  2019 David Melendez, MIT License</Copyright>
     <AssemblyTitle>Azure Table Storage Provider for ASP.NET Identity Core</AssemblyTitle>
     <VersionPrefix>2.0.0</VersionPrefix>
     <Authors>David Melendez</Authors>
@@ -14,7 +14,7 @@
     <PackageId>ElCamino.AspNetCore.Identity.AzureTable</PackageId>
     <PackageTags>ASP.NET;Identity Core;Azure;Table Storage;MVC;UserStore;RoleStore;UserManager;multi-tenant;RA-GRS;geo-redundant;Microsoft.AspNetCore.Identity</PackageTags>
     <PackageReleaseNotes>
-      Supports AspNetCore.Identity 2.x frameworks for .NET Core. Migration(s) required from 1.x to 2.x.
+      Breaking changes. Data migration required to this version.
       Important! Check https://dlmelendez.github.io/identityazuretable/#/migration for data migration information.</PackageReleaseNotes>
     <PackageIconUrl>https://dlmelendez.github.io/identityazuretable/images/projectNugetPic.png</PackageIconUrl>
     <PackageLicenseUrl>https://github.com/dlmelendez/identityazuretable/blob/master/LICENSE</PackageLicenseUrl>

@@ -26,6 +26,17 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             return string.Format(Constants.RowKeyConstants.FormatterIdentityUserEmail, hash);
         }
 
+        public override string GenerateUserId()
+        {
+            return Guid.NewGuid().ToString("N");
+        }
+
+        public override string GenerateRowKeyUserId(string plainUserId)
+        {
+            string hash = ConvertKeyToHash(plainUserId?.ToUpper());
+            return string.Format(Constants.RowKeyConstants.FormatterIdentityUserName, hash);
+        }
+
         public override string GenerateRowKeyUserName(string plainUserName)
         {
             string hash = ConvertKeyToHash(plainUserName?.ToUpper());

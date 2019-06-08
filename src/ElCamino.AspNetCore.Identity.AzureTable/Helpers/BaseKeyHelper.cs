@@ -10,7 +10,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 
         public abstract string GenerateRowKeyUserEmail(string plainEmail);
 
+        public abstract string GenerateUserId();
+
         public abstract string GenerateRowKeyUserName(string plainUserName);
+
+        public abstract string GenerateRowKeyUserId(string plainUserId);
 
         public abstract string GenerateRowKeyIdentityUserRole(string plainRoleName);
 

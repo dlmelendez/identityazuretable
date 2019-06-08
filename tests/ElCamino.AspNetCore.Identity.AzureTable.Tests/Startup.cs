@@ -35,10 +35,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.TestsExp
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             // Add Identity services to the services container.
+#pragma warning disable 0618
             services.AddIdentity<IdentityUser, IdentityRole>((config) =>
             {
 
             })
+#pragma warning restore 0618
             //.AddEntityFrameworkStores<ApplicationDbContext>()
             .AddAzureTableStores<IdentityCloudContext>(new Func<IdentityConfiguration>(() =>
             {

@@ -25,6 +25,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             return hashHelper.GenerateRowKeyUserEmail(plainEmail);
         }
 
+        public static string GenerateUserId()
+        {
+            return hashHelper.GenerateUserId();
+        }
+
+        public static string GenerateRowKeyUserId(string plainUserId)
+        {
+            return hashHelper.GenerateRowKeyUserId(plainUserId);
+        }
 
         public static string GenerateRowKeyUserName(string plainUserName)
         {

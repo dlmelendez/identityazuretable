@@ -309,7 +309,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         private UserStoreV2<ApplicationUserV2, IdentityRole, IdentityCloudContext> GetImmutableUserIdStore()
         {
             var config = userFixture.GetConfig();
-            config.EnableImmutableUserId = true;
             var userStore = userFixture.CreateUserStore(userFixture.GetContext(config), config);
             return userStore;
         }

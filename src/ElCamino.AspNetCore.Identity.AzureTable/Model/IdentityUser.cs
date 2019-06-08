@@ -26,8 +26,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// </summary>
         public void GenerateKeys()
         {
-            Id = PeekRowKey();
-            PartitionKey = Id;
+            if (string.IsNullOrWhiteSpace(Id))
+            {
+                Id = KeyHelper.GenerateUserId();
+            }
+            RowKey = PeekRowKey();
+            PartitionKey = RowKey;
             KeyVersion = KeyHelper.KeyVersion;
         }
 
@@ -38,16 +42,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// <returns></returns>
         public string PeekRowKey()
         {
-            return KeyHelper.GenerateRowKeyUserName(UserName);
+            return KeyHelper.GenerateRowKeyUserId(Id);
         }
 
         public double KeyVersion { get; set; }
 
-        public override string Id
-        {
-            get => RowKey;
-            set => RowKey = value;
-        }
+        
 
         public override string UserName
         {
@@ -62,6 +62,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         }
     }
 
+    [Obsolete("IdentityUserV2 will be renamed IdentityUser in a future release. Use IdentityUserV2 instead to ease breaking changes.")]
     public class IdentityUser : IdentityUser<string, IdentityUserLogin, IdentityUserRole, IdentityUserClaim, IdentityUserToken>, IGenerateKeys
     {
         public IdentityUser() : base() { }
@@ -78,8 +79,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// </summary>
         public void GenerateKeys()
         {
-            Id = PeekRowKey();
-            PartitionKey = Id;
+            if (string.IsNullOrWhiteSpace(Id))
+            {
+                Id = KeyHelper.GenerateUserId();
+            }
+            RowKey = PeekRowKey();
+            PartitionKey = RowKey;
             KeyVersion = KeyHelper.KeyVersion;
         }
 
@@ -90,16 +95,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// <returns></returns>
         public string PeekRowKey()
         {
-            return KeyHelper.GenerateRowKeyUserName(UserName);
+            return KeyHelper.GenerateRowKeyUserId(Id);
         }
 
         public double KeyVersion { get; set; }
 
-        public override string Id
-        {
-            get => RowKey;
-            set => RowKey = base.Id = value;
-        }
 
         public override string UserName
         {
@@ -114,7 +114,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         }
     }
 
-
+    [Obsolete("IdentityUser<TKey, TLogin, TRole, TClaim, TToken> : IdentityUser<TKey> will be removed in a future release.")]
     public class IdentityUser<TKey, TLogin, TRole, TClaim, TToken> : IdentityUser<TKey>
         where TKey : IEquatable<TKey>
         where TLogin : IdentityUserLogin<TKey>
@@ -154,9 +154,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         {
         }
 
-
-        [IgnoreProperty]
-        public override TKey Id { get => base.Id; set => base.Id = value; }
 
         public virtual DateTime? LockoutEndDateUtc { get; set; }
 

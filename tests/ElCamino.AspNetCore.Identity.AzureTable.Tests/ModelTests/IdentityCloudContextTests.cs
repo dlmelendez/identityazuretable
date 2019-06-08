@@ -9,16 +9,17 @@ using Xunit.Abstractions;
 
 namespace ElCamino.AspNet.Identity.AzureTable.Tests.ModelTests
 {
+#pragma warning disable 0618
     public class IdentityCloudContextTests : IClassFixture<RoleFixture<IdentityUser, IdentityRole, IdentityCloudContext>>
     {
         private readonly ITestOutputHelper output;
         private RoleFixture<IdentityUser, IdentityRole, IdentityCloudContext> roleFixture;
-
         public IdentityCloudContextTests(RoleFixture<IdentityUser, IdentityRole, IdentityCloudContext> roleFix, ITestOutputHelper output)
         {
             this.output = output;
             roleFixture = roleFix;
         }
+#pragma warning restore 0618
 
         [Fact(DisplayName = "IdentityCloudContextCtors")]
         [Trait("IdentityCore.Azure.Model", "")]
