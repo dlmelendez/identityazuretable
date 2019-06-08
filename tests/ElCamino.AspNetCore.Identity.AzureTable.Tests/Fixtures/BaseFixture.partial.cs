@@ -58,7 +58,10 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
             {
                 StorageConnectionString = root["IdentityAzureTable:identityConfiguration:storageConnectionString"],
                 TablePrefix = root["IdentityAzureTable:identityConfiguration:tablePrefix"],
-                LocationMode = root["IdentityAzureTable:identityConfiguration:locationMode"]
+                LocationMode = root["IdentityAzureTable:identityConfiguration:locationMode"],
+                IndexTableName = root["IdentityAzureTable:identityConfiguration:indexTableName"],
+                UserTableName = root["IdentityAzureTable:identityConfiguration:userTableName"],
+                RoleTableName = root["IdentityAzureTable:identityConfiguration:roleTableName"]
             };
 
             return idconfig;
