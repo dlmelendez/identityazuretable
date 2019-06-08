@@ -260,11 +260,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             BatchOperationHelper bop = new BatchOperationHelper();
 
             List<Task> tasks = new List<Task>();
-
+            string userPartitionKey = KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
             foreach (Claim c in claims)
             {
                 bop.Add(TableOperation.Insert(CreateUserClaim(user, c)));
-                tasks.Add(_indexTable.ExecuteAsync(TableOperation.InsertOrReplace(CreateClaimIndex(KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)), c.Type, c.Value))));
+                tasks.Add(_indexTable.ExecuteAsync(TableOperation.InsertOrReplace(CreateClaimIndex(userPartitionKey, c.Type, c.Value))));
             }
 
             tasks.Add(bop.ExecuteBatchAsync(_userTable));
@@ -343,13 +343,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             try
             {
+                string userPartitionKey = KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
                 List<Task> tasks = new List<Task>(2);
                 tasks.Add(_userTable.ExecuteAsync(TableOperation.Insert(user)));
-                tasks.Add(_indexTable.ExecuteAsync(TableOperation.Insert(CreateUserNameIndex(KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)), user.UserName))));
+                tasks.Add(_indexTable.ExecuteAsync(TableOperation.Insert(CreateUserNameIndex(userPartitionKey, user.UserName))));
 
                 if (!string.IsNullOrWhiteSpace(user.Email))
                 {
-                    Model.IdentityUserIndex index = CreateEmailIndex(KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)), user.Email);
+                    Model.IdentityUserIndex index = CreateEmailIndex(userPartitionKey, user.Email);
                     tasks.Add(_indexTable.ExecuteAsync(TableOperation.InsertOrReplace(index)));
                 }
 
@@ -370,33 +371,35 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             if (user == null) throw new ArgumentNullException(nameof(user));
 
             List<Task> tasks = new List<Task>(50);
-            string userId = KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
-            var userRows = (await GetUserAggregateQueryAsync(userId)).ToList();
+            string userPartitionKey = KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
+            var userRows = (await GetUserAggregateQueryAsync(userPartitionKey)).ToList();
 
-            tasks.Add(DeleteAllUserRows(userId, userRows));
+            tasks.Add(DeleteAllUserRows(userPartitionKey, userRows));
 
-            var userAgg = MapUserAggregate(userId, userRows);
+            tasks.Add(_indexTable.ExecuteAsync(TableOperation.Delete(CreateUserNameIndex(userPartitionKey, user.UserName))));
+
+            var userAgg = MapUserAggregate(userPartitionKey, userRows);
 
             //Don't use the BatchHelper for login index table, partition keys are likely not the same
             //since they are based on logonprovider and providerkey
             foreach (var userLogin in userAgg.Logins)
             {
-                tasks.Add(_indexTable.ExecuteAsync(TableOperation.Delete(CreateLoginIndex(KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)), userLogin.LoginProvider, userLogin.ProviderKey))));
+                tasks.Add(_indexTable.ExecuteAsync(TableOperation.Delete(CreateLoginIndex(userPartitionKey, userLogin.LoginProvider, userLogin.ProviderKey))));
             }
 
             foreach (var userRole in userAgg.Roles)
             {
-                tasks.Add(_indexTable.ExecuteAsync(TableOperation.Delete(CreateRoleIndex(KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)), userRole.RoleName))));
+                tasks.Add(_indexTable.ExecuteAsync(TableOperation.Delete(CreateRoleIndex(userPartitionKey, userRole.RoleName))));
             }
 
             foreach (var userClaim in userAgg.Claims)
             {
-                tasks.Add(_indexTable.ExecuteAsync(TableOperation.Delete(CreateClaimIndex(KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)), userClaim.ClaimType, userClaim.ClaimValue))));
+                tasks.Add(_indexTable.ExecuteAsync(TableOperation.Delete(CreateClaimIndex(userPartitionKey, userClaim.ClaimType, userClaim.ClaimValue))));
             }
 
             if (!string.IsNullOrWhiteSpace(user.Email))
             {
-                tasks.Add(_indexTable.ExecuteAsync(TableOperation.Delete(CreateEmailIndex(KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)), user.Email))));
+                tasks.Add(_indexTable.ExecuteAsync(TableOperation.Delete(CreateEmailIndex(userPartitionKey, user.Email))));
             }
 
             try
@@ -1126,17 +1129,17 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             TUserClaim local = await GetUserClaimAsync(user, claim);
             List<Task> tasks = new List<Task>(3);
-
+            string userPartitionKey = KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
             if (local != null)
             {
                 TableOperation deleteOperation = TableOperation.Delete(CreateUserClaim(user, claim));
                 bop.Add(deleteOperation);
-                tasks.Add(_indexTable.ExecuteAsync(TableOperation.Delete(CreateClaimIndex(KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)), claim.Type, claim.Value))));
+                tasks.Add(_indexTable.ExecuteAsync(TableOperation.Delete(CreateClaimIndex(userPartitionKey, claim.Type, claim.Value))));
             }
             TUserClaim item = CreateUserClaim(user, newClaim);
 
             bop.Add(TableOperation.Insert(item));
-            tasks.Add(_indexTable.ExecuteAsync(TableOperation.InsertOrReplace(CreateClaimIndex(KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)), newClaim.Type, newClaim.Value))));
+            tasks.Add(_indexTable.ExecuteAsync(TableOperation.InsertOrReplace(CreateClaimIndex(userPartitionKey, newClaim.Type, newClaim.Value))));
 
             tasks.Add(bop.ExecuteBatchAsync(_userTable));
 
@@ -1153,7 +1156,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             // Claim ctor doesn't allow Claim.Value to be null. Need to allow string.empty.
             BatchOperationHelper bop = new BatchOperationHelper();
             List<Task> tasks = new List<Task>();
-
+            string userPartitionKey = KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
             var userClaims = await this.GetClaimsAsync(user);
             foreach (Claim claim in claims)
             {
@@ -1164,7 +1167,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 {
                     TableOperation deleteOperation = TableOperation.Delete(CreateUserClaim(user, local));
                     bop.Add(deleteOperation);
-                    tasks.Add(_indexTable.ExecuteAsync(TableOperation.Delete(CreateClaimIndex(KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)), local.Type, local.Value))));
+                    tasks.Add(_indexTable.ExecuteAsync(TableOperation.Delete(CreateClaimIndex(userPartitionKey, local.Type, local.Value))));
                 }
             }
             tasks.Add(bop.ExecuteBatchAsync(_userTable));
@@ -1197,8 +1200,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             if (string.IsNullOrWhiteSpace(roleName))
                 throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(roleName));
 
+            string userPartitionKey = KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
             TUserRole item = null; 
-            var tresult = await _userTable.ExecuteAsync(TableOperation.Retrieve<TUserRole>(user.PartitionKey, KeyHelper.GenerateRowKeyIdentityRole(roleName)));
+            var tresult = await _userTable.ExecuteAsync(TableOperation.Retrieve<TUserRole>(userPartitionKey, KeyHelper.GenerateRowKeyIdentityRole(roleName)));
             item = tresult.Result as TUserRole; 
 
             if (item != null)
@@ -1208,7 +1212,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 List<Task> tasks = new List<Task>(2);
 
                 tasks.Add(_userTable.ExecuteAsync(deleteOperation));
-                tasks.Add(_indexTable.ExecuteAsync(TableOperation.Delete(CreateRoleIndex(KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)), roleName))));
+                tasks.Add(_indexTable.ExecuteAsync(TableOperation.Delete(CreateRoleIndex(userPartitionKey, roleName))));
 
                 await Task.WhenAll(tasks);
             }
@@ -1219,12 +1223,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             cancellationToken.ThrowIfCancellationRequested();
             this.ThrowIfDisposed();
             if (user == null) throw new ArgumentNullException(nameof(user));
-
-            TUserLogin item = await FindUserLoginAsync(KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)), loginProvider, providerKey);
+            string userPartitionKey = KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
+            TUserLogin item = await FindUserLoginAsync(userPartitionKey, loginProvider, providerKey);
 
             if (item != null)
             {
-                Model.IdentityUserIndex index = CreateLoginIndex(KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)), item.LoginProvider, item.ProviderKey);
+                Model.IdentityUserIndex index = CreateLoginIndex(userPartitionKey, item.LoginProvider, item.ProviderKey);
                 await Task.WhenAll(_indexTable.ExecuteAsync(TableOperation.Delete(index)),
                                     _userTable.ExecuteAsync(TableOperation.Delete(item)));
             }
@@ -1279,76 +1283,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
 
             await deleteBatchHelper.ExecuteBatchAsync(_userTable);
-        }
-
-
-        protected async Task<TUser> ChangeUserNameAsync(TUser user)
-        {
-            List<Task> taskList = new List<Task>(50);
-            string userNameKey = KeyHelper.GenerateRowKeyUserName(user.UserName);
-
-            Debug.WriteLine("Old User.Id: {0}", user.Id);
-            string oldUserId = KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
-            Debug.WriteLine(string.Format("New User.Id: {0}", KeyHelper.GenerateRowKeyUserName(user.UserName)));
-            //Get the old user
-            var userRows = (await GetUserAggregateQueryAsync(KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)))).ToList();
-            //Insert the new user name rows
-            BatchOperationHelper insertBatchHelper = new BatchOperationHelper();
-            foreach (DynamicTableEntity oldUserRow in userRows)
-            {
-                ITableEntity dte = null;
-                if (oldUserRow.RowKey == KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)))
-                {
-                    Model.IGenerateKeys ikey = (Model.IGenerateKeys)user;
-                    ikey.GenerateKeys();
-                    dte = user;
-                }
-                else
-                {
-                    dte = new DynamicTableEntity(userNameKey, oldUserRow.RowKey,
-                        Constants.ETagWildcard,
-                        oldUserRow.Properties);
-                }
-                insertBatchHelper.Add(TableOperation.Insert(dte));
-            }
-            taskList.Add(insertBatchHelper.ExecuteBatchAsync(_userTable));
-            //Delete the old user
-            taskList.Add(DeleteAllUserRows(oldUserId, userRows));
-
-            // Create the new email index
-            if (!string.IsNullOrWhiteSpace(user.Email))
-            {
-                taskList.Add(DeleteEmailIndexAsync(oldUserId, user.Email));
-
-                Model.IdentityUserIndex indexEmail = CreateEmailIndex(userNameKey, user.Email);
-
-                taskList.Add(_indexTable.ExecuteAsync(TableOperation.InsertOrReplace(indexEmail)));
-            }
-
-            var userAgg = MapUserAggregate(oldUserId, userRows);
-
-            // Update the external login indexes
-            foreach (var login in userAgg.Logins)                                    
-            {
-                taskList.Add(_indexTable.ExecuteAsync(TableOperation.InsertOrReplace(CreateLoginIndex(userNameKey, login.LoginProvider, login.ProviderKey))));
-            }
-
-            // Update the claims indexes
-            foreach (var claim in userAgg.Claims)
-            {
-                taskList.Add(_indexTable.ExecuteAsync(TableOperation.Delete(CreateClaimIndex(oldUserId, claim.ClaimType, claim.ClaimValue))));
-                taskList.Add(_indexTable.ExecuteAsync(TableOperation.InsertOrReplace(CreateClaimIndex(userNameKey, claim.ClaimType, claim.ClaimValue))));
-            }
-
-            // Update the roles indexes
-            foreach (var role in userAgg.Roles)
-            {
-                taskList.Add(_indexTable.ExecuteAsync(TableOperation.Delete(CreateRoleIndex(oldUserId, role.RoleName))));
-                taskList.Add(_indexTable.ExecuteAsync(TableOperation.InsertOrReplace(CreateRoleIndex(userNameKey, role.RoleName))));
-            }
-
-            await Task.WhenAll(taskList.ToArray());
-            return user;
         }
 
 
