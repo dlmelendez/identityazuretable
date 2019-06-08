@@ -1,7 +1,6 @@
 ﻿// MIT License Copyright 2017 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 using System;
 using System.Resources;
-using Microsoft.WindowsAzure;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
 using Xunit;
 using ElCamino.AspNetCore.Identity.AzureTable;

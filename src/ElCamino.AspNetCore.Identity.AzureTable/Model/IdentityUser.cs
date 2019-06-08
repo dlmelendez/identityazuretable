@@ -5,9 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.WindowsAzure.Storage.Table;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
-using Microsoft.WindowsAzure.Storage;
+using Microsoft.Azure.Cosmos.Table;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 {
@@ -132,16 +131,16 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         }
 
         #region Collections
-        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
+        [IgnoreProperty]
         public ICollection<TClaim> Claims { get; private set; }
 
-        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
+        [IgnoreProperty]
         public ICollection<TLogin> Logins { get; private set; }
 
-        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
+        [IgnoreProperty]
         public ICollection<TRole> Roles { get; private set; }
 
-        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
+        [IgnoreProperty]
         public ICollection<TToken> Tokens { get; private set; }
 
         #endregion
@@ -156,7 +155,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         }
 
 
-        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
+        [IgnoreProperty]
         public override TKey Id { get => base.Id; set => base.Id = value; }
 
         public virtual DateTime? LockoutEndDateUtc { get; set; }
@@ -164,7 +163,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// <summary>
         /// LockoutEnd is stored as LockoutEndDateUtc for backwards compat.
         /// </summary>
-        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
+        [IgnoreProperty]
         public override DateTimeOffset? LockoutEnd
         {
             get

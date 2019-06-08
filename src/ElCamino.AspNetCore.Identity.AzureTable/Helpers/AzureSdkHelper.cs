@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
-namespace Microsoft.WindowsAzure.Storage.Table
+namespace Microsoft.Azure.Cosmos.Table
 {
     public static class AzureSdkHelper
     {

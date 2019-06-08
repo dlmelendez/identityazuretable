@@ -5,9 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.Azure.Cosmos.Table;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
-using Microsoft.WindowsAzure.Storage;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 {
@@ -36,7 +35,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 
         public double KeyVersion { get; set; }
 
-        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
+        [IgnoreProperty]
         public override string RoleId
         {
             get

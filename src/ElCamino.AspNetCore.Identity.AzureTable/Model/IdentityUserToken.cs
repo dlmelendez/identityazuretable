@@ -1,14 +1,11 @@
 ﻿// MIT License Copyright 2017 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
-using Microsoft.WindowsAzure.Storage.Table;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
-using Microsoft.WindowsAzure.Storage;
+using Microsoft.Azure.Cosmos.Table;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 {
@@ -38,7 +35,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
             return KeyHelper.GenerateRowKeyIdentityUserToken(LoginProvider, Name);
         }
 
-        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
+        [IgnoreProperty]
         public override string UserId
         {
             get
@@ -71,10 +68,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
             return TableEntity.WriteUserObject(this, operationContext);
         }
 
-        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
+        [IgnoreProperty]
         public override string Name { get => base.Name; set => base.Name = value; }
 
-        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
+        [IgnoreProperty]
         public override string Value { get => base.Value; set => base.Value = value; }
 
         //These properties are more descriptive fields in storage, also allows for backcompat
