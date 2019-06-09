@@ -47,19 +47,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
                 RoleId = value;
             }
         }
-
-        [IgnoreProperty]
-        public override string UserId
-        {
-            get
-            {
-                return PartitionKey;
-            }
-            set
-            {
-                PartitionKey = value;
-            }
-        }
+        
     }
 
     public class IdentityUserRole<TKey> : Microsoft.AspNetCore.Identity.IdentityUserRole<TKey>

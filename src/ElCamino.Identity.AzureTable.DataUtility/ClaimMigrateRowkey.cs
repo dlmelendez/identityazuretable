@@ -15,7 +15,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         {
             TableQuery tq = new TableQuery();
             string partitionFilter = TableQuery.CombineFilters(
-                TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.GreaterThanOrEqual, Constants.RowKeyConstants.PreFixIdentityUserName),
+                TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.GreaterThanOrEqual, Constants.RowKeyConstants.PreFixIdentityUserId),
                 TableOperators.And,
                 TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.LessThan, "V_"));
             string rowFilter = TableQuery.CombineFilters(
@@ -40,7 +40,8 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             return false;
         }
 
-        public void ProcessMigrate(IdentityCloudContext ic,
+        public void ProcessMigrate(IdentityCloudContext targetContext,
+            IdentityCloudContext sourceContext,
             IList<DynamicTableEntity> claimResults,
             int maxDegreesParallel,
             Action updateComplete = null,
@@ -73,7 +74,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                         claimNew.Properties.Add(KeyVersion, EntityProperty.GeneratePropertyForDouble(KeyHelper.KeyVersion));
                     }
 
-                    var taskExecute = ic.UserTable.ExecuteAsync(TableOperation.InsertOrReplace(claimNew));
+                    var taskExecute = targetContext.UserTable.ExecuteAsync(TableOperation.InsertOrReplace(claimNew));
                     taskExecute.Wait();
 
                     updateComplete?.Invoke();

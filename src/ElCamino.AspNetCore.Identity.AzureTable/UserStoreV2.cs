@@ -319,6 +319,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             userToRole.PartitionKey = KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
             userToRole.RoleId = roleT.Id;
             userToRole.RoleName = roleT.Name;
+            userToRole.UserId = user.Id;
             TUserRole item = userToRole;
 
             ((Model.IGenerateKeys)item).GenerateKeys();
@@ -1179,6 +1180,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             TUserClaim uc = base.CreateUserClaim(user, claim);
             ((IGenerateKeys)uc).GenerateKeys();
             uc.PartitionKey = KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
+            uc.UserId = user.Id;
             uc.ETag = Constants.ETagWildcard;
             return uc;
         }
@@ -1188,6 +1190,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             TUserLogin ul = base.CreateUserLogin(user, login);
             ((IGenerateKeys)ul).GenerateKeys();
             ul.PartitionKey = KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
+            ul.UserId = user.Id;
             ul.ETag = Constants.ETagWildcard;
             return ul;
         }
@@ -1318,13 +1321,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
         public TContext Context { get; private set; }
 
-        protected Model.IdentityUserIndex CreateClaimIndex(string userid, string claimType, string claimValue)
+        protected Model.IdentityUserIndex CreateClaimIndex(string userPartitionKey, string claimType, string claimValue)
         {
             return new Model.IdentityUserIndex()
             {
-                Id = userid,
+                Id = userPartitionKey,
                 PartitionKey = KeyHelper.GenerateRowKeyIdentityUserClaim(claimType, claimValue),
-                RowKey = userid,
+                RowKey = userPartitionKey,
                 KeyVersion = KeyHelper.KeyVersion,
                 ETag = Constants.ETagWildcard
             };
@@ -1334,16 +1337,16 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         /// <summary>
         ///  Creates an role -> users index suitable for a crud operation
         /// </summary>
-        /// <param name="userid">Formatted UserId from the KeyHelper or IdentityUser.Id.ToString()</param>
+        /// <param name="userPartitionKey">Formatted UserId from the KeyHelper or IdentityUser.Id.ToString()</param>
         /// <param name="plainRoleName">Plain role name</param>
         /// <returns></returns>
-        protected Model.IdentityUserIndex CreateRoleIndex(string userid, string plainRoleName)
+        protected Model.IdentityUserIndex CreateRoleIndex(string userPartitionKey, string plainRoleName)
         {
             return new Model.IdentityUserIndex()
             {
-                Id = userid,
+                Id = userPartitionKey,
                 PartitionKey = KeyHelper.GenerateRowKeyIdentityUserRole(plainRoleName),
-                RowKey = userid,
+                RowKey = userPartitionKey,
                 KeyVersion = KeyHelper.KeyVersion,
                 ETag = Constants.ETagWildcard
             };
@@ -1386,11 +1389,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             };
         }
 
-        protected Model.IdentityUserIndex CreateLoginIndex(string userid, string loginProvider, string providerKey)
+        protected Model.IdentityUserIndex CreateLoginIndex(string userPartitionKey, string loginProvider, string providerKey)
         {
             return new Model.IdentityUserIndex()
             {
-                Id = userid,
+                Id = userPartitionKey,
                 PartitionKey = KeyHelper.GeneratePartitionKeyIndexByLogin(loginProvider, providerKey),
                 RowKey = KeyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey),
                 KeyVersion = KeyHelper.KeyVersion,
@@ -1503,6 +1506,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             TUserToken item = base.CreateUserToken(user, loginProvider, name, value);
             ((Model.IGenerateKeys)item).GenerateKeys();
             item.PartitionKey = KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
+            item.UserId = user.Id;
             return item;
         }
 

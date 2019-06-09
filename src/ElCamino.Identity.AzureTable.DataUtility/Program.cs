@@ -30,7 +30,8 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             MigrationFactory.EmailIndex,
             MigrationFactory.LoginIndex,
             MigrationFactory.ClaimRowkey,
-            MigrationFactory.RoleAndClaimIndex
+            MigrationFactory.RoleAndClaimIndex,
+            MigrationFactory.Users
         };
         private const string nodeleteToken = "/nodelete";
         private const string maxdegreesparallelToken = "/maxparallel:";
@@ -62,100 +63,127 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false);
             Configuration = builder.Build();
 
-            IdentityConfiguration idconfig = new IdentityConfiguration();
-            idconfig.TablePrefix = Configuration.GetSection("IdentityAzureTable:IdentityConfiguration:TablePrefix").Value;
-            idconfig.StorageConnectionString = Configuration.GetSection("IdentityAzureTable:IdentityConfiguration:StorageConnectionString").Value;
-            idconfig.LocationMode = Configuration.GetSection("IdentityAzureTable:IdentityConfiguration:LocationMode").Value;
+            IdentityConfiguration sourceConfig = new IdentityConfiguration();
+            sourceConfig.TablePrefix = Configuration.GetSection("source:IdentityConfiguration:TablePrefix")?.Value;
+            sourceConfig.StorageConnectionString = Configuration.GetSection("source:IdentityConfiguration:StorageConnectionString")?.Value;
+            sourceConfig.LocationMode = Configuration.GetSection("source:IdentityConfiguration:LocationMode")?.Value ?? string.Empty;
+            sourceConfig.UserTableName = Configuration.GetSection("source:IdentityConfiguration:UserTableName")?.Value ?? string.Empty;
+            sourceConfig.IndexTableName = Configuration.GetSection("source:IdentityConfiguration:IndexTableName")?.Value ?? string.Empty;
+            sourceConfig.RoleTableName = Configuration.GetSection("source:IdentityConfiguration:RoleTableName")?.Value ?? string.Empty;
+
+            IdentityConfiguration targetConfig = new IdentityConfiguration();
+            targetConfig.TablePrefix = Configuration.GetSection("target:IdentityConfiguration:TablePrefix")?.Value;
+            targetConfig.StorageConnectionString = Configuration.GetSection("target:IdentityConfiguration:StorageConnectionString")?.Value;
+            targetConfig.LocationMode = Configuration.GetSection("target:IdentityConfiguration:LocationMode")?.Value ?? string.Empty;
+            targetConfig.UserTableName = Configuration.GetSection("target:IdentityConfiguration:UserTableName")?.Value ?? string.Empty;
+            targetConfig.IndexTableName = Configuration.GetSection("target:IdentityConfiguration:IndexTableName")?.Value ?? string.Empty;
+            targetConfig.RoleTableName = Configuration.GetSection("target:IdentityConfiguration:RoleTableName")?.Value ?? string.Empty;
+
 
             Console.WriteLine("MaxDegreeOfParallelism: {0}", iMaxdegreesparallel);
             Console.WriteLine("PageSize: {0}", iPageSize);
             Console.WriteLine("MigrateCommand: {0}", MigrateCommand);
 
-            var migrateIndex = MigrationFactory.CreateMigration(MigrateCommand);
-
-            using (IdentityCloudContext ic = new IdentityCloudContext(idconfig))
+            var migration = MigrationFactory.CreateMigration(MigrateCommand);
+            using (IdentityCloudContext targetContext = new IdentityCloudContext(targetConfig))
             {
-                DateTime startLoad = DateTime.UtcNow;
-                var allDataList = new List<DynamicTableEntity>(iPageSize);
+                Task.WhenAll(targetContext.IndexTable.CreateIfNotExistsAsync(),
+                            targetContext.UserTable.CreateIfNotExistsAsync(),
+                            targetContext.RoleTable.CreateIfNotExistsAsync()).Wait();
+                Console.WriteLine($"Target IndexTable: {targetContext.IndexTable.Name}");
+                Console.WriteLine($"Target UserTable: {targetContext.UserTable.Name}");
+                Console.WriteLine($"Target RoleTable: {targetContext.RoleTable.Name}");
 
-                TableQuery tq = migrateIndex.GetUserTableQuery();
 
-                tq.TakeCount = iPageSize;
-                TableContinuationToken continueToken = new TableContinuationToken();
-
-                int iSkippedUserCount = 0;
-                int iSkippedPageCount = 0;
-                int iPageCounter = 0;
-                while (continueToken != null)
+                using (IdentityCloudContext sourceContext = new IdentityCloudContext(sourceConfig))
                 {
-                    DateTime batchStart = DateTime.UtcNow;
+                    Console.WriteLine($"Source IndexTable: {sourceContext.IndexTable.Name}");
+                    Console.WriteLine($"Source UserTable: {sourceContext.UserTable.Name}");
+                    Console.WriteLine($"Source RoleTable: {sourceContext.RoleTable.Name}");
 
-                    var userResults = ic.UserTable.ExecuteQuerySegmentedAsync(tq, continueToken).Result;
-                    continueToken = userResults.ContinuationToken;
+                    DateTime startLoad = DateTime.UtcNow;
+                    var allDataList = new List<DynamicTableEntity>(iPageSize);
 
+                    TableQuery tq = migration.GetUserTableQuery();
 
-                    int batchCount = userResults.Count(migrateIndex.UserWhereFilter);
-                    iUserTotal += batchCount;
-                    iPageCounter++;
+                    tq.TakeCount = iPageSize;
+                    TableContinuationToken continueToken = new TableContinuationToken();
 
-                    bool includePage = (iStartPage == -1 || iPageCounter >= iStartPage) && (iFinishPage == -1 || iPageCounter <= iFinishPage);
-
-                    if (includePage)
+                    int iSkippedUserCount = 0;
+                    int iSkippedPageCount = 0;
+                    int iPageCounter = 0;
+                    while (continueToken != null)
                     {
-                        if (migrateOption)
+                        DateTime batchStart = DateTime.UtcNow;
+
+                        var userResults = sourceContext.UserTable.ExecuteQuerySegmentedAsync(tq, continueToken).Result;
+                        continueToken = userResults.ContinuationToken;
+
+
+                        int batchCount = userResults.Count(migration.UserWhereFilter);
+                        iUserTotal += batchCount;
+                        iPageCounter++;
+
+                        bool includePage = (iStartPage == -1 || iPageCounter >= iStartPage) && (iFinishPage == -1 || iPageCounter <= iFinishPage);
+
+                        if (includePage)
                         {
-                            migrateIndex.ProcessMigrate(ic, userResults.Results, iMaxdegreesparallel,
-                            () =>
+                            if (migrateOption)
                             {
-                                Interlocked.Increment(ref iUserSuccessConvert);
-                            },
-                            (exMessage) =>
-                            {
-                                if (!string.IsNullOrWhiteSpace(exMessage))
+                                migration.ProcessMigrate(targetContext, sourceContext, userResults.Results, iMaxdegreesparallel,
+                                () =>
                                 {
-                                    userIdFailures.Add(exMessage);
-                                }
-                                Interlocked.Increment(ref iUserFailureConvert);
-                            });
+                                    Interlocked.Increment(ref iUserSuccessConvert);
+                                    Console.WriteLine($"User(s) Complete: {iUserSuccessConvert}");
+                                },
+                                (exMessage) =>
+                                {
+                                    if (!string.IsNullOrWhiteSpace(exMessage))
+                                    {
+                                        userIdFailures.Add(exMessage);
+                                    }
+                                    Interlocked.Increment(ref iUserFailureConvert);
+                                });
+                            }
+
                         }
-
-                    }
-                    else
-                    {
-                        iSkippedPageCount++;
-                        iSkippedUserCount += batchCount;
-                    }
-
-                    Console.WriteLine("Page: {2}{3}, Users Batch: {1}: {0} seconds", (DateTime.UtcNow - batchStart).TotalSeconds, batchCount, iPageCounter, includePage ? string.Empty : "(Skipped)");
-
-                    //Are we done yet?
-                    if(iFinishPage > 0 && iPageCounter >= iFinishPage)
-                    {
-                        break;
-                    }
-                }
-
-
-                Console.WriteLine("");
-                Console.WriteLine("Elapsed time: {0} seconds", (DateTime.UtcNow - startLoad).TotalSeconds);
-                Console.WriteLine("Total Users Skipped: {0}, Total Pages: {1}", iSkippedUserCount, iSkippedPageCount);
-                Console.WriteLine("Total Users To Convert: {0}, Total Pages: {1}", iUserTotal - iSkippedUserCount, iPageCounter - iSkippedPageCount);
-
-                Console.WriteLine("");
-                if (migrateOption)
-                {
-                    Console.WriteLine("Total Users Successfully Converted: {0}", iUserSuccessConvert);
-                    Console.WriteLine("Total Users Failed to Convert: {0}", iUserFailureConvert);
-                    if (iUserFailureConvert > 0)
-                    {
-                        Console.WriteLine("User Ids Failed:");
-                        foreach (string s in userIdFailures)
+                        else
                         {
-                            Console.WriteLine(s);
+                            iSkippedPageCount++;
+                            iSkippedUserCount += batchCount;
+                        }
+
+                        Console.WriteLine("Page: {2}{3}, Users Batch: {1}: {0} seconds", (DateTime.UtcNow - batchStart).TotalSeconds, batchCount, iPageCounter, includePage ? string.Empty : "(Skipped)");
+
+                        //Are we done yet?
+                        if (iFinishPage > 0 && iPageCounter >= iFinishPage)
+                        {
+                            break;
                         }
                     }
-                }
 
+
+                    Console.WriteLine("");
+                    Console.WriteLine("Elapsed time: {0} seconds", (DateTime.UtcNow - startLoad).TotalSeconds);
+                    Console.WriteLine("Total Users Skipped: {0}, Total Pages: {1}", iSkippedUserCount, iSkippedPageCount);
+                    Console.WriteLine("Total Users To Convert: {0}, Total Pages: {1}", iUserTotal - iSkippedUserCount, iPageCounter - iSkippedPageCount);
+
+                    Console.WriteLine("");
+                    if (migrateOption)
+                    {
+                        Console.WriteLine("Total Users Successfully Converted: {0}", iUserSuccessConvert);
+                        Console.WriteLine("Total Users Failed to Convert: {0}", iUserFailureConvert);
+                        if (iUserFailureConvert > 0)
+                        {
+                            Console.WriteLine("User Ids Failed:");
+                            foreach (string s in userIdFailures)
+                            {
+                                Console.WriteLine(s);
+                            }
+                        }
+                    }
+
+                }
             }
 
             DisplayAnyKeyToExit();

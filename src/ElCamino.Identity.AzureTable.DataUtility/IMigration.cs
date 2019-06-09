@@ -13,8 +13,9 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
         bool UserWhereFilter(DynamicTableEntity d);
 
-        void ProcessMigrate(IdentityCloudContext ic,
-            IList<DynamicTableEntity> userResults,
+        void ProcessMigrate(IdentityCloudContext targetContext,
+            IdentityCloudContext sourceContext,
+            IList<DynamicTableEntity> sourceUserResults,
             int maxDegreesParallel,
             Action updateComplete = null,
             Action<string> updateError = null);

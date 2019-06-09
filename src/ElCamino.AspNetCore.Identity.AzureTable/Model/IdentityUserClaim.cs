@@ -34,18 +34,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 
         public double KeyVersion { get; set; }
 
-        [IgnoreProperty]
-        public override string UserId
-        {
-            get
-            {
-                return PartitionKey;
-            }
-            set
-            {
-                PartitionKey = value;
-            }
-        }
+        
     }
 
     public class IdentityUserClaim<TKey> : Microsoft.AspNetCore.Identity.IdentityUserClaim<TKey>,  

@@ -34,19 +34,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         {
             return KeyHelper.GenerateRowKeyIdentityUserToken(LoginProvider, Name);
         }
-
-        [IgnoreProperty]
-        public override string UserId
-        {
-            get
-            {
-                return PartitionKey;
-            }
-            set
-            {
-                PartitionKey = value;
-            }
-        }
+        
     }
 
     public class IdentityUserToken<TKey> : Microsoft.AspNetCore.Identity.IdentityUserToken<TKey>

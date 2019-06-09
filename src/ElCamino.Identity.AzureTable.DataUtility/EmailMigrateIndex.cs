@@ -16,11 +16,11 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             TableQuery tq = new TableQuery();
             tq.SelectColumns = new List<string>() { "PartitionKey", "RowKey", "Email" };
             string partitionFilter = TableQuery.CombineFilters(
-                TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.GreaterThanOrEqual, Constants.RowKeyConstants.PreFixIdentityUserName),
+                TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.GreaterThanOrEqual, Constants.RowKeyConstants.PreFixIdentityUserId),
                 TableOperators.And,
                 TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.LessThan, "V_"));
             string rowFilter = TableQuery.CombineFilters(
-                TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.GreaterThanOrEqual, Constants.RowKeyConstants.PreFixIdentityUserName),
+                TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.GreaterThanOrEqual, Constants.RowKeyConstants.PreFixIdentityUserId),
                 TableOperators.And,
                 TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.LessThan, "V_"));
             tq.FilterString = TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowFilter);
@@ -33,7 +33,8 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             return !string.IsNullOrWhiteSpace(d.Properties["Email"].StringValue);
         }
 
-        public void ProcessMigrate(IdentityCloudContext ic, 
+        public void ProcessMigrate(IdentityCloudContext targetContext,
+            IdentityCloudContext sourceContext,
             IList<DynamicTableEntity> userResults, 
             int maxDegreesParallel,
             Action updateComplete = null,
@@ -52,7 +53,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 try
                 {
                     IdentityUserIndex index = CreateEmailIndex(userId.UserId, userId.Email);
-                    var r = ic.IndexTable.ExecuteAsync(TableOperation.InsertOrReplace(index)).Result;
+                    var r = targetContext.IndexTable.ExecuteAsync(TableOperation.InsertOrReplace(index)).Result;
                     updateComplete?.Invoke();
                 }
                 catch (Exception ex)
