@@ -34,10 +34,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         public override string GenerateRowKeyUserId(string plainUserId)
         {
             string hash = ConvertKeyToHash(plainUserId?.ToUpper());
-            return string.Format(Constants.RowKeyConstants.FormatterIdentityUserName, hash);
+            return string.Format(Constants.RowKeyConstants.FormatterIdentityUserId, hash);
         }
 
-        public override string GenerateRowKeyUserName(string plainUserName)
+        public override string GeneratePartitionKeyUserName(string plainUserName)
         {
             string hash = ConvertKeyToHash(plainUserName?.ToUpper());
             return string.Format(Constants.RowKeyConstants.FormatterIdentityUserName, hash);

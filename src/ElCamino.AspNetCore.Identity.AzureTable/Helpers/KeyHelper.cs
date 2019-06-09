@@ -37,7 +37,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 
         public static string GenerateRowKeyUserName(string plainUserName)
         {
-            return hashHelper.GenerateRowKeyUserName(plainUserName);
+            return hashHelper.GeneratePartitionKeyUserName(plainUserName);
         }
 
         public static string GenerateRowKeyIdentityUserRole(string plainRoleName)

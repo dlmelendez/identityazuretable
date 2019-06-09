@@ -1371,16 +1371,16 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         /// Create an index for getting the user id based on his user name,
         /// Only used if EnableImmutableUserId = true
         /// </summary>
-        /// <param name="userid"></param>
+        /// <param name="userPartitionKey"></param>
         /// <param name="userName"></param>
         /// <returns></returns>
-        protected Model.IdentityUserIndex CreateUserNameIndex(string userid, string userName)
+        protected Model.IdentityUserIndex CreateUserNameIndex(string userPartitionKey, string userName)
         {
             return new Model.IdentityUserIndex()
             {
-                Id = userid,
+                Id = userPartitionKey,
                 PartitionKey = KeyHelper.GenerateRowKeyUserName(userName),
-                RowKey = userid,
+                RowKey = userPartitionKey,
                 KeyVersion = KeyHelper.KeyVersion,
                 ETag = Constants.ETagWildcard
             };
