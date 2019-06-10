@@ -27,10 +27,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         private const string previewToken = "/preview:";
         private const string migrateToken = "/migrate:";
         private readonly static List<string> validCommands = new List<string>() {
-            MigrationFactory.EmailIndex,
-            MigrationFactory.LoginIndex,
-            MigrationFactory.ClaimRowkey,
-            MigrationFactory.RoleAndClaimIndex,
+            MigrationFactory.Roles,
             MigrationFactory.Users
         };
         private const string nodeleteToken = "/nodelete";
@@ -94,6 +91,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 Console.WriteLine($"Target UserTable: {targetContext.UserTable.Name}");
                 Console.WriteLine($"Target RoleTable: {targetContext.RoleTable.Name}");
 
+                string entityRecordName = "Users";
 
                 using (IdentityCloudContext sourceContext = new IdentityCloudContext(sourceConfig))
                 {
@@ -104,7 +102,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                     DateTime startLoad = DateTime.UtcNow;
                     var allDataList = new List<DynamicTableEntity>(iPageSize);
 
-                    TableQuery tq = migration.GetUserTableQuery();
+                    TableQuery tq = migration.GetSourceTableQuery();
 
                     tq.TakeCount = iPageSize;
                     TableContinuationToken continueToken = new TableContinuationToken();
@@ -116,11 +114,17 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                     {
                         DateTime batchStart = DateTime.UtcNow;
 
-                        var userResults = sourceContext.UserTable.ExecuteQuerySegmentedAsync(tq, continueToken).Result;
-                        continueToken = userResults.ContinuationToken;
+                        CloudTable sourceTable = sourceContext.UserTable;
+                        if (MigrateCommand == MigrationFactory.Roles)
+                        {
+                            sourceTable = sourceContext.RoleTable;
+                            entityRecordName = "Role and Role Claims";
+                        }
+                        var sourceResults = sourceTable.ExecuteQuerySegmentedAsync(tq, continueToken).Result;
+                        continueToken = sourceResults.ContinuationToken;
 
 
-                        int batchCount = userResults.Count(migration.UserWhereFilter);
+                        int batchCount = sourceResults.Count(migration.UserWhereFilter);
                         iUserTotal += batchCount;
                         iPageCounter++;
 
@@ -130,11 +134,11 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                         {
                             if (migrateOption)
                             {
-                                migration.ProcessMigrate(targetContext, sourceContext, userResults.Results, iMaxdegreesparallel,
+                                migration.ProcessMigrate(targetContext, sourceContext, sourceResults.Results, iMaxdegreesparallel,
                                 () =>
                                 {
                                     Interlocked.Increment(ref iUserSuccessConvert);
-                                    Console.WriteLine($"User(s) Complete: {iUserSuccessConvert}");
+                                    Console.WriteLine($"{entityRecordName}(s) Complete: {iUserSuccessConvert}");
                                 },
                                 (exMessage) =>
                                 {
@@ -153,7 +157,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                             iSkippedUserCount += batchCount;
                         }
 
-                        Console.WriteLine("Page: {2}{3}, Users Batch: {1}: {0} seconds", (DateTime.UtcNow - batchStart).TotalSeconds, batchCount, iPageCounter, includePage ? string.Empty : "(Skipped)");
+                        Console.WriteLine("Page: {2}{3}, {4} Batch: {1}: {0} seconds", (DateTime.UtcNow - batchStart).TotalSeconds, batchCount, iPageCounter, includePage ? string.Empty : "(Skipped)", entityRecordName);
 
                         //Are we done yet?
                         if (iFinishPage > 0 && iPageCounter >= iFinishPage)
@@ -165,17 +169,17 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
                     Console.WriteLine("");
                     Console.WriteLine("Elapsed time: {0} seconds", (DateTime.UtcNow - startLoad).TotalSeconds);
-                    Console.WriteLine("Total Users Skipped: {0}, Total Pages: {1}", iSkippedUserCount, iSkippedPageCount);
-                    Console.WriteLine("Total Users To Convert: {0}, Total Pages: {1}", iUserTotal - iSkippedUserCount, iPageCounter - iSkippedPageCount);
+                    Console.WriteLine("Total {2} Skipped: {0}, Total Pages: {1}", iSkippedUserCount, iSkippedPageCount, entityRecordName);
+                    Console.WriteLine("Total {2} To Convert: {0}, Total Pages: {1}", iUserTotal - iSkippedUserCount, iPageCounter - iSkippedPageCount, entityRecordName);
 
                     Console.WriteLine("");
                     if (migrateOption)
                     {
-                        Console.WriteLine("Total Users Successfully Converted: {0}", iUserSuccessConvert);
-                        Console.WriteLine("Total Users Failed to Convert: {0}", iUserFailureConvert);
+                        Console.WriteLine("Total {1} Successfully Converted: {0}", iUserSuccessConvert, entityRecordName);
+                        Console.WriteLine("Total {1} Failed to Convert: {0}", iUserFailureConvert, entityRecordName);
                         if (iUserFailureConvert > 0)
                         {
-                            Console.WriteLine("User Ids Failed:");
+                            Console.WriteLine($"{entityRecordName} Ids Failed:");
                             foreach (string s in userIdFailures)
                             {
                                 Console.WriteLine(s);

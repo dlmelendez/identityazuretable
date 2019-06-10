@@ -9,7 +9,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 {
     public interface IMigration
     {
-        TableQuery GetUserTableQuery();
+        TableQuery GetSourceTableQuery();
 
         bool UserWhereFilter(DynamicTableEntity d);
 

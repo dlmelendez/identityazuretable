@@ -11,7 +11,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 {
     public class UsersMigration : IMigration
     {
-        public TableQuery GetUserTableQuery()
+        public TableQuery GetSourceTableQuery()
         {
             //Get all User key records
             TableQuery tq = new TableQuery();
@@ -235,73 +235,6 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             }
             return (targetUserEntities, targetUserIndexes);
         }
-
-        //private async Task UpsertUserAsync(IdentityCloudContext targetContext, DynamicTableEntity sourceDte)
-        //{
-        //    List<Task> tasks = new List<Task>(3);
-        //    string userId = KeyHelper.GenerateUserId();
-        //    string userKey = KeyHelper.GenerateRowKeyUserId(userId);
-        //    DynamicTableEntity tgtDte = new DynamicTableEntity(userKey, userKey, Constants.ETagWildcard, sourceDte.Properties);
-        //    tgtDte.Properties["Id"] = new EntityProperty(userId);
-        //    tgtDte.Properties["KeyVersion"] = new EntityProperty(KeyHelper.KeyVersion);
-        //    tasks.Add(targetContext.UserTable.ExecuteAsync(TableOperation.InsertOrReplace(tgtDte)));
-
-        //    //UserName index
-        //    tgtDte.Properties.TryGetValue("UserName", out EntityProperty userNameProperty);
-        //    string userNameKey = KeyHelper.GenerateRowKeyUserName(userNameProperty.StringValue);
-        //    IdentityUserIndex userNameIndex = new IdentityUserIndex()
-        //    {
-        //        Id = userKey,
-        //        PartitionKey = userNameKey,
-        //        RowKey = userKey,
-        //        KeyVersion = KeyHelper.KeyVersion,
-        //        ETag = Constants.ETagWildcard
-        //    };
-        //    tasks.Add(targetContext.IndexTable.ExecuteAsync(TableOperation.InsertOrReplace(userNameIndex)));
-
-        //    //Email index - only if email exists
-        //    if (tgtDte.Properties.TryGetValue("Email", out EntityProperty emailProperty))
-        //    {
-        //        string emailKey = KeyHelper.GenerateRowKeyUserEmail(emailProperty.StringValue);
-        //        IdentityUserIndex emailIndex = new IdentityUserIndex()
-        //        {
-        //            Id = userKey,
-        //            PartitionKey = emailKey,
-        //            RowKey = userKey,
-        //            KeyVersion = KeyHelper.KeyVersion,
-        //            ETag = Constants.ETagWildcard
-        //        };
-        //        tasks.Add(targetContext.IndexTable.ExecuteAsync(TableOperation.InsertOrReplace(emailIndex)));
-        //    }
-
-        //    await Task.WhenAll(tasks);
-        //}
-
-        //private async Task UpsertUserClaimAsync(IdentityCloudContext targetContext, DynamicTableEntity sourceDte)
-        //{
-        //    List<Task> tasks = new List<Task>(2);
-        //    string userId = KeyHelper.GenerateUserId();
-        //    string userPartitionKey = KeyHelper.GenerateRowKeyUserId(userId);
-        //    DynamicTableEntity tgtDte = new DynamicTableEntity(userPartitionKey, userPartitionKey, Constants.ETagWildcard, sourceDte.Properties);
-        //    tgtDte.Properties["Id"] = new EntityProperty(userId);
-        //    tgtDte.Properties["KeyVersion"] = new EntityProperty(KeyHelper.KeyVersion);
-        //    tasks.Add(targetContext.UserTable.ExecuteAsync(TableOperation.InsertOrReplace(tgtDte)));
-
-        //    //UserName index
-        //    tgtDte.Properties.TryGetValue("UserName", out EntityProperty userNameProperty);
-        //    string userNameKey = KeyHelper.GenerateRowKeyUserName(userNameProperty.StringValue);
-        //    IdentityUserIndex userNameIndex = new IdentityUserIndex()
-        //    {
-        //        Id = userPartitionKey,
-        //        PartitionKey = userNameKey,
-        //        RowKey = userPartitionKey,
-        //        KeyVersion = KeyHelper.KeyVersion,
-        //        ETag = Constants.ETagWildcard
-        //    };
-        //    tasks.Add(targetContext.IndexTable.ExecuteAsync(TableOperation.InsertOrReplace(userNameIndex)));            
-
-        //    await Task.WhenAll(tasks);
-        //}
 
         public bool UserWhereFilter(DynamicTableEntity d)
         {

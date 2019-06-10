@@ -11,7 +11,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 {
     public class RoleAndClaimMigrateIndex : IMigration
     {
-        public TableQuery GetUserTableQuery()
+        public TableQuery GetSourceTableQuery()
         {
             TableQuery tq = new TableQuery();
             tq.SelectColumns = new List<string>() { "PartitionKey", "RowKey", "KeyVersion" };

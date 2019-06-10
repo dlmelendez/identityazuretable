@@ -11,7 +11,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 {
     public class ClaimMigrateRowkey : IMigration
     {
-        public TableQuery GetUserTableQuery()
+        public TableQuery GetSourceTableQuery()
         {
             TableQuery tq = new TableQuery();
             string partitionFilter = TableQuery.CombineFilters(
