@@ -1,4 +1,6 @@
-﻿using ElCamino.AspNetCore.Identity.AzureTable;
+﻿// MIT License Copyright 2019 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
+
+using ElCamino.AspNetCore.Identity.AzureTable;
 using Microsoft.Azure.Cosmos.Table;
 using System;
 using System.Collections.Generic;

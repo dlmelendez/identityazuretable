@@ -13,11 +13,11 @@
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <PackageId>ElCamino.AspNetCore.Identity.AzureTable</PackageId>
     <PackageTags>ASP.NET;Identity Core;Azure;Table Storage;MVC;UserStore;RoleStore;UserManager;multi-tenant;RA-GRS;geo-redundant;Microsoft.AspNetCore.Identity</PackageTags>
-    <PackageReleaseNotes>
+    <PackageReleaseNotes>Check https://github.com/dlmelendez/identityazuretable/releases for the latest release information.
       Breaking changes. Data migration required to this version.
       Important! Check https://dlmelendez.github.io/identityazuretable/#/migration for data migration information.</PackageReleaseNotes>
     <PackageIconUrl>https://dlmelendez.github.io/identityazuretable/images/projectNugetPic.png</PackageIconUrl>
-    <PackageLicenseUrl>https://github.com/dlmelendez/identityazuretable/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseUrl></PackageLicenseUrl>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/dlmelendez/identityazuretable.git</RepositoryUrl>
@@ -26,6 +26,7 @@
     <PackageProjectUrl>https://dlmelendez.github.io/identityazuretable</PackageProjectUrl>
     <AssetTargetFallback Condition=" '$(TargetFramework)' == 'net461' ">$(AssetTargetFallback);net45;</AssetTargetFallback>
     <DebugType>Full</DebugType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
 
   </PropertyGroup>
 
