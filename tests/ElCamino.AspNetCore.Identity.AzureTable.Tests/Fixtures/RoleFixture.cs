@@ -12,8 +12,10 @@ using Microsoft.AspNetCore.Identity;
 
 namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 {
+#pragma warning disable 0618
     public partial class RoleFixture<TUser, TRole, TContext> : BaseFixture<TUser, TRole, TContext, UserStore<TUser, TRole, TContext>>
         where TUser : IdentityUser, new()
+#pragma warning restore 0618
         where TRole : IdentityRole, new()
         where TContext : IdentityCloudContext, new()
     {

@@ -9,7 +9,10 @@
   },
   "IdentityAzureTable": {
     "identityConfiguration": {
-      "tablePrefix": "",
+      "tablePrefix": "av22",
+      "indexTableName": "indexes",
+      "userTableName": "users",
+      "roleTableName": "roles",
       "storageConnectionString": "UseDevelopmentStorage=true;",
       "locationMode": "PrimaryOnly"
     }

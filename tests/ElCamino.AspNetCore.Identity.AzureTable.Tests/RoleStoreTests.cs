@@ -15,11 +15,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {
+#pragma warning disable 0618
     public class RoleStoreTests : IClassFixture<RoleFixture<IdentityUser, IdentityRole, IdentityCloudContext>>
     {
         private readonly ITestOutputHelper output;
         private RoleFixture<IdentityUser, IdentityRole, IdentityCloudContext> roleFixture;
-
         public RoleStoreTests(RoleFixture<IdentityUser, IdentityRole, IdentityCloudContext> roleFix, ITestOutputHelper output)
         {
             this.output = output;
@@ -29,6 +29,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             }).Wait();
             
         }
+#pragma warning restore 0618
 
         [Fact(DisplayName = "RoleStoreCtors")]
         [Trait("IdentityCore.Azure.RoleStore", "")]
@@ -142,12 +143,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
             ServiceCollection services = new ServiceCollection();
             // Adding coverage for CreateAzureTablesIfNotExists();
+#pragma warning disable 0618
             services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddAzureTableStoresV2<IdentityCloudContext>(new Func<IdentityConfiguration>(() =>
                 {
                     return roleFixture.GetConfig();
                 }))
                 .CreateAzureTablesIfNotExists<IdentityCloudContext>();
+#pragma warning restore 0618
+
         }
 
         [Fact(DisplayName = "CreateRole")]

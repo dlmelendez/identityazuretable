@@ -11,7 +11,8 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         public const string LoginIndex = "loginindex";
         public const string ClaimRowkey = "claimrowkey";
         public const string RoleAndClaimIndex = "roleandclaimindex";
-
+        public const string Users = "users";
+        public const string Roles = "roles";
 
         public static IMigration CreateMigration(string migrateCommand)
         {
@@ -26,6 +27,10 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                     return new ClaimMigrateRowkey();
                 case RoleAndClaimIndex:
                     return new RoleAndClaimMigrateIndex();
+                case Users:
+                    return new UsersMigration();
+                case Roles:
+                    return new RolesMigration();
                 default:
                     break;
             }

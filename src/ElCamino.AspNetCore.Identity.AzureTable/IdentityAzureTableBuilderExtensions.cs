@@ -9,6 +9,7 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class IdentityAzureTableBuilderExtensions
     {
+        [Obsolete("AddAzureTableStoresV2 will be renamed AddAzureTableStores in a future version. Use AddAzureTableStoresV2.")]
         public static IdentityBuilder AddAzureTableStores<TContext>(this IdentityBuilder builder, Func<IdentityConfiguration> configAction)
             where TContext : IdentityCloudContext, new()
         {

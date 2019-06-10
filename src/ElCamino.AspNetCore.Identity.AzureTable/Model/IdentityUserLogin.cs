@@ -5,9 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.WindowsAzure.Storage.Table;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
-using Microsoft.WindowsAzure.Storage;
+using Microsoft.Azure.Cosmos.Table;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 {
@@ -37,18 +36,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
             return KeyHelper.GenerateRowKeyIdentityUserLogin(LoginProvider, ProviderKey);
         }
 
-        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
-        public override string UserId
-        {
-            get
-            {
-                return PartitionKey;
-            }
-            set
-            {
-                PartitionKey = value;
-            }
-        }
+       
     }
 
     public class IdentityUserLogin<TKey> : Microsoft.AspNetCore.Identity.IdentityUserLogin<TKey>

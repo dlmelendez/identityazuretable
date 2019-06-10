@@ -1,12 +1,10 @@
 ﻿// MIT License Copyright 2017 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Data.Services.Common;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.WindowsAzure.Storage.Table;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 using System;
-using Microsoft.WindowsAzure.Storage;
+using Microsoft.Azure.Cosmos.Table;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 {
@@ -42,7 +40,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
             base.Name = roleName;
         }
 
-        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
+        [IgnoreProperty]
         public override string Id
         {
             get
@@ -80,11 +78,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
             this.Users = new List<TUserRole>();
         }
 
-        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
+        [IgnoreProperty]
         public override TKey Id { get; set; }
 
 
-        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
+        [IgnoreProperty]
         public ICollection<TUserRole> Users { get; private set; }
     }
 }

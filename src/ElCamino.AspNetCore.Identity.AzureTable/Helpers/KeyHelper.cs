@@ -13,38 +13,46 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 {
     public static class KeyHelper
     {
-        private static BaseKeyHelper baseHelper = new UriEncodeKeyHelper();
         private static BaseKeyHelper hashHelper = new HashKeyHelper();
 
         public static string GeneratePartitionKeyIndexByLogin(string plainLoginProvider, string plainProviderKey)
         {
-            return baseHelper.GeneratePartitionKeyIndexByLogin(plainLoginProvider, plainProviderKey);
+            return hashHelper.GeneratePartitionKeyIndexByLogin(plainLoginProvider, plainProviderKey);
         }
 
         public static string GenerateRowKeyUserEmail(string plainEmail)
         {
-            return baseHelper.GenerateRowKeyUserEmail(plainEmail);
+            return hashHelper.GenerateRowKeyUserEmail(plainEmail);
         }
 
+        public static string GenerateUserId()
+        {
+            return hashHelper.GenerateUserId();
+        }
+
+        public static string GenerateRowKeyUserId(string plainUserId)
+        {
+            return hashHelper.GenerateRowKeyUserId(plainUserId);
+        }
 
         public static string GenerateRowKeyUserName(string plainUserName)
         {
-            return baseHelper.GenerateRowKeyUserName(plainUserName);
+            return hashHelper.GeneratePartitionKeyUserName(plainUserName);
         }
 
         public static string GenerateRowKeyIdentityUserRole(string plainRoleName)
         {
-            return baseHelper.GenerateRowKeyIdentityUserRole(plainRoleName);
+            return hashHelper.GenerateRowKeyIdentityUserRole(plainRoleName);
         }
 
         public static string GenerateRowKeyIdentityRole(string plainRoleName)
         {
-            return baseHelper.GenerateRowKeyIdentityRole(plainRoleName);
+            return hashHelper.GenerateRowKeyIdentityRole(plainRoleName);
         }
 
         public static string GeneratePartitionKeyIdentityRole(string plainRoleName)
         {
-            return baseHelper.GeneratePartitionKeyIdentityRole(plainRoleName);
+            return hashHelper.GeneratePartitionKeyIdentityRole(plainRoleName);
         }
 
         public static string GenerateRowKeyIdentityUserClaim(string claimType, string claimValue)
@@ -63,19 +71,19 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         }
         public static string GenerateRowKeyIdentityUserClaim_Pre1_7(string claimType, string claimValue)
         {
-            return baseHelper.GenerateRowKeyIdentityUserClaim(claimType, claimValue);
+            return hashHelper.GenerateRowKeyIdentityUserClaim(claimType, claimValue);
         }
 
         public static string GenerateRowKeyIdentityUserLogin(string loginProvider, string providerKey)
         {
-            return baseHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey);
+            return hashHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey);
         }
 
         public static string ParsePartitionKeyIdentityRoleFromRowKey(string rowKey)
         {
-            return baseHelper.ParsePartitionKeyIdentityRoleFromRowKey(rowKey);
+            return hashHelper.ParsePartitionKeyIdentityRoleFromRowKey(rowKey);
         }
 
-        public static double KeyVersion { get { return baseHelper.KeyVersion; } }
+        public static double KeyVersion { get { return hashHelper.KeyVersion; } }
     }
 }

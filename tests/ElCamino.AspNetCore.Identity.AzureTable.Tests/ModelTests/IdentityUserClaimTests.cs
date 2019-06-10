@@ -14,7 +14,6 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.ModelTests
         {
             var uc = new IdentityUserClaim();
             uc.GenerateKeys();
-            Assert.Equal(uc.PartitionKey, uc.UserId);
         }
     }
 }

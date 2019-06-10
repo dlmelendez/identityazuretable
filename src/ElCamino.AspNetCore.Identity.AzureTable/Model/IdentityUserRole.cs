@@ -5,9 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.Azure.Cosmos.Table;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
-using Microsoft.WindowsAzure.Storage;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 {
@@ -48,19 +47,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
                 RoleId = value;
             }
         }
-
-        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
-        public override string UserId
-        {
-            get
-            {
-                return PartitionKey;
-            }
-            set
-            {
-                PartitionKey = value;
-            }
-        }
+        
     }
 
     public class IdentityUserRole<TKey> : Microsoft.AspNetCore.Identity.IdentityUserRole<TKey>
@@ -81,7 +68,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         {
             return TableEntity.WriteUserObject(this, operationContext);
         }
-        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
+        [IgnoreProperty]
         public override TKey RoleId { get; set; }
 
         public string RoleName { get; set; }

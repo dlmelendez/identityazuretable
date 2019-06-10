@@ -1,7 +1,7 @@
 ﻿using ElCamino.AspNetCore.Identity.AzureTable;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
-using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.Azure.Cosmos.Table;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,12 +11,12 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 {
     public class LoginMigrateIndex : IMigration
     {
-        public TableQuery GetUserTableQuery()
+        public TableQuery GetSourceTableQuery()
         {
             TableQuery tq = new TableQuery();
             tq.SelectColumns = new List<string>() { "PartitionKey", "RowKey", "LoginProvider", "ProviderKey" };
             string partitionFilter = TableQuery.CombineFilters(
-                TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.GreaterThanOrEqual, Constants.RowKeyConstants.PreFixIdentityUserName),
+                TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.GreaterThanOrEqual, Constants.RowKeyConstants.PreFixIdentityUserId),
                 TableOperators.And,
                 TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.LessThan, "V_"));
             string rowFilter = TableQuery.CombineFilters(
@@ -34,13 +34,14 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 && !string.IsNullOrWhiteSpace(d.Properties["ProviderKey"].StringValue);
         }
 
-        public void ProcessMigrate(IdentityCloudContext ic,
-            IList<DynamicTableEntity> userResults,
+        public void ProcessMigrate(IdentityCloudContext targetContext,
+            IdentityCloudContext sourceContext,
+            IList<DynamicTableEntity> sourceUserResults,
             int maxDegreesParallel,
             Action updateComplete = null,
             Action<string> updateError = null)
         {
-            var userIds = userResults
+            var userIds = sourceUserResults
                 .Where(UserWhereFilter)
                 .Select(d => new
                 {
@@ -58,7 +59,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 try
                 {
                     IdentityUserIndex index = CreateLoginIndex(userId.UserId, userId.LoginProvider, userId.ProviderKey);
-                    var r = ic.IndexTable.ExecuteAsync(TableOperation.InsertOrReplace(index)).Result;
+                    var r = targetContext.IndexTable.ExecuteAsync(TableOperation.InsertOrReplace(index)).Result;
                     updateComplete?.Invoke();
                 }
                 catch (Exception ex)

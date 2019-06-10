@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Azure Table Storage Provider to support AspNet Identity Core 2.x frameworks for .NET Core.</Description>
-    <Copyright>Copyright ©  2017 David Melendez, MIT License</Copyright>
+    <Copyright>Copyright ©  2019 David Melendez, MIT License</Copyright>
     <AssemblyTitle>Azure Table Storage Provider for ASP.NET Identity Core</AssemblyTitle>
     <VersionPrefix>2.0.0</VersionPrefix>
     <Authors>David Melendez</Authors>
@@ -14,7 +14,7 @@
     <PackageId>ElCamino.AspNetCore.Identity.AzureTable</PackageId>
     <PackageTags>ASP.NET;Identity Core;Azure;Table Storage;MVC;UserStore;RoleStore;UserManager;multi-tenant;RA-GRS;geo-redundant;Microsoft.AspNetCore.Identity</PackageTags>
     <PackageReleaseNotes>
-      Supports AspNetCore.Identity 2.x frameworks for .NET Core. Migration(s) required from 1.x to 2.x.
+      Breaking changes. Data migration required to this version.
       Important! Check https://dlmelendez.github.io/identityazuretable/#/migration for data migration information.</PackageReleaseNotes>
     <PackageIconUrl>https://dlmelendez.github.io/identityazuretable/images/projectNugetPic.png</PackageIconUrl>
     <PackageLicenseUrl>https://github.com/dlmelendez/identityazuretable/blob/master/LICENSE</PackageLicenseUrl>
@@ -22,7 +22,7 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/dlmelendez/identityazuretable.git</RepositoryUrl>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>2.1.0</Version>
+    <Version>2.2.0</Version>
     <PackageProjectUrl>https://dlmelendez.github.io/identityazuretable</PackageProjectUrl>
     <AssetTargetFallback Condition=" '$(TargetFramework)' == 'net461' ">$(AssetTargetFallback);net45;</AssetTargetFallback>
     <DebugType>Full</DebugType>
@@ -30,12 +30,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.0.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="2.0.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="WindowsAzure.Storage" Version="8.5.0" />
-    <PackageReference Include="Microsoft.Data.Services.Client" Version="5.8.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Azure.Cosmos.Table" Version="1.0.1" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="2.2.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="Microsoft.Data.Services.Client" Version="5.8.4" />
     <PackageReference Include="System.Linq.Queryable" Version="4.3.0" />
   </ItemGroup>
 

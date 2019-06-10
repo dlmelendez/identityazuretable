@@ -19,11 +19,12 @@ using Microsoft.AspNetCore.Identity;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {
+#pragma warning disable 0618
     public partial class UserStoreTests : BaseUserStoreTests<ApplicationUser, IdentityRole, IdentityCloudContext, UserStore<ApplicationUser, IdentityRole, IdentityCloudContext>>
     {
         public UserStoreTests(UserFixture<ApplicationUser, IdentityRole, IdentityCloudContext, UserStore<ApplicationUser, IdentityRole, IdentityCloudContext>> userFix, ITestOutputHelper output) :
             base(userFix, output) {  }
-
+#pragma warning restore 0618
         [Fact(DisplayName = "AddRemoveUserClaim")]
         [Trait("IdentityCore.Azure.UserStore", "")]
         public override Task AddRemoveUserClaim()
@@ -192,15 +193,17 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             return base.UpdateUser();
         }
 
+#pragma warning disable 0618
         [Fact(DisplayName = "UserStoreCtors")]
         [Trait("IdentityCore.Azure.UserStore", "")]
         public override void UserStoreCtors()
         {
             Assert.Throws<ArgumentNullException>(() => 
             {
-                new UserStore<ApplicationUser, IdentityRole, IdentityCloudContext>(null);
+                new UserStore<ApplicationUser, IdentityRole, IdentityCloudContext>(null,null);
             });
         }
+#pragma warning restore 0618
     }
 
     public partial class BaseUserStoreTests<TUser, TRole, TContext, TUserStore> : IClassFixture<UserFixture<TUser, TRole, TContext, TUserStore>>
@@ -609,15 +612,16 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
                     Assert.Equal<int>(firstUserLogins.Count, changedUserLogins.Count);
 
-                    Assert.NotEqual<string>(originalUserId, changedUser.Id);
+                    //Immutable Id
+                    Assert.Equal(originalUserId, changedUser.Id);
 
                     //Check email
                     var findEmailResult = await manager.FindByEmailAsync(changedUser.Email);
                     Assert.NotNull(findEmailResult);
 
-                    //Check the old username is deleted
+                    //Check the old username is should be the same and still work now.
                     var oldUser = await manager.FindByIdAsync(originalUserId);
-                    Assert.Null(oldUser);
+                    Assert.NotNull(oldUser);
 
                     
 
@@ -626,7 +630,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     {
                         var findLoginResult = await manager.FindByLoginAsync(log.LoginProvider, log.ProviderKey);                        
                         Assert.NotNull(findLoginResult);
-                        Assert.NotEqual<string>(originalUserId, findLoginResult.Id.ToString());
+                        Assert.Equal(originalUserId, findLoginResult.Id.ToString());
                     }
 
                     //Check role indexes

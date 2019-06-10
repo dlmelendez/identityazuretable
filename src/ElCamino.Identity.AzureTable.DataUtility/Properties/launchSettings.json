@@ -8,16 +8,9 @@
     }
   },
   "profiles": {
-    "IIS Express": {
-      "commandName": "IISExpress",
-      "launchBrowser": true,
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      }
-    },
     "ElCamino.Identity.AzureTable.DataUtility": {
       "commandName": "Project",
-      "commandLineArgs": "/pagesize:1000 /migrate:roleandclaimindex "
+      "commandLineArgs": "/migrate:users"
     }
   }
 }

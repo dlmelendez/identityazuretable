@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ElCamino.AspNetCore.Identity.AzureTable;
-using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.Azure.Cosmos.Table;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
 
@@ -11,12 +11,12 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 {
     public class RoleAndClaimMigrateIndex : IMigration
     {
-        public TableQuery GetUserTableQuery()
+        public TableQuery GetSourceTableQuery()
         {
             TableQuery tq = new TableQuery();
             tq.SelectColumns = new List<string>() { "PartitionKey", "RowKey", "KeyVersion" };
             string partitionFilter = TableQuery.CombineFilters(
-                TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.GreaterThanOrEqual, Constants.RowKeyConstants.PreFixIdentityUserName),
+                TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.GreaterThanOrEqual, Constants.RowKeyConstants.PreFixIdentityUserId),
                 TableOperators.And,
                 TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.LessThan, "V_"));
             string rowFilterRole = TableQuery.CombineFilters(
@@ -36,9 +36,9 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             return tq;
         }
 
-        public void ProcessMigrate(IdentityCloudContext ic, IList<DynamicTableEntity> userResults, int maxDegreesParallel, Action updateComplete = null, Action<string> updateError = null)
+        public void ProcessMigrate(IdentityCloudContext targetContext, IdentityCloudContext sourceContext, IList<DynamicTableEntity> sourceUserResults, int maxDegreesParallel, Action updateComplete = null, Action<string> updateError = null)
         {
-            var rolesAndClaims = userResults
+            var rolesAndClaims = sourceUserResults
                             .Where(UserWhereFilter);
 
 
@@ -56,7 +56,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                         KeyVersion = KeyHelper.KeyVersion,
                         ETag = Constants.ETagWildcard
                     };
-                    var r = ic.IndexTable.ExecuteAsync(TableOperation.InsertOrReplace(index)).Result;
+                    var r = targetContext.IndexTable.ExecuteAsync(TableOperation.InsertOrReplace(index)).Result;
                     updateComplete?.Invoke();
                 }
                 catch (Exception ex)

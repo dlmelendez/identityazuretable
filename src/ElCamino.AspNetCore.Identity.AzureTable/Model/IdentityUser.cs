@@ -5,9 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.WindowsAzure.Storage.Table;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
-using Microsoft.WindowsAzure.Storage;
+using Microsoft.Azure.Cosmos.Table;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 {
@@ -27,8 +26,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// </summary>
         public void GenerateKeys()
         {
-            Id = PeekRowKey();
-            PartitionKey = Id;
+            if (string.IsNullOrWhiteSpace(Id))
+            {
+                Id = KeyHelper.GenerateUserId();
+            }
+            RowKey = PeekRowKey();
+            PartitionKey = RowKey;
             KeyVersion = KeyHelper.KeyVersion;
         }
 
@@ -39,16 +42,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// <returns></returns>
         public string PeekRowKey()
         {
-            return KeyHelper.GenerateRowKeyUserName(UserName);
+            return KeyHelper.GenerateRowKeyUserId(Id);
         }
 
         public double KeyVersion { get; set; }
 
-        public override string Id
-        {
-            get => RowKey;
-            set => RowKey = value;
-        }
+        
 
         public override string UserName
         {
@@ -63,6 +62,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         }
     }
 
+    [Obsolete("IdentityUserV2 will be renamed IdentityUser in a future release. Use IdentityUserV2 instead to ease breaking changes.")]
     public class IdentityUser : IdentityUser<string, IdentityUserLogin, IdentityUserRole, IdentityUserClaim, IdentityUserToken>, IGenerateKeys
     {
         public IdentityUser() : base() { }
@@ -79,8 +79,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// </summary>
         public void GenerateKeys()
         {
-            Id = PeekRowKey();
-            PartitionKey = Id;
+            if (string.IsNullOrWhiteSpace(Id))
+            {
+                Id = KeyHelper.GenerateUserId();
+            }
+            RowKey = PeekRowKey();
+            PartitionKey = RowKey;
             KeyVersion = KeyHelper.KeyVersion;
         }
 
@@ -91,16 +95,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// <returns></returns>
         public string PeekRowKey()
         {
-            return KeyHelper.GenerateRowKeyUserName(UserName);
+            return KeyHelper.GenerateRowKeyUserId(Id);
         }
 
         public double KeyVersion { get; set; }
 
-        public override string Id
-        {
-            get => RowKey;
-            set => RowKey = base.Id = value;
-        }
 
         public override string UserName
         {
@@ -115,7 +114,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         }
     }
 
-
+    [Obsolete("IdentityUser<TKey, TLogin, TRole, TClaim, TToken> : IdentityUser<TKey> will be removed in a future release.")]
     public class IdentityUser<TKey, TLogin, TRole, TClaim, TToken> : IdentityUser<TKey>
         where TKey : IEquatable<TKey>
         where TLogin : IdentityUserLogin<TKey>
@@ -132,16 +131,16 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         }
 
         #region Collections
-        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
+        [IgnoreProperty]
         public ICollection<TClaim> Claims { get; private set; }
 
-        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
+        [IgnoreProperty]
         public ICollection<TLogin> Logins { get; private set; }
 
-        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
+        [IgnoreProperty]
         public ICollection<TRole> Roles { get; private set; }
 
-        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
+        [IgnoreProperty]
         public ICollection<TToken> Tokens { get; private set; }
 
         #endregion
@@ -156,15 +155,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         }
 
 
-        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
-        public override TKey Id { get => base.Id; set => base.Id = value; }
-
         public virtual DateTime? LockoutEndDateUtc { get; set; }
 
         /// <summary>
         /// LockoutEnd is stored as LockoutEndDateUtc for backwards compat.
         /// </summary>
-        [Microsoft.WindowsAzure.Storage.Table.IgnoreProperty]
+        [IgnoreProperty]
         public override DateTimeOffset? LockoutEnd
         {
             get
