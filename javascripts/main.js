@@ -9,6 +9,9 @@ app.config(function($routeProvider) {
     .when("/gettingstarted", {
         templateUrl: "content/gettingstarted.html"
     })
+    .when("/walkthrough-menu", {
+        templateUrl: "content/walkthrough-menu.html"
+    })
     .when("/walkthrough", {
         templateUrl: "content/walkthrough.html"
     })
@@ -18,14 +21,23 @@ app.config(function($routeProvider) {
     .when("/walkthroughcore2", {
         templateUrl: "content/walkthroughcore2.html"
     })
+    .when("/walkthroughcore3", {
+        templateUrl: "content/walkthroughcore3.html"
+    })
     .when("/ragrs", {
         templateUrl: "content/ragrs.html"
+    })
+    .when("/techoverview-menu", {
+        templateUrl: "content/techoverview-menu.html"
     })
     .when("/techoverview", {
         templateUrl: "content/techoverview.html"
     })
     .when("/techoverview2", {
         templateUrl: "content/techoverview2.html"
+    })
+    .when("/techoverview3", {
+        templateUrl: "content/techoverview3.html"
     })
     .when("/migration", {
         templateUrl: "content/migration.html",

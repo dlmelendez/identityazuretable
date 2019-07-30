@@ -1,0 +1,7 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs/identityazuretable-ghpages/v16/TestStore/0
+/.vs/slnx.sqlite
+/.vs/identityazuretable-ghpages

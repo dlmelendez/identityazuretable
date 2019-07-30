@@ -1,12 +1,12 @@
-﻿<h2>ElCamino.AspNetCore.Identity.AzureTable &gt; 1.7 &lt;= 2.1</h2>
+<h2>ElCamino.AspNetCore.Identity.AzureTable &gt;= 2.2</h2>
 <h3>High Level Dependencies</h3>
 <img src="images/AzureIdentityTableDependency2.png" alt="AzureIdentityTableDependency2.png" title="Azure Identity Dependendencies">
 <br>
-ElCamino.AspNetCore.Identity.AzureTable.dll acts as the data access layer under the Microsoft.AspNetCore.Identity.dll classes UserManager and RoleManager by implementing the necessary interfaces on the UserStore and RoleStore respectively. These classes consume
+ElCamino.AspNetCore.Identity.AzureTable.dll acts as the data access layer under the Microsoft.AspNetCore.Identity.dll classes UserManager and RoleManager by implementing the necessary interfaces on the UserStoreV2 and RoleStore respectively. These classes consume
  the <a href="https://github.com/dlmelendez/identityazuretable/tree/master/src/ElCamino.AspNetCore.Identity.AzureTable/IdentityCloudContext.cs">
     IdentityCloudContext
 </a> and the other Identity Model classes described below to persist the user and role information according to the business logic dictated by the respective UserManager and RoleManager classes.
-<h3>UserStore and RoleStore Classes</h3>
+<h3>UserStoreV2 and RoleStore Classes</h3>
 <img src="images/IdentityUserStoreRoleStore2.png" alt="IdentityUserStoreRoleStore2.png" title="IdentityUserStoreRoleStore2.png">
 <h3>IdentityCloudContext and Connections</h3>
 <a href="https://github.com/dlmelendez/identityazuretable/tree/master/src/ElCamino.AspNetCore.Identity.AzureTable/IdentityCloudContext.cs">IdentityCloudContext</a> that enables access to the Azure Table storage service and exposes the tables.
@@ -15,9 +15,10 @@ The IdentityCloudContext default constructor will look for the IdentityConfigura
         TablePrefix can be left blank, any text here will prefix the Azure table storage names of AspNetUser, AspNetRoles, and AspNetIndex.
         StorageConnectionString is the Azure table storage connection string.
         LocationMode can be left empty (defaults to PrimaryOnly). Other storage location modes are listed <a href="https://msdn.microsoft.com/en-us/library/azure/microsoft.windowsazure.storage.retrypolicies.locationmode.aspx">here</a> and must be used with a RA-GRS storage account if changed from the default.
+        *TableName values can be null or left empty and default values are shown in the example below.
 <br>
 <div style="color:Black; background-color:White">
-<pre>
+    <pre>
 {
 ...
     "IdentityAzureTable": {
@@ -25,6 +26,9 @@ The IdentityCloudContext default constructor will look for the IdentityConfigura
             "TablePrefix": <span style="color:#A31515">"mvc6"</span>
             "StorageConnectionString": <span style="color:#A31515">"UseDevelopmentStorage=true;"</span>
             "LocationMode": <span style="color:#A31515">"PrimaryOnly"</span>
+            "IndexTableName": <span style="color:#A31515">"AspNetIndex"</span>
+            "RoleTableName": <span style="color:#A31515">"AspNetRoles"</span>
+            "UserTableName": <span style="color:#A31515">"AspNetUsers"</span>
         }
     }...
 }
@@ -48,17 +52,17 @@ The IdentityCloudContext default constructor will look for the IdentityConfigura
         </tr>
         <tr>
             <td>
-                <a href="https://github.com/dlmelendez/identityazuretable/tree/master/src/ElCamino.AspNetCore.Identity.AzureTable/Model/IdentityUser.cs">IdentityUser</a>
+                <a href="https://github.com/dlmelendez/identityazuretable/tree/master/src/ElCamino.AspNetCore.Identity.AzureTable/Model/IdentityUser.cs">IdentityUserV2</a>
             </td>
-            <td>Escaped(UserName) </td>
-            <td>Escaped(UserName) </td>
-            <td>1 UserName : 1 IdentityUser, UserName uniquely identifies IdentityUser.</td>
+            <td>Hashed(UserId) </td>
+            <td>Hashed(UserId) </td>
+            <td>1 UserId : 1 IdentityUser, UserId uniquely identifies IdentityUser.</td>
         </tr>
         <tr>
             <td>
                 <a href="https://github.com/dlmelendez/identityazuretable/tree/master/src/ElCamino.AspNetCore.Identity.AzureTable/Model/IdentityUserClaim.cs">IdentityUserClaim</a>
             </td>
-            <td>Escaped(UserName) </td>
+            <td>Hashed(UserId) </td>
             <td>Hashed(ClaimType, ClaimValue) </td>
             <td>1 IdentityUser : 0,Many IdentityUserClaim(s)</td>
         </tr>
@@ -66,23 +70,23 @@ The IdentityCloudContext default constructor will look for the IdentityConfigura
             <td>
                 <a href="https://github.com/dlmelendez/identityazuretable/tree/master/src/ElCamino.AspNetCore.Identity.AzureTable/Model/IdentityUserLogin.cs">IdentityUserLogin</a>
             </td>
-            <td>Escaped(UserName) </td>
-            <td>Escaped(LoginProvider, ProviderKey) </td>
+            <td>Hashed(UserId) </td>
+            <td>Hashed(LoginProvider, ProviderKey) </td>
             <td>1 IdentityUser : 0,Many IdentityUserLogin(s)</td>
         </tr>
         <tr>
             <td>
                 <a href="https://github.com/dlmelendez/identityazuretable/tree/master/src/ElCamino.AspNetCore.Identity.AzureTable/Model/IdentityUserRole.cs">IdentityUserRole</a>
             </td>
-            <td>Escaped(UserName) </td>
-            <td>Escaped(RoleName) </td>
+            <td>Hashed(UserId) </td>
+            <td>Hashed(RoleName) </td>
             <td>1 IdentityUser : 0,Many IdentityUserRole(s)</td>
         </tr>
         <tr>
             <td>
                 <a href="https://github.com/dlmelendez/identityazuretable/tree/master/src/ElCamino.AspNetCore.Identity.AzureTable/Model/IdentityUserToken.cs">IdentityUserToken</a>
             </td>
-            <td>Escaped(UserName) </td>
+            <td>Hashed(UserId) </td>
             <td>Hashed(LoginProvider, Name) </td>
             <td>1 IdentityUser : 0,Many IdentityUserToken(s)</td>
         </tr>
@@ -103,34 +107,44 @@ The IdentityCloudContext default constructor will look for the IdentityConfigura
             <td>
                 <a href="https://github.com/dlmelendez/identityazuretable/tree/master/src/ElCamino.AspNetCore.Identity.AzureTable/Model/IdentityUserIndex.cs">IdentityUserIndex</a>
             </td>
+            <td>UserName Index </td>
+            <td>Hashed(UserName) </td>
+            <td>Hashed(UserId) </td>
+            <td>Hashed(UserId) </td>
+            <td>1 UserName : 1 IdentityUser</td>
+        </tr>
+        <tr>
+            <td>
+                <a href="https://github.com/dlmelendez/identityazuretable/tree/master/src/ElCamino.AspNetCore.Identity.AzureTable/Model/IdentityUserIndex.cs">IdentityUserIndex</a>
+            </td>
             <td>User Email Index </td>
-            <td>Escaped(User Email) </td>
-            <td>Escaped(UserName) </td>
-            <td>Escaped(UserName) </td>
+            <td>Hashed(User Email) </td>
+            <td>Hashed(UserId) </td>
+            <td>Hashed(UserId) </td>
             <td>1 Email : 1,Many IdentityUser(s) (unless the UserManager is set to enforce unique email addresses per user, then 1 Email : 1 IdentityUser)</td>
         </tr>
         <tr>
             <td><a href="https://github.com/dlmelendez/identityazuretable/tree/master/src/ElCamino.AspNetCore.Identity.AzureTable/Model/IdentityUserIndex.cs">IdentityUserIndex</a></td>
             <td>User Login Index </td>
-            <td>Escaped(LoginProvider, ProviderKey) </td>
-            <td>Escaped(LoginProvider, ProviderKey) </td>
-            <td>Escaped(UserName) </td>
+            <td>Hashed(LoginProvider, ProviderKey) </td>
+            <td>Hashed(LoginProvider, ProviderKey) </td>
+            <td>Hashed(UserId) </td>
             <td>1 IdentityUserLogin : 1 IdentityUser</td>
         </tr>
         <tr>
             <td><a href="https://github.com/dlmelendez/identityazuretable/tree/master/src/ElCamino.AspNetCore.Identity.AzureTable/Model/IdentityUserIndex.cs">IdentityUserIndex</a></td>
             <td>User Claim Index </td>
             <td>Hashed(ClaimType, ClaimValue) </td>
-            <td>Escaped(UserName) </td>
-            <td>Escaped(UserName) </td>
+            <td>Hashed(UserId) </td>
+            <td>Hashed(UserId) </td>
             <td>1 IdentityUserClaim : 1,Many IdentityUser(s). Used to lookup users by claim.</td>
         </tr>
         <tr>
             <td><a href="https://github.com/dlmelendez/identityazuretable/tree/master/src/ElCamino.AspNetCore.Identity.AzureTable/Model/IdentityUserIndex.cs">IdentityUserIndex</a></td>
             <td>User Role Index </td>
-            <td>Escaped(RoleName) </td>
-            <td>Escaped(UserName) </td>
-            <td>Escaped(UserName) </td>
+            <td>Hashed(RoleName) </td>
+            <td>Hashed(UserId) </td>
+            <td>Hashed(UserId) </td>
             <td>1 IdentityUserRole : 1,Many IdentityUser(s). Used to lookup users by role.</td>
         </tr>
     </tbody>
@@ -147,19 +161,18 @@ The IdentityCloudContext default constructor will look for the IdentityConfigura
             <td>
                 <a href="https://github.com/dlmelendez/identityazuretable/tree/master/src/ElCamino.AspNetCore.Identity.AzureTable/Model/IdentityRole.cs">IdentityRole</a>
             </td>
-            <td>Escaped(First Char of RoleName) </td>
-            <td>Escaped(RoleName)</td>
+            <td>Hashed(First Char of RoleName) </td>
+            <td>Hashed(RoleName)</td>
         </tr>
     </tbody>
 </table>
 <br>
 <br>
-    The properties of the respective identity model class are stored as a field in the table unless marked with the ignore attribute. Inheriting and extending these classes one can add fields whenever your extended class is saved. Also, the Escaped() psydo-code
-    is a reference to the respective methods found in the <a href="https://github.com/dlmelendez/identityazuretable/tree/master/src/ElCamino.AspNetCore.Identity.AzureTable/Helpers/UriEncodeKeyHelper.cs">UriEncodeKeyHelper</a> class. Hashed() psydo-code is a SHA256 hash of the inputfound in the <a href="https://github.com/dlmelendez/identityazuretable/tree/master/src/ElCamino.AspNetCore.Identity.AzureTable/Helpers/HashKeyHelper.cs">HashKeyHelper</a> class. The Hashed() algorithm was introduced to overcome the size limitation of the rowkey for claim values and overall is a better algorithm for setting deterministic key sizes.
+    The properties of the respective identity model class are stored as a field in the table unless marked with the ignore attribute. Inheriting and extending these classes one can add fields whenever your extended class is saved. Also, the Hashed() psydo-code is a SHA1 hash of the input found in the <a href="https://github.com/dlmelendez/identityazuretable/tree/master/src/ElCamino.AspNetCore.Identity.AzureTable/Helpers/HashKeyHelper.cs">HashKeyHelper</a> class. The Hashed() algorithm was introduced to overcome the size limitation of the rowkey for claim values and overall is a better algorithm for setting deterministic key sizes.
 <h3>Performance </h3>
     The AspNetUsers table is designed to keep all of the user&#39;s data in a single table and in a table partition for each user. This results in a single query using the user&#39;s id (partition key) to get all of the data in a single query when the user&#39;s
-    id is known. The user&#39;s id is an &#39;Escaped&#39; version of the username and the traditional guid is not used. This makes the UserStore.FindByUserNameAsync() and UserStoreFindByUserNameAsync() use the same query. When the user id is not known, the AspNetIndex
-    table is queried first either by user&#39;s email UserStore.FindByEmailAsync() or external login information UserStore.FindAsync() to get the user&#39;s id to then query by user id for the complete user information. The AspNextIndex is always queried by partition
+    id is known. The user&#39;s id is an &#39;Hashed&#39; version of the UserId guid. When the user id is not known, the AspNetIndex
+    table is queried first either by user&#39;s email UserStoreV2.FindByEmailAsync(), user&#39;s username UserStoreV2.FindByUserNameAsync() or external login information UserStoreV2.FindAsync() to get the user&#39;s id to then query by user id for the complete user information. The AspNextIndex is always queried by partition
     and rowkey making that query extremely fast. See above for the details of the AspNetIndex partition and rowkey strategy. In addition, Roles and Claims mapping to users are also indexed for use by GetUsersInRoleAsync() and GetUsersForClaimAsync(), respectively.
 <br>
     AspNetRoles table also uses a composite of the RoleName for the partition and row keys making it possible query the table by its primary key optimizing performance.
@@ -170,11 +183,10 @@ The IdentityCloudContext default constructor will look for the IdentityConfigura
 <h3>Release Management</h3>
 <ul>
     <li>
-        Full suite of unit tests against this assembly at 100% pass rate against the Azure Local Emulator and against a live Azure Storage account. 100% pass rate is required before release. The tests are at about 90% code coverage currently and will work to keep
-        the up.
+        Full suite of unit tests against this assembly at 100% pass rate against the Azure Local Emulator and against a live Azure Storage account. 100% pass rate is required before release.
     </li>
     <li>
-        Releases available on NuGet and are strong name signed.
+        Releases available on NuGet..
     </li>
     <li><a href="https://www.nuget.org/packages/ElCamino.AspNetCore.Identity.AzureTable/">https://www.nuget.org/packages/ElCamino.AspNetCore.Identity.AzureTable/</a></li>
 
