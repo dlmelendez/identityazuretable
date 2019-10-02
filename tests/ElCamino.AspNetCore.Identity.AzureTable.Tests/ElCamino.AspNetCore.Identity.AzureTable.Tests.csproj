@@ -7,7 +7,7 @@
     <TargetFrameworks>netcoreapp2.0</TargetFrameworks>
     <AssemblyName>ElCamino.AspNetCore.Identity.AzureTable.Tests</AssemblyName>
     <IsPackable>false</IsPackable>
-    <Version>2.2.0</Version>
+    <Version>2.2.1</Version>
     <DebugType>Full</DebugType>
 
   </PropertyGroup>
@@ -27,7 +27,7 @@
     <PackageReference Include="Microsoft.Azure.Cosmos.Table" Version="1.0.1" />
     <PackageReference Include="Microsoft.CodeCoverage" Version="16.1.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.1.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.2.0" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.0" />

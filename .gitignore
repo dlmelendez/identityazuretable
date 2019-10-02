@@ -267,3 +267,4 @@ __pycache__/
 /test/Data.Tests/global.json
 !/src/Web/wwwroot/out-tsc/
 /src/Web/wwwroot/
+*.stackdump
