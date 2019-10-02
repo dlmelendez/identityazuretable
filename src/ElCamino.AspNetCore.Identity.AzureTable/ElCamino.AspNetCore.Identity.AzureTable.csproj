@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Azure Table Storage Provider to support AspNet Identity Core 2.x frameworks for .NET Core.</Description>
-    <Copyright>Copyright ©  2019 David Melendez, MIT License</Copyright>
+    <Copyright>Copyright ©  2020 David Melendez, MIT License</Copyright>
     <AssemblyTitle>Azure Table Storage Provider for ASP.NET Identity Core</AssemblyTitle>
     <VersionPrefix>2.0.0</VersionPrefix>
     <Authors>David Melendez</Authors>
@@ -22,7 +22,7 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/dlmelendez/identityazuretable.git</RepositoryUrl>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>2.2.1</Version>
+    <Version>3.0</Version>
     <PackageProjectUrl>https://dlmelendez.github.io/identityazuretable</PackageProjectUrl>
     <AssetTargetFallback Condition=" '$(TargetFramework)' == 'net461' ">$(AssetTargetFallback);net45;</AssetTargetFallback>
     <DebugType>Full</DebugType>
