@@ -242,7 +242,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                 Task.Run(async () => {
                     using (var store = userFixture.CreateUserStore())
                     {
-                        await store.CreateTablesIfNotExists().ConfigureAwait(continueOnCapturedContext: false);
+                        await store.CreateTablesIfNotExistsAsync().ConfigureAwait(continueOnCapturedContext: false);
                     }
                 }).Wait();
                 

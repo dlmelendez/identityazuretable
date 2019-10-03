@@ -61,7 +61,7 @@ namespace Microsoft.Extensions.DependencyInjection
             var userStore = ActivatorUtilities.GetServiceOrCreateInstance(builder.Services.BuildServiceProvider(),
                 userStoreType) as dynamic;
 
-            userStore.CreateTablesIfNotExists();
+            userStore.CreateTablesIfNotExistsAsync();
 
             return builder;
         }
