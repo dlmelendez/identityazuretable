@@ -42,7 +42,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.TestsExp
 
             })
             //.AddEntityFrameworkStores<ApplicationDbContext>()            
-            .AddAzureTableStoresV2<IdentityCloudContext>(new Func<IdentityConfiguration>(() =>
+            .AddAzureTableStores<IdentityCloudContext>(new Func<IdentityConfiguration>(() =>
             {
                 return new IdentityConfiguration()
                 {

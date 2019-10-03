@@ -23,7 +23,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
         where TUser : IdentityUser, new()
         where TRole : IdentityRole, new()
         where TContext : IdentityCloudContext, new()
-        where TUserStore : UserStoreV2<TUser, TRole, TContext>
+        where TUserStore : UserStore<TUser, TRole, TContext>
     {
 
         public RoleStore<TRole> CreateRoleStore()
@@ -66,7 +66,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
             id.AddRoles<IdentityRole>();
 
             
-            id = id.AddAzureTableStoresV2<TContext>(new Func<IdentityConfiguration>(() =>
+            id = id.AddAzureTableStores<TContext>(new Func<IdentityConfiguration>(() =>
             {
                 return GetConfig();
             }));
@@ -150,7 +150,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 
         protected bool IsV2()
         {
-            return new TUser() is IdentityUserV2;
+            return new TUser() is Model.IdentityUser;
         }
 
         public TContext GetContext()
@@ -195,7 +195,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
             });
 
             
-            id = id.AddAzureTableStoresV2<TContext>(new Func<IdentityConfiguration>(() =>
+            id = id.AddAzureTableStores<TContext>(new Func<IdentityConfiguration>(() =>
             {
                 return GetConfig();
             }));

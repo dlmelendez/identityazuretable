@@ -14,7 +14,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
         where TUser : IdentityUser, IApplicationUser, new()
         where TRole : IdentityRole, new()
         where TContext : IdentityCloudContext, new()
-        where TUserStore : UserStoreV2<TUser, TRole, TContext>
+        where TUserStore : UserStore<TUser, TRole, TContext>
     {
         public UserFixture() : base()
         {

@@ -11,10 +11,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.ModelTests
         [Trait("IdentityCore.Azure.Model", "")]
         public void IdentityUserCtors()
         {
-#pragma warning disable 0618
             Assert.NotNull(new IdentityUser(Guid.NewGuid().ToString()));
-#pragma warning restore 0618
-            Assert.NotNull(new IdentityUserV2(Guid.NewGuid().ToString()));
         }
     }
 }

@@ -16,7 +16,7 @@ using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {
-    public partial class UserStoreTests : BaseUserStoreTests<ApplicationUserV2, IdentityCloudContext, UserOnlyStore<ApplicationUserV2, IdentityCloudContext>>
+    public partial class UserOnlyStoreTests : BaseUserStoreTests<ApplicationUserV2, IdentityCloudContext, UserOnlyStore<ApplicationUserV2, IdentityCloudContext>>
     {
         public const string UserOnlyStoreTraitProperties = UserOnlyStoreTrait + ".Properties";
 

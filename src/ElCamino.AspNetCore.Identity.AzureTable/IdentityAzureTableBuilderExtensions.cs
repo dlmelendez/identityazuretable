@@ -9,13 +9,13 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class IdentityAzureTableBuilderExtensions
     {
-        public static IdentityBuilder AddAzureTableStoresV2<TContext>(this IdentityBuilder builder, Func<IdentityConfiguration> configAction)
+        public static IdentityBuilder AddAzureTableStores<TContext>(this IdentityBuilder builder, Func<IdentityConfiguration> configAction)
             where TContext : IdentityCloudContext, new()
         {
             builder.Services.AddSingleton<IdentityConfiguration>(new Func<IServiceProvider, IdentityConfiguration>(p => configAction()));
 
             Type contextType = typeof(TContext);
-            Type userStoreType = typeof(UserStoreV2<,,>).MakeGenericType(builder.UserType, builder.RoleType ?? typeof(ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole), contextType);
+            Type userStoreType = typeof(UserStore<,,>).MakeGenericType(builder.UserType, builder.RoleType ?? typeof(ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole), contextType);
             Type roleStoreType = typeof(RoleStore<,>).MakeGenericType(builder.RoleType??typeof(ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole), contextType);
 
             builder.Services.AddScoped(contextType, contextType);

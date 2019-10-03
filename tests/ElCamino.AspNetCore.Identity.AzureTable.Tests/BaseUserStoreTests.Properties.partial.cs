@@ -19,7 +19,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
        where TUser : IdentityUser, IApplicationUser, new()
        where TRole : IdentityRole, new()
        where TContext : IdentityCloudContext, new()
-       where TUserStore : UserStoreV2<TUser, TRole, TContext>        
+       where TUserStore : UserStore<TUser, TRole, TContext>        
     {
     }
 

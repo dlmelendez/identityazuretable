@@ -15,7 +15,7 @@
     <PackageTags>ASP.NET;Identity Core;Azure;Table Storage;MVC;UserStore;RoleStore;UserManager;multi-tenant;RA-GRS;geo-redundant;Microsoft.AspNetCore.Identity</PackageTags>
     <PackageReleaseNotes>Check https://github.com/dlmelendez/identityazuretable/releases for the latest release information.
       Important! Check https://dlmelendez.github.io/identityazuretable/#/migration for data migration information.</PackageReleaseNotes>
-    <PackageIconUrl>https://dlmelendez.github.io/identityazuretable/images/projectNugetPic.png</PackageIconUrl>
+    <PackageIcon>projectNugetPic.png</PackageIcon>
     <PackageLicenseUrl></PackageLicenseUrl>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <RepositoryType>git</RepositoryType>
@@ -40,5 +40,7 @@
     <PackageReference Include="System.Linq.Queryable" Version="4.3.0" />
   </ItemGroup>
 
- 
+  <ItemGroup>  
+    <None Include="projectNugetPic.png" Pack="true" PackagePath="\"/>   
+  </ItemGroup>
 </Project>
