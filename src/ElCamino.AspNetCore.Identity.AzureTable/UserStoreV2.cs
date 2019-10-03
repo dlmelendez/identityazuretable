@@ -238,7 +238,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
     }
 
     public class UserStoreV2<TUser, TRole, TKey, TUserLogin, TUserRole, TUserClaim, TUserToken, TContext> :
-        UserOnlyStore<TUser, TKey, TUserLogin, TUserClaim, TUserToken, TContext>
+        UserOnlyStore<TUser, TContext, TKey, TUserClaim, TUserLogin, TUserToken>
         , IUserRoleStore<TUser>
         , IDisposable
         where TUser : Model.IdentityUser<TKey>, new()
