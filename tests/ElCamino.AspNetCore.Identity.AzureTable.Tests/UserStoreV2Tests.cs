@@ -109,9 +109,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
         [Fact(DisplayName = "CreateUser")]
         [Trait("IdentityCore.Azure.UserStoreV2", "")]
-        public override void CreateUserTest()
+        public override Task CreateUserTest()
         {
-            base.CreateUserTest();
+            return base.CreateUserTest();
         }
 
         [Fact(DisplayName = "DeleteUser")]

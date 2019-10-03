@@ -16,8 +16,8 @@ namespace Microsoft.Extensions.DependencyInjection
             builder.Services.AddSingleton<IdentityConfiguration>(new Func<IServiceProvider, IdentityConfiguration>(p => configAction()));
 
             Type contextType = typeof(TContext);
-            Type userStoreType = typeof(UserStore<,,>).MakeGenericType(builder.UserType, builder.RoleType, contextType);
-            Type roleStoreType = typeof(RoleStore<,>).MakeGenericType(builder.RoleType, contextType);
+            Type userStoreType = typeof(UserStore<,,>).MakeGenericType(builder.UserType, builder.RoleType ?? typeof(ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole), contextType);
+            Type roleStoreType = typeof(RoleStore<,>).MakeGenericType(builder.RoleType ?? typeof(ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole), contextType);
 
             builder.Services.AddScoped(contextType, contextType);
 
@@ -25,7 +25,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 typeof(IUserStore<>).MakeGenericType(builder.UserType),
                 userStoreType);
             builder.Services.AddScoped(
-                typeof(IRoleStore<>).MakeGenericType(builder.RoleType),
+                typeof(IRoleStore<>).MakeGenericType(builder.RoleType ?? typeof(ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole)),
                 roleStoreType);
 
             return builder;
@@ -37,8 +37,8 @@ namespace Microsoft.Extensions.DependencyInjection
             builder.Services.AddSingleton<IdentityConfiguration>(new Func<IServiceProvider, IdentityConfiguration>(p => configAction()));
 
             Type contextType = typeof(TContext);
-            Type userStoreType = typeof(UserStoreV2<,,>).MakeGenericType(builder.UserType, builder.RoleType, contextType);
-            Type roleStoreType = typeof(RoleStore<,>).MakeGenericType(builder.RoleType, contextType);
+            Type userStoreType = typeof(UserStoreV2<,,>).MakeGenericType(builder.UserType, builder.RoleType ?? typeof(ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole), contextType);
+            Type roleStoreType = typeof(RoleStore<,>).MakeGenericType(builder.RoleType??typeof(ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole), contextType);
 
             builder.Services.AddScoped(contextType, contextType);
 
@@ -46,7 +46,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 typeof(IUserStore<>).MakeGenericType(builder.UserType),
                 userStoreType);
             builder.Services.AddScoped(
-                typeof(IRoleStore<>).MakeGenericType(builder.RoleType),
+                typeof(IRoleStore<>).MakeGenericType(builder.RoleType ?? typeof(ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole)),
                 roleStoreType);
 
             return builder;

@@ -104,9 +104,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
         [Fact(DisplayName = "CreateUser")]
         [Trait("IdentityCore.Azure.UserStore", "")]
-        public override void CreateUserTest()
+        public override Task CreateUserTest()
         {
-            base.CreateUserTest();
+            return base.CreateUserTest();
         }
 
         [Fact(DisplayName = "DeleteUser")]
@@ -371,9 +371,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             }
         }
 
-        public virtual void CreateUserTest()
+        public virtual async Task CreateUserTest()
         {
-            WriteLineObject(CreateTestUserAsync<TUser>());
+            WriteLineObject(await CreateTestUserAsync<TUser>());
         }
 
         public Task<T> CreateUserAsync<T>()

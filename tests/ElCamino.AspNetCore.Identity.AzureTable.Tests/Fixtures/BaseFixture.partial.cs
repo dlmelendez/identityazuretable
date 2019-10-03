@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.DataProtection;
 
 namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 {
@@ -109,7 +110,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
             IServiceCollection services = new ServiceCollection();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             // Add Identity services to the services container.
-            var id = services.AddIdentity<TUser, TRole>(
+            var id = services.AddIdentityCore<TUser>(
             (config) =>
             {
                 config.Lockout = new LockoutOptions() { MaxFailedAccessAttempts = 2 };
@@ -119,6 +120,9 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
                 config.Password.RequireNonAlphanumeric = false;
                 config.Password.RequireUppercase = false;
             });
+
+            id.AddRoles<IdentityRole>();
+
             if (IsV2())
             {
                 id = id.AddAzureTableStoresV2<TContext>(new Func<IdentityConfiguration>(() =>
@@ -133,8 +137,11 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
                     return GetConfig();
                 }));
             }
+
             id.CreateAzureTablesIfNotExists<TContext>();
+            id.Services.AddDataProtection();
             id.AddDefaultTokenProviders();
+
             services.AddLogging();
 
             return services.BuildServiceProvider().GetService(typeof(RoleManager<TRole>)) as RoleManager<TRole>;
@@ -163,7 +170,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             // Add Identity services to the services container.
-            var id = services.AddIdentity<TUser, IdentityRole>((config) =>
+            var id = services.AddIdentityCore<TUser>((config) =>
             {
                 config.User.RequireUniqueEmail = options.User.RequireUniqueEmail;
                 config.Lockout.DefaultLockoutTimeSpan = options.Lockout.DefaultLockoutTimeSpan;
@@ -184,7 +191,11 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
                     return GetConfig();
                 }));
             }
+            id.Services.AddDataProtection();
             id.AddDefaultTokenProviders();
+            
+            id.AddSignInManager();
+
             services.AddLogging();
 
             return services.BuildServiceProvider().GetService(typeof(UserManager<TUser>)) as UserManager<TUser>;

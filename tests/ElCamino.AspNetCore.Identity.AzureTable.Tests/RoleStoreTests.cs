@@ -144,7 +144,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             ServiceCollection services = new ServiceCollection();
             // Adding coverage for CreateAzureTablesIfNotExists();
 #pragma warning disable 0618
-            services.AddIdentity<IdentityUser, IdentityRole>()
+            services.AddIdentityCore<IdentityUser>()
                 .AddAzureTableStoresV2<IdentityCloudContext>(new Func<IdentityConfiguration>(() =>
                 {
                     return roleFixture.GetConfig();

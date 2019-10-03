@@ -2,14 +2,15 @@
 using System;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Identity.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser;
 using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Hosting;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.TestsExp
 {
@@ -33,10 +34,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.TestsExp
         {
             services.AddLogging();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddDataProtection();
 
             // Add Identity services to the services container.
 #pragma warning disable 0618
-            services.AddIdentity<IdentityUser, IdentityRole>((config) =>
+            services.AddIdentityCore<IdentityUser>((config) =>
             {
 
             })

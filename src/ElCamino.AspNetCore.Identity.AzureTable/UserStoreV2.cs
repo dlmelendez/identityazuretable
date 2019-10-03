@@ -192,6 +192,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
     }
 
+    //-------------------------------------------------
+    public class UserStoreV2<TUser, TContext> : UserStoreV2<TUser, Model.IdentityRole, string, Model.IdentityUserLogin, Model.IdentityUserRole, Model.IdentityUserClaim, Model.IdentityUserToken, TContext>
+       , IUserStore<TUser>
+       where TUser : Model.IdentityUser<string>, new()
+       where TContext : IdentityCloudContext, new()
+    {
+        public UserStoreV2(TContext context, IdentityConfiguration config) : base(context, config) { }
+    }
     /// <summary>
     /// Supports as slimmer, trimmer, IdentityUserV2 with NO Roles, Claims, and Tokens as collection properties.
     /// Use this for keep inline with v2 core identity base user model. Otherwise, data is the same, queries load a smaller user object.
