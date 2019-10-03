@@ -150,31 +150,32 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return MapUser(userId, await GetUserAggregateQueryAsync(userId).ToListAsync());
         }
 
-        protected async override Task<IEnumerable<TUser>> GetUserQueryAsync(IList<string> userIds)
+        protected async override Task<IEnumerable<TUser>> GetUserQueryAsync(IEnumerable<string> userIds)
         {
             const double pageSize = 50.0;
-            int pages = (int)Math.Ceiling(((double)userIds.Count / pageSize));
+            int pages = (int)Math.Ceiling(((double)userIds.Count() / pageSize));
             List<TableQuery> listTqs = new List<TableQuery>(pages);
-            List<string> tempUserIds = null;
+            IEnumerable<string> tempUserIds = Enumerable.Empty<string>();
 
             for (int currentPage = 1; currentPage <= pages; currentPage++)
             {
                 if (currentPage > 1)
                 {
-                    tempUserIds = userIds.Skip(((currentPage - 1) * (int)pageSize)).Take((int)pageSize).ToList();
+                    tempUserIds = userIds.Skip(((currentPage - 1) * (int)pageSize)).Take((int)pageSize);
                 }
                 else
                 {
-                    tempUserIds = userIds.Take((int)pageSize).ToList();
+                    tempUserIds = userIds.Take((int)pageSize);
                 }
 
                 TableQuery tq = new TableQuery();
-                for (int i = 0; i < tempUserIds.Count; i++)
+                int tempUserIdCounter = 0;
+                foreach (string tempUserId in tempUserIds)
                 {
 
-                    string temp = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, tempUserIds[i]);
+                    string temp = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, tempUserId);
 
-                    if (i > 0)
+                    if (tempUserIdCounter > 0)
                     {
                         tq.FilterString = TableQuery.CombineFilters(tq.FilterString, TableOperators.Or, temp);
                     }
@@ -182,7 +183,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                     {
                         tq.FilterString = temp;
                     }
-
+                    tempUserIdCounter++;
                 }
                 listTqs.Add(tq);
 
@@ -192,21 +193,18 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 #if DEBUG
             DateTime startUserAggTotal = DateTime.UtcNow;
 #endif
-            List<Task> tasks = new List<Task>(listTqs.Count);
-            listTqs.ForEach((q) =>
+            var tasks = listTqs.Select((q) =>
             {
-                tasks.Add(Task.Run(async () =>
-                {
-                    foreach (var s in 
-                    (await _userTable.ExecuteQueryAsync(q)
-                    .ToListAsync())
-                    .GroupBy(g => g.PartitionKey))
+                return _userTable.ExecuteQueryAsync(q)
+                .ToListAsync()
+                .ContinueWith((urTask) => {
+                    foreach (var s in urTask.Result.GroupBy(g => g.PartitionKey))
                     {
                         bag.Add(MapUser(s.Key, s));
-                    }                                       
-                }));
+                    }
+                });                                                                        
             });
-            await Task.WhenAll(tasks);
+            await Task.WhenAll(tasks).ConfigureAwait(false);
 #if DEBUG
             Debug.WriteLine("GetUserAggregateQuery (GetUserAggregateTotal): {0} seconds", (DateTime.UtcNow - startUserAggTotal).TotalSeconds);
 #endif
@@ -806,13 +804,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return _userTable.ExecuteQueryAsync(tq);
         }
 
-        protected async Task<IEnumerable<TUser>> GetUserAggregateQueryAsync(IList<string> userIds,
+        protected async Task<IEnumerable<TUser>> GetUserAggregateQueryAsync(IEnumerable<string> userIds,
                 Func<string, string> setFilterByUserId = null,
                 Func<TUserRole, bool> whereRole = null,
                 Func<TUserClaim, bool> whereClaim = null)
         {
             const double pageSize = 50.0;
-            int pages = (int)Math.Ceiling(((double)userIds.Count / pageSize));
+            int pages = (int)Math.Ceiling(((double)userIds.Count() / pageSize));
             List<TableQuery> listTqs = new List<TableQuery>(pages);
             IEnumerable<string> tempUserIds = null;
 
@@ -901,32 +899,33 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return bag;
         }
 
-        protected async virtual Task<IEnumerable<TUser>> GetUserQueryAsync(IList<string> userIds)
+        protected async virtual Task<IEnumerable<TUser>> GetUserQueryAsync(IEnumerable<string> userIds)
         {
             const double pageSize = 50.0;
-            int pages = (int)Math.Ceiling(((double)userIds.Count / pageSize));
+            int pages = (int)Math.Ceiling(((double)userIds.Count() / pageSize));
             List<TableQuery> listTqs = new List<TableQuery>(pages);
-            List<string> tempUserIds = null;
+            IEnumerable<string> tempUserIds = Enumerable.Empty<string>();
 
             for (int currentPage = 1; currentPage <= pages; currentPage++)
             {
                 if (currentPage > 1)
                 {
-                    tempUserIds = userIds.Skip(((currentPage - 1) * (int)pageSize)).Take((int)pageSize).ToList();
+                    tempUserIds = userIds.Skip(((currentPage - 1) * (int)pageSize)).Take((int)pageSize);
                 }
                 else
                 {
-                    tempUserIds = userIds.Take((int)pageSize).ToList();
+                    tempUserIds = userIds.Take((int)pageSize);
                 }
 
                 TableQuery tq = new TableQuery();
-                for (int i = 0; i < tempUserIds.Count; i++)
+                int tempUserCounter = 0;
+                foreach(string tempUserId in tempUserIds)
                 {
 
                     string temp = TableQuery.CombineFilters(
-                        TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, tempUserIds[i]), TableOperators.And,
-                        TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, tempUserIds[i]));
-                    if (i > 0)
+                        TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, tempUserId), TableOperators.And,
+                        TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, tempUserId));
+                    if (tempUserCounter > 0)
                     {
                         tq.FilterString = TableQuery.CombineFilters(tq.FilterString, TableOperators.Or, temp);
                     }
@@ -934,7 +933,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                     {
                         tq.FilterString = temp;
                     }
-
+                    tempUserCounter++;
                 }
                 listTqs.Add(tq);
 
@@ -944,19 +943,19 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 #if DEBUG
             DateTime startUserAggTotal = DateTime.UtcNow;
 #endif
-            List<Task> tasks = new List<Task>(listTqs.Count);
-            listTqs.ForEach((q) =>
-            {
-                tasks.Add(Task.Run(async () =>
+            IEnumerable<Task> tasks =  listTqs.Select((q) =>
+            {               
+                return _userTable.ExecuteQueryAsync(q).ToListAsync()
+                .ContinueWith((taskResults) =>
                 {
-                    (await _userTable.ExecuteQueryAsync(q).ToListAsync())
-                    .ForEach((s) =>
+                    foreach (var s in taskResults.Result)
                     {
                         bag.Add(MapTableEntity<TUser>(s));
-                    });
-                }));
+                    }
+                });
+                
             });
-            await Task.WhenAll(tasks);
+            await Task.WhenAll(tasks).ConfigureAwait(false);
 #if DEBUG
             Debug.WriteLine("GetUserAggregateQuery (GetUserAggregateTotal): {0} seconds", (DateTime.UtcNow - startUserAggTotal).TotalSeconds);
 #endif
@@ -974,10 +973,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
                             
             TUser user = default(TUser);
-            List<TUserRole> roles = new List<TUserRole>();
-            List<TUserClaim> claims = new List<TUserClaim>();
-            List<TUserLogin> logins = new List<TUserLogin>();
-            List<TUserToken> tokens = new List<TUserToken>();
+            IEnumerable<TUserRole> roles = Enumerable.Empty<TUserRole>();
+            IEnumerable<TUserClaim> claims = Enumerable.Empty<TUserClaim>();
+            IEnumerable<TUserLogin> logins = Enumerable.Empty<TUserLogin>();
+            IEnumerable<TUserToken> tokens = Enumerable.Empty<TUserToken>();
 
             var vUser = userResults.Where(u => u.RowKey.Equals(userId) && u.PartitionKey.Equals(userId)).SingleOrDefault();
             var op = new OperationContext();
@@ -988,44 +987,34 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 user = MapTableEntity<TUser>(vUser);
 
                 //Roles
-                foreach (var log in userResults.Where(u => u.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserRole)
-                     && u.PartitionKey.Equals(userId)))
-                {
-                    TUserRole trole = MapTableEntity<TUserRole>(log);
-                    roles.Add(trole);
-                }
+                roles = userResults.Where(u => u.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserRole)
+                    && u.PartitionKey.Equals(userId))
+                    .Select((log) =>
+                    {
+                        return MapTableEntity<TUserRole>(log);
+                    });
                 //Claims
-                foreach (var log in userResults.Where(u => u.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserClaim)
-                     && u.PartitionKey.Equals(userId)))
-                {
-                    TUserClaim tclaim = MapTableEntity<TUserClaim>(log);
-                    //Added for 1.7 rowkey change
-                    if (KeyHelper.GenerateRowKeyIdentityUserClaim(tclaim.ClaimType, tclaim.ClaimValue).Equals(tclaim.RowKey))
+                claims = userResults.Where(u => u.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserClaim)
+                     && u.PartitionKey.Equals(userId))
+                    .Select((log) =>
                     {
-                        claims.Add(tclaim);
-                    }
-#if DEBUG
-                    else
-                    {
-                        Debug.WriteLine("Claim partition and row keys not added to user: " + log.PartitionKey + " " + log.RowKey);
-                    }
-#endif
-                }
+                        return MapTableEntity<TUserClaim>(log);
+                    });
                 //Logins
-                foreach (var log in userResults.Where(u => u.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserLogin)
-                 && u.PartitionKey.Equals(userId)))
-                {
-                    TUserLogin tlogin = MapTableEntity<TUserLogin> (log);
-                    logins.Add(tlogin);
-                }
+                logins = userResults.Where(u => u.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserLogin)
+                    && u.PartitionKey.Equals(userId))
+                    .Select((log) =>
+                    {
+                        return MapTableEntity<TUserLogin>(log);
+                    });
 
                 //Tokens
-                foreach (var log in userResults.Where(u => u.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserToken)
-                 && u.PartitionKey.Equals(userId)))
-                {
-                    TUserToken token = MapTableEntity<TUserToken>(log);
-                    tokens.Add(token);
-                }
+                tokens = userResults.Where(u => u.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserToken)
+                     && u.PartitionKey.Equals(userId))
+                    .Select((log) =>
+                    {
+                        return MapTableEntity<TUserToken>(log);
+                    });
             }
             return (user, roles, claims, logins, tokens);
         }
@@ -1042,25 +1031,25 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return default(TUser);
         }
 
-        protected async Task<IEnumerable<TUser>> GetUsersAggregateByIndexQueryAsync(TableQuery queryUser, Func<List<string>, Task<IEnumerable<TUser>>> getUserFunc)
+        protected async Task<IEnumerable<TUser>> GetUsersAggregateByIndexQueryAsync(TableQuery queryUser, Func<IEnumerable<string>, Task<IEnumerable<TUser>>> getUserFunc)
         {
 #if DEBUG
             DateTime startIndex = DateTime.UtcNow;
 #endif
-            ConcurrentBag<List<TUser>> lUsers = new ConcurrentBag<List<TUser>>();
+            ConcurrentBag<IEnumerable<TUser>> lUsers = new ConcurrentBag<IEnumerable<TUser>>();
             TableContinuationToken token = new TableContinuationToken();
             const int takeCount = 100;
             const int taskMax = 10;
             queryUser.TakeCount = takeCount;
             List<Task> taskBatch = new List<Task>(taskMax);
-            Func<List<string>, Task> getUsers = async (ids) =>
+            Func<IEnumerable<string>, Task> getUsers = async (ids) =>
             {
-                lUsers.Add((await getUserFunc(ids)).ToList());
+                lUsers.Add((await getUserFunc(ids)));
             };
             while (token != null)
             {
                 var response = await _indexTable.ExecuteQuerySegmentedAsync(queryUser, token);
-                var tempUserIds = response.ToList().Select(u => u.Properties["Id"].StringValue).Distinct().ToList();
+                var tempUserIds = response.Select(u => u.Properties["Id"].StringValue).Distinct();
                 taskBatch.Add(getUsers(tempUserIds));
                 if (taskBatch.Count % taskMax == 0)
                 {
