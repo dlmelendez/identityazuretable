@@ -16,25 +16,24 @@ using ElCamino.AspNetCore.Identity.AzureTable.Model;
 namespace ElCamino.AspNetCore.Identity.AzureTable
 {
     public class UserOnlyStore<TUser> 
-        : UserOnlyStore<TUser, IdentityCloudContext, string> where TUser : Model.IdentityUser<string>, new()
+        : UserOnlyStore<TUser, IdentityCloudContext> where TUser : Model.IdentityUser<string>, new()
     {
         public UserOnlyStore(IdentityCloudContext context, IdentityConfiguration config) : base(context, config) { }
 
     }
 
+    //public class UserOnlyStore<TUser, TContext> 
+    //    : UserOnlyStore<TUser, TContext, string>
+    //    where TUser : Model.IdentityUser<string>, new()
+    //    where TContext : IdentityCloudContext, new()
+    //{
+    //    public UserOnlyStore(TContext context, IdentityConfiguration config) : base(context, config) { }
+    //}
+
     public class UserOnlyStore<TUser, TContext> 
-        : UserOnlyStore<TUser, TContext, string>
+        : UserOnlyStore<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken>
         where TUser : Model.IdentityUser<string>, new()
         where TContext : IdentityCloudContext, new()
-    {
-        public UserOnlyStore(TContext context, IdentityConfiguration config) : base(context, config) { }
-    }
-
-    public class UserOnlyStore<TUser, TContext, TKey> 
-        : UserOnlyStore<TUser, TContext, TKey, Model.IdentityUserClaim<TKey>, Model.IdentityUserLogin<TKey>, Model.IdentityUserToken<TKey>>
-        where TUser : Model.IdentityUser<TKey>, new()
-        where TContext : IdentityCloudContext, new()
-        where TKey : IEquatable<TKey>
     {
         public UserOnlyStore(TContext context, IdentityConfiguration config) : base(context, config) { }
     }

@@ -13,14 +13,94 @@ using Microsoft.Extensions.DependencyInjection;
 using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.DataProtection;
+using Model = ElCamino.AspNetCore.Identity.AzureTable.Model;
+
 
 namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 {
-    public partial class BaseFixture<TUser, TRole, TContext, TUserStore> : IDisposable
+    public class BaseFixture<TUser, TRole, TContext, TUserStore> 
+        : BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore>
         where TUser : IdentityUser, new()
         where TRole : IdentityRole, new()
         where TContext : IdentityCloudContext, new()
         where TUserStore : UserStoreV2<TUser, TRole, TContext>
+    {
+
+        public RoleStore<TRole> CreateRoleStore()
+        {
+            return new RoleStore<TRole>(GetContext());
+        }
+
+        public RoleStore<TRole> CreateRoleStore(TContext context)
+        {
+            return new RoleStore<TRole>(context);
+        }
+
+        public RoleManager<TRole> CreateRoleManager()
+        {
+            return CreateRoleManager(CreateRoleStore());
+        }
+
+        public RoleManager<TRole> CreateRoleManager(TContext context)
+        {
+            return CreateRoleManager(new RoleStore<TRole>(context));
+        }
+
+        public RoleManager<TRole> CreateRoleManager(RoleStore<TRole> store)
+        {
+            //return new RoleManager<TRole>(store);
+            IServiceCollection services = new ServiceCollection();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            // Add Identity services to the services container.
+            var id = services.AddIdentityCore<TUser>(
+            (config) =>
+            {
+                config.Lockout = new LockoutOptions() { MaxFailedAccessAttempts = 2 };
+                config.Password.RequireDigit = false;
+                config.Password.RequiredLength = 3;
+                config.Password.RequireLowercase = false;
+                config.Password.RequireNonAlphanumeric = false;
+                config.Password.RequireUppercase = false;
+            });
+
+            id.AddRoles<IdentityRole>();
+
+            
+            id = id.AddAzureTableStoresV2<TContext>(new Func<IdentityConfiguration>(() =>
+            {
+                return GetConfig();
+            }));
+           
+
+            id.CreateAzureTablesIfNotExists<TContext>();
+            id.Services.AddDataProtection();
+            id.AddDefaultTokenProviders();
+
+            services.AddLogging();
+
+            return services.BuildServiceProvider().GetService(typeof(RoleManager<TRole>)) as RoleManager<TRole>;
+        }
+        
+
+    }
+
+    public class BaseFixture<TUser, TContext, TUserStore>
+    : BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore>
+    where TUser : IdentityUser, new()
+    where TContext : IdentityCloudContext, new()
+    where TUserStore : UserOnlyStore<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken>
+    {
+
+    }
+
+    public class BaseFixture<TUser, TContext, TKey, TUserClaim, TUserLogin, TUserToken, TUserStore> : IDisposable
+        where TUser : Model.IdentityUser<TKey>, new()
+        where TKey : IEquatable<TKey>
+        where TUserLogin : Model.IdentityUserLogin<TKey>, new()
+        where TUserClaim : Model.IdentityUserClaim<TKey>, new()
+        where TUserToken : Model.IdentityUserToken<TKey>, new()
+        where TContext : IdentityCloudContext, new()
+        where TUserStore : UserOnlyStore<TUser, TContext, TKey, TUserClaim, TUserLogin, TUserToken>
     {
 
         #region IDisposable Support
@@ -84,69 +164,6 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 
         }
 
-        public RoleStore<TRole> CreateRoleStore()
-        {
-            return new RoleStore<TRole>(GetContext());
-        }
-
-        public RoleStore<TRole> CreateRoleStore(TContext context)
-        {
-            return new RoleStore<TRole>(context);
-        }
-
-        public RoleManager<TRole> CreateRoleManager()
-        {
-            return CreateRoleManager(CreateRoleStore());
-        }
-
-        public RoleManager<TRole> CreateRoleManager(TContext context)
-        {
-            return CreateRoleManager(new RoleStore<TRole>(context));
-        }
-
-        public RoleManager<TRole> CreateRoleManager(RoleStore<TRole> store)
-        {
-            //return new RoleManager<TRole>(store);
-            IServiceCollection services = new ServiceCollection();
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            // Add Identity services to the services container.
-            var id = services.AddIdentityCore<TUser>(
-            (config) =>
-            {
-                config.Lockout = new LockoutOptions() { MaxFailedAccessAttempts = 2 };
-                config.Password.RequireDigit = false;
-                config.Password.RequiredLength = 3;
-                config.Password.RequireLowercase = false;
-                config.Password.RequireNonAlphanumeric = false;
-                config.Password.RequireUppercase = false;
-            });
-
-            id.AddRoles<IdentityRole>();
-
-            if (IsV2())
-            {
-                id = id.AddAzureTableStoresV2<TContext>(new Func<IdentityConfiguration>(() =>
-                {
-                    return GetConfig();
-                }));
-            }
-            else
-            {
-                id = id.AddAzureTableStores<TContext>(new Func<IdentityConfiguration>(() =>
-                {
-                    return GetConfig();
-                }));
-            }
-
-            id.CreateAzureTablesIfNotExists<TContext>();
-            id.Services.AddDataProtection();
-            id.AddDefaultTokenProviders();
-
-            services.AddLogging();
-
-            return services.BuildServiceProvider().GetService(typeof(RoleManager<TRole>)) as RoleManager<TRole>;
-        }
-
         public TUserStore CreateUserStore()
         {
             return CreateUserStore(GetContext(),GetConfig());
@@ -177,20 +194,12 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
                 config.Lockout.MaxFailedAccessAttempts = options.Lockout.MaxFailedAccessAttempts;
             });
 
-            if (IsV2())
+            
+            id = id.AddAzureTableStoresV2<TContext>(new Func<IdentityConfiguration>(() =>
             {
-                id = id.AddAzureTableStoresV2<TContext>(new Func<IdentityConfiguration>(() =>
-                {
-                    return GetConfig();
-                }));
-            }
-            else
-            {
-                id = id.AddAzureTableStores<TContext>(new Func<IdentityConfiguration>(() =>
-                {
-                    return GetConfig();
-                }));
-            }
+                return GetConfig();
+            }));
+            
             id.Services.AddDataProtection();
             id.AddDefaultTokenProviders();
             

@@ -6,7 +6,7 @@ using ElCamino.AspNetCore.Identity.AzureTable.Model;
 using ElCamino.AspNetCore.Identity.AzureTable.Tests;
 using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
 using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser<string>;
-
+using Model = ElCamino.AspNetCore.Identity.AzureTable.Model;
 
 namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 {
@@ -21,6 +21,23 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
         }
 
       
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+        }
+
+    }
+
+    public partial class UserFixture<TUser, TContext, TUserStore> : BaseFixture<TUser, TContext, TUserStore>
+       where TUser : IdentityUser, IApplicationUser, new()
+       where TContext : IdentityCloudContext, new()
+       where TUserStore : UserOnlyStore<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken>
+    {
+        public UserFixture() : base()
+        {
+        }
+
+
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);

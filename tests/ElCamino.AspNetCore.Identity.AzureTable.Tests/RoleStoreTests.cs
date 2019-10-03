@@ -16,11 +16,11 @@ using Microsoft.Extensions.DependencyInjection;
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {
 #pragma warning disable 0618
-    public class RoleStoreTests : IClassFixture<RoleFixture<IdentityUser, IdentityRole, IdentityCloudContext>>
+    public class RoleStoreTests : IClassFixture<RoleFixture<IdentityUserV2, IdentityRole, IdentityCloudContext>>
     {
         private readonly ITestOutputHelper output;
-        private RoleFixture<IdentityUser, IdentityRole, IdentityCloudContext> roleFixture;
-        public RoleStoreTests(RoleFixture<IdentityUser, IdentityRole, IdentityCloudContext> roleFix, ITestOutputHelper output)
+        private RoleFixture<IdentityUserV2, IdentityRole, IdentityCloudContext> roleFixture;
+        public RoleStoreTests(RoleFixture<IdentityUserV2, IdentityRole, IdentityCloudContext> roleFix, ITestOutputHelper output)
         {
             this.output = output;
             roleFixture = roleFix;

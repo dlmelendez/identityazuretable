@@ -37,14 +37,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.TestsExp
             services.AddDataProtection();
 
             // Add Identity services to the services container.
-#pragma warning disable 0618
             services.AddIdentityCore<IdentityUser>((config) =>
             {
 
             })
-#pragma warning restore 0618
-            //.AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddAzureTableStores<IdentityCloudContext>(new Func<IdentityConfiguration>(() =>
+            //.AddEntityFrameworkStores<ApplicationDbContext>()            
+            .AddAzureTableStoresV2<IdentityCloudContext>(new Func<IdentityConfiguration>(() =>
             {
                 return new IdentityConfiguration()
                 {
