@@ -94,7 +94,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             return string.Format(Constants.RowKeyConstants.FormatterIdentityUserLogin, hash);
         }
 
-        public override double KeyVersion => 2.2;
+        public override double KeyVersion => 3.0;
 
         public static string ConvertKeyToHash(string input)
         {
