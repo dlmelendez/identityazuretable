@@ -1,4 +1,7 @@
-﻿using System;
+﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
+
+#if NETSTANDARD2_1
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -61,3 +64,4 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         }
     }
 }
+#endif

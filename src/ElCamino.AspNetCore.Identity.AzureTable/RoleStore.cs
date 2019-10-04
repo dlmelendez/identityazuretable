@@ -193,7 +193,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             TableQuery tq = new TableQuery();
             tq.FilterString = filter;
             OperationContext oc = new OperationContext();
-            return (await _roleTable.ExecuteQueryAsync(tq).ToListAsync())
+            return 
+#if NETSTANDARD2_1
+
+                (await _roleTable.ExecuteQueryAsync(tq).ToListAsync())
+#else
+                (await Task.FromResult(_roleTable.ExecuteQuery(tq)))
+#endif
+                
                 .Select(s =>
                 {
                     TRoleClaim trc = (TRoleClaim)Activator.CreateInstance(typeof(TRoleClaim));

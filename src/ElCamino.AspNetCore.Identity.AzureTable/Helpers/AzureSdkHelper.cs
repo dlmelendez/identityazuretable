@@ -10,6 +10,7 @@ namespace Microsoft.Azure.Cosmos.Table
     public static class AzureSdkHelper
     {
         //Azure SDK changes, you are killing me.
+#if NETSTANDARD2_1
         public static async IAsyncEnumerable<DynamicTableEntity> ExecuteQueryAsync(this CloudTable ct, TableQuery tq)
         { 
             TableContinuationToken t = new TableContinuationToken();
@@ -33,6 +34,29 @@ namespace Microsoft.Azure.Cosmos.Table
             Debug.WriteLine("ExecuteQueryAsync (Query): " + tq.FilterString);
 
         }
+#endif
+        public static IEnumerable<DynamicTableEntity> ExecuteQuery(this CloudTable ct, TableQuery tq)
+        {
+            TableContinuationToken t = new TableContinuationToken();
+#if DEBUG
+            int iCounter = 0;
+#endif
+            while (t != null)
+            {
+                var segment = ct.ExecuteQuerySegmented(tq, t);
+                foreach (var result in segment.Results)
+                {
+#if DEBUG
+                    iCounter++;
+#endif
+                    yield return result;
+                }
+                t = segment.ContinuationToken;
+            }
 
+            Debug.WriteLine("ExecuteQuery: (Count): {0}", iCounter);
+            Debug.WriteLine("ExecuteQuery (Query): " + tq.FilterString);
+
+        }
     }
 }
