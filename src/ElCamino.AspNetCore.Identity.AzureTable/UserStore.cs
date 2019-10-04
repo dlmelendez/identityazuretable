@@ -120,10 +120,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             TableQuery tq = new TableQuery();
 
             string rowFilter =
-                TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.GreaterThanOrEqual, Constants.RowKeyConstants.PreFixIdentityUserRole);
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.GreaterThanOrEqual, Constants.RowKeyConstants.PreFixIdentityUserRole);
 
             tq.FilterString = TableQuery.CombineFilters(
-                TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, userId),
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, userId),
                 TableOperators.And,
                 rowFilter);
             tq.SelectColumns = new List<string>() { roleName };
@@ -192,12 +192,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         public string BuildRoleQuery(string normalizedRoleName)
         {
             string rowFilter =
-                TableQuery.GenerateFilterCondition("RowKey",
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey),
                 QueryComparisons.Equal,
                 KeyHelper.GenerateRowKeyIdentityRole(normalizedRoleName));
 
             return TableQuery.CombineFilters(
-                TableQuery.GenerateFilterCondition("PartitionKey",
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey),
                 QueryComparisons.Equal, KeyHelper.GeneratePartitionKeyIdentityRole(normalizedRoleName)),
                 TableOperators.And,
                 rowFilter);
@@ -217,12 +217,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 Func<string, string> getTableQueryFilterByUserId = (userId) =>
                 {
                     string rowFilter = TableQuery.CombineFilters(
-                        TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, userId),
+                        TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, userId),
                         TableOperators.Or,
-                        TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, KeyHelper.GenerateRowKeyIdentityUserRole(roleName)));
+                        TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, KeyHelper.GenerateRowKeyIdentityUserRole(roleName)));
 
                     string tqFilter = TableQuery.CombineFilters(
-                        TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, userId), TableOperators.And,
+                        TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, userId), TableOperators.And,
                         rowFilter);
                     return tqFilter;
                 };
@@ -255,13 +255,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             TableQuery tq = new TableQuery();
 
             string rowFilter =
-                TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, KeyHelper.GenerateRowKeyIdentityUserRole(roleName));
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, KeyHelper.GenerateRowKeyIdentityUserRole(roleName));
 
             tq.FilterString = TableQuery.CombineFilters(
-                TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, userId),
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, userId),
                 TableOperators.And,
                 rowFilter);
-            tq.SelectColumns = new List<string>() { "RowKey" };
+            tq.SelectColumns = new List<string>() { nameof(TableEntity.RowKey) };
             tq.TakeCount = 1;
             var tasks = new Task<bool>[]
             {
@@ -342,7 +342,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 foreach (var tempUserId in tempUserIds)
                 {
 
-                    string temp = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, tempUserId);
+                    string temp = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, tempUserId);
                     if (setFilterByUserId != null)
                     {
                         temp = setFilterByUserId(tempUserId);
