@@ -29,10 +29,10 @@ namespace Microsoft.Azure.Cosmos.Table
                 }
                 t = segment.ContinuationToken;
             }
-
+#if DEBUG
             Debug.WriteLine("ExecuteQueryAsync: (Count): {0}", iCounter);
             Debug.WriteLine("ExecuteQueryAsync (Query): " + tq.FilterString);
-
+#endif
         }
 #else
         public static Task<IEnumerable<DynamicTableEntity>> ExecuteQueryAsync(this CloudTable ct, TableQuery tq)
@@ -58,10 +58,11 @@ namespace Microsoft.Azure.Cosmos.Table
                 }
                 t = segment.ContinuationToken;
             }
+#if DEBUG
 
             Debug.WriteLine("ExecuteQuery: (Count): {0}", iCounter);
             Debug.WriteLine("ExecuteQuery (Query): " + tq.FilterString);
-
+#endif
         }
     }
 }

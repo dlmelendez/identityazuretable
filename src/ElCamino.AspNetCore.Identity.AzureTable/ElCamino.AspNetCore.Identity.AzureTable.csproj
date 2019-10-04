@@ -26,7 +26,8 @@
     <AssetTargetFallback Condition=" '$(TargetFramework)' == 'net461' ">$(AssetTargetFallback);net45;</AssetTargetFallback>
     <DebugType>Full</DebugType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>
