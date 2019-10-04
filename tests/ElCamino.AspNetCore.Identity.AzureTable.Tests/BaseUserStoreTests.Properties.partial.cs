@@ -1,4 +1,4 @@
-﻿// MIT License Copyright 2019 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
+﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,87 +13,20 @@ using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
 using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser<string>;
 using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
 
-
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {
-    public partial class UserStoreTests : BaseUserStoreTests<ApplicationUser, IdentityRole, IdentityCloudContext, UserStore<ApplicationUser, IdentityRole, IdentityCloudContext>>
+    public partial class BaseUserStoreTests<TUser, TRole, TContext, TUserStore> : IClassFixture<UserFixture<TUser, TRole, TContext, TUserStore>>
+       where TUser : IdentityUser, IApplicationUser, new()
+       where TRole : IdentityRole, new()
+       where TContext : IdentityCloudContext, new()
+       where TUserStore : UserStore<TUser, TRole, TContext>        
     {
-        [Fact(DisplayName = "AccessFailedCount")]
-        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
-        public override Task AccessFailedCount()
-        {
-            return base.AccessFailedCount();
-        }
-
-        [Fact(DisplayName = "Email")]
-        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
-        public override Task Email()
-        {
-            return base.Email();
-        }
-
-        [Fact(DisplayName = "EmailConfirmed")]
-        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
-        public override Task EmailConfirmed()
-        {
-            return base.EmailConfirmed();
-        }
-
-        [Fact(DisplayName = "EmailNone")]
-        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
-        public override Task EmailNone()
-        {
-            return base.EmailNone();
-        }
-
-        [Fact(DisplayName = "LockoutEnabled")]
-        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
-        public override Task LockoutEnabled()
-        {
-            return base.LockoutEnabled();
-        }
-
-        [Fact(DisplayName = "PasswordHash")]
-        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
-        public override Task PasswordHash()
-        {
-            return base.PasswordHash();
-        }
-
-        [Fact(DisplayName = "PhoneNumber")]
-        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
-        public override Task PhoneNumber()
-        {
-            return base.PhoneNumber();
-        }
-
-        [Fact(DisplayName = "PhoneNumberConfirmed")]
-        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
-        public override Task PhoneNumberConfirmed()
-        {
-            return base.PhoneNumberConfirmed();
-        }
-
-        [Fact(DisplayName = "SecurityStamp")]
-        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
-        public override Task SecurityStamp()
-        {
-            return base.SecurityStamp();
-        }
-
-        [Fact(DisplayName = "TwoFactorEnabled")]
-        [Trait("IdentityCore.Azure.UserStore.Properties", "")]
-        public override Task TwoFactorEnabled()
-        {
-            return base.TwoFactorEnabled();
-        }
     }
 
-    public partial class BaseUserStoreTests<TUser, TRole, TContext, TUserStore> : IClassFixture<UserFixture<TUser, TRole, TContext, TUserStore>>
-        where TUser : IdentityUser, IApplicationUser, new()
-        where TRole : IdentityRole, new()
-        where TContext : IdentityCloudContext, new()
-        where TUserStore : UserStoreV2<TUser, TRole, TContext>
+    public partial class BaseUserStoreTests<TUser, TContext, TUserStore> : IClassFixture<UserFixture<TUser, TContext, TUserStore>>
+         where TUser : IdentityUser, IApplicationUser, new()
+         where TContext : IdentityCloudContext, new()
+         where TUserStore : UserOnlyStore<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken>
     {
         public virtual async Task AccessFailedCount()
         {
@@ -181,7 +114,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             {
                 using (var manager = userFixture.CreateUserManager())
                 {
-                    var user = await CreateTestUserLiteAsync(createPassword: false, createEmail: false); 
+                    var user = await CreateTestUserLiteAsync(createPassword: false, createEmail: false);
                     string strNewEmail = string.Format("{0}@hotmail.com", Guid.NewGuid().ToString("N"));
                     await SetValidateEmailAsync(manager, store, user, strNewEmail);
                     await SetValidateEmailAsync(manager, store, user, string.Empty);
@@ -346,7 +279,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             {
                 using (var manager = userFixture.CreateUserManager())
                 {
-                    var user = await CreateTestUserLiteAsync(createPassword:true, createEmail:true);
+                    var user = await CreateTestUserLiteAsync(createPassword: true, createEmail: true);
                     string passwordPlain = Guid.NewGuid().ToString("N");
                     string passwordHash = new PasswordHasher<TUser>().HashPassword(user, passwordPlain);
                     await store.SetPasswordHashAsync(user, passwordHash);
@@ -385,4 +318,5 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             }
         }
     }
+
 }

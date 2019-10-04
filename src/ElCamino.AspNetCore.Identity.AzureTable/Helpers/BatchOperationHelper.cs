@@ -1,4 +1,4 @@
-﻿// MIT License Copyright 2019 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
+﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
 using System;
 using System.Collections.Concurrent;
@@ -43,19 +43,26 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             current.Add(operation);
         }
 
-        public async Task<IList<TableResult>> ExecuteBatchAsync(CloudTable table)
-         => await Task.Run(() =>
+        public async Task<IEnumerable<TableResult>> ExecuteBatchAsync(CloudTable table)
+        {
+            ConcurrentBag<TableResult> results = new ConcurrentBag<TableResult>();
+            var tasks = _batches.Select((batchOperation) =>
             {
-                ConcurrentBag<TableResult> results = new ConcurrentBag<TableResult>();
-                //TODO: Fix for Core 5.0
-                _batches.ForEach(async (batchOperation) =>
-                {
-                    var x = await table.ExecuteBatchAsync(batchOperation);
-                    x.ToList().ForEach((tr) => { results.Add(tr); });
-                });
-                Clear();
-                return results.ToList();
+                return table.ExecuteBatchAsync(batchOperation)
+                .ContinueWith((taskTableBatch) =>
+               {
+                   TableBatchResult batchResult = taskTableBatch.Result;
+                   foreach (var tr in batchResult)
+                   {
+                       results.Add(tr);
+                   }
+               });
+               
             });
+            await Task.WhenAll(tasks).ConfigureAwait(false);
+            Clear();
+            return results as IEnumerable<TableResult>;
+        }
 
         public void Clear()
         {

@@ -1,4 +1,4 @@
-﻿// MIT License Copyright 2019 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
+﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
 using System;
 using System.Collections.Generic;
@@ -182,10 +182,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             {
                 throw new ArgumentNullException(nameof(role));
             }
-            string partitionFilter = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, role.Id.ToString());
+            string partitionFilter = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, role.Id.ToString());
 
-            string rowFilter1 = TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.GreaterThanOrEqual, Constants.RowKeyConstants.PreFixIdentityUserToken);
-            string rowFilter2 = TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.LessThan, "U_");
+            string rowFilter1 = TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.GreaterThanOrEqual, Constants.RowKeyConstants.PreFixIdentityUserToken);
+            string rowFilter2 = TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.LessThan, "U_");
             string rowFilter = TableQuery.CombineFilters(rowFilter1, TableOperators.Or, rowFilter2);
 
             string filter = TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowFilter);
@@ -193,8 +193,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             TableQuery tq = new TableQuery();
             tq.FilterString = filter;
             OperationContext oc = new OperationContext();
-            return (await _roleTable.ExecuteQueryAsync(tq))
-                .ToList()
+            return 
+#if NETSTANDARD2_1
+
+                (await _roleTable.ExecuteQueryAsync(tq).ToListAsync())
+#else
+                (await _roleTable.ExecuteQueryAsync(tq))
+#endif
+                
                 .Select(s =>
                 {
                     TRoleClaim trc = (TRoleClaim)Activator.CreateInstance(typeof(TRoleClaim));

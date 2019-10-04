@@ -1,4 +1,4 @@
-﻿// MIT License Copyright 2019 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
+﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 using System;
 using System.Resources;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
@@ -9,7 +9,6 @@ using Xunit.Abstractions;
 
 namespace ElCamino.AspNet.Identity.AzureTable.Tests.ModelTests
 {
-#pragma warning disable 0618
     public class IdentityCloudContextTests : IClassFixture<RoleFixture<IdentityUser, IdentityRole, IdentityCloudContext>>
     {
         private readonly ITestOutputHelper output;
@@ -19,7 +18,6 @@ namespace ElCamino.AspNet.Identity.AzureTable.Tests.ModelTests
             this.output = output;
             roleFixture = roleFix;
         }
-#pragma warning restore 0618
 
         [Fact(DisplayName = "IdentityCloudContextCtors")]
         [Trait("IdentityCore.Azure.Model", "")]

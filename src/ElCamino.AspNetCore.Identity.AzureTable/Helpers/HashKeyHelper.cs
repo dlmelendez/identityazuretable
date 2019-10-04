@@ -1,4 +1,4 @@
-﻿// MIT License Copyright 2019 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
+﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
 using System;
 using System.Collections.Generic;
@@ -94,7 +94,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             return string.Format(Constants.RowKeyConstants.FormatterIdentityUserLogin, hash);
         }
 
-        public override double KeyVersion => 2.2;
+        public override double KeyVersion => 3.0;
 
         public static string ConvertKeyToHash(string input)
         {
