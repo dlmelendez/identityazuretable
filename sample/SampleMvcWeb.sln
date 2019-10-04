@@ -16,7 +16,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleMvcCore", "samplemvcc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "samplemvccore2", "samplemvccore2\samplemvccore2.csproj", "{C2D56768-BF37-403F-A47E-018850F6A2C6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "samplemvccore3", "samplemvccore3\samplemvccore3.csproj", "{5053B277-1F8F-42D8-B608-AD4BF26CBB06}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "samplemvccore3", "samplemvccore3\samplemvccore3.csproj", "{5053B277-1F8F-42D8-B608-AD4BF26CBB06}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "samplemvccore4", "samplemvccore4\samplemvccore4.csproj", "{6FFFB231-8284-41DF-98D3-EADE0171EE91}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,6 +38,10 @@ Global
 		{5053B277-1F8F-42D8-B608-AD4BF26CBB06}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5053B277-1F8F-42D8-B608-AD4BF26CBB06}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5053B277-1F8F-42D8-B608-AD4BF26CBB06}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6FFFB231-8284-41DF-98D3-EADE0171EE91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FFFB231-8284-41DF-98D3-EADE0171EE91}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FFFB231-8284-41DF-98D3-EADE0171EE91}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FFFB231-8284-41DF-98D3-EADE0171EE91}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
