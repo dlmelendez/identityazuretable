@@ -1,0 +1,156 @@
+﻿<div>
+    <h1>ElCamino.AspNetCore.Identity.AzureTable </h1>
+    <h2><a href="https://github.com/dlmelendez/identityazuretable/tree/master/sample/samplemvccore4">Sample Core MVC with Identity PageModel Scaffolding Website</a></h2>
+    Included in the source is a MVC Core Website project that is an example of removing the EntityFramework and Identity EntityFramework references and replacing them with the Azure Table storage provider. It was created by using the <a href="https://docs.microsoft.com/en-us/aspnet/core/security/authentication/scaffold-identity?view=aspnetcore-2.2&tabs=visual-studio">Scaffold Identity in ASP.NET Core projects</a> process as a starting point.  <br>
+    <h2>Overview</h2>
+    The sample Mvc web application is a standard web application that uses the Individual User Accounts authentication type. The EntityFramework references have been removed and replaced with the Azure Table storage provider.<br>
+    <h2>Walk-Through of the samplemvccore4</h2>
+    Remove the NuGet packages EntityFramework and Microsoft.AspNetCore.Identity.EntityFramework packages using the Manage NuGet Packages.<br>
+    Remove this using statement throughout the application.<br>
+    <del>using Microsoft.AspNetCore.Identity.EntityFramework;</del><br>
+    Add the NuGet package or the assembly ElCamino.AspNetCore.Identity.AzureTable to the web application.
+    <h3>Simplify project references</h3>
+    <pre><code class="xml language-xml">
+    &lt;ItemGroup&gt;
+    &lt;PackageReference Include="ElCamino.AspNetCore.Identity.AzureTable" Version="3.0.0" /&gt;
+    &lt;PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.0.0" /&gt;
+    &lt;PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.0.0" /&gt;
+    &lt;PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.0.0" /&gt;
+    &lt;/ItemGroup&gt;
+</code></pre>
+    <h3>
+        Changes to <a href="https://github.com/dlmelendez/identityazuretable/blob/master/sample/samplemvccore4/areas/identity/">
+            /sample/samplemvccore4/areas/identity/**.cs
+        </a>
+    </h3>
+    Remove and add statements<br>
+    <del>using Microsoft.AspNetCore.Identity.EntityFramework;</del><br>
+    with:<br>
+    <div style="color:Black; background-color:White">
+        <pre>
+        <span style="color:Blue">using</span> <span style="color:teal">IdentityUser</span> = ElCamino.AspNetCore.Identity.AzureTable.Model.<span style="color:teal">IdentityUser</span>;
+</pre>
+    </div>
+    ...<br>
+    <h3>
+        Changes to <a href="https://github.com/dlmelendez/identityazuretable/blob/master/sample/samplemvccore4/">
+            /sample/samplemvccore4/**/**/_ViewImports.cshtml
+        </a>
+    </h3>
+    Add this using to override the IdentityUser class in the Microsoft.AspNetCore.Identity namespace<br>
+    <div style="color:Black; background-color:White">
+        <pre>
+        <span style="color:black; background-color:yellow;">@</span><span style="color:Blue">using</span> <span style="color:teal">IdentityUser</span> = ElCamino.AspNetCore.Identity.AzureTable.Model.<span style="color:teal">IdentityUser</span> 
+</pre>
+    </div>
+    ...<br>
+    <h3>
+        Changes to <a href="https://github.com/dlmelendez/identityazuretable/blob/master/sample/samplemvccore4/Data/ApplicationDbContext.cs">
+            /sample/samplemvccore4/Data/ApplicationDbContext.cs
+        </a>
+    </h3>
+    Replace the statement<br>
+    <del>using Microsoft.AspNetCore.Identity.EntityFramework;</del><br>
+    with:<br>
+    <div style="color:Black; background-color:White">
+<pre>
+<span style="color:Blue">using</span> ElCamino.AspNetCore.Identity.AzureTable;
+<span style="color:Blue">using</span> ElCamino.AspNetCore.Identity.AzureTable.Model;
+</pre>
+    </div>
+    Inherit from the IdentityCloudContext which provides the Azure connection and table storage schema.<br>
+    <div style="color:Black; background-color:White">
+<pre>
+        <span style="color:Blue">public</span> <span style="color:Blue">class</span> ApplicationDbContext : IdentityCloudContext
+    {
+        <span style="color:Blue">public</span> ApplicationDbContext() : <span style="color:Blue">base</span>() { } 
+        <span style="color:Blue">public</span> ApplicationDbContext(IdentityConfiguration config) : base(config) { }...
+</pre>
+    </div>
+    <h3>
+        Changes to <a href="https://github.com/dlmelendez/identityazuretable/blob/master/sample/samplemvccore4/Startup.cs">
+            /sample/samplemvccore4/Startup.cs
+        </a>
+    </h3>
+    Replace the statement<br>
+    <del>using Microsoft.AspNetCore.Identity.EntityFramework;</del><br>
+    with:<br>
+    <div style="color:Black; background-color:White">
+<pre>
+<span style="color:Blue">using</span> ElCamino.AspNetCore.Identity.AzureTable;
+<span style="color:Blue">using</span> ElCamino.AspNetCore.Identity.AzureTable.Model;
+</pre>
+    </div>
+    ...<br>
+    Adding code to inject the Azure table provider into the Identity middleware pipeline and optionally, create the azure tables. Remove any EntityFramework extension methods here.<br>
+    <div style="color:Black; background-color:White">
+        <pre>
+        <span style="color:Blue">public</span> <span style="color:Blue">class</span> Startup 
+    {
+        ...
+        <span style="color:Blue">public</span> <span style="color:Blue">void</span> ConfigureServices(IServiceCollection services)
+    {
+        <span style="color:green">// Add Elcamino Azure Table Identity services.</span>
+        <span style="color:green"><del>//services.AddDbContext<ApplicationDbContext>(options =></del></span>
+        <span style="color:green"><del>//    options.UseSqlServer(</del></span>
+        <span style="color:green"><del>//        Configuration.GetConnectionString("DefaultConnection")));</del></span>
+            services.AddDefaultIdentity&lt;<span style="color:teal">IdentityUser</span>&gt;(options =>
+            {
+        <span style="color:green">// Set whatever identity options here</span>
+                options.SignIn.RequireConfirmedAccount = true;
+                options.User.RequireUniqueEmail = true;
+            })               
+            .AddAzureTableStores&lt;<span style="color:blue">ApplicationDbContext</span>&gt;(new Func&lt;<span style="color:blue">IdentityConfiguration</span>&gt;(() =&gt;
+            {
+                IdentityConfiguration idconfig = new IdentityConfiguration();
+                idconfig.TablePrefix = Configuration.GetSection("IdentityAzureTable:IdentityConfiguration:TablePrefix").Value;
+                idconfig.StorageConnectionString = Configuration.GetSection("IdentityAzureTable:IdentityConfiguration:StorageConnectionString").Value;
+                idconfig.LocationMode = Configuration.GetSection("IdentityAzureTable:IdentityConfiguration:LocationMode").Value;
+        <span style="color:green">//Setting TableNames is optional, default value shown below if not set.</span>
+                idconfig.IndexTableName = Configuration.GetSection("IdentityAzureTable:IdentityConfiguration:IndexTableName").Value; // default: AspNetIndex
+                idconfig.RoleTableName = Configuration.GetSection("IdentityAzureTable:IdentityConfiguration:RoleTableName").Value;   // default: AspNetRoles
+                idconfig.UserTableName = Configuration.GetSection("IdentityAzureTable:IdentityConfiguration:UserTableName").Value;   // default: AspNetUsers
+
+                return idconfig;
+            }))
+             .AddDefaultTokenProviders()
+            .AddDefaultUI()
+            .CreateAzureTablesIfNotExists&lt;<span style="color:blue">ApplicationDbContext</span>&gt;(); <span style="color:green">//can remove after first run;</span>
+            <span style="color:green">//.AddEntityFrameworkStores&lt;<span style="color:blue">ApplicationDbContext</span>&gt;();       </span>
+            <span style="color:green">// Add application services</span> 
+...
+</pre>
+    </div>
+    <h3>
+        Changes to <a href="https://github.com/dlmelendez/identityazuretable/blob/master/sample/samplemvccore4/appsettings.json">
+            /sample/samplemvccore4/appsettings.json
+        </a>
+    </h3>
+    Remove all references to the EntityFramework.<br>
+    Add the default local connection string to the Azure Storage Emulator in the appsettings.json.
+    TablePrefix can be left blank, any text here will prefix the Azure table storage names.
+    StorageConnectionString is the Azure table storage connection string.
+    LocationMode can be left empty (defaults to PrimaryOnly). Other storage location modes are listed <a href="https://msdn.microsoft.com/en-us/library/azure/microsoft.windowsazure.storage.retrypolicies.locationmode.aspx">here</a> and must be used with a RA-GRS storage account if changed from the default.
+    *TableName values can be null or left empty and default values are shown in the example below.
+    <br>
+    <div style="color:Black; background-color:White">
+        <pre>
+{
+...
+    "IdentityAzureTable": {
+        "IdentityConfiguration": {
+            "TablePrefix": <span style="color:#A31515">"v2"</span>
+            "StorageConnectionString": <span style="color:#A31515">"UseDevelopmentStorage=true;"</span>
+            "LocationMode": <span style="color:#A31515">"PrimaryOnly"</span>
+            "IndexTableName": <span style="color:#A31515">"AspNetIndex"</span>
+            "RoleTableName": <span style="color:#A31515">"AspNetRoles"</span>
+            "UserTableName": <span style="color:#A31515">"AspNetUsers"</span>
+        }
+    }...
+}
+</pre>
+    </div>
+    <br>
+    <h3>Tip: Don&#39;t forget to start your Azure Storage Emulator if running locally.</h3>
+</div>
+<div></div>
