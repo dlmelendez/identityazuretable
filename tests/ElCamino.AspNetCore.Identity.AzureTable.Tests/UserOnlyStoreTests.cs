@@ -38,13 +38,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             return base.AddRemoveUserLogin();
         }
 
-        //[Fact(DisplayName = "AddRemoveUserRole")]
-        //[Trait(UserOnlyStoreTrait, "")]
-        //public override Task AddRemoveUserRole()
-        //{
-        //    return base.AddRemoveUserRole();
-        //}
-
         [Fact(DisplayName = "AddRemoveUserToken")]
         [Trait(UserOnlyStoreTrait, "")]
         public override Task AddRemoveUserToken()
@@ -72,13 +65,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         {
             return base.AddUserLogin();
         }
-
-        //[Fact(DisplayName = "AddUserRole")]
-        //[Trait(UserOnlyStoreTrait, "")]
-        //public override Task AddUserRole()
-        //{
-        //    return base.AddUserRole();
-        //}
 
         [Fact(DisplayName = "ChangeUserName")]
         [Trait(UserOnlyStoreTrait, "")]
@@ -143,33 +129,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             return base.FindUsersByEmail();
         }
 
-        //[Fact(DisplayName = "GenerateUsers", Skip = "true")]
-        //[Trait(UserOnlyStoreTrait, "")]
-        //public override Task GenerateUsers()
-        //{
-        //    return base.GenerateUsers();
-        //}
-
         [Fact(DisplayName = "GetUsersByClaim")]
         [Trait(UserOnlyStoreTrait, "")]
         public override Task GetUsersByClaim()
         {
             return base.GetUsersByClaim();
         }
-
-        //[Fact(DisplayName = "GetUsersByRole")]
-        //[Trait(UserOnlyStoreTrait, "")]
-        //public override Task GetUsersByRole()
-        //{
-        //    return base.GetUsersByRole();
-        //}
-
-        //[Fact(DisplayName = "IsUserInRole")]
-        //[Trait(UserOnlyStoreTrait, "")]
-        //public override Task IsUserInRole()
-        //{
-        //    return base.IsUserInRole();
-        //}
 
         [Fact(DisplayName = "ThrowIfDisposed")]
         [Trait(UserOnlyStoreTrait, "")]
