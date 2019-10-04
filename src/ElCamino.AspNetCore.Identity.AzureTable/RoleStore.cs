@@ -198,7 +198,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
                 (await _roleTable.ExecuteQueryAsync(tq).ToListAsync())
 #else
-                (await Task.FromResult(_roleTable.ExecuteQuery(tq)))
+                (await _roleTable.ExecuteQueryAsync(tq))
 #endif
                 
                 .Select(s =>

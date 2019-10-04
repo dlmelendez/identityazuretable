@@ -247,7 +247,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 #if NETSTANDARD2_1
             var log = await _userTable.ExecuteQueryAsync(tq).FirstOrDefaultAsync().ConfigureAwait(false);
 #else
-            var log = (await Task.FromResult(_userTable.ExecuteQuery(tq))).FirstOrDefault();
+            var log = (await _userTable.ExecuteQueryAsync(tq)).FirstOrDefault();
 #endif
             if (log != null)
             {
@@ -270,7 +270,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 #if NETSTANDARD2_1
             var indexInfo = await _indexTable.ExecuteQueryAsync(loginQuery).FirstOrDefaultAsync().ConfigureAwait(false);
 #else
-            var indexInfo = _indexTable.ExecuteQuery(loginQuery).FirstOrDefault();
+            var indexInfo = (await _indexTable.ExecuteQueryAsync(loginQuery).ConfigureAwait(false)).FirstOrDefault();
 #endif
             if (indexInfo != null)
             {
@@ -400,7 +400,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 #if NETSTANDARD2_1
             await foreach (var de in _userTable.ExecuteQueryAsync(tq))
 #else
-             foreach (var de in (await Task.FromResult(_userTable.ExecuteQuery(tq))))
+             foreach (var de in (await _userTable.ExecuteQueryAsync(tq)))
 
 #endif
             {
@@ -447,7 +447,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 #if NETSTANDARD2_1
             await foreach (var de in _userTable.ExecuteQueryAsync(tq))
 #else
-            foreach (var de in (await Task.FromResult(_userTable.ExecuteQuery(tq))))
+            foreach (var de in (await _userTable.ExecuteQueryAsync(tq)))
 #endif
             {
                 TUserLogin tul = MapTableEntity<TUserLogin>(de);
@@ -483,7 +483,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             TableQuery tq = new TableQuery();
             tq.FilterString = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, userId);
 
-            return Task.FromResult(_userTable.ExecuteQuery(tq));
+            return _userTable.ExecuteQueryAsync(tq);
         }
 
 #endif
@@ -541,7 +541,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 #if NETSTANDARD2_1
                 return _userTable.ExecuteQueryAsync(q).ToListAsync()
 #else
-                return Task.FromResult(_userTable.ExecuteQuery(q))
+                return _userTable.ExecuteQueryAsync(q)
 
 #endif
                      .ContinueWith((taskResults) =>
@@ -624,7 +624,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 #if NETSTANDARD2_1
                 return _userTable.ExecuteQueryAsync(q).ToListAsync()
 #else
-                return Task.FromResult(_userTable.ExecuteQuery(q))
+                return _userTable.ExecuteQueryAsync(q)
 #endif
                 .ContinueWith((taskResults) =>
                 {
@@ -693,7 +693,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 #if NETSTANDARD2_1
             var user = await _indexTable.ExecuteQueryAsync(queryUser).FirstOrDefaultAsync().ConfigureAwait(false);
 #else
-            var user = _indexTable.ExecuteQuery(queryUser).FirstOrDefault();
+            var user = (await _indexTable.ExecuteQueryAsync(queryUser)).FirstOrDefault();
 #endif
             if (user != null)
             {
@@ -891,7 +891,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             await foreach (DynamicTableEntity de in _indexTable.ExecuteQueryAsync(tq))
 #else
 
-            foreach (DynamicTableEntity de in _indexTable.ExecuteQuery(tq))
+            foreach (DynamicTableEntity de in (await _indexTable.ExecuteQueryAsync(tq)))
 #endif
             {
                 if (de.Properties["Id"].StringValue.Equals(userId, StringComparison.OrdinalIgnoreCase))

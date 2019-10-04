@@ -34,6 +34,11 @@ namespace Microsoft.Azure.Cosmos.Table
             Debug.WriteLine("ExecuteQueryAsync (Query): " + tq.FilterString);
 
         }
+#else
+        public static Task<IEnumerable<DynamicTableEntity>> ExecuteQueryAsync(this CloudTable ct, TableQuery tq)
+        {
+            return Task.Run<IEnumerable<DynamicTableEntity>>(() => ExecuteQuery(ct, tq));
+        }
 #endif
         public static IEnumerable<DynamicTableEntity> ExecuteQuery(this CloudTable ct, TableQuery tq)
         {

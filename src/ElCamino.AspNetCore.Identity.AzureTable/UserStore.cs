@@ -131,7 +131,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 #if NETSTANDARD2_1
                 (await _userTable.ExecuteQueryAsync(tq).ToListAsync())
 #else
-                (await Task.FromResult(_userTable.ExecuteQuery(tq)))
+                (await _userTable.ExecuteQueryAsync(tq))
 #endif
                 .Where(w => w.Properties[roleName] != null)
                 .Select(d => d.Properties[roleName].StringValue)
@@ -173,7 +173,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 #if NETSTANDARD2_1
                         _roleTable.ExecuteQueryAsync(tqRoles).ToListAsync()
 #else
-                         Task.FromResult(_roleTable.ExecuteQuery(tqRoles))
+                        _roleTable.ExecuteQueryAsync(tqRoles)
 #endif
                         .ContinueWith((t) => {
                             return t.Result.Where(w => w.Properties[rName] != null)
@@ -278,16 +278,16 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return tasks.All(t => t.Result);
         }
 
-        public Task<bool> RoleExistsAsync(string roleName)
+        public async Task<bool> RoleExistsAsync(string roleName)
         {
             TableQuery tqRoles = new TableQuery();
             tqRoles.FilterString = BuildRoleQuery(roleName);
             tqRoles.SelectColumns = new List<string>() { "Name" };
             tqRoles.TakeCount = 1;
 #if NETSTANDARD2_1
-            return _roleTable.ExecuteQueryAsync(tqRoles).AnyAsync();
+            return await _roleTable.ExecuteQueryAsync(tqRoles).AnyAsync();
 #else
-            return Task.FromResult(_roleTable.ExecuteQuery(tqRoles).Any());
+            return (await _roleTable.ExecuteQueryAsync(tqRoles)).Any();
 #endif
         }
 
@@ -372,7 +372,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 #if NETSTANDARD2_1
                 _userTable.ExecuteQueryAsync(q).ToListAsync()
 #else
-                Task.FromResult(_userTable.ExecuteQuery(q))
+                _userTable.ExecuteQueryAsync(q)
 #endif
                      .ContinueWith((taskResults) =>
                      {
