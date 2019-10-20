@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace samplemvccore3.Models
 {
-    public class ApplicationUser : IdentityUserV2 //or use IdentityUser if your code depends on the Role, Claim and Token collections
+    public class ApplicationUser : IdentityUser //or use IdentityUser if your code depends on the Role, Claim and Token collections
     {
     }
 }

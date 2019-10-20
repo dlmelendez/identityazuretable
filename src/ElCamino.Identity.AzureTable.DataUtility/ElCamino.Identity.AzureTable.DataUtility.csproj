@@ -11,7 +11,7 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <EnableDefaultContentItems>false</EnableDefaultContentItems>
-    <Version>3.0</Version>
+    <Version>3.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

@@ -42,9 +42,7 @@ namespace samplemvccore3
             {
                 options.User.RequireUniqueEmail = true;
             })
-            //or use .AddAzureTableStores with your ApplicationUser extends IdentityUser if your code depends on the Role, Claim and Token collections on the user object.
-            //You can safely switch between .AddAzureTableStores and .AddAzureTableStoresV2. Just make sure the Application User extends the correct IdentityUser/IdentityUserV2
-                .AddAzureTableStoresV2<ApplicationDbContext>(new Func<IdentityConfiguration>(() =>
+                .AddAzureTableStores<ApplicationDbContext>(new Func<IdentityConfiguration>(() =>
                 {
                     IdentityConfiguration idconfig = new IdentityConfiguration();
                     idconfig.TablePrefix = Configuration.GetSection("IdentityAzureTable:IdentityConfiguration:TablePrefix").Value;
