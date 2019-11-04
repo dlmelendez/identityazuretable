@@ -50,10 +50,15 @@ app.config(function($routeProvider) {
         templateUrl : "content/index.html"
     });
 
+   
+});
+
+app.config(['$rootScope', function ($rootScope) {
+    // Configure existing providers
     $rootScope.$watch('$stateChangeSuccess', function (event) {
         ga('set', 'page', $location.path());
         ga('send', 'pageview');
     });
-});
+}]);
 
 ///</script>
