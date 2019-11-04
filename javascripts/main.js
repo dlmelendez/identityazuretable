@@ -49,6 +49,11 @@ app.config(function($routeProvider) {
     .otherwise({
         templateUrl : "content/index.html"
     });
+
+    $rootScope.$on('$stateChangeSuccess', function (event) {
+        ga('set', 'page', $location.path());
+        ga('send', 'pageview');
+    });
 });
 
 ///</script>
