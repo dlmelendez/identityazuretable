@@ -50,7 +50,7 @@ app.config(function($routeProvider) {
         templateUrl : "content/index.html"
     });
 
-    $rootScope.watch('$stateChangeSuccess', function (event) {
+    $rootScope.$watch('$stateChangeSuccess', function (event) {
         ga('set', 'page', $location.path());
         ga('send', 'pageview');
     });
