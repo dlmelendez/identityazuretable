@@ -53,12 +53,6 @@ app.config(function($routeProvider) {
    
 });
 
-app.config(['$rootScope', function ($rootScope) {
-    // Configure existing providers
-    $rootScope.$watch('$stateChangeSuccess', function (event) {
-        ga('set', 'page', $location.path());
-        ga('send', 'pageview');
-    });
-}]);
+
 
 ///</script>
