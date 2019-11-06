@@ -6,4 +6,12 @@ projectControllers.controller('migrationDetails', ['$scope', '$http',
           $scope.helptext = data;
       });
 
-  }]);
+    }]);
+
+projectControllers.controller('appController', function ($rootScope, $location, $window) {
+
+    $rootScope.$on('$routeChangeSuccess', function () {
+        $window.ga('send', 'pageview', $location.path());
+    });
+
+});

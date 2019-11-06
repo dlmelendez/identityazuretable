@@ -1,7 +1,7 @@
 ///<script>
 
 var app = angular.module("myApp", ["ngRoute", "projectControllers"]);
-app.config(function($routeProvider) {
+app.config(function ($routeProvider) {
     $routeProvider
     .when("/", {
         templateUrl: "content/index.html"
