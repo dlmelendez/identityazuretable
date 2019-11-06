@@ -8,10 +8,14 @@ projectControllers.controller('migrationDetails', ['$scope', '$http',
 
     }]);
 
-projectControllers.controller('appController', function ($rootScope, $location, $window) {
+projectControllers.controller('appController', function ($rootScope, $location) {
 
     $rootScope.$on('$routeChangeSuccess', function () {
-        $window.ga('send', 'pageview', $location.path());
+        gtag('config', 'UA-136441581-2', {
+            'page_path': $location.path(),
+            'page_location': $location.url()
+        });
+
     });
 
 });
