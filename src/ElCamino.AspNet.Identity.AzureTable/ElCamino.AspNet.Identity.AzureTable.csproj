@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Description>Azure Table Storage Provider for ASP.NET Identity 2.0 framework</Description>
-    <Copyright>Copyright ©  2017 David Melendez, MIT License</Copyright>
+    <Description>Azure Table Storage Provider for ASP.NET Identity 2.0 framework. Important! This package should be upgraded to the ElCamino.AspNetCore.Identity.AzureTable package. Check here https://dlmelendez.github.io/identityazuretable/#/migration for data migration information.</Description>
+    <Copyright>Copyright ©  2019 David Melendez, MIT License</Copyright>
     <AssemblyTitle>Azure Table Storage Provider for ASP.NET Identity Core</AssemblyTitle>
     <Authors>David Melendez</Authors>
-    <TargetFramework>net45</TargetFramework>
+    <TargetFramework>net452</TargetFramework>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
 
     <RootNamespace>ElCamino.AspNet.Identity.AzureTable</RootNamespace>
@@ -16,18 +16,20 @@
     <PackageId>ElCamino.AspNet.Identity.AzureTable</PackageId>
     <PackageTags>ASP.NET;Identity 2.0;Azure Table Storage;MVC;UserStore;RoleStore;UserManager;multi-tenant;RA-GRS;geo-redundant;Microsoft.AspNet.Identity</PackageTags>
     <PackageReleaseNotes>This project is an open source high performance plugin to ASP.NET Identity framework using Azure Table Storage.
- 
-Fix for #20 Claim key deletion error.
-      Important! Check https://dlmelendez.github.io/identityazuretable/#/migration for data migration information.</PackageReleaseNotes>
-    <PackageIconUrl>https://dlmelendez.github.io/identityazuretable/images/projectNugetPic.png</PackageIconUrl>
-    <PackageLicenseUrl>https://github.com/dlmelendez/identityazuretable/blob/master/LICENSE</PackageLicenseUrl>
+      Important! This package should be upgraded to the ElCamino.AspNetCore.Identity.AzureTable package. Check here https://dlmelendez.github.io/identityazuretable/#/migration for data migration information.</PackageReleaseNotes>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/dlmelendez/identityazuretable.git</RepositoryUrl>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>1.7.0</Version>
+    <Version>1.7.1</Version>
     <PackageProjectUrl>https://dlmelendez.github.io/identityazuretable</PackageProjectUrl>
-
+    <PackageIcon>projectNugetPic.png</PackageIcon>
+    <DebugType>Full</DebugType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -59,11 +61,9 @@ Fix for #20 Claim key deletion error.
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNet.Identity.Core" Version="2.2.1" />
+    <PackageReference Include="Microsoft.AspNet.Identity.Core" Version="2.2.2" />
     <PackageReference Include="Microsoft.Azure.KeyVault.Core" Version="2.0.4" />
     <PackageReference Include="Microsoft.Data.Edm" Version="5.8.2" />
     <PackageReference Include="Microsoft.Data.OData" Version="5.8.2" />
@@ -162,6 +162,10 @@ Fix for #20 Claim key deletion error.
       <AutoGen>True</AutoGen>
       <DependentUpon>IdentityResources.resx</DependentUpon>
     </None>
+  </ItemGroup>
+  
+  <ItemGroup>  
+    <None Include="projectNugetPic.png" Pack="true" PackagePath="\" />   
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
