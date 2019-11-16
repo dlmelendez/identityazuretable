@@ -7,7 +7,7 @@
     <TargetFrameworks>net461;netcoreapp2.2;netcoreapp3.0</TargetFrameworks>
     <AssemblyName>ElCamino.AspNetCore.Identity.AzureTable.Tests</AssemblyName>
     <IsPackable>false</IsPackable>
-    <Version>3.0.1</Version>
+    <Version>3.0.2</Version>
     <DebugType>Full</DebugType>
 
   </PropertyGroup>
