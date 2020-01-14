@@ -14,12 +14,12 @@ using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.DataProtection;
 using Model = ElCamino.AspNetCore.Identity.AzureTable.Model;
-
+using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 
 namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 {
     public class BaseFixture<TUser, TRole, TContext, TUserStore> 
-        : BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore>
+        : BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore, DefaultKeyHelper>
         where TUser : IdentityUser, new()
         where TRole : IdentityRole, new()
         where TContext : IdentityCloudContext, new()
@@ -28,12 +28,12 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 
         public RoleStore<TRole> CreateRoleStore()
         {
-            return new RoleStore<TRole>(GetContext());
+            return new RoleStore<TRole>(GetContext(), new DefaultKeyHelper());
         }
 
         public RoleStore<TRole> CreateRoleStore(TContext context)
         {
-            return new RoleStore<TRole>(context);
+            return new RoleStore<TRole>(context, new DefaultKeyHelper());
         }
 
         public RoleManager<TRole> CreateRoleManager()
@@ -43,7 +43,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 
         public RoleManager<TRole> CreateRoleManager(TContext context)
         {
-            return CreateRoleManager(new RoleStore<TRole>(context));
+            return CreateRoleManager(new RoleStore<TRole>(context, new DefaultKeyHelper()));
         }
 
         public RoleManager<TRole> CreateRoleManager(RoleStore<TRole> store)
@@ -120,7 +120,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
     }
 
     public class BaseFixture<TUser, TContext, TUserStore>
-    : BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore>
+    : BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore, DefaultKeyHelper>
     where TUser : IdentityUser, new()
     where TContext : IdentityCloudContext, new()
     where TUserStore : UserOnlyStore<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken>
@@ -128,7 +128,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 
     }
 
-    public class BaseFixture<TUser, TContext, TKey, TUserClaim, TUserLogin, TUserToken, TUserStore> : IDisposable
+    public class BaseFixture<TUser, TContext, TKey, TUserClaim, TUserLogin, TUserToken, TUserStore, TKeyHelper> : IDisposable
         where TUser : Model.IdentityUser<TKey>, new()
         where TKey : IEquatable<TKey>
         where TUserLogin : Model.IdentityUserLogin<TKey>, new()
@@ -136,6 +136,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
         where TUserToken : Model.IdentityUserToken<TKey>, new()
         where TContext : IdentityCloudContext, new()
         where TUserStore : UserOnlyStore<TUser, TContext, TKey, TUserClaim, TUserLogin, TUserToken>
+        where TKeyHelper : IKeyHelper, new()
     {
 
         #region IDisposable Support
@@ -162,6 +163,11 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
             Dispose(true);
         }
         #endregion
+
+        public TKeyHelper GetKeyHelper()
+        {
+            return new TKeyHelper();
+        }
 
         public IdentityConfiguration GetConfig()
         {
@@ -206,7 +212,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 
         public TUserStore CreateUserStore(TContext context,IdentityConfiguration config)
         {
-            var userStore = Activator.CreateInstance(typeof(TUserStore), new object[2] { context,config }) as TUserStore;
+            var userStore = Activator.CreateInstance(typeof(TUserStore), new object[3] { context, GetKeyHelper(), config }) as TUserStore;
 
             return userStore;
         }

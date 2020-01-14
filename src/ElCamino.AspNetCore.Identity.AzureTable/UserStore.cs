@@ -20,7 +20,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
        where TUser : Model.IdentityUser<string>, new()
        where TContext : IdentityCloudContext, new()
     {
-        public UserStore(TContext context, IdentityConfiguration config) : base(context, config) { }
+        public UserStore(TContext context, IKeyHelper keyHelper, IdentityConfiguration config) : base(context, keyHelper, config) { }
     }
     /// <summary>
     /// Supports as slimmer, trimmer, IdentityUser 
@@ -35,7 +35,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         where TRole : Model.IdentityRole<string, Model.IdentityUserRole>, new()
         where TContext : IdentityCloudContext, new()
     {
-        public UserStore(TContext context,IdentityConfiguration config) : base(context,config) { }
+        public UserStore(TContext context, IKeyHelper keyHelper, IdentityConfiguration config) : base(context, keyHelper, config) { }
     }
 
     public class UserStore<TUser, TRole, TKey, TUserLogin, TUserRole, TUserClaim, TUserToken, TContext> :
@@ -53,7 +53,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
     {
         protected CloudTable _roleTable;
 
-        public UserStore(TContext context, IdentityConfiguration config) : base(context, config) 
+        public UserStore(TContext context, IKeyHelper keyHelper, IdentityConfiguration config) : base(context, keyHelper, config) 
         {
             this._roleTable = context.RoleTable;
         }
@@ -82,17 +82,17 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             TRole roleT = new TRole();
             roleT.Name = roleName;
-            ((Model.IGenerateKeys)roleT).GenerateKeys();
+            ((Model.IGenerateKeys)roleT).GenerateKeys(_keyHelper);
 
 
             TUserRole userToRole = new TUserRole();
-            userToRole.PartitionKey = KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
+            userToRole.PartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
             userToRole.RoleId = roleT.Id;
             userToRole.RoleName = roleT.Name;
             userToRole.UserId = user.Id;
             TUserRole item = userToRole;
 
-            ((Model.IGenerateKeys)item).GenerateKeys();
+            ((Model.IGenerateKeys)item).GenerateKeys(_keyHelper);
 
             roleT.Users.Add(item);
 
@@ -115,7 +115,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
 
             const string roleName = "RoleName";
-            string userId = KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
+            string userId = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
             // Changing to a live query to mimic EF UserStore in Identity 3.0
             TableQuery tq = new TableQuery();
 
@@ -194,11 +194,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             string rowFilter =
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey),
                 QueryComparisons.Equal,
-                KeyHelper.GenerateRowKeyIdentityRole(normalizedRoleName));
+                _keyHelper.GenerateRowKeyIdentityRole(normalizedRoleName));
 
             return TableQuery.CombineFilters(
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey),
-                QueryComparisons.Equal, KeyHelper.GeneratePartitionKeyIdentityRole(normalizedRoleName)),
+                QueryComparisons.Equal, _keyHelper.GeneratePartitionKeyIdentityRole(normalizedRoleName)),
                 TableOperators.And,
                 rowFilter);
         }
@@ -219,7 +219,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                     string rowFilter = TableQuery.CombineFilters(
                         TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, userId),
                         TableOperators.Or,
-                        TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, KeyHelper.GenerateRowKeyIdentityUserRole(roleName)));
+                        TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, _keyHelper.GenerateRowKeyIdentityUserRole(roleName)));
 
                     string tqFilter = TableQuery.CombineFilters(
                         TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, userId), TableOperators.And,
@@ -231,7 +231,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 return (await this.GetUsersAggregateByIndexQueryAsync(GetUserByRoleQuery(roleName), (userId) => {
                     return GetUserAggregateQueryAsync(userId, setFilterByUserId: getTableQueryFilterByUserId, whereClaim: null, whereRole: (ur) =>
                     {
-                        return ur.RowKey == KeyHelper.GenerateRowKeyIdentityUserRole(roleName);
+                        return ur.RowKey == _keyHelper.GenerateRowKeyIdentityUserRole(roleName);
                     });
 
                 })).ToList();
@@ -250,12 +250,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(roleName));
             }
 
-            string userId = KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
+            string userId = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
             // Changing to a live query to mimic EF UserStore in Identity 3.0
             TableQuery tq = new TableQuery();
 
             string rowFilter =
-                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, KeyHelper.GenerateRowKeyIdentityUserRole(roleName));
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, _keyHelper.GenerateRowKeyIdentityUserRole(roleName));
 
             tq.FilterString = TableQuery.CombineFilters(
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, userId),
@@ -299,9 +299,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             if (string.IsNullOrWhiteSpace(roleName))
                 throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(roleName));
 
-            string userPartitionKey = KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
+            string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
             TUserRole item = null;
-            var tresult = await _userTable.ExecuteAsync(TableOperation.Retrieve<TUserRole>(userPartitionKey, KeyHelper.GenerateRowKeyIdentityRole(roleName))).ConfigureAwait(false);
+            var tresult = await _userTable.ExecuteAsync(TableOperation.Retrieve<TUserRole>(userPartitionKey, _keyHelper.GenerateRowKeyIdentityRole(roleName))).ConfigureAwait(false);
             item = tresult.Result as TUserRole;
 
             if (item != null)
@@ -477,7 +477,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             if (user == null) throw new ArgumentNullException(nameof(user));
 
             List<Task> tasks = new List<Task>(50);
-            string userPartitionKey = KeyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
+            string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
 #if NETSTANDARD2_1
             var userRows = await GetUserAggregateQueryAsync(userPartitionKey).ToListAsync().ConfigureAwait(false);
 #else

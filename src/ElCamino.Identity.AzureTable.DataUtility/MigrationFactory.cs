@@ -1,5 +1,7 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
+using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
+using ElCamino.AspNetCore.Identity.AzureTable.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +17,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         public const string RoleAndClaimIndex = "roleandclaimindex";
         public const string Users = "users";
         public const string Roles = "roles";
+        public static IKeyHelper KeyHelper = new DefaultKeyHelper();
 
         public static IMigration CreateMigration(string migrateCommand)
         {
@@ -22,17 +25,17 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             switch(cmd)
             {
                 case EmailIndex:
-                    return new EmailMigrateIndex();
+                    return new EmailMigrateIndex(KeyHelper);
                 case LoginIndex:
-                    return new LoginMigrateIndex();
+                    return new LoginMigrateIndex(KeyHelper);
                 case ClaimRowkey:
-                    return new ClaimMigrateRowkey();
+                    return new ClaimMigrateRowkey(KeyHelper);
                 case RoleAndClaimIndex:
-                    return new RoleAndClaimMigrateIndex();
+                    return new RoleAndClaimMigrateIndex(KeyHelper);
                 case Users:
-                    return new UsersMigration();
+                    return new UsersMigration(KeyHelper);
                 case Roles:
-                    return new RolesMigration();
+                    return new RolesMigration(KeyHelper);
                 default:
                     break;
             }

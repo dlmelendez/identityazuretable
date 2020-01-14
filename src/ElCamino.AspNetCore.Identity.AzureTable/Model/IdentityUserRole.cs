@@ -18,20 +18,20 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// Generates Row and Id keys.
         /// Partition key is equal to the UserId
         /// </summary>
-        public void GenerateKeys()
+        public void GenerateKeys(IKeyHelper keyHelper)
         {
             Id = Guid.NewGuid().ToString();
-            RowKey = PeekRowKey();
-            KeyVersion = KeyHelper.KeyVersion;
+            RowKey = PeekRowKey(keyHelper);
+            KeyVersion = keyHelper.KeyVersion;
         }
 
         /// <summary>
         /// Generates the RowKey without setting it on the object.
         /// </summary>
         /// <returns></returns>
-        public string PeekRowKey()
+        public string PeekRowKey(IKeyHelper keyHelper)
         {
-            return KeyHelper.GenerateRowKeyIdentityUserRole(RoleName);
+            return keyHelper.GenerateRowKeyIdentityUserRole(RoleName);
         }
 
         public double KeyVersion { get; set; }

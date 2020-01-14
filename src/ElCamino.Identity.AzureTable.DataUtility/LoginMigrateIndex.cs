@@ -13,6 +13,12 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 {
     public class LoginMigrateIndex : IMigration
     {
+        private IKeyHelper _keyHelper;
+        public LoginMigrateIndex(IKeyHelper keyHelper)
+        {
+            _keyHelper = keyHelper;
+        }
+
         public TableQuery GetSourceTableQuery()
         {
             TableQuery tq = new TableQuery();
@@ -78,9 +84,9 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             return new IdentityUserIndex()
             {
                 Id = userid,
-                PartitionKey = KeyHelper.GeneratePartitionKeyIndexByLogin(loginProvider, providerKey),
-                RowKey = KeyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey),
-                KeyVersion = KeyHelper.KeyVersion,
+                PartitionKey = _keyHelper.GeneratePartitionKeyIndexByLogin(loginProvider, providerKey),
+                RowKey = _keyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey),
+                KeyVersion = _keyHelper.KeyVersion,
                 ETag = Constants.ETagWildcard
             };
 

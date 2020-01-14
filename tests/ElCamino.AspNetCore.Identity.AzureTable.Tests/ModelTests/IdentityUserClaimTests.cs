@@ -1,6 +1,7 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
 using System;
+using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
 using Xunit;
 
@@ -13,7 +14,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.ModelTests
         public void IdentityUserClaimGet_UserId()
         {
             var uc = new IdentityUserClaim();
-            uc.GenerateKeys();
+            uc.GenerateKeys(new DefaultKeyHelper());
         }
     }
 }

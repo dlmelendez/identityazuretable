@@ -13,6 +13,12 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 {
     public class EmailMigrateIndex : IMigration
     {
+        private IKeyHelper _keyHelper;
+        public EmailMigrateIndex(IKeyHelper keyHelper)
+        {
+            _keyHelper = keyHelper;
+        }
+
         public TableQuery GetSourceTableQuery()
         {
             TableQuery tq = new TableQuery();
@@ -78,9 +84,9 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             return new IdentityUserIndex()
             {
                 Id = userid,
-                PartitionKey = KeyHelper.GenerateRowKeyUserEmail(email),
+                PartitionKey = _keyHelper.GenerateRowKeyUserEmail(email),
                 RowKey = userid,
-                KeyVersion = KeyHelper.KeyVersion,
+                KeyVersion = _keyHelper.KeyVersion,
                 ETag = Constants.ETagWildcard
             };
         }

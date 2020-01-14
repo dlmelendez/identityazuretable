@@ -24,15 +24,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// Generates Row, Partition and Id keys.
         /// All are the same in this case
         /// </summary>
-        public void GenerateKeys()
+        public void GenerateKeys(IKeyHelper keyHelper)
         {
             if (string.IsNullOrWhiteSpace(Id))
             {
-                Id = KeyHelper.GenerateUserId();
+                Id = keyHelper.GenerateUserId();
             }
-            RowKey = PeekRowKey();
+            RowKey = PeekRowKey(keyHelper);
             PartitionKey = RowKey;
-            KeyVersion = KeyHelper.KeyVersion;
+            KeyVersion = keyHelper.KeyVersion;
         }
 
         /// <summary>
@@ -40,9 +40,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// In this case, just returns a key based on username
         /// </summary>
         /// <returns></returns>
-        public string PeekRowKey()
+        public string PeekRowKey(IKeyHelper keyHelper)
         {
-            return KeyHelper.GenerateRowKeyUserId(Id);
+            return keyHelper.GenerateRowKeyUserId(Id);
         }
 
         public double KeyVersion { get; set; }

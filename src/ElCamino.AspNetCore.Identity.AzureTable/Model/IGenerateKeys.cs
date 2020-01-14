@@ -10,9 +10,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 {
     public interface IGenerateKeys
     {
-        void GenerateKeys();
+        void GenerateKeys(IKeyHelper keyHelper);
 
-        string PeekRowKey();
+        string PeekRowKey(IKeyHelper keyHelper);
 
         double KeyVersion { get; set; }
     }

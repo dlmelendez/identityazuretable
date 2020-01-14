@@ -13,6 +13,12 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 {
     public class UsersMigration : IMigration
     {
+        private IKeyHelper _keyHelper;
+        public UsersMigration(IKeyHelper keyHelper)
+        {
+            _keyHelper = keyHelper;
+        }
+
         public TableQuery GetSourceTableQuery()
         {
             //Get all User key records
@@ -26,7 +32,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.GreaterThanOrEqual, Constants.RowKeyConstants.PreFixIdentityUserId),
                 TableOperators.And,
                 TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.LessThan, "V_"));
-            string keyVersionFilter = TableQuery.GenerateFilterConditionForDouble("KeyVersion", QueryComparisons.LessThan, KeyHelper.KeyVersion);
+            string keyVersionFilter = TableQuery.GenerateFilterConditionForDouble("KeyVersion", QueryComparisons.LessThan, _keyHelper.KeyVersion);
             string keysFilter = TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowFilter);
 
             tq.FilterString = TableQuery.CombineFilters(keysFilter, TableOperators.And, keyVersionFilter);
@@ -41,7 +47,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 try
                 {
                     var sourceUserEntities = GetUserEntitiesBySourceId(dte.PartitionKey, sourceContext);
-                    string targetUserId = KeyHelper.GenerateUserId();
+                    string targetUserId = _keyHelper.GenerateUserId();
                     var targetEntities = ConvertToTargetUserEntities(targetUserId, sourceUserEntities);
                     List<Task> mainTasks = new List<Task>(2);
                     List<Task> indexTasks = new List<Task>(100);
@@ -72,7 +78,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             List<DynamicTableEntity> results = new List<DynamicTableEntity>(1000);
             TableQuery tq = new TableQuery();
             string partitionKeyFilter = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, userPartitionKey);
-            string keyVersionFilter = TableQuery.GenerateFilterConditionForDouble("KeyVersion", QueryComparisons.LessThan, KeyHelper.KeyVersion);
+            string keyVersionFilter = TableQuery.GenerateFilterConditionForDouble("KeyVersion", QueryComparisons.LessThan, _keyHelper.KeyVersion);
             tq.FilterString = TableQuery.CombineFilters(partitionKeyFilter, TableOperators.And, keyVersionFilter);
             TableContinuationToken token = new TableContinuationToken();
             while (token != null)
@@ -92,7 +98,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             {
                 if (sourceEntity.PartitionKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserId))
                 {
-                    string targetUserPartitionKey = KeyHelper.GenerateRowKeyUserId(userId);
+                    string targetUserPartitionKey = _keyHelper.GenerateRowKeyUserId(userId);
 
                     //User record
                     if (sourceEntity.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserId))
@@ -102,18 +108,18 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                         //Add Email Index
                         DynamicTableEntity tgtDte = new DynamicTableEntity(targetUserPartitionKey, targetUserPartitionKey, Constants.ETagWildcard, sourceEntity.Properties);
                         tgtDte.Properties["Id"] = new EntityProperty(userId);
-                        tgtDte.Properties["KeyVersion"] = new EntityProperty(KeyHelper.KeyVersion);
+                        tgtDte.Properties["KeyVersion"] = new EntityProperty(_keyHelper.KeyVersion);
                         targetUserEntities.Add(tgtDte);
 
                         //UserName index
                         tgtDte.Properties.TryGetValue("UserName", out EntityProperty userNameProperty);
-                        string userNameKey = KeyHelper.GenerateRowKeyUserName(userNameProperty.StringValue);
+                        string userNameKey = _keyHelper.GenerateRowKeyUserName(userNameProperty.StringValue);
                         IdentityUserIndex userNameIndex = new IdentityUserIndex()
                         {
                             Id = targetUserPartitionKey,
                             PartitionKey = userNameKey,
                             RowKey = targetUserPartitionKey,
-                            KeyVersion = KeyHelper.KeyVersion,
+                            KeyVersion = _keyHelper.KeyVersion,
                             ETag = Constants.ETagWildcard
                         };
                         targetUserIndexes.Add(userNameIndex);
@@ -121,13 +127,13 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                         //Email index - only if email exists
                         if (tgtDte.Properties.TryGetValue("Email", out EntityProperty emailProperty))
                         {
-                            string emailKey = KeyHelper.GenerateRowKeyUserEmail(emailProperty.StringValue);
+                            string emailKey = _keyHelper.GenerateRowKeyUserEmail(emailProperty.StringValue);
                             IdentityUserIndex emailIndex = new IdentityUserIndex()
                             {
                                 Id = targetUserPartitionKey,
                                 PartitionKey = emailKey,
                                 RowKey = targetUserPartitionKey,
-                                KeyVersion = KeyHelper.KeyVersion,
+                                KeyVersion = _keyHelper.KeyVersion,
                                 ETag = Constants.ETagWildcard
                             };
                             targetUserIndexes.Add(emailIndex);
@@ -144,10 +150,10 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                         sourceEntity.Properties.TryGetValue("ClaimValue", out EntityProperty claimValueProperty);
                         string claimValue = claimValueProperty.StringValue;
 
-                        string targetUserRowKey = KeyHelper.GenerateRowKeyIdentityUserClaim(claimType, claimValue);
+                        string targetUserRowKey = _keyHelper.GenerateRowKeyIdentityUserClaim(claimType, claimValue);
                         DynamicTableEntity tgtDte = new DynamicTableEntity(targetUserPartitionKey, targetUserRowKey, Constants.ETagWildcard, sourceEntity.Properties);
                         tgtDte.Properties["UserId"] = new EntityProperty(userId);
-                        tgtDte.Properties["KeyVersion"] = new EntityProperty(KeyHelper.KeyVersion);
+                        tgtDte.Properties["KeyVersion"] = new EntityProperty(_keyHelper.KeyVersion);
                         targetUserEntities.Add(tgtDte);
 
                         //Claim index
@@ -156,7 +162,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                             Id = targetUserPartitionKey,
                             PartitionKey = targetUserRowKey,
                             RowKey = targetUserPartitionKey,
-                            KeyVersion = KeyHelper.KeyVersion,
+                            KeyVersion = _keyHelper.KeyVersion,
                             ETag = Constants.ETagWildcard
                         };
                         targetUserIndexes.Add(claimIndex);
@@ -172,19 +178,19 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                         sourceEntity.Properties.TryGetValue("ProviderKey", out EntityProperty providerKeyProperty);
                         string providerKey = providerKeyProperty.StringValue;
 
-                        string targetUserRowKey = KeyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey);
+                        string targetUserRowKey = _keyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey);
                         DynamicTableEntity tgtDte = new DynamicTableEntity(targetUserPartitionKey, targetUserRowKey, Constants.ETagWildcard, sourceEntity.Properties);
                         tgtDte.Properties["UserId"] = new EntityProperty(userId);
-                        tgtDte.Properties["KeyVersion"] = new EntityProperty(KeyHelper.KeyVersion);
+                        tgtDte.Properties["KeyVersion"] = new EntityProperty(_keyHelper.KeyVersion);
                         targetUserEntities.Add(tgtDte);
 
                         //Logon index
                         IdentityUserIndex logonIndex = new IdentityUserIndex()
                         {
                             Id = targetUserPartitionKey,
-                            PartitionKey = KeyHelper.GeneratePartitionKeyIndexByLogin(loginProvider, providerKey),
-                            RowKey = KeyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey),
-                            KeyVersion = KeyHelper.KeyVersion,
+                            PartitionKey = _keyHelper.GeneratePartitionKeyIndexByLogin(loginProvider, providerKey),
+                            RowKey = _keyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey),
+                            KeyVersion = _keyHelper.KeyVersion,
                             ETag = Constants.ETagWildcard
                         };
                         targetUserIndexes.Add(logonIndex);
@@ -198,10 +204,10 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                         sourceEntity.Properties.TryGetValue("RoleName", out EntityProperty roleNameProperty);
                         string roleName = roleNameProperty.StringValue;
 
-                        string targetUserRowKey = KeyHelper.GenerateRowKeyIdentityUserRole(roleName);
+                        string targetUserRowKey = _keyHelper.GenerateRowKeyIdentityUserRole(roleName);
                         DynamicTableEntity tgtDte = new DynamicTableEntity(targetUserPartitionKey, targetUserRowKey, Constants.ETagWildcard, sourceEntity.Properties);
                         tgtDte.Properties["UserId"] = new EntityProperty(userId);
-                        tgtDte.Properties["KeyVersion"] = new EntityProperty(KeyHelper.KeyVersion);
+                        tgtDte.Properties["KeyVersion"] = new EntityProperty(_keyHelper.KeyVersion);
                         targetUserEntities.Add(tgtDte);
 
                         //Role index
@@ -210,7 +216,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                             Id = targetUserPartitionKey,
                             PartitionKey = targetUserRowKey,
                             RowKey = targetUserPartitionKey,
-                            KeyVersion = KeyHelper.KeyVersion,
+                            KeyVersion = _keyHelper.KeyVersion,
                             ETag = Constants.ETagWildcard
                         };
                         targetUserIndexes.Add(roleIndex);
@@ -225,10 +231,10 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                         sourceEntity.Properties.TryGetValue("TokenName", out EntityProperty tokenNameProperty);
                         string tokenName = tokenNameProperty.StringValue;
 
-                        string targetUserRowKey = KeyHelper.GenerateRowKeyIdentityUserToken(loginProvider, tokenName);
+                        string targetUserRowKey = _keyHelper.GenerateRowKeyIdentityUserToken(loginProvider, tokenName);
                         DynamicTableEntity tgtDte = new DynamicTableEntity(targetUserPartitionKey, targetUserRowKey, Constants.ETagWildcard, sourceEntity.Properties);
                         tgtDte.Properties["UserId"] = new EntityProperty(userId);
-                        tgtDte.Properties["KeyVersion"] = new EntityProperty(KeyHelper.KeyVersion);
+                        tgtDte.Properties["KeyVersion"] = new EntityProperty(_keyHelper.KeyVersion);
                         targetUserEntities.Add(tgtDte);
                         continue;
 
