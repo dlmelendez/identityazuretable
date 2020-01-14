@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 using Microsoft.Azure.Cosmos.Table;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
@@ -46,12 +45,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         public DateTimeOffset Timestamp { get; set; }
         public string ETag { get; set; }
 
-        public void ReadEntity(IDictionary<string, EntityProperty> properties, OperationContext operationContext)
+        public virtual void ReadEntity(IDictionary<string, EntityProperty> properties, OperationContext operationContext)
         {
             TableEntity.ReadUserObject(this, properties, operationContext);
         }
 
-        public IDictionary<string, EntityProperty> WriteEntity(OperationContext operationContext)
+        public virtual IDictionary<string, EntityProperty> WriteEntity(OperationContext operationContext)
         {
             return TableEntity.WriteUserObject(this, operationContext);
         }
