@@ -13,6 +13,12 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 {
     public class RoleAndClaimMigrateIndex : IMigration
     {
+        private IKeyHelper _keyHelper;
+        public RoleAndClaimMigrateIndex(IKeyHelper keyHelper)
+        {
+            _keyHelper = keyHelper;
+        }
+
         public TableQuery GetSourceTableQuery()
         {
             TableQuery tq = new TableQuery();
@@ -55,7 +61,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                         Id = dte.PartitionKey,
                         PartitionKey = dte.RowKey,
                         RowKey = dte.PartitionKey,
-                        KeyVersion = KeyHelper.KeyVersion,
+                        KeyVersion = _keyHelper.KeyVersion,
                         ETag = Constants.ETagWildcard
                     };
                     var r = targetContext.IndexTable.ExecuteAsync(TableOperation.InsertOrReplace(index)).Result;

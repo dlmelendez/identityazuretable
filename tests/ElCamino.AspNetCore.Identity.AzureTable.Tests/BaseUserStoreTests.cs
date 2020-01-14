@@ -16,7 +16,7 @@ using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
 using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
 using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
 using Microsoft.AspNetCore.Identity;
-
+using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {
@@ -395,9 +395,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         protected readonly ITestOutputHelper output;
 
 
-        protected BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore> userFixture;
+        protected BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore, DefaultKeyHelper> userFixture;
 
-        public BaseUserStoreTests(BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore> userFix, ITestOutputHelper output)
+        public BaseUserStoreTests(BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore, DefaultKeyHelper> userFix, ITestOutputHelper output)
         {
             userFixture = userFix;
 

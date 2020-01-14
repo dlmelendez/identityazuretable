@@ -2,7 +2,6 @@
 
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
-using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 using System;
 using Microsoft.Azure.Cosmos.Table;
 
@@ -16,20 +15,20 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// Generates Row and Id keys.
         /// Partition key is equal to the UserId
         /// </summary>
-        public void GenerateKeys()
+        public void GenerateKeys(IKeyHelper keyHelper)
         {
-            RowKey = PeekRowKey();
-            PartitionKey = KeyHelper.GeneratePartitionKeyIdentityRole(Name);
-            KeyVersion = KeyHelper.KeyVersion;
+            RowKey = PeekRowKey(keyHelper);
+            PartitionKey = keyHelper.GeneratePartitionKeyIdentityRole(Name);
+            KeyVersion = keyHelper.KeyVersion;
         }
 
         /// <summary>
         /// Generates the RowKey without setting it on the object.
         /// </summary>
         /// <returns></returns>
-        public string PeekRowKey()
+        public string PeekRowKey(IKeyHelper keyHelper)
         {
-            return KeyHelper.GenerateRowKeyIdentityRole(Name);
+            return keyHelper.GenerateRowKeyIdentityRole(Name);
         }
 
         public double KeyVersion { get; set; }
@@ -63,12 +62,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         public DateTimeOffset Timestamp { get; set; }
         public string ETag { get; set; }
 
-        public void ReadEntity(IDictionary<string, EntityProperty> properties, OperationContext operationContext)
+        public virtual void ReadEntity(IDictionary<string, EntityProperty> properties, OperationContext operationContext)
         {
             TableEntity.ReadUserObject(this, properties, operationContext);
         }
 
-        public IDictionary<string, EntityProperty> WriteEntity(OperationContext operationContext)
+        public virtual IDictionary<string, EntityProperty> WriteEntity(OperationContext operationContext)
         {
             return TableEntity.WriteUserObject(this, operationContext);
         }

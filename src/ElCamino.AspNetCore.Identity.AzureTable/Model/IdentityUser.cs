@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 using Microsoft.Azure.Cosmos.Table;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
@@ -24,15 +23,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// Generates Row, Partition and Id keys.
         /// All are the same in this case
         /// </summary>
-        public void GenerateKeys()
+        public void GenerateKeys(IKeyHelper keyHelper)
         {
             if (string.IsNullOrWhiteSpace(Id))
             {
-                Id = KeyHelper.GenerateUserId();
+                Id = keyHelper.GenerateUserId();
             }
-            RowKey = PeekRowKey();
+            RowKey = PeekRowKey(keyHelper);
             PartitionKey = RowKey;
-            KeyVersion = KeyHelper.KeyVersion;
+            KeyVersion = keyHelper.KeyVersion;
         }
 
         /// <summary>
@@ -40,9 +39,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// In this case, just returns a key based on username
         /// </summary>
         /// <returns></returns>
-        public string PeekRowKey()
+        public string PeekRowKey(IKeyHelper keyHelper)
         {
-            return KeyHelper.GenerateRowKeyUserId(Id);
+            return keyHelper.GenerateRowKeyUserId(Id);
         }
 
         public double KeyVersion { get; set; }
@@ -106,12 +105,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         public DateTimeOffset Timestamp { get; set; }
         public string ETag { get; set; }
 
-        public void ReadEntity(IDictionary<string, EntityProperty> properties, OperationContext operationContext)
+        public virtual void ReadEntity(IDictionary<string, EntityProperty> properties, OperationContext operationContext)
         {
             TableEntity.ReadUserObject(this, properties, operationContext);
         }
 
-        public IDictionary<string, EntityProperty> WriteEntity(OperationContext operationContext)
+        public virtual IDictionary<string, EntityProperty> WriteEntity(OperationContext operationContext)
         {
             return TableEntity.WriteUserObject(this, operationContext);
         }

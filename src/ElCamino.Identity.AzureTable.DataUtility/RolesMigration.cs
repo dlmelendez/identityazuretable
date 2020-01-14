@@ -13,11 +13,17 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 {
     public class RolesMigration : IMigration
     {
+        private IKeyHelper _keyHelper;
+        public RolesMigration(IKeyHelper keyHelper)
+        {
+            _keyHelper = keyHelper;
+        }
+
         public TableQuery GetSourceTableQuery()
         {
             //Get all User key records
             TableQuery tq = new TableQuery();
-            string keyVersionFilter = TableQuery.GenerateFilterConditionForDouble("KeyVersion", QueryComparisons.LessThan, KeyHelper.KeyVersion);
+            string keyVersionFilter = TableQuery.GenerateFilterConditionForDouble("KeyVersion", QueryComparisons.LessThan, _keyHelper.KeyVersion);
 
             tq.FilterString = keyVersionFilter;
             return tq;
@@ -50,7 +56,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         {
 
             var tr = sourcesContext.RoleTable.ExecuteAsync(
-                TableOperation.Retrieve<DynamicTableEntity>(KeyHelper.ParsePartitionKeyIdentityRoleFromRowKey(roleRowKey),
+                TableOperation.Retrieve<DynamicTableEntity>(_keyHelper.ParsePartitionKeyIdentityRoleFromRowKey(roleRowKey),
                roleRowKey, new List<string>() { "Name", "PartitionKey", "RowKey" })).Result;
             if (tr.Result != null)
             {
@@ -78,17 +84,17 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
                 string roleName = GetRoleNameBySourceId(sourceEntity.PartitionKey, sourcesContext);
 
-                targetEntity = new DynamicTableEntity(KeyHelper.GenerateRowKeyIdentityRole(roleName), 
-                    KeyHelper.GenerateRowKeyIdentityRoleClaim(claimType, claimValue), Constants.ETagWildcard, sourceEntity.Properties);
-                targetEntity.Properties["KeyVersion"] = new EntityProperty(KeyHelper.KeyVersion);
+                targetEntity = new DynamicTableEntity(_keyHelper.GenerateRowKeyIdentityRole(roleName), 
+                    _keyHelper.GenerateRowKeyIdentityRoleClaim(claimType, claimValue), Constants.ETagWildcard, sourceEntity.Properties);
+                targetEntity.Properties["KeyVersion"] = new EntityProperty(_keyHelper.KeyVersion);
             }
             else if (sourceEntity.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityRole))
             {
                 sourceEntity.Properties.TryGetValue("Name", out EntityProperty roleNameProperty);
                 string roleName = roleNameProperty.StringValue;
 
-                targetEntity = new DynamicTableEntity(KeyHelper.GeneratePartitionKeyIdentityRole(roleName), KeyHelper.GenerateRowKeyIdentityRole(roleName), Constants.ETagWildcard, sourceEntity.Properties);
-                targetEntity.Properties["KeyVersion"] = new EntityProperty(KeyHelper.KeyVersion);
+                targetEntity = new DynamicTableEntity(_keyHelper.GeneratePartitionKeyIdentityRole(roleName), _keyHelper.GenerateRowKeyIdentityRole(roleName), Constants.ETagWildcard, sourceEntity.Properties);
+                targetEntity.Properties["KeyVersion"] = new EntityProperty(_keyHelper.KeyVersion);
 
             }
 

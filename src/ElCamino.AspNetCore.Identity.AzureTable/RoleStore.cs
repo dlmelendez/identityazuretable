@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Azure.Cosmos.Table;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
+using ElCamino.AspNetCore.Identity.AzureTable.Model;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable
 {
@@ -16,12 +17,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
     where TRole : Model.IdentityRole, new()
     {
         public RoleStore()
-            : this(new IdentityCloudContext())
+            : this(new IdentityCloudContext(), new DefaultKeyHelper())
         {
         }
 
-        public RoleStore(IdentityCloudContext context)
-            : base(context)
+        public RoleStore(IdentityCloudContext context, IKeyHelper keyHelper)
+            : base(context, keyHelper)
         {
         }
     }
@@ -30,7 +31,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         where TRole : Model.IdentityRole, new()
         where TContext : IdentityCloudContext, new()
     {
-        public RoleStore(TContext context) : base(context) { }
+        public RoleStore(TContext context, IKeyHelper keyHelper) : base(context, keyHelper) { }
 
         //Fixing code analysis issue CA1063
         protected override void Dispose(bool disposing)
@@ -50,11 +51,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         private bool _disposed;
         private CloudTable _roleTable;
         private IdentityErrorDescriber _errorDescriber = new IdentityErrorDescriber();
+        protected IKeyHelper _keyHelper;
 
-        public RoleStore(TContext context) : base(new IdentityErrorDescriber())
+        public RoleStore(TContext context, IKeyHelper keyHelper) : base(new IdentityErrorDescriber())
         {
             Context = context ?? throw new ArgumentNullException("context");
             _roleTable = context.RoleTable;
+            _keyHelper = keyHelper;
         }
 
         public Task<bool> CreateTableIfNotExistsAsync()
@@ -66,7 +69,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             ThrowIfDisposed();
             if (role == null) throw new ArgumentNullException(nameof(role));
 
-            ((Model.IGenerateKeys)role).GenerateKeys();
+            ((Model.IGenerateKeys)role).GenerateKeys(_keyHelper);
 
             // Create the TableOperation that inserts the role entity.
             TableOperation insertOperation = TableOperation.Insert(role);
@@ -115,7 +118,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             cancellationToken.ThrowIfCancellationRequested();
             this.ThrowIfDisposed();
             TableOperation getOperation = TableOperation.Retrieve<TRole>(
-                KeyHelper.ParsePartitionKeyIdentityRoleFromRowKey(roleId),
+                _keyHelper.ParsePartitionKeyIdentityRoleFromRowKey(roleId),
                 roleId.ToString());
 
             TableResult tresult = await _roleTable.ExecuteAsync(getOperation);
@@ -128,8 +131,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             this.ThrowIfDisposed();
 
             TableOperation getOperation = TableOperation.Retrieve<TRole>(
-                KeyHelper.GeneratePartitionKeyIdentityRole(roleName),
-                KeyHelper.GenerateRowKeyIdentityRole(roleName));
+                _keyHelper.GeneratePartitionKeyIdentityRole(roleName),
+                _keyHelper.GenerateRowKeyIdentityRole(roleName));
 
             TableResult tresult = await _roleTable.ExecuteAsync(getOperation);
             return tresult.Result == null ? null : (TRole)tresult.Result;
@@ -146,13 +149,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
 
             Model.IGenerateKeys g = role as Model.IGenerateKeys;
-            if (!g.PeekRowKey().Equals(role.RowKey, StringComparison.Ordinal))
+            if (!g.PeekRowKey(_keyHelper).Equals(role.RowKey, StringComparison.Ordinal))
             {
                 TableBatchOperation batch = new TableBatchOperation();
                 DynamicTableEntity dRole = new DynamicTableEntity(role.PartitionKey, role.RowKey);
                 dRole.ETag = Constants.ETagWildcard;
                 dRole.Timestamp = role.Timestamp;
-                g.GenerateKeys();
+                g.GenerateKeys(_keyHelper);
                 //PartitionKey has to be the same to participate in a batch transaction.
                 if (dRole.PartitionKey.Equals(role.PartitionKey))
                 {
@@ -228,7 +231,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             item.RoleId = role.Id;
             item.ClaimType = claim.Type;
             item.ClaimValue = claim.Value;
-            ((Model.IGenerateKeys)item).GenerateKeys();
+            ((Model.IGenerateKeys)item).GenerateKeys(_keyHelper);
 
             await _roleTable.ExecuteAsync(TableOperation.Insert(item));
         }
@@ -256,7 +259,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             item.ClaimType = claim.Type;
             item.ClaimValue = claim.Value;
             item.ETag = Constants.ETagWildcard;
-            ((Model.IGenerateKeys)item).GenerateKeys();
+            ((Model.IGenerateKeys)item).GenerateKeys(_keyHelper);
 
             await _roleTable.ExecuteAsync(TableOperation.Delete(item));
         }

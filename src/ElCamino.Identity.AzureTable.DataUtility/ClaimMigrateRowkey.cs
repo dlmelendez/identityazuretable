@@ -13,6 +13,12 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 {
     public class ClaimMigrateRowkey : IMigration
     {
+        private IKeyHelper _keyHelper;
+        public ClaimMigrateRowkey(IKeyHelper keyHelper)
+        {
+            _keyHelper = keyHelper;
+        }
+
         public TableQuery GetSourceTableQuery()
         {
             TableQuery tq = new TableQuery();
@@ -36,7 +42,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
             if(!string.IsNullOrWhiteSpace(claimType))
             {
-                return (d.RowKey == KeyHelper.GenerateRowKeyIdentityUserClaim_Pre1_7(claimType, claimValue??string.Empty));                
+                return (d.RowKey != _keyHelper.GenerateRowKeyIdentityUserClaim(claimType, claimValue??string.Empty));                
             }
 
             return false;
@@ -64,16 +70,16 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 {
 
                     var claimNew = new DynamicTableEntity(claim.PartitionKey,
-                        KeyHelper.GenerateRowKeyIdentityUserClaim(claim.Properties["ClaimType"].StringValue, claim.Properties["ClaimValue"].StringValue),
+                        _keyHelper.GenerateRowKeyIdentityUserClaim(claim.Properties["ClaimType"].StringValue, claim.Properties["ClaimValue"].StringValue),
                         Constants.ETagWildcard,
                         claim.Properties);
                     if (claimNew.Properties.ContainsKey(KeyVersion))
                     {
-                        claimNew.Properties[KeyVersion].DoubleValue = KeyHelper.KeyVersion;
+                        claimNew.Properties[KeyVersion].DoubleValue = _keyHelper.KeyVersion;
                     }
                     else
                     {
-                        claimNew.Properties.Add(KeyVersion, EntityProperty.GeneratePropertyForDouble(KeyHelper.KeyVersion));
+                        claimNew.Properties.Add(KeyVersion, EntityProperty.GeneratePropertyForDouble(_keyHelper.KeyVersion));
                     }
 
                     var taskExecute = targetContext.UserTable.ExecuteAsync(TableOperation.InsertOrReplace(claimNew));
