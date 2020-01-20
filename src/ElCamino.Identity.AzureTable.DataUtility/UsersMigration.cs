@@ -25,13 +25,13 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             TableQuery tq = new TableQuery();
             tq.SelectColumns = new List<string>() { "PartitionKey", "RowKey", "KeyVersion" };
             string partitionFilter = TableQuery.CombineFilters(
-                TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.GreaterThanOrEqual, Constants.RowKeyConstants.PreFixIdentityUserId),
+                TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserId),
                 TableOperators.And,
-                TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.LessThan, "V_"));
+                TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.LessThan, _keyHelper.PreFixIdentityUserIdUpperBound));
             string rowFilter = TableQuery.CombineFilters(
-                TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.GreaterThanOrEqual, Constants.RowKeyConstants.PreFixIdentityUserId),
+                TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserId),
                 TableOperators.And,
-                TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.LessThan, "V_"));
+                TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.LessThan, _keyHelper.PreFixIdentityUserIdUpperBound));
             string keyVersionFilter = TableQuery.GenerateFilterConditionForDouble("KeyVersion", QueryComparisons.LessThan, _keyHelper.KeyVersion);
             string keysFilter = TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowFilter);
 
@@ -96,12 +96,12 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             List<ITableEntity> targetUserIndexes = new List<ITableEntity>(100);
             foreach (DynamicTableEntity sourceEntity in sourceUserEntities)
             {
-                if (sourceEntity.PartitionKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserId))
+                if (sourceEntity.PartitionKey.StartsWith(_keyHelper.PreFixIdentityUserId))
                 {
                     string targetUserPartitionKey = _keyHelper.GenerateRowKeyUserId(userId);
 
                     //User record
-                    if (sourceEntity.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserId))
+                    if (sourceEntity.RowKey.StartsWith(_keyHelper.PreFixIdentityUserId))
                     {
                         //New User 
                         //Add UserName Index
@@ -141,7 +141,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                         continue;
                     }
                     //User Claim record
-                    if (sourceEntity.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserClaim))
+                    if (sourceEntity.RowKey.StartsWith(_keyHelper.PreFixIdentityUserClaim))
                     {
                         //New User Claim
                         //Add Claim Index
@@ -169,7 +169,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                         continue;
                     }
                     //User Logon record
-                    if (sourceEntity.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserLogin))
+                    if (sourceEntity.RowKey.StartsWith(_keyHelper.PreFixIdentityUserLogin))
                     {
                         //New User Logon
                         //Add Logon Index
@@ -197,7 +197,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                         continue;
                     }
                     //User Role record
-                    if (sourceEntity.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserRole))
+                    if (sourceEntity.RowKey.StartsWith(_keyHelper.PreFixIdentityUserRole))
                     {
                         //New User Role
                         //Add Role Index
@@ -223,7 +223,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                         continue;
                     }
                     //User Token record
-                    if (sourceEntity.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserToken))
+                    if (sourceEntity.RowKey.StartsWith(_keyHelper.PreFixIdentityUserToken))
                     {
                         //New User Token
                         sourceEntity.Properties.TryGetValue("LoginProvider", out EntityProperty loginProviderProperty);

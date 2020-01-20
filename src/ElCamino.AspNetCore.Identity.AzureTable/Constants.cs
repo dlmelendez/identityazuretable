@@ -28,11 +28,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             #region Identity User
             public const string PreFixIdentityUserClaim = "C_";
+            public const string PreFixIdentityUserClaimUpperBound = "D_";
             public const string PreFixIdentityUserRole = "R_";
+            public const string PreFixIdentityUserRoleUpperBound = "S_";
             public const string PreFixIdentityUserLogin = "L_";
+            public const string PreFixIdentityUserLoginUpperBound = "M_";
             public const string PreFixIdentityUserEmail = "E_";
             public const string PreFixIdentityUserToken = "T_";
             public const string PreFixIdentityUserId = "U_";
+            public const string PreFixIdentityUserIdUpperBound = "V_";
             public const string PreFixIdentityUserName = "N_";
 
             public const string FormatterIdentityUserClaim = PreFixIdentityUserClaim + "{0}";

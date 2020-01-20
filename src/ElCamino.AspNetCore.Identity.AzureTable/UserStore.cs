@@ -120,7 +120,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             TableQuery tq = new TableQuery();
 
             string rowFilter =
-                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.GreaterThanOrEqual, Constants.RowKeyConstants.PreFixIdentityUserRole);
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserRole);
 
             tq.FilterString = TableQuery.CombineFilters(
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, userId),
@@ -438,21 +438,21 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 user = MapTableEntity<TUser>(vUser);
 
                 //Roles
-                roles = userResults.Where(u => u.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserRole)
+                roles = userResults.Where(u => u.RowKey.StartsWith(_keyHelper.PreFixIdentityUserRole)
                     && u.PartitionKey.Equals(userId))
                     .Select((log) =>
                     {
                         return MapTableEntity<TUserRole>(log);
                     });
                 //Claims
-                claims = userResults.Where(u => u.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserClaim)
+                claims = userResults.Where(u => u.RowKey.StartsWith(_keyHelper.PreFixIdentityUserClaim)
                      && u.PartitionKey.Equals(userId))
                     .Select((log) =>
                     {
                         return MapTableEntity<TUserClaim>(log);
                     });
                 //Logins
-                logins = userResults.Where(u => u.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserLogin)
+                logins = userResults.Where(u => u.RowKey.StartsWith(_keyHelper.PreFixIdentityUserLogin)
                     && u.PartitionKey.Equals(userId))
                     .Select((log) =>
                     {
@@ -460,7 +460,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                     });
 
                 //Tokens
-                tokens = userResults.Where(u => u.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserToken)
+                tokens = userResults.Where(u => u.RowKey.StartsWith(_keyHelper.PreFixIdentityUserToken)
                      && u.PartitionKey.Equals(userId))
                     .Select((log) =>
                     {

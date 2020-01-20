@@ -387,9 +387,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             string partitionFilter =
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, user.PartitionKey);
             string rowFilter = TableQuery.CombineFilters(
-                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.GreaterThanOrEqual, Constants.RowKeyConstants.PreFixIdentityUserClaim),
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserClaim),
                 TableOperators.And,
-                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.LessThan, "D_"));
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.LessThan, _keyHelper.PreFixIdentityUserClaimUpperBound));
             tq.FilterString = TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowFilter);
 #if NETSTANDARD2_1
             await foreach (var de in _userTable.ExecuteQueryAsync(tq))
@@ -434,9 +434,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             string partitionFilter =
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, user.PartitionKey);
             string rowFilter = TableQuery.CombineFilters(
-                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.GreaterThanOrEqual, Constants.RowKeyConstants.PreFixIdentityUserLogin),
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserLogin),
                 TableOperators.And,
-                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.LessThan, "M_"));
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.LessThan, _keyHelper.PreFixIdentityUserLoginUpperBound));
             tq.FilterString = TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowFilter);
 #if NETSTANDARD2_1
             await foreach (var de in _userTable.ExecuteQueryAsync(tq))
@@ -657,14 +657,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 user = MapTableEntity<TUser>(vUser);
 
                 //Claims
-                claims = userResults.Where(u => u.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserClaim)
+                claims = userResults.Where(u => u.RowKey.StartsWith(_keyHelper.PreFixIdentityUserClaim)
                      && u.PartitionKey.Equals(userId))
                     .Select((log) =>
                     {
                         return MapTableEntity<TUserClaim>(log);
                     });
                 //Logins
-                logins = userResults.Where(u => u.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserLogin)
+                logins = userResults.Where(u => u.RowKey.StartsWith(_keyHelper.PreFixIdentityUserLogin)
                     && u.PartitionKey.Equals(userId))
                     .Select((log) =>
                     {
@@ -672,7 +672,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                     });
 
                 //Tokens
-                tokens = userResults.Where(u => u.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserToken)
+                tokens = userResults.Where(u => u.RowKey.StartsWith(_keyHelper.PreFixIdentityUserToken)
                      && u.PartitionKey.Equals(userId))
                     .Select((log) =>
                     {

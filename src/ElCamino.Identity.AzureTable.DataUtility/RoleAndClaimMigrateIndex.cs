@@ -24,17 +24,17 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             TableQuery tq = new TableQuery();
             tq.SelectColumns = new List<string>() { "PartitionKey", "RowKey", "KeyVersion" };
             string partitionFilter = TableQuery.CombineFilters(
-                TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.GreaterThanOrEqual, Constants.RowKeyConstants.PreFixIdentityUserId),
+                TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserId),
                 TableOperators.And,
-                TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.LessThan, "V_"));
+                TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.LessThan, _keyHelper.PreFixIdentityUserIdUpperBound));
             string rowFilterRole = TableQuery.CombineFilters(
-                TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.GreaterThanOrEqual, Constants.RowKeyConstants.PreFixIdentityUserRole),
+                TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserRole),
                 TableOperators.And,
-                TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.LessThan, "S_"));
+                TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.LessThan, _keyHelper.PreFixIdentityUserRoleUpperBound));
             string rowFilterClaim = TableQuery.CombineFilters(
-                TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.GreaterThanOrEqual, Constants.RowKeyConstants.PreFixIdentityUserClaim),
+                TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserClaim),
                 TableOperators.And,
-                TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.LessThan, "D_"));
+                TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.LessThan, _keyHelper.PreFixIdentityUserClaimUpperBound));
 
             string keyVersionFilter = TableQuery.GenerateFilterConditionForDouble("KeyVersion", QueryComparisons.LessThan, 2.0);
 
@@ -77,7 +77,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
         public bool UserWhereFilter(DynamicTableEntity d)
         {
-            return d.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserRole) || d.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserClaim);
+            return d.RowKey.StartsWith(_keyHelper.PreFixIdentityUserRole) || d.RowKey.StartsWith(_keyHelper.PreFixIdentityUserClaim);
         }
     }
 }
