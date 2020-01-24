@@ -6,14 +6,15 @@ using Xunit;
 using ElCamino.AspNetCore.Identity.AzureTable;
 using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
 using Xunit.Abstractions;
+using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 
 namespace ElCamino.AspNet.Identity.AzureTable.Tests.ModelTests
 {
-    public class IdentityCloudContextTests : IClassFixture<RoleFixture<IdentityUser, IdentityRole, IdentityCloudContext>>
+    public class IdentityCloudContextTests : IClassFixture<RoleFixture<IdentityUser, IdentityRole, IdentityCloudContext, DefaultKeyHelper>>
     {
         private readonly ITestOutputHelper output;
-        private RoleFixture<IdentityUser, IdentityRole, IdentityCloudContext> roleFixture;
-        public IdentityCloudContextTests(RoleFixture<IdentityUser, IdentityRole, IdentityCloudContext> roleFix, ITestOutputHelper output)
+        private RoleFixture<IdentityUser, IdentityRole, IdentityCloudContext, DefaultKeyHelper> roleFixture;
+        public IdentityCloudContextTests(RoleFixture<IdentityUser, IdentityRole, IdentityCloudContext, DefaultKeyHelper> roleFix, ITestOutputHelper output)
         {
             this.output = output;
             roleFixture = roleFix;

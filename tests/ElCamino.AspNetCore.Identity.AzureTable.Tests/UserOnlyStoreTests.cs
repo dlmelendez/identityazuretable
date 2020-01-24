@@ -16,13 +16,14 @@ using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
 using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
 using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
 using Microsoft.AspNetCore.Identity;
+using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {
-    public partial class UserOnlyStoreTests : BaseUserStoreTests<ApplicationUserV2, IdentityCloudContext, UserOnlyStore<ApplicationUserV2, IdentityCloudContext>>
+    public partial class UserOnlyStoreTests : BaseUserStoreTests<ApplicationUserV2, IdentityCloudContext, UserOnlyStore<ApplicationUserV2, IdentityCloudContext>, DefaultKeyHelper>
     {
         public const string UserOnlyStoreTrait = "IdentityCore.Azure.UserOnlyStore";
-        public UserOnlyStoreTests(UserFixture<ApplicationUserV2, IdentityCloudContext, UserOnlyStore<ApplicationUserV2, IdentityCloudContext>> userFix, ITestOutputHelper output) :
+        public UserOnlyStoreTests(UserFixture<ApplicationUserV2, IdentityCloudContext, UserOnlyStore<ApplicationUserV2, IdentityCloudContext>, DefaultKeyHelper> userFix, ITestOutputHelper output) :
             base(userFix, output) {  }
         [Fact(DisplayName = "AddRemoveUserClaim")]
         [Trait(UserOnlyStoreTrait, "")]

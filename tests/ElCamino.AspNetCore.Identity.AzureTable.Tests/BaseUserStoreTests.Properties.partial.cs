@@ -15,18 +15,21 @@ using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {
-    public partial class BaseUserStoreTests<TUser, TRole, TContext, TUserStore> : IClassFixture<UserFixture<TUser, TRole, TContext, TUserStore>>
-       where TUser : IdentityUser, IApplicationUser, new()
-       where TRole : IdentityRole, new()
-       where TContext : IdentityCloudContext, new()
-       where TUserStore : UserStore<TUser, TRole, TContext>        
+    public partial class BaseUserStoreTests<TUser, TRole, TContext, TUserStore, TKeyHelper> : BaseUserStoreTests<TUser, TContext, TUserStore, TKeyHelper>,
+        IClassFixture<UserFixture<TUser, TRole, TContext, TUserStore, TKeyHelper>>
+         where TUser : IdentityUser, IApplicationUser, new()
+         where TRole : IdentityRole, new()
+         where TContext : IdentityCloudContext, new()
+         where TUserStore : UserStore<TUser, TRole, TContext>
+         where TKeyHelper : IKeyHelper, new()
     {
     }
 
-    public partial class BaseUserStoreTests<TUser, TContext, TUserStore> : IClassFixture<UserFixture<TUser, TContext, TUserStore>>
+    public partial class BaseUserStoreTests<TUser, TContext, TUserStore, TKeyHelper> : IClassFixture<UserFixture<TUser, TContext, TUserStore, TKeyHelper>>
          where TUser : IdentityUser, IApplicationUser, new()
          where TContext : IdentityCloudContext, new()
          where TUserStore : UserOnlyStore<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken>
+         where TKeyHelper : IKeyHelper, new()
     {
         public virtual async Task AccessFailedCount()
         {

@@ -17,19 +17,21 @@ using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
 using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
 using Microsoft.AspNetCore.Identity;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
+using ElCamino.AspNetCore.Identity.AzureTable.Model;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {
-    public partial class BaseUserStoreTests<TUser, TRole, TContext, TUserStore> : BaseUserStoreTests<TUser, TContext, TUserStore>,
-        IClassFixture<BaseFixture<TUser, TRole, TContext, TUserStore>>
+    public partial class BaseUserStoreTests<TUser, TRole, TContext, TUserStore, TKeyHelper> : BaseUserStoreTests<TUser, TContext, TUserStore, TKeyHelper>,
+        IClassFixture<BaseFixture<TUser, TRole, TContext, TUserStore, TKeyHelper>>
          where TUser : IdentityUser, IApplicationUser, new()
          where TRole : IdentityRole, new()
          where TContext : IdentityCloudContext, new()
          where TUserStore : UserStore<TUser, TRole, TContext>
+       where TKeyHelper : IKeyHelper, new()
     {
-        protected new BaseFixture<TUser, TRole, TContext, TUserStore> userFixture;
+        protected new BaseFixture<TUser, TRole, TContext, TUserStore, TKeyHelper> userFixture;
 
-        public BaseUserStoreTests(BaseFixture<TUser, TRole, TContext, TUserStore> userFix, ITestOutputHelper output)
+        public BaseUserStoreTests(BaseFixture<TUser, TRole, TContext, TUserStore, TKeyHelper> userFix, ITestOutputHelper output)
             :base(userFix, output)
         {
             userFixture = userFix;
@@ -380,10 +382,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
     }
 
-    public partial class BaseUserStoreTests<TUser, TContext, TUserStore> : IClassFixture<BaseFixture<TUser, TContext, TUserStore>>
+    public partial class BaseUserStoreTests<TUser, TContext, TUserStore, TKeyHelper> : IClassFixture<BaseFixture<TUser, TContext, TUserStore, TKeyHelper>>
          where TUser : IdentityUser, IApplicationUser, new()
          where TContext : IdentityCloudContext, new()
          where TUserStore : UserOnlyStore<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken>
+         where TKeyHelper : IKeyHelper, new()
     {
         #region Static and Const Members
         public static string DefaultUserPassword = "M" + Guid.NewGuid().ToString();
@@ -395,9 +398,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         protected readonly ITestOutputHelper output;
 
 
-        protected BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore, DefaultKeyHelper> userFixture;
+        protected BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore, TKeyHelper> userFixture;
 
-        public BaseUserStoreTests(BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore, DefaultKeyHelper> userFix, ITestOutputHelper output)
+        public BaseUserStoreTests(BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore, TKeyHelper> userFix, ITestOutputHelper output)
         {
             userFixture = userFix;
 

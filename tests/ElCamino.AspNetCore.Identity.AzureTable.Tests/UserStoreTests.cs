@@ -17,17 +17,18 @@ using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
 using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
 using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
 using Microsoft.AspNetCore.Identity;
+using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {
-    public partial class UserStoreTests : BaseUserStoreTests<ApplicationUserV2, IdentityRole, IdentityCloudContext, UserStore<ApplicationUserV2, IdentityRole, IdentityCloudContext>>
+    public class UserStoreTests : BaseUserStoreTests<ApplicationUserV2, IdentityRole, IdentityCloudContext, UserStore<ApplicationUserV2, IdentityRole, IdentityCloudContext>, DefaultKeyHelper>
     {
         public const string UserStoreTrait = "IdentityCore.Azure.UserStore";
         public const string UserStoreTraitProperties = UserStoreTrait + ".Properties";
 
         public UserStoreTests(
             UserFixture<ApplicationUserV2, IdentityRole, IdentityCloudContext,
-                UserStore<ApplicationUserV2, IdentityRole, IdentityCloudContext>> userFix, ITestOutputHelper output) :
+                UserStore<ApplicationUserV2, IdentityRole, IdentityCloudContext>, DefaultKeyHelper> userFix, ITestOutputHelper output) :
             base(userFix, output)
         {
             

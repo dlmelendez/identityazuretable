@@ -12,11 +12,11 @@ using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
 using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
 using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser<string>;
 using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
-
+using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {
-    public partial class UserOnlyStoreTests : BaseUserStoreTests<ApplicationUserV2, IdentityCloudContext, UserOnlyStore<ApplicationUserV2, IdentityCloudContext>>
+    public partial class UserOnlyStoreTests : BaseUserStoreTests<ApplicationUserV2, IdentityCloudContext, UserOnlyStore<ApplicationUserV2, IdentityCloudContext>, DefaultKeyHelper>
     {
         public const string UserOnlyStoreTraitProperties = UserOnlyStoreTrait + ".Properties";
 

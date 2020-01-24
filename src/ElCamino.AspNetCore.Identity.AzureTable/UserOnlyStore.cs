@@ -705,7 +705,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 #endif
             ConcurrentBag<IEnumerable<TUser>> lUsers = new ConcurrentBag<IEnumerable<TUser>>();
             TableContinuationToken token = new TableContinuationToken();
-            const int takeCount = 100;
+            const int takeCount = 30;
             const int taskMax = 10;
             queryUser.TakeCount = takeCount;
             List<Task> taskBatch = new List<Task>(taskMax);
