@@ -15,6 +15,9 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.ModelTests
         {
             var uc = new IdentityUserClaim();
             uc.GenerateKeys(new DefaultKeyHelper());
+
+            var uc2 = new IdentityUserClaim();
+            uc2.GenerateKeys(new SHA256KeyHelper());
         }
     }
 }

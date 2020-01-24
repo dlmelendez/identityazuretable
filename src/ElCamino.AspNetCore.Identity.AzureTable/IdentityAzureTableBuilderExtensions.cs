@@ -17,10 +17,12 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="builder"></param>
         /// <param name="configAction"></param>
         /// <returns></returns>
-        public static IdentityBuilder AddAzureTableStores<TContext>(this IdentityBuilder builder, Func<IdentityConfiguration> configAction)
+        public static IdentityBuilder AddAzureTableStores<TContext>(this IdentityBuilder builder, Func<IdentityConfiguration> configAction,
+            IKeyHelper keyHelper = null)
             where TContext : IdentityCloudContext, new()
         {
-            builder.Services.AddSingleton<IKeyHelper>(new DefaultKeyHelper());
+                
+            builder.Services.AddSingleton<IKeyHelper>(keyHelper?? new DefaultKeyHelper());
 
             builder.Services.AddSingleton<IdentityConfiguration>(new Func<IServiceProvider, IdentityConfiguration>(p => configAction()));
 

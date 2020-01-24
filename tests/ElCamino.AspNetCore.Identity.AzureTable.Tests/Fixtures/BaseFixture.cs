@@ -70,7 +70,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
             id = id.AddAzureTableStores<TContext>(new Func<IdentityConfiguration>(() =>
             {
                 return GetConfig();
-            }));
+            }), GetKeyHelper());
            
 
             id.CreateAzureTablesIfNotExists<TContext>();
@@ -106,7 +106,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
             id = id.AddAzureTableStores<TContext>(new Func<IdentityConfiguration>(() =>
             {
                 return GetConfig();
-            }));
+            }), GetKeyHelper());
 
             id.Services.AddDataProtection();
             id.AddDefaultTokenProviders();
@@ -241,7 +241,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
             id = id.AddAzureTableStores<TContext>(new Func<IdentityConfiguration>(() =>
             {
                 return GetConfig();
-            }));
+            }), GetKeyHelper());
             
             id.Services.AddDataProtection();
             id.AddDefaultTokenProviders();

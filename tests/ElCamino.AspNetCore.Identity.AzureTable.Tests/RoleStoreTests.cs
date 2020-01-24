@@ -139,14 +139,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                 var r = await store.CreateTableIfNotExistsAsync();
                 Assert.True(await store.Context.RoleTable.ExistsAsync());
             }
-
             ServiceCollection services = new ServiceCollection();
             // Adding coverage for CreateAzureTablesIfNotExists();
             services.AddIdentityCore<IdentityUser>()
                 .AddAzureTableStores<IdentityCloudContext>(new Func<IdentityConfiguration>(() =>
                 {
                     return roleFixture.GetConfig();
-                }))
+                }), roleFixture.GetKeyHelper())
                 .CreateAzureTablesIfNotExists<IdentityCloudContext>();
 
         }

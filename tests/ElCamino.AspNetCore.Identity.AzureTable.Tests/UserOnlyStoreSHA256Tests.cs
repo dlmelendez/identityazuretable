@@ -20,13 +20,14 @@ using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {
-    public class UserOnlyStoreTests : BaseUserStoreTests<ApplicationUserV2, IdentityCloudContext, UserOnlyStore<ApplicationUserV2, IdentityCloudContext>, DefaultKeyHelper>
+    public class UserOnlyStoreSHA256Tests : BaseUserStoreTests<ApplicationUserV2, IdentityCloudContext, UserOnlyStore<ApplicationUserV2, IdentityCloudContext>, SHA256KeyHelper>
     {
         public const string UserOnlyStoreTrait = "IdentityCore.Azure.UserOnlyStore";
         public const string UserOnlyStoreTraitProperties = UserOnlyStoreTrait + ".Properties";
 
-        public UserOnlyStoreTests(UserFixture<ApplicationUserV2, IdentityCloudContext, UserOnlyStore<ApplicationUserV2, IdentityCloudContext>, DefaultKeyHelper> userFix, ITestOutputHelper output) :
-            base(userFix, output) {  }
+        public UserOnlyStoreSHA256Tests(UserFixture<ApplicationUserV2, IdentityCloudContext, UserOnlyStore<ApplicationUserV2, IdentityCloudContext>, SHA256KeyHelper> userFix, ITestOutputHelper output) :
+            base(userFix, output)
+        { }
         [Fact(DisplayName = "AddRemoveUserClaim")]
         [Trait(UserOnlyStoreTrait, "")]
         public override Task AddRemoveUserClaim()
@@ -164,7 +165,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         [Trait(UserOnlyStoreTrait, "")]
         public override void UserStoreCtors()
         {
-            Assert.Throws<ArgumentNullException>(() => 
+            Assert.Throws<ArgumentNullException>(() =>
             {
                 new UserOnlyStore<ApplicationUserV2, IdentityCloudContext>(null, null, null);
             });
