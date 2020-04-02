@@ -5,6 +5,7 @@
     <VersionPrefix>2.0.0</VersionPrefix>
     <Authors>Dave Melendez</Authors>
     <TargetFrameworks>net461;netcoreapp2.1;netcoreapp3.1</TargetFrameworks>
+    <LangVersion>8.0</LangVersion>
     <AssemblyName>ElCamino.AspNetCore.Identity.AzureTable.Tests</AssemblyName>
     <IsPackable>false</IsPackable>
     <Version>3.1</Version>

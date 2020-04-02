@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <LangVersion>8.0</LangVersion>
     <AssemblyName>ElCamino.Identity.AzureTable.DataUtility</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>ElCamino.Identity.AzureTable.DataUtility</PackageId>
