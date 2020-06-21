@@ -625,7 +625,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     var taskUser = createPassword ?
                         await manager.CreateAsync(user, DefaultUserPassword) :
                         await manager.CreateAsync(user);
-                    output.WriteLine("User Id: {0}", user.Id);
                     Assert.True(taskUser.Succeeded, string.Concat(taskUser.Errors));
 
 
@@ -1128,12 +1127,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     TUser tempUser = null;
                     for (int i = 0; i < userCount; i++)
                     {
-                        var sw2 = new Stopwatch();
-                        output.WriteLine("CreateTestUserLite()");
-                        sw2.Start();
                         tempUser = await CreateTestUserLiteAsync(true, true);
-                        sw2.Stop();
-                        output.WriteLine("CreateTestUserLite(): {0} seconds", sw2.Elapsed.TotalSeconds);
                         await store.AddClaimAsync(tempUser, claim);
                     }
                     sw.Stop();
