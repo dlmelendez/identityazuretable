@@ -161,15 +161,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                         }
                         iRoleCounter++;
                     }
-                    const string rName = "Name";
                     TableQuery tqRoles = new TableQuery();
                     tqRoles.FilterString = queryTemp;
-                    tqRoles.SelectColumns = new List<string>() { rName };
+                    tqRoles.SelectColumns = new List<string>() { nameof(Model.IdentityRole.Name) };
                     tasks.Add(
                         _roleTable.ExecuteQueryAsync(tqRoles).ToListAsync()
                         .ContinueWith((t) => {
-                            return t.Result.Where(w => w.Properties[rName] != null)
-                            .Select(d => d.Properties[rName].StringValue)
+                            return t.Result.Where(w => w.Properties[nameof(Model.IdentityRole.Name)] != null)
+                            .Select(d => d.Properties[nameof(Model.IdentityRole.Name)].StringValue)
                             .Where(di => !string.IsNullOrWhiteSpace(di))
                             .ToList();
                         })
@@ -270,7 +269,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             TableQuery tqRoles = new TableQuery();
             tqRoles.FilterString = BuildRoleQuery(roleName);
-            tqRoles.SelectColumns = new List<string>() { "Name" };
+            tqRoles.SelectColumns = new List<string>() { nameof(Model.IdentityRole.Name) };
             tqRoles.TakeCount = 1;
             return await _roleTable.ExecuteQueryAsync(tqRoles).AnyAsync();
         }

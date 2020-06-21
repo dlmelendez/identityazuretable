@@ -55,7 +55,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
         public RoleStore(TContext context, IKeyHelper keyHelper) : base(new IdentityErrorDescriber())
         {
-            Context = context ?? throw new ArgumentNullException("context");
+            Context = context ?? throw new ArgumentNullException(nameof(context));
             _roleTable = context.RoleTable;
             _keyHelper = keyHelper;
         }
