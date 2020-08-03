@@ -75,7 +75,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             TableOperation insertOperation = TableOperation.Insert(role);
 
             // Execute the insert operation.
-            await _roleTable.ExecuteAsync(insertOperation);
+            await _roleTable.ExecuteAsync(insertOperation).ConfigureAwait(false);
             return IdentityResult.Success;
         }
 
@@ -89,7 +89,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             TableOperation deleteOperation = TableOperation.Delete(role);
 
             // Execute the insert operation.
-            await _roleTable.ExecuteAsync(deleteOperation);
+            await _roleTable.ExecuteAsync(deleteOperation).ConfigureAwait(false);
             return IdentityResult.Success;
         }
 
@@ -121,7 +121,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 _keyHelper.ParsePartitionKeyIdentityRoleFromRowKey(roleId),
                 roleId.ToString());
 
-            TableResult tresult = await _roleTable.ExecuteAsync(getOperation);
+            TableResult tresult = await _roleTable.ExecuteAsync(getOperation).ConfigureAwait(false);
             return tresult.Result == null ? null : (TRole)tresult.Result;
         }
 
@@ -134,7 +134,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 _keyHelper.GeneratePartitionKeyIdentityRole(roleName),
                 _keyHelper.GenerateRowKeyIdentityRole(roleName));
 
-            TableResult tresult = await _roleTable.ExecuteAsync(getOperation);
+            TableResult tresult = await _roleTable.ExecuteAsync(getOperation).ConfigureAwait(false);
             return tresult.Result == null ? null : (TRole)tresult.Result;
         }
        
@@ -161,13 +161,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 {
                     batch.Add(TableOperation.Delete(dRole));
                     batch.Add(TableOperation.Insert(role));
-                    await _roleTable.ExecuteBatchAsync(batch);
+                    await _roleTable.ExecuteBatchAsync(batch).ConfigureAwait(false);
                 }
                 else
                 {
                     await Task.WhenAll(
                     _roleTable.ExecuteAsync(TableOperation.Delete(dRole)),
-                    _roleTable.ExecuteAsync(TableOperation.Insert(role)));
+                    _roleTable.ExecuteAsync(TableOperation.Insert(role))).ConfigureAwait(false);
                 }
 
                 return IdentityResult.Success;
@@ -198,7 +198,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             OperationContext oc = new OperationContext();
             return 
 
-                (await _roleTable.ExecuteQueryAsync(tq).ToListAsync())                
+                (await _roleTable.ExecuteQueryAsync(tq).ToListAsync().ConfigureAwait(false))                
                 .Select(s =>
                 {
                     TRoleClaim trc = (TRoleClaim)Activator.CreateInstance(typeof(TRoleClaim));
@@ -228,7 +228,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             item.ClaimValue = claim.Value;
             ((Model.IGenerateKeys)item).GenerateKeys(_keyHelper);
 
-            await _roleTable.ExecuteAsync(TableOperation.Insert(item));
+            await _roleTable.ExecuteAsync(TableOperation.Insert(item)).ConfigureAwait(false);
         }
 
         public override async Task RemoveClaimAsync(TRole role, Claim claim, CancellationToken cancellationToken = default(CancellationToken))
@@ -256,7 +256,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             item.ETag = Constants.ETagWildcard;
             ((Model.IGenerateKeys)item).GenerateKeys(_keyHelper);
 
-            await _roleTable.ExecuteAsync(TableOperation.Delete(item));
+            await _roleTable.ExecuteAsync(TableOperation.Delete(item)).ConfigureAwait(false);
         }
 
         public TContext Context { get; private set; }

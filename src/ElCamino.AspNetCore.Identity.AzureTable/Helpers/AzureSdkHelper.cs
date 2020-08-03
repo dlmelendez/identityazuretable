@@ -17,8 +17,8 @@ namespace Microsoft.Azure.Cosmos.Table
             int iCounter = 0;
 #endif
             while (t != null)
-            {                
-                var segment = await ct.ExecuteQuerySegmentedAsync(tq, t);
+            {
+                TableQuerySegment<DynamicTableEntity> segment = await ct.ExecuteQuerySegmentedAsync(tq, t).ConfigureAwait(false);
                 foreach (var result in segment.Results)
                 {
 #if DEBUG
