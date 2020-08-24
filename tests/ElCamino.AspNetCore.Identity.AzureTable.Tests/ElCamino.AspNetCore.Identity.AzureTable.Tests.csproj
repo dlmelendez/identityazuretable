@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>Testing</Description>
     <Authors>David Melendez</Authors>
-    <TargetFrameworks>net461;netcoreapp2.1;netcoreapp3.1;net50</TargetFrameworks>
+    <TargetFrameworks>net461;netcoreapp2.1;netcoreapp3.1;net5.0</TargetFrameworks>
     <LangVersion>9.0</LangVersion>
     <AssemblyName>ElCamino.AspNetCore.Identity.AzureTable.Tests</AssemblyName>
     <IsPackable>false</IsPackable>
@@ -23,7 +23,7 @@
     <ProjectReference Include="..\..\src\ElCamino.AspNetCore.Identity.AzureTable\ElCamino.AspNetCore.Identity.AzureTable.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net50' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net5.0' ">
     <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="5.0.0-preview.7.20365.19" />
     <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="5.0.0-preview.7.20365.19" />
 

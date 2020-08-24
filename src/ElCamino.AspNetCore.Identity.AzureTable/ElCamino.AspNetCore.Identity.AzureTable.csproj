@@ -5,7 +5,7 @@
     <Copyright>Copyright ©  2020 David Melendez, MIT License</Copyright>
     <AssemblyTitle>Azure Table Storage Provider for ASP.NET Identity Core</AssemblyTitle>
     <Authors>David Melendez</Authors>
-    <TargetFrameworks>netstandard2.0;net50</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net5.0</TargetFrameworks>
     <LangVersion>9.0</LangVersion>
     <AssemblyName>ElCamino.AspNetCore.Identity.AzureTable</AssemblyName>
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
@@ -38,7 +38,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net50' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net5.0' ">
     <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="5.0.0-preview.7.20365.19" />
     <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="5.0.0-preview.7.20365.19" />
 
@@ -46,7 +46,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0-preview.7.20364.11" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' != 'net50' ">
+  <ItemGroup Condition=" '$(TargetFramework)' != 'net5.0' ">
     <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="2.2.0" />
 
