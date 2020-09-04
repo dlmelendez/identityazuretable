@@ -266,12 +266,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
         public TContext Context { get; private set; }
 
-        public override IQueryable<TRole> Roles
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
+        public override IQueryable<TRole> Roles => _roleTable.CreateQuery<TRole>();
     }
 }

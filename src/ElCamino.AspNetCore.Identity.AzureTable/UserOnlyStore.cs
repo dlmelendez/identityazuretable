@@ -57,7 +57,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             _config = config;
         }
 
-        public override IQueryable<TUser> Users => throw new NotImplementedException();
+        public override IQueryable<TUser> Users => _userTable.CreateQuery<TUser>();
 
         public virtual async Task<bool> CreateTablesIfNotExistsAsync()
         {
