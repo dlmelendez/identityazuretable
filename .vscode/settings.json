@@ -1,0 +1,4 @@
+{
+    "dotnet-test-explorer.testProjectPath": "**/*ElCamino.AspNetCore.Identity.AzureTable.Tests.@(csproj|vbproj|fsproj)",
+    "omnisharp.defaultLaunchSolution": "ElCamino.AspNetCore.Identity.AzureTable.sln"
+}
