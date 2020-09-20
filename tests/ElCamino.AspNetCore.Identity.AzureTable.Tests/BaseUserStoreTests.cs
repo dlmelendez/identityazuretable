@@ -1227,6 +1227,37 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             }
         }
 
+        public virtual async Task CanFindByNameIfImmutableIdSetUp()
+        {
+            var userStore = userFixture.CreateUserStore();
+
+            var user = GenTestUser();
+            _ = await userFixture.CreateUserManager().CreateAsync(user);
+
+            var userFound = await userStore.FindByNameAsync(user.UserName);
+
+
+            Assert.NotNull(user);
+            Assert.Equal(user.Id, userFound.Id);
+            Assert.Equal(user.PartitionKey, userFound.PartitionKey);
+            Assert.Equal(user.RowKey, userFound.RowKey);
+        }
+
+        public async virtual Task CanFindByIdIfImmutableIdSetUp()
+        {
+            var userStore = userFixture.CreateUserStore();
+
+            var user = GenTestUser();
+            _ = await userFixture.CreateUserManager().CreateAsync(user);
+
+            var userFound = await userStore.FindByIdAsync(user.Id);
+
+            Assert.NotNull(user);
+            Assert.Equal(user.Id, userFound.Id);
+            Assert.Equal(user.PartitionKey, userFound.PartitionKey);
+            Assert.Equal(user.RowKey, userFound.RowKey);
+        }
+
         public virtual async Task ThrowIfDisposed()
         {
             var store = userFixture.CreateUserStore();

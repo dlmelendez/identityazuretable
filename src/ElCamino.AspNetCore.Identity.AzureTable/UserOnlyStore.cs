@@ -347,12 +347,20 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return GetUserAsync(_keyHelper.GenerateRowKeyUserId(userId));
         }
 
-        public override Task<TUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken = default(CancellationToken))
+        public override async Task<TUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
             TableQuery userId = FindByUserNameQuery(normalizedUserName);
-            return GetUserAggregateAsync(userId);
+            TUser user = await GetUserAggregateAsync(userId).ConfigureAwait(false);
+            //Make sure the index lookup matches the user record.
+            if(user != default(TUser) 
+                && user.NormalizedUserName != null
+                && user.NormalizedUserName.Equals(normalizedUserName, StringComparison.OrdinalIgnoreCase))
+            {
+                return user;
+            }
+            return default(TUser);
         }
 
         protected async Task<TUserClaim> GetUserClaimAsync(TUser user, Claim claim)
@@ -443,11 +451,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return null;
         }
 
-
-        protected IAsyncEnumerable<DynamicTableEntity> GetUserAggregateQueryAsync(string userId)
+        /// <summary>
+        /// Retrieves User rows by partitionkey UserId
+        /// </summary>
+        /// <param name="userIdPartitionKey">Must be formatted as UserId PartitionKey</param>
+        /// <returns></returns>
+        protected IAsyncEnumerable<DynamicTableEntity> GetUserAggregateQueryAsync(string userIdPartitionKey)
         {
             TableQuery tq = new TableQuery();
-            tq.FilterString = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, userId);
+            tq.FilterString = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, userIdPartitionKey);
 
             return _userTable.ExecuteQueryAsync(tq);
         }
