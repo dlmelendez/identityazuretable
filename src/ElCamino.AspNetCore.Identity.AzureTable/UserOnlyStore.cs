@@ -814,6 +814,21 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
         }
 
+        public override async Task SetUserNameAsync(TUser user, string userName, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            this.ThrowIfDisposed();
+            if (user == null) throw new ArgumentNullException(nameof(user));
+
+            //Only remove the username if different
+            //The UserManager calls UpdateAsync which will generate the new username index record
+            if (!string.IsNullOrWhiteSpace(user.UserName) && user.UserName != userName)
+            {
+                await DeleteUserNameIndexAsync(ConvertIdToString(user.Id), user.UserName).ConfigureAwait(false);
+            }
+            user.UserName = userName;
+        }
+
         public override async Task SetEmailAsync(TUser user, string email, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -848,6 +863,17 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
         }
 
+        protected async Task DeleteUserNameIndexAsync(string userId, string userName)
+        {
+            string userPartitionKey = _keyHelper.GenerateRowKeyUserId(userId);
+
+            TableResult result =  await _indexTable.ExecuteAsync(TableOperation.Retrieve(_keyHelper.GenerateRowKeyUserName(userName), userPartitionKey)).ConfigureAwait(false);
+            var tableentity = result.Result as DynamicTableEntity;      
+            if(tableentity != null)
+            {
+                _ = await _indexTable.ExecuteAsync(TableOperation.Delete(tableentity)).ConfigureAwait(false);
+            }
+        }
 
         protected Task DeleteAllUserRows(string userId, IEnumerable<DynamicTableEntity> userRows)
         {
@@ -947,7 +973,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
         /// <summary>
         /// Create an index for getting the user id based on his user name,
-        /// Only used if EnableImmutableUserId = true
         /// </summary>
         /// <param name="userPartitionKey"></param>
         /// <param name="userName"></param>

@@ -5,7 +5,7 @@ using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
 using Xunit;
 
-namespace ElCamino.Web.Identity.AzureTable.Tests.ModelTests
+namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.ModelTests
 {
     public class IdentityUserClaimTests
     {

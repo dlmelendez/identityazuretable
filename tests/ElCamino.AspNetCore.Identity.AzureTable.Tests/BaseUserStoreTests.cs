@@ -347,6 +347,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     Assert.NotNull(oldUser);
 
 
+                    //Query for the old username, should be null
+                    var oldUserNameResult = await manager.FindByNameAsync(originalPlainUserName);
+                    Assert.Null(oldUserNameResult);
+
 
                     //Check logins
                     foreach (var log in changedUserLogins)

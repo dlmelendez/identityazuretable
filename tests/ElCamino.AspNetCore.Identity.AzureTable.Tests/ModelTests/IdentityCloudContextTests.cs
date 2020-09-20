@@ -8,7 +8,7 @@ using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
 using Xunit.Abstractions;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 
-namespace ElCamino.AspNet.Identity.AzureTable.Tests.ModelTests
+namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.ModelTests
 {
     public class IdentityCloudContextTests : IClassFixture<RoleFixture<IdentityUser, IdentityRole, IdentityCloudContext, DefaultKeyHelper>>
     {
