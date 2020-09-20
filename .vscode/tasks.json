@@ -2,6 +2,7 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "detail": "Build main identity azure table.",
             "label": "build",
             "command": "dotnet",
             "type": "process",
@@ -12,6 +13,6 @@
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile"
-        }
+        }       
     ]
 }
