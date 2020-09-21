@@ -52,12 +52,19 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         private CloudTable _roleTable;
         private IdentityErrorDescriber _errorDescriber = new IdentityErrorDescriber();
         protected IKeyHelper _keyHelper;
+        private readonly string FilterString;
 
         public RoleStore(TContext context, IKeyHelper keyHelper) : base(new IdentityErrorDescriber())
         {
             Context = context ?? throw new ArgumentNullException(nameof(context));
             _roleTable = context.RoleTable;
             _keyHelper = keyHelper;
+
+            FilterString = TableQuery.CombineFilters(
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityRole),
+                TableOperators.And,
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.LessThan, _keyHelper.PreFixIdentityRoleUpperBound));
+
         }
 
         public Task<bool> CreateTableIfNotExistsAsync()
@@ -261,12 +268,18 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
         public TContext Context { get; private set; }
 
+        /// <summary>
+        /// Queries will be slow unless they include Partition and/or Row keys
+        /// </summary>
         public override IQueryable<TRole> Roles
         {
             get
             {
-                throw new NotImplementedException();
+                TableQuery<TRole> tableQuery = _roleTable.CreateQuery<TRole>();
+                tableQuery.FilterString = FilterString;
+                return tableQuery.AsQueryable();
             }
         }
+
     }
 }

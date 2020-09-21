@@ -312,6 +312,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
                     Assert.NotNull(result);
                     Assert.Equal(role.Name, result.Name);
+
+                    sw.Reset();
+                    sw.Start();
+                    var result1 = manager.Roles.Where(r => r.Name == role.Name).ToList();
+                    sw.Stop();
+                    output.WriteLine("RoleManager.Roles where name: {0} seconds", sw.Elapsed.TotalSeconds);
+
+                    Assert.NotNull(result1.SingleOrDefault());
+                    Assert.Equal(role.Name, result1.SingleOrDefault().Name);
                 }
             }
         }

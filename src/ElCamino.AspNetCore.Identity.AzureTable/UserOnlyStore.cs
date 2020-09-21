@@ -48,6 +48,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
         private IdentityConfiguration _config = null;
 
+        private readonly string FilterString;
+
         public UserOnlyStore(TContext context, IKeyHelper keyHelper, IdentityConfiguration config) : base(new IdentityErrorDescriber())
         {
             Context = context ?? throw new ArgumentNullException(nameof(context));
@@ -55,9 +57,30 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             _indexTable = context.IndexTable;
             _keyHelper = keyHelper;
             _config = config;
+
+            string partitionFilter = TableQuery.CombineFilters(
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserId),
+                TableOperators.And,
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.LessThan, _keyHelper.PreFixIdentityUserIdUpperBound));
+            string rowFilter = TableQuery.CombineFilters(
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserId),
+                TableOperators.And,
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.LessThan, _keyHelper.PreFixIdentityUserIdUpperBound));
+            FilterString = TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowFilter);
         }
 
-        public override IQueryable<TUser> Users => throw new NotImplementedException();
+        /// <summary>
+        /// Queries will be slow unless they include Partition and/or Row keys
+        /// </summary>
+        public override IQueryable<TUser> Users
+        {
+            get
+            {
+                TableQuery<TUser> tableQuery =  _userTable.CreateQuery<TUser>();
+                tableQuery.FilterString = FilterString;
+                return tableQuery.AsQueryable();
+            }
+        }
 
         public virtual async Task<bool> CreateTablesIfNotExistsAsync()
         {

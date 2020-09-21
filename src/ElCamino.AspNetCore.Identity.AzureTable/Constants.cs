@@ -51,6 +51,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             #region Identity Role
             public const string PreFixIdentityRole = "R_";
+            public const string PreFixIdentityRoleUpperBound = "S_";
             public const string PreFixIdentityRoleClaim = "C_";
             public const string FormatterIdentityRole = PreFixIdentityRole + "{0}";
             public const string FormatterIdentityRoleClaim = PreFixIdentityRoleClaim + "{0}";

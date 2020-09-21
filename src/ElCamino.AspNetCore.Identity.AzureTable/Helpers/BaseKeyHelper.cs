@@ -54,6 +54,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 
         public virtual string PreFixIdentityRole => Constants.RowKeyConstants.PreFixIdentityRole;
 
+        public virtual string PreFixIdentityRoleUpperBound => Constants.RowKeyConstants.PreFixIdentityRoleUpperBound;
+
         public virtual string PreFixIdentityRoleClaim => Constants.RowKeyConstants.PreFixIdentityRoleClaim;
 
         public virtual string FormatterIdentityRole => Constants.RowKeyConstants.FormatterIdentityRole;

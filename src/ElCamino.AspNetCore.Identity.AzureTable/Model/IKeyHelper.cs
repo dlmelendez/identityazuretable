@@ -31,6 +31,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 
         #region Identity Role
         string PreFixIdentityRole { get; }
+        string PreFixIdentityRoleUpperBound { get; }
         string PreFixIdentityRoleClaim { get; }
         string FormatterIdentityRole { get; }
         string FormatterIdentityRoleClaim { get; }

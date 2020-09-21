@@ -932,6 +932,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     output.WriteLine("FindByNameAsync: {0} seconds", sw.Elapsed.TotalSeconds);
 
                     Assert.Equal(user.UserName, result.UserName);
+
+                    sw.Reset();
+                    sw.Start();
+                    var result1 = manager.Users.Where(w => w.UserName == user.UserName).ToList().FirstOrDefault();
+                    sw.Stop();
+                    output.WriteLine("Users where UserName: {0} seconds", sw.Elapsed.TotalSeconds);
+                    Assert.Equal(user.UserName, result1.UserName);
                 }
             }
         }
