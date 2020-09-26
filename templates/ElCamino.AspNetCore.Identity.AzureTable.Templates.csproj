@@ -23,6 +23,8 @@
     <PackageProjectUrl>https://dlmelendez.github.io/identityazuretable</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <PackageReleaseNotes>Check https://github.com/dlmelendez/identityazuretable/releases for the latest release information.</PackageReleaseNotes>
+
   </PropertyGroup>
 
   <ItemGroup>
