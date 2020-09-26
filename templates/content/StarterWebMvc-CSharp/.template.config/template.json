@@ -2,7 +2,7 @@
   "$schema": "http://json.schemastore.org/template",
   "author": "David Melendez",
   "classifications": [ "Web", "MVC" ],
-  "name": "ASP.NET Core MVC Web App with Identity Azure Tables ",
+  "name": "ASP.NET Core MVC Web App/Identity Azure Tables ",
   "identity": "ElCamino.AspNetCore.Identity.AzureTable.Web.Mvc.Template",
   "groupIdentity": "ElCamino.AspNetCore.Identity",
   "shortName": "mvc-id-azure-tables",
