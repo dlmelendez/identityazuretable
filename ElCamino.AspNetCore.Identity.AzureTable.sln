@@ -16,6 +16,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		StoreClasses.dgml = StoreClasses.dgml
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElCamino.AspNetCore.Identity.AzureTable.Templates", "templates\ElCamino.AspNetCore.Identity.AzureTable.Templates.csproj", "{F8EBDAC0-0F00-4EED-99B4-6F7FF234CCBB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,12 @@ Global
 		{56BB5104-E5F7-49BD-A5E9-25B818197F28}.Release|Any CPU.Build.0 = Release|Any CPU
 		{56BB5104-E5F7-49BD-A5E9-25B818197F28}.Signed|Any CPU.ActiveCfg = Release|Any CPU
 		{56BB5104-E5F7-49BD-A5E9-25B818197F28}.Signed|Any CPU.Build.0 = Release|Any CPU
+		{F8EBDAC0-0F00-4EED-99B4-6F7FF234CCBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8EBDAC0-0F00-4EED-99B4-6F7FF234CCBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8EBDAC0-0F00-4EED-99B4-6F7FF234CCBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8EBDAC0-0F00-4EED-99B4-6F7FF234CCBB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8EBDAC0-0F00-4EED-99B4-6F7FF234CCBB}.Signed|Any CPU.ActiveCfg = Release|Any CPU
+		{F8EBDAC0-0F00-4EED-99B4-6F7FF234CCBB}.Signed|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
