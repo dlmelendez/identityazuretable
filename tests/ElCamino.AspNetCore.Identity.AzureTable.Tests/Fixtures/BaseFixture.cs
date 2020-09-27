@@ -18,22 +18,23 @@ using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 
 namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 {
-    public class BaseFixture<TUser, TRole, TContext, TUserStore> 
-        : BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore, DefaultKeyHelper>
+    public class BaseFixture<TUser, TRole, TContext, TUserStore, TKeyHelper> 
+        : BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore, TKeyHelper>
         where TUser : IdentityUser, new()
         where TRole : IdentityRole, new()
         where TContext : IdentityCloudContext, new()
         where TUserStore : UserStore<TUser, TRole, TContext>
+        where TKeyHelper : IKeyHelper, new()
     {
 
         public RoleStore<TRole> CreateRoleStore()
         {
-            return new RoleStore<TRole>(GetContext(), new DefaultKeyHelper());
+            return new RoleStore<TRole>(GetContext(), new TKeyHelper());
         }
 
         public RoleStore<TRole> CreateRoleStore(TContext context)
         {
-            return new RoleStore<TRole>(context, new DefaultKeyHelper());
+            return new RoleStore<TRole>(context, new TKeyHelper());
         }
 
         public RoleManager<TRole> CreateRoleManager()
@@ -43,7 +44,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 
         public RoleManager<TRole> CreateRoleManager(TContext context)
         {
-            return CreateRoleManager(new RoleStore<TRole>(context, new DefaultKeyHelper()));
+            return CreateRoleManager(new RoleStore<TRole>(context, new TKeyHelper()));
         }
 
         public RoleManager<TRole> CreateRoleManager(RoleStore<TRole> store)
@@ -69,7 +70,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
             id = id.AddAzureTableStores<TContext>(new Func<IdentityConfiguration>(() =>
             {
                 return GetConfig();
-            }));
+            }), GetKeyHelper());
            
 
             id.CreateAzureTablesIfNotExists<TContext>();
@@ -105,7 +106,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
             id = id.AddAzureTableStores<TContext>(new Func<IdentityConfiguration>(() =>
             {
                 return GetConfig();
-            }));
+            }), GetKeyHelper());
 
             id.Services.AddDataProtection();
             id.AddDefaultTokenProviders();
@@ -119,11 +120,12 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 
     }
 
-    public class BaseFixture<TUser, TContext, TUserStore>
-    : BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore, DefaultKeyHelper>
+    public class BaseFixture<TUser, TContext, TUserStore, TKeyHelper>
+    : BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore, TKeyHelper>
     where TUser : IdentityUser, new()
     where TContext : IdentityCloudContext, new()
     where TUserStore : UserOnlyStore<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken>
+    where TKeyHelper : IKeyHelper, new()
     {
 
     }
@@ -239,7 +241,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
             id = id.AddAzureTableStores<TContext>(new Func<IdentityConfiguration>(() =>
             {
                 return GetConfig();
-            }));
+            }), GetKeyHelper());
             
             id.Services.AddDataProtection();
             id.AddDefaultTokenProviders();

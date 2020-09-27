@@ -16,13 +16,16 @@ using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
 using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
 using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
 using Microsoft.AspNetCore.Identity;
+using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {
-    public partial class UserOnlyStoreTests : BaseUserStoreTests<ApplicationUserV2, IdentityCloudContext, UserOnlyStore<ApplicationUserV2, IdentityCloudContext>>
+    public class UserOnlyStoreTests : BaseUserStoreTests<ApplicationUserV2, IdentityCloudContext, UserOnlyStore<ApplicationUserV2, IdentityCloudContext>, DefaultKeyHelper>
     {
         public const string UserOnlyStoreTrait = "IdentityCore.Azure.UserOnlyStore";
-        public UserOnlyStoreTests(UserFixture<ApplicationUserV2, IdentityCloudContext, UserOnlyStore<ApplicationUserV2, IdentityCloudContext>> userFix, ITestOutputHelper output) :
+        public const string UserOnlyStoreTraitProperties = UserOnlyStoreTrait + ".Properties";
+
+        public UserOnlyStoreTests(UserFixture<ApplicationUserV2, IdentityCloudContext, UserOnlyStore<ApplicationUserV2, IdentityCloudContext>, DefaultKeyHelper> userFix, ITestOutputHelper output) :
             base(userFix, output) {  }
         [Fact(DisplayName = "AddRemoveUserClaim")]
         [Trait(UserOnlyStoreTrait, "")]
@@ -166,6 +169,80 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                 new UserOnlyStore<ApplicationUserV2, IdentityCloudContext>(null, null, null);
             });
         }
+
+        #region Properties
+
+        [Fact(DisplayName = "AccessFailedCount")]
+        [Trait(UserOnlyStoreTraitProperties, "")]
+        public override Task AccessFailedCount()
+        {
+            return base.AccessFailedCount();
+        }
+
+        [Fact(DisplayName = "Email")]
+        [Trait(UserOnlyStoreTraitProperties, "")]
+        public override Task Email()
+        {
+            return base.Email();
+        }
+
+        [Fact(DisplayName = "EmailConfirmed")]
+        [Trait(UserOnlyStoreTraitProperties, "")]
+        public override Task EmailConfirmed()
+        {
+            return base.EmailConfirmed();
+        }
+
+        [Fact(DisplayName = "EmailNone")]
+        [Trait(UserOnlyStoreTraitProperties, "")]
+        public override Task EmailNone()
+        {
+            return base.EmailNone();
+        }
+
+        [Fact(DisplayName = "LockoutEnabled")]
+        [Trait(UserOnlyStoreTraitProperties, "")]
+        public override Task LockoutEnabled()
+        {
+            return base.LockoutEnabled();
+        }
+
+        [Fact(DisplayName = "PasswordHash")]
+        [Trait(UserOnlyStoreTraitProperties, "")]
+        public override Task PasswordHash()
+        {
+            return base.PasswordHash();
+        }
+
+        [Fact(DisplayName = "PhoneNumber")]
+        [Trait(UserOnlyStoreTraitProperties, "")]
+        public override Task PhoneNumber()
+        {
+            return base.PhoneNumber();
+        }
+
+        [Fact(DisplayName = "PhoneNumberConfirmed")]
+        [Trait(UserOnlyStoreTraitProperties, "")]
+        public override Task PhoneNumberConfirmed()
+        {
+            return base.PhoneNumberConfirmed();
+        }
+
+        [Fact(DisplayName = "SecurityStamp")]
+        [Trait(UserOnlyStoreTraitProperties, "")]
+        public override Task SecurityStamp()
+        {
+            return base.SecurityStamp();
+        }
+
+        [Fact(DisplayName = "TwoFactorEnabled")]
+        [Trait(UserOnlyStoreTraitProperties, "")]
+        public override Task TwoFactorEnabled()
+        {
+            return base.TwoFactorEnabled();
+        }
+
+        #endregion
     }
 
 }

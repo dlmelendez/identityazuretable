@@ -1,0 +1,11 @@
+{
+	"folders": [		
+		{
+			"name": "samples",
+			"path": "..\\sample"
+		}
+	],
+	"settings": {
+		"omnisharp.defaultLaunchSolution": "SampleMvcWeb.sln"
+	}
+}

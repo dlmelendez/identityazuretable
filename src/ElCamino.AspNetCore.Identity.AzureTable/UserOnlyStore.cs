@@ -48,6 +48,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
         private IdentityConfiguration _config = null;
 
+        private readonly string FilterString;
+
         public UserOnlyStore(TContext context, IKeyHelper keyHelper, IdentityConfiguration config) : base(new IdentityErrorDescriber())
         {
             Context = context ?? throw new ArgumentNullException(nameof(context));
@@ -55,9 +57,30 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             _indexTable = context.IndexTable;
             _keyHelper = keyHelper;
             _config = config;
+
+            string partitionFilter = TableQuery.CombineFilters(
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserId),
+                TableOperators.And,
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.LessThan, _keyHelper.PreFixIdentityUserIdUpperBound));
+            string rowFilter = TableQuery.CombineFilters(
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserId),
+                TableOperators.And,
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.LessThan, _keyHelper.PreFixIdentityUserIdUpperBound));
+            FilterString = TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowFilter);
         }
 
-        public override IQueryable<TUser> Users => throw new NotImplementedException();
+        /// <summary>
+        /// Queries will be slow unless they include Partition and/or Row keys
+        /// </summary>
+        public override IQueryable<TUser> Users
+        {
+            get
+            {
+                TableQuery<TUser> tableQuery =  _userTable.CreateQuery<TUser>();
+                tableQuery.FilterString = FilterString;
+                return tableQuery.AsQueryable();
+            }
+        }
 
         public virtual async Task<bool> CreateTablesIfNotExistsAsync()
         {
@@ -75,7 +98,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
             if (user == null) throw new ArgumentNullException(nameof(user));
-            if (claims == null) throw new ArgumentNullException("claims");
+            if (claims == null) throw new ArgumentNullException(nameof(claims));
 
             BatchOperationHelper bop = new BatchOperationHelper();
 
@@ -88,7 +111,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
 
             tasks.Add(bop.ExecuteBatchAsync(_userTable));
-            await Task.WhenAll(tasks);
+            await Task.WhenAll(tasks).ConfigureAwait(false);
         }
 
         public virtual async Task AddClaimAsync(TUser user, Claim claim)
@@ -102,7 +125,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             tasks.Add(_userTable.ExecuteAsync(TableOperation.Insert(CreateUserClaim(user, claim))));
             tasks.Add(_indexTable.ExecuteAsync(TableOperation.InsertOrReplace(CreateClaimIndex(_keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)), claim.Type, claim.Value))));
 
-            await Task.WhenAll(tasks);
+            await Task.WhenAll(tasks).ConfigureAwait(false);
         }
 
         public override Task AddLoginAsync(TUser user, UserLoginInfo login, CancellationToken cancellationToken = default(CancellationToken))
@@ -141,7 +164,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                     tasks.Add(_indexTable.ExecuteAsync(TableOperation.InsertOrReplace(index)));
                 }
 
-                await Task.WhenAll(tasks.ToArray());
+                await Task.WhenAll(tasks.ToArray()).ConfigureAwait(false);
                 return IdentityResult.Success;
             }
             catch (AggregateException aggex)
@@ -159,11 +182,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             List<Task> tasks = new List<Task>(50);
             string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
-#if NETSTANDARD2_1
             var userRows = await GetUserAggregateQueryAsync(userPartitionKey).ToListAsync().ConfigureAwait(false);
-#else
-            var userRows = await GetUserAggregateQueryAsync(userPartitionKey).ConfigureAwait(false);
-#endif
+
             tasks.Add(DeleteAllUserRows(userPartitionKey, userRows));
 
             tasks.Add(_indexTable.ExecuteAsync(TableOperation.Delete(CreateUserNameIndex(userPartitionKey, user.UserName))));
@@ -189,7 +209,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             try
             {
-                await Task.WhenAll(tasks.ToArray());
+                await Task.WhenAll(tasks.ToArray()).ConfigureAwait(false);
                 return IdentityResult.Success;
             }
             catch (AggregateException aggex)
@@ -221,11 +241,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
         }
 
-        protected override async Task<TUserLogin> FindUserLoginAsync(TKey userId, string loginProvider, string providerKey, CancellationToken cancellationToken)
+        protected override Task<TUserLogin> FindUserLoginAsync(TKey userId, string loginProvider, string providerKey, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            return await FindUserLoginAsync(ConvertIdToString(userId), loginProvider, providerKey);
+            return FindUserLoginAsync(ConvertIdToString(userId), loginProvider, providerKey);
         }
 
         protected async Task<TUserLogin> FindUserLoginAsync(string userId, string loginProvider, string providerKey)
@@ -238,11 +258,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, userId),
                 TableOperators.And,
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, rowKey));
-#if NETSTANDARD2_1
-            var log = await _userTable.ExecuteQueryAsync(tq).FirstOrDefaultAsync().ConfigureAwait(false);
-#else
-            var log = (await _userTable.ExecuteQueryAsync(tq)).FirstOrDefault();
-#endif
+            DynamicTableEntity log = await _userTable.ExecuteQueryAsync(tq).FirstOrDefaultAsync().ConfigureAwait(false);
+
             if (log != null)
             {
                 TUserLogin tlogin = MapTableEntity<TUserLogin>(log);
@@ -261,15 +278,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             string partitionKey = _keyHelper.GeneratePartitionKeyIndexByLogin(loginProvider, providerKey);
             var loginQuery = GetUserIdByIndex(partitionKey, rowKey);
 
-#if NETSTANDARD2_1
-            var indexInfo = await _indexTable.ExecuteQueryAsync(loginQuery).FirstOrDefaultAsync().ConfigureAwait(false);
-#else
-            var indexInfo = (await _indexTable.ExecuteQueryAsync(loginQuery).ConfigureAwait(false)).FirstOrDefault();
-#endif
+            DynamicTableEntity indexInfo = await _indexTable.ExecuteQueryAsync(loginQuery).FirstOrDefaultAsync().ConfigureAwait(false);
+
             if (indexInfo != null)
             {
                 string userId = indexInfo.Properties["Id"].StringValue;
-                return await FindUserLoginAsync(userId, loginProvider, providerKey);
+                return await FindUserLoginAsync(userId, loginProvider, providerKey).ConfigureAwait(false);
             }
 
             return null;
@@ -289,7 +303,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             string rowKey = _keyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey);
             string partitionKey = _keyHelper.GeneratePartitionKeyIndexByLogin(loginProvider, providerKey);
-            var loginQuery = GetUserIdByIndex(partitionKey, rowKey);
+            TableQuery loginQuery = GetUserIdByIndex(partitionKey, rowKey);
 
             return GetUserAggregateAsync(loginQuery);
         }
@@ -306,7 +320,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         public async Task<IEnumerable<TUser>> FindAllByEmailAsync(string plainEmail)
         {
             this.ThrowIfDisposed();
-            var users = await GetUsersAggregateByIndexQueryAsync(FindByEmailQuery(plainEmail), GetUserQueryAsync);
+            IEnumerable<TUser> users = await GetUsersAggregateByIndexQueryAsync(FindByEmailQuery(plainEmail), GetUserQueryAsync).ConfigureAwait(false);
             return users.Where(user => _keyHelper.GenerateRowKeyUserEmail(plainEmail) == _keyHelper.GenerateRowKeyUserEmail(user.Email));
         }
 
@@ -333,7 +347,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             TableQuery tq = new TableQuery();
             tq.TakeCount = 1;
-            tq.SelectColumns = new List<string>() { "Id" };
+            tq.SelectColumns = new List<string>() { nameof(IdentityUserIndex.Id) };
             tq.FilterString = TableQuery.CombineFilters(
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, partitionkey),
                 TableOperators.And,
@@ -344,7 +358,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         protected TableQuery GetUserIdsByIndex(string partitionKey)
         {
             TableQuery tq = new TableQuery();
-            tq.SelectColumns = new List<string>() { "Id" };
+            tq.SelectColumns = new List<string>() { nameof(IdentityUserIndex.Id) };
             tq.FilterString = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, partitionKey);
             return tq;
         }
@@ -356,18 +370,26 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return GetUserAsync(_keyHelper.GenerateRowKeyUserId(userId));
         }
 
-        public override Task<TUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken = default(CancellationToken))
+        public override async Task<TUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            var userId = FindByUserNameQuery(normalizedUserName);
-            return GetUserAggregateAsync(userId);
+            TableQuery userId = FindByUserNameQuery(normalizedUserName);
+            TUser user = await GetUserAggregateAsync(userId).ConfigureAwait(false);
+            //Make sure the index lookup matches the user record.
+            if(user != default(TUser) 
+                && user.NormalizedUserName != null
+                && user.NormalizedUserName.Equals(normalizedUserName, StringComparison.OrdinalIgnoreCase))
+            {
+                return user;
+            }
+            return default(TUser);
         }
 
         protected async Task<TUserClaim> GetUserClaimAsync(TUser user, Claim claim)
         {
-            var tr = await _userTable.ExecuteAsync(TableOperation.Retrieve<TUserClaim>(_keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)),
-                _keyHelper.GenerateRowKeyIdentityUserClaim(claim.Type, claim.Value)));
+            TableResult tr = await _userTable.ExecuteAsync(TableOperation.Retrieve<TUserClaim>(_keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)),
+                _keyHelper.GenerateRowKeyIdentityUserClaim(claim.Type, claim.Value))).ConfigureAwait(false);
             if (tr.Result != null)
             {
                 return (TUserClaim)tr.Result;
@@ -387,16 +409,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             string partitionFilter =
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, user.PartitionKey);
             string rowFilter = TableQuery.CombineFilters(
-                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.GreaterThanOrEqual, Constants.RowKeyConstants.PreFixIdentityUserClaim),
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserClaim),
                 TableOperators.And,
-                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.LessThan, "D_"));
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.LessThan, _keyHelper.PreFixIdentityUserClaimUpperBound));
             tq.FilterString = TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowFilter);
-#if NETSTANDARD2_1
-            await foreach (var de in _userTable.ExecuteQueryAsync(tq))
-#else
-             foreach (var de in (await _userTable.ExecuteQueryAsync(tq)))
-
-#endif
+            await foreach (var de in _userTable.ExecuteQueryAsync(tq).ConfigureAwait(false))
             {
                 TUserClaim tclaim = MapTableEntity<TUserClaim>(de);
                 //1.7 Claim rowkey migration 
@@ -434,15 +451,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             string partitionFilter =
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, user.PartitionKey);
             string rowFilter = TableQuery.CombineFilters(
-                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.GreaterThanOrEqual, Constants.RowKeyConstants.PreFixIdentityUserLogin),
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserLogin),
                 TableOperators.And,
-                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.LessThan, "M_"));
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.LessThan, _keyHelper.PreFixIdentityUserLoginUpperBound));
             tq.FilterString = TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowFilter);
-#if NETSTANDARD2_1
-            await foreach (var de in _userTable.ExecuteQueryAsync(tq))
-#else
-            foreach (var de in (await _userTable.ExecuteQueryAsync(tq)))
-#endif
+            await foreach (var de in _userTable.ExecuteQueryAsync(tq).ConfigureAwait(false))
             {
                 TUserLogin tul = MapTableEntity<TUserLogin>(de);
                 rLogins.Add(new UserLoginInfo(tul.LoginProvider, tul.ProviderKey, tul.ProviderDisplayName));
@@ -453,7 +466,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
         protected async virtual Task<TUser> GetUserAsync(string userId)
         {
-            var tr = await _userTable.ExecuteAsync(TableOperation.Retrieve<TUser>(userId, userId));
+            var tr = await _userTable.ExecuteAsync(TableOperation.Retrieve<TUser>(userId, userId)).ConfigureAwait(false);
             if (tr.Result != null)
             {
                 return (TUser)tr.Result;
@@ -461,26 +474,19 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return null;
         }
 
-#if NETSTANDARD2_1
-
-        protected IAsyncEnumerable<DynamicTableEntity> GetUserAggregateQueryAsync(string userId)
+        /// <summary>
+        /// Retrieves User rows by partitionkey UserId
+        /// </summary>
+        /// <param name="userIdPartitionKey">Must be formatted as UserId PartitionKey</param>
+        /// <returns></returns>
+        protected IAsyncEnumerable<DynamicTableEntity> GetUserAggregateQueryAsync(string userIdPartitionKey)
         {
             TableQuery tq = new TableQuery();
-            tq.FilterString = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, userId);
-
-            return _userTable.ExecuteQueryAsync(tq);
-        }
-#else
-                
-        protected Task<IEnumerable<DynamicTableEntity>> GetUserAggregateQueryAsync(string userId)
-        {
-            TableQuery tq = new TableQuery();
-            tq.FilterString = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, userId);
+            tq.FilterString = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, userIdPartitionKey);
 
             return _userTable.ExecuteQueryAsync(tq);
         }
 
-#endif
         protected async Task<IEnumerable<TUser>> GetUserAggregateQueryAsync(IEnumerable<string> userIds,
                 Func<string, string> setFilterByUserId = null,
                 Func<TUserClaim, bool> whereClaim = null)
@@ -532,12 +538,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 #endif
             var tasks = listTqs.Select((q) =>
             {
-#if NETSTANDARD2_1
                 return _userTable.ExecuteQueryAsync(q).ToListAsync()
-#else
-                return _userTable.ExecuteQueryAsync(q)
-
-#endif
                      .ContinueWith((taskResults) =>
                      {
                          //ContinueWith returns completed task. Calling .Result is safe here.
@@ -615,11 +616,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 #endif
             IEnumerable<Task> tasks = listTqs.Select((q) =>
             {
-#if NETSTANDARD2_1
                 return _userTable.ExecuteQueryAsync(q).ToListAsync()
-#else
-                return _userTable.ExecuteQueryAsync(q)
-#endif
                 .ContinueWith((taskResults) =>
                 {
                     foreach (var s in taskResults.Result)
@@ -657,14 +654,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 user = MapTableEntity<TUser>(vUser);
 
                 //Claims
-                claims = userResults.Where(u => u.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserClaim)
+                claims = userResults.Where(u => u.RowKey.StartsWith(_keyHelper.PreFixIdentityUserClaim)
                      && u.PartitionKey.Equals(userId))
                     .Select((log) =>
                     {
                         return MapTableEntity<TUserClaim>(log);
                     });
                 //Logins
-                logins = userResults.Where(u => u.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserLogin)
+                logins = userResults.Where(u => u.RowKey.StartsWith(_keyHelper.PreFixIdentityUserLogin)
                     && u.PartitionKey.Equals(userId))
                     .Select((log) =>
                     {
@@ -672,7 +669,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                     });
 
                 //Tokens
-                tokens = userResults.Where(u => u.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityUserToken)
+                tokens = userResults.Where(u => u.RowKey.StartsWith(_keyHelper.PreFixIdentityUserToken)
                      && u.PartitionKey.Equals(userId))
                     .Select((log) =>
                     {
@@ -684,15 +681,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
         protected virtual async Task<TUser> GetUserAggregateAsync(TableQuery queryUser)
         {
-#if NETSTANDARD2_1
             var user = await _indexTable.ExecuteQueryAsync(queryUser).FirstOrDefaultAsync().ConfigureAwait(false);
-#else
-            var user = (await _indexTable.ExecuteQueryAsync(queryUser)).FirstOrDefault();
-#endif
             if (user != null)
             {
-                string userId = user.Properties["Id"].StringValue;
-                return await GetUserAsync(userId);
+                string userId = user.Properties[nameof(IdentityUserIndex.Id)].StringValue;
+                return await GetUserAsync(userId).ConfigureAwait(false);
             }
 
             return default(TUser);
@@ -705,22 +698,22 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 #endif
             ConcurrentBag<IEnumerable<TUser>> lUsers = new ConcurrentBag<IEnumerable<TUser>>();
             TableContinuationToken token = new TableContinuationToken();
-            const int takeCount = 100;
+            const int takeCount = 30;
             const int taskMax = 10;
             queryUser.TakeCount = takeCount;
             List<Task> taskBatch = new List<Task>(taskMax);
             Func<IEnumerable<string>, Task> getUsers = async (ids) =>
             {
-                lUsers.Add((await getUserFunc(ids)));
+                lUsers.Add((await getUserFunc(ids).ConfigureAwait(false)));
             };
             while (token != null)
             {
-                var response = await _indexTable.ExecuteQuerySegmentedAsync(queryUser, token);
-                var tempUserIds = response.Select(u => u.Properties["Id"].StringValue).Distinct();
+                var response = await _indexTable.ExecuteQuerySegmentedAsync(queryUser, token).ConfigureAwait(false);
+                var tempUserIds = response.Select(u => u.Properties[nameof(IdentityUserIndex.Id)].StringValue).Distinct();
                 taskBatch.Add(getUsers(tempUserIds));
                 if (taskBatch.Count % taskMax == 0)
                 {
-                    await Task.WhenAll(taskBatch);
+                    await Task.WhenAll(taskBatch).ConfigureAwait(false);
                     taskBatch.Clear();
                 }
                 token = response.ContinuationToken;
@@ -728,7 +721,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             if (taskBatch.Count > 0)
             {
-                await Task.WhenAll(taskBatch);
+                await Task.WhenAll(taskBatch).ConfigureAwait(false);
                 taskBatch.Clear();
             }
 #if DEBUG
@@ -747,7 +740,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             // Claim ctor doesn't allow Claim.Value to be null. Need to allow string.empty.
 
 
-            TUserClaim local = await GetUserClaimAsync(user, claim);
+            TUserClaim local = await GetUserClaimAsync(user, claim).ConfigureAwait(false);
             if (local != null)
             {
                 TableOperation deleteOperation = TableOperation.Delete(CreateUserClaim(user, claim));
@@ -757,7 +750,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                     _userTable.ExecuteAsync(deleteOperation)
                 };
 
-                await Task.WhenAll(tasks);
+                await Task.WhenAll(tasks).ConfigureAwait(false);
             }
 
         }
@@ -773,7 +766,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             // Claim ctor doesn't allow Claim.Value to be null. Need to allow string.empty.
             BatchOperationHelper bop = new BatchOperationHelper();
 
-            TUserClaim local = await GetUserClaimAsync(user, claim);
+            TUserClaim local = await GetUserClaimAsync(user, claim).ConfigureAwait(false);
             List<Task> tasks = new List<Task>(3);
             string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
             if (local != null)
@@ -789,7 +782,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             tasks.Add(bop.ExecuteBatchAsync(_userTable));
 
-            await Task.WhenAll(tasks);
+            await Task.WhenAll(tasks).ConfigureAwait(false);
         }
 
         public override async Task RemoveClaimsAsync(TUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken = default(CancellationToken))
@@ -803,7 +796,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             BatchOperationHelper bop = new BatchOperationHelper();
             List<Task> tasks = new List<Task>();
             string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
-            var userClaims = await this.GetClaimsAsync(user);
+            var userClaims = await this.GetClaimsAsync(user).ConfigureAwait(false);
             foreach (Claim claim in claims)
             {
                 Claim local = (from uc in userClaims
@@ -817,7 +810,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 }
             }
             tasks.Add(bop.ExecuteBatchAsync(_userTable));
-            await Task.WhenAll(tasks);
+            await Task.WhenAll(tasks).ConfigureAwait(false);
         }
 
         protected override TUserClaim CreateUserClaim(TUser user, Claim claim)
@@ -852,8 +845,23 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             {
                 Model.IdentityUserIndex index = CreateLoginIndex(userPartitionKey, item.LoginProvider, item.ProviderKey);
                 await Task.WhenAll(_indexTable.ExecuteAsync(TableOperation.Delete(index)),
-                                    _userTable.ExecuteAsync(TableOperation.Delete(item)));
+                                    _userTable.ExecuteAsync(TableOperation.Delete(item))).ConfigureAwait(false);
             }
+        }
+
+        public override async Task SetUserNameAsync(TUser user, string userName, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            this.ThrowIfDisposed();
+            if (user == null) throw new ArgumentNullException(nameof(user));
+
+            //Only remove the username if different
+            //The UserManager calls UpdateAsync which will generate the new username index record
+            if (!string.IsNullOrWhiteSpace(user.UserName) && user.UserName != userName)
+            {
+                await DeleteUserNameIndexAsync(ConvertIdToString(user.Id), user.UserName).ConfigureAwait(false);
+            }
+            user.UserName = userName;
         }
 
         public override async Task SetEmailAsync(TUser user, string email, CancellationToken cancellationToken = default(CancellationToken))
@@ -879,24 +887,30 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, _keyHelper.GenerateRowKeyUserEmail(plainEmail)),
                 TableOperators.And,
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, userId));
-            tq.SelectColumns = new List<string>() { "Id" };
+            tq.SelectColumns = new List<string>() { nameof(IdentityUserIndex.Id) };
 
-#if NETSTANDARD2_1
-            await foreach (DynamicTableEntity de in _indexTable.ExecuteQueryAsync(tq))
-#else
-
-            foreach (DynamicTableEntity de in (await _indexTable.ExecuteQueryAsync(tq)))
-#endif
+            await foreach (DynamicTableEntity de in _indexTable.ExecuteQueryAsync(tq).ConfigureAwait(false))
             {
-                if (de.Properties["Id"].StringValue.Equals(userId, StringComparison.OrdinalIgnoreCase))
+                if (de.Properties[nameof(IdentityUserIndex.Id)].StringValue.Equals(userId, StringComparison.OrdinalIgnoreCase))
                 {
-                    await _indexTable.ExecuteAsync(TableOperation.Delete(de));
+                    await _indexTable.ExecuteAsync(TableOperation.Delete(de)).ConfigureAwait(false);
                 }
             }
         }
 
+        protected async Task DeleteUserNameIndexAsync(string userId, string userName)
+        {
+            string userPartitionKey = _keyHelper.GenerateRowKeyUserId(userId);
 
-        protected async Task DeleteAllUserRows(string userId, IEnumerable<DynamicTableEntity> userRows)
+            TableResult result =  await _indexTable.ExecuteAsync(TableOperation.Retrieve(_keyHelper.GenerateRowKeyUserName(userName), userPartitionKey)).ConfigureAwait(false);
+            var tableentity = result.Result as DynamicTableEntity;      
+            if(tableentity != null)
+            {
+                _ = await _indexTable.ExecuteAsync(TableOperation.Delete(tableentity)).ConfigureAwait(false);
+            }
+        }
+
+        protected Task DeleteAllUserRows(string userId, IEnumerable<DynamicTableEntity> userRows)
         {
             BatchOperationHelper deleteBatchHelper = new BatchOperationHelper();
             foreach (DynamicTableEntity delUserRow in userRows)
@@ -907,7 +921,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 }
             }
 
-            await deleteBatchHelper.ExecuteBatchAsync(_userTable);
+            return deleteBatchHelper.ExecuteBatchAsync(_userTable);
         }
 
 
@@ -930,7 +944,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             try
             {
-                await Task.WhenAll(tasks.ToArray());
+                await Task.WhenAll(tasks.ToArray()).ConfigureAwait(false);
                 return IdentityResult.Success;
             }
             catch (AggregateException aggex)
@@ -994,7 +1008,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
         /// <summary>
         /// Create an index for getting the user id based on his user name,
-        /// Only used if EnableImmutableUserId = true
         /// </summary>
         /// <param name="userPartitionKey"></param>
         /// <param name="userName"></param>
@@ -1053,7 +1066,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                     return uc.RowKey == _keyHelper.GenerateRowKeyIdentityUserClaim(claim.Type, claim.Value);
                 });
 
-            })).ToList();
+            }).ConfigureAwait(false)).ToList();
         }
 
         /// <summary>
@@ -1076,7 +1089,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             var tableOp = TableOperation.Retrieve<TUserToken>(_keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)),
                 _keyHelper.GenerateRowKeyIdentityUserToken(loginProvider, name));
 
-            var result = await _userTable.ExecuteAsync(tableOp);
+            var result = await _userTable.ExecuteAsync(tableOp).ConfigureAwait(false);
 
             if (result.Result != null)
             {
@@ -1095,15 +1108,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return item;
         }
 
-        protected override async Task AddUserTokenAsync(TUserToken token)
+        protected override Task AddUserTokenAsync(TUserToken token)
         {
-            await _userTable.ExecuteAsync(TableOperation.InsertOrReplace(token as ITableEntity));
+            return _userTable.ExecuteAsync(TableOperation.InsertOrReplace(token as ITableEntity));
         }
 
 
-        protected override async Task RemoveUserTokenAsync(TUserToken token)
+        protected override Task RemoveUserTokenAsync(TUserToken token)
         {
-            await _userTable.ExecuteAsync(TableOperation.Delete(token as ITableEntity));
+            return _userTable.ExecuteAsync(TableOperation.Delete(token as ITableEntity));
         }
 
 

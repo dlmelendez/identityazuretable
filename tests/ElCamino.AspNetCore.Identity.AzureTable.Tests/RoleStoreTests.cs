@@ -12,14 +12,15 @@ using Microsoft.AspNetCore.Identity;
 using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser;
 using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
 using Microsoft.Extensions.DependencyInjection;
+using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {
-    public class RoleStoreTests : IClassFixture<RoleFixture<Model.IdentityUser, IdentityRole, IdentityCloudContext>>
+    public class RoleStoreTests : IClassFixture<RoleFixture<Model.IdentityUser, IdentityRole, IdentityCloudContext, DefaultKeyHelper>>
     {
         private readonly ITestOutputHelper output;
-        private RoleFixture<Model.IdentityUser, IdentityRole, IdentityCloudContext> roleFixture;
-        public RoleStoreTests(RoleFixture<Model.IdentityUser, IdentityRole, IdentityCloudContext> roleFix, ITestOutputHelper output)
+        private RoleFixture<Model.IdentityUser, IdentityRole, IdentityCloudContext, DefaultKeyHelper> roleFixture;
+        public RoleStoreTests(RoleFixture<Model.IdentityUser, IdentityRole, IdentityCloudContext, DefaultKeyHelper> roleFix, ITestOutputHelper output)
         {
             this.output = output;
             roleFixture = roleFix;
@@ -138,14 +139,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                 var r = await store.CreateTableIfNotExistsAsync();
                 Assert.True(await store.Context.RoleTable.ExistsAsync());
             }
-
             ServiceCollection services = new ServiceCollection();
             // Adding coverage for CreateAzureTablesIfNotExists();
             services.AddIdentityCore<IdentityUser>()
                 .AddAzureTableStores<IdentityCloudContext>(new Func<IdentityConfiguration>(() =>
                 {
                     return roleFixture.GetConfig();
-                }))
+                }), roleFixture.GetKeyHelper())
                 .CreateAzureTablesIfNotExists<IdentityCloudContext>();
 
         }
@@ -312,6 +312,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
                     Assert.NotNull(result);
                     Assert.Equal(role.Name, result.Name);
+
+                    sw.Reset();
+                    sw.Start();
+                    var result1 = manager.Roles.Where(r => r.Name == role.Name).ToList();
+                    sw.Stop();
+                    output.WriteLine("RoleManager.Roles where name: {0} seconds", sw.Elapsed.TotalSeconds);
+
+                    Assert.NotNull(result1.SingleOrDefault());
+                    Assert.Equal(role.Name, result1.SingleOrDefault().Name);
                 }
             }
         }

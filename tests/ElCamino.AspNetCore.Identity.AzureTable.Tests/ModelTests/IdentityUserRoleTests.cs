@@ -5,7 +5,7 @@ using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
 using Xunit;
 
-namespace ElCamino.Web.Identity.AzureTable.Tests.ModelTests
+namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.ModelTests
 {
     public class IdentityUserRoleTests
     {
@@ -16,6 +16,10 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.ModelTests
             var ur = new IdentityUserRole();
             ur.GenerateKeys(new DefaultKeyHelper());
             Assert.Equal(ur.PartitionKey, ur.UserId);
+
+            var ur2 = new IdentityUserRole();
+            ur2.GenerateKeys(new SHA256KeyHelper());
+            Assert.Equal(ur2.PartitionKey, ur2.UserId);
         }
     }
 }

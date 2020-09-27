@@ -73,8 +73,8 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         {
             DynamicTableEntity targetEntity = null;
             //RoleClaim record
-            if (sourceEntity.PartitionKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityRole)
-                && sourceEntity.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityRoleClaim))
+            if (sourceEntity.PartitionKey.StartsWith(_keyHelper.PreFixIdentityRole)
+                && sourceEntity.RowKey.StartsWith(_keyHelper.PreFixIdentityRoleClaim))
             {
                 sourceEntity.Properties.TryGetValue("ClaimType", out EntityProperty claimTypeProperty);
                 string claimType = claimTypeProperty.StringValue;
@@ -88,7 +88,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                     _keyHelper.GenerateRowKeyIdentityRoleClaim(claimType, claimValue), Constants.ETagWildcard, sourceEntity.Properties);
                 targetEntity.Properties["KeyVersion"] = new EntityProperty(_keyHelper.KeyVersion);
             }
-            else if (sourceEntity.RowKey.StartsWith(Constants.RowKeyConstants.PreFixIdentityRole))
+            else if (sourceEntity.RowKey.StartsWith(_keyHelper.PreFixIdentityRole))
             {
                 sourceEntity.Properties.TryGetValue("Name", out EntityProperty roleNameProperty);
                 string roleName = roleNameProperty.StringValue;

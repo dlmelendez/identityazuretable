@@ -11,16 +11,20 @@ namespace Microsoft.Extensions.DependencyInjection
     public static class IdentityAzureTableBuilderExtensions
     {
         /// <summary>
-        /// Call .AddRoles<IdentityRole>() in the pipeline if you need Roles functionality, otherwise the RoleStore will not be loaded.
+        /// Use this to load and configure the Identity Azure Tables into the aspnet identity pipeline.
+        /// Note: <see cref="IdentityBuilder.AddRoles{TRole}"/> prior to calling this methiod in the pipeline if you need Roles functionality, otherwise the RoleStore will not be loaded.
         /// </summary>
-        /// <typeparam name="TContext"></typeparam>
-        /// <param name="builder"></param>
-        /// <param name="configAction"></param>
-        /// <returns></returns>
-        public static IdentityBuilder AddAzureTableStores<TContext>(this IdentityBuilder builder, Func<IdentityConfiguration> configAction)
+        /// <typeparam name="TContext">Use or extend <see cref="IdentityCloudContext"/></typeparam>
+        /// <param name="builder"><see cref="IdentityBuilder"/> aspnet identity pipeline</param>
+        /// <param name="configAction"><see cref="IdentityConfiguration"/></param>
+        /// <param name="keyHelper">Use <see cref="DefaultKeyHelper"/> that uses SHA1,  <see cref="SHA256KeyHelper"/> or a custom keyhelper that implements <see cref="IKeyHelper"/> </param>
+        /// <returns><see cref="IdentityBuilder"/></returns>
+        public static IdentityBuilder AddAzureTableStores<TContext>(this IdentityBuilder builder, Func<IdentityConfiguration> configAction,
+            IKeyHelper keyHelper = null)
             where TContext : IdentityCloudContext, new()
         {
-            builder.Services.AddSingleton<IKeyHelper>(new DefaultKeyHelper());
+                
+            builder.Services.AddSingleton<IKeyHelper>(keyHelper?? new DefaultKeyHelper());
 
             builder.Services.AddSingleton<IdentityConfiguration>(new Func<IServiceProvider, IdentityConfiguration>(p => configAction()));
 
@@ -44,6 +48,12 @@ namespace Microsoft.Extensions.DependencyInjection
             return builder;
         }
 
+        /// <summary>
+        /// Use this to create all table resources needed. Execute this after any table name configuration change. Remove after first run if you want.
+        /// </summary>
+        /// <typeparam name="TContext">Use or extend <see cref="IdentityCloudContext"/></typeparam>
+        /// <param name="builder"><see cref="IdentityBuilder"/> aspnet identity pipeline</param>
+        /// <returns><see cref="IdentityBuilder"/></returns>
         public static IdentityBuilder CreateAzureTablesIfNotExists<TContext>(this IdentityBuilder builder)
             where TContext : IdentityCloudContext, new()
         {

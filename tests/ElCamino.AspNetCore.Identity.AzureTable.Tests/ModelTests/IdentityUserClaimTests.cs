@@ -5,7 +5,7 @@ using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
 using Xunit;
 
-namespace ElCamino.Web.Identity.AzureTable.Tests.ModelTests
+namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.ModelTests
 {
     public class IdentityUserClaimTests
     {
@@ -15,6 +15,9 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.ModelTests
         {
             var uc = new IdentityUserClaim();
             uc.GenerateKeys(new DefaultKeyHelper());
+
+            var uc2 = new IdentityUserClaim();
+            uc2.GenerateKeys(new SHA256KeyHelper());
         }
     }
 }

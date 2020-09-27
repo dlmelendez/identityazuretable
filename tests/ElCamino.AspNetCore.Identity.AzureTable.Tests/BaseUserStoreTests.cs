@@ -17,19 +17,21 @@ using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
 using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
 using Microsoft.AspNetCore.Identity;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
+using ElCamino.AspNetCore.Identity.AzureTable.Model;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {
-    public partial class BaseUserStoreTests<TUser, TRole, TContext, TUserStore> : BaseUserStoreTests<TUser, TContext, TUserStore>,
-        IClassFixture<BaseFixture<TUser, TRole, TContext, TUserStore>>
+    public partial class BaseUserStoreTests<TUser, TRole, TContext, TUserStore, TKeyHelper> : BaseUserStoreTests<TUser, TContext, TUserStore, TKeyHelper>,
+        IClassFixture<BaseFixture<TUser, TRole, TContext, TUserStore, TKeyHelper>>
          where TUser : IdentityUser, IApplicationUser, new()
          where TRole : IdentityRole, new()
          where TContext : IdentityCloudContext, new()
          where TUserStore : UserStore<TUser, TRole, TContext>
+       where TKeyHelper : IKeyHelper, new()
     {
-        protected new BaseFixture<TUser, TRole, TContext, TUserStore> userFixture;
+        protected new BaseFixture<TUser, TRole, TContext, TUserStore, TKeyHelper> userFixture;
 
-        public BaseUserStoreTests(BaseFixture<TUser, TRole, TContext, TUserStore> userFix, ITestOutputHelper output)
+        public BaseUserStoreTests(BaseFixture<TUser, TRole, TContext, TUserStore, TKeyHelper> userFix, ITestOutputHelper output)
             :base(userFix, output)
         {
             userFixture = userFix;
@@ -345,6 +347,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     Assert.NotNull(oldUser);
 
 
+                    //Query for the old username, should be null
+                    var oldUserNameResult = await manager.FindByNameAsync(originalPlainUserName);
+                    Assert.Null(oldUserNameResult);
+
 
                     //Check logins
                     foreach (var log in changedUserLogins)
@@ -380,10 +386,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
     }
 
-    public partial class BaseUserStoreTests<TUser, TContext, TUserStore> : IClassFixture<BaseFixture<TUser, TContext, TUserStore>>
+    public partial class BaseUserStoreTests<TUser, TContext, TUserStore, TKeyHelper> : IClassFixture<BaseFixture<TUser, TContext, TUserStore, TKeyHelper>>
          where TUser : IdentityUser, IApplicationUser, new()
          where TContext : IdentityCloudContext, new()
          where TUserStore : UserOnlyStore<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken>
+         where TKeyHelper : IKeyHelper, new()
     {
         #region Static and Const Members
         public static string DefaultUserPassword = "M" + Guid.NewGuid().ToString();
@@ -395,9 +402,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         protected readonly ITestOutputHelper output;
 
 
-        protected BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore, DefaultKeyHelper> userFixture;
+        protected BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore, TKeyHelper> userFixture;
 
-        public BaseUserStoreTests(BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore, DefaultKeyHelper> userFix, ITestOutputHelper output)
+        public BaseUserStoreTests(BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore, TKeyHelper> userFix, ITestOutputHelper output)
         {
             userFixture = userFix;
 
@@ -622,7 +629,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     var taskUser = createPassword ?
                         await manager.CreateAsync(user, DefaultUserPassword) :
                         await manager.CreateAsync(user);
-                    output.WriteLine("User Id: {0}", user.Id);
                     Assert.True(taskUser.Succeeded, string.Concat(taskUser.Errors));
 
 
@@ -926,6 +932,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     output.WriteLine("FindByNameAsync: {0} seconds", sw.Elapsed.TotalSeconds);
 
                     Assert.Equal(user.UserName, result.UserName);
+
+                    sw.Reset();
+                    sw.Start();
+                    var result1 = manager.Users.Where(w => w.UserName == user.UserName).ToList().FirstOrDefault();
+                    sw.Stop();
+                    output.WriteLine("Users where UserName: {0} seconds", sw.Elapsed.TotalSeconds);
+                    Assert.Equal(user.UserName, result1.UserName);
                 }
             }
         }
@@ -1125,12 +1138,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     TUser tempUser = null;
                     for (int i = 0; i < userCount; i++)
                     {
-                        var sw2 = new Stopwatch();
-                        output.WriteLine("CreateTestUserLite()");
-                        sw2.Start();
                         tempUser = await CreateTestUserLiteAsync(true, true);
-                        sw2.Stop();
-                        output.WriteLine("CreateTestUserLite(): {0} seconds", sw2.Elapsed.TotalSeconds);
                         await store.AddClaimAsync(tempUser, claim);
                     }
                     sw.Stop();
@@ -1224,6 +1232,37 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     Assert.DoesNotContain(claims2, (c) => c.Value == nClaim.Value && c.Type == nClaim.Type); //, "Claim not removed, new claim found.");
                 }
             }
+        }
+
+        public virtual async Task CanFindByNameIfImmutableIdSetUp()
+        {
+            var userStore = userFixture.CreateUserStore();
+
+            var user = GenTestUser();
+            _ = await userFixture.CreateUserManager().CreateAsync(user);
+
+            var userFound = await userStore.FindByNameAsync(user.UserName);
+
+
+            Assert.NotNull(user);
+            Assert.Equal(user.Id, userFound.Id);
+            Assert.Equal(user.PartitionKey, userFound.PartitionKey);
+            Assert.Equal(user.RowKey, userFound.RowKey);
+        }
+
+        public async virtual Task CanFindByIdIfImmutableIdSetUp()
+        {
+            var userStore = userFixture.CreateUserStore();
+
+            var user = GenTestUser();
+            _ = await userFixture.CreateUserManager().CreateAsync(user);
+
+            var userFound = await userStore.FindByIdAsync(user.Id);
+
+            Assert.NotNull(user);
+            Assert.Equal(user.Id, userFound.Id);
+            Assert.Equal(user.PartitionKey, userFound.PartitionKey);
+            Assert.Equal(user.RowKey, userFound.RowKey);
         }
 
         public virtual async Task ThrowIfDisposed()

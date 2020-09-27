@@ -31,6 +31,9 @@ namespace samplemvccore4
             //services.AddDbContext<ApplicationDbContext>(options =>
             //    options.UseSqlServer(
             //        Configuration.GetConnectionString("DefaultConnection")));
+
+            // Use the line below for identity role configuration
+            //services.AddIdentity<IdentityUser, ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole>(options =>
             services.AddDefaultIdentity<IdentityUser>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = true;

@@ -46,7 +46,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         public async Task<IEnumerable<TableResult>> ExecuteBatchAsync(CloudTable table)
         {
             ConcurrentBag<TableResult> results = new ConcurrentBag<TableResult>();
-            var tasks = _batches.Select((batchOperation) =>
+            IEnumerable<Task> tasks = _batches.Select((batchOperation) =>
             {
                 return table.ExecuteBatchAsync(batchOperation)
                 .ContinueWith((taskTableBatch) =>

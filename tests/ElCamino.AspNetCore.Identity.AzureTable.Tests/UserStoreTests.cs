@@ -17,17 +17,18 @@ using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
 using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
 using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
 using Microsoft.AspNetCore.Identity;
+using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {
-    public partial class UserStoreTests : BaseUserStoreTests<ApplicationUserV2, IdentityRole, IdentityCloudContext, UserStore<ApplicationUserV2, IdentityRole, IdentityCloudContext>>
+    public class UserStoreTests : BaseUserStoreTests<ApplicationUserV2, IdentityRole, IdentityCloudContext, UserStore<ApplicationUserV2, IdentityRole, IdentityCloudContext>, DefaultKeyHelper>
     {
         public const string UserStoreTrait = "IdentityCore.Azure.UserStore";
         public const string UserStoreTraitProperties = UserStoreTrait + ".Properties";
 
         public UserStoreTests(
             UserFixture<ApplicationUserV2, IdentityRole, IdentityCloudContext,
-                UserStore<ApplicationUserV2, IdentityRole, IdentityCloudContext>> userFix, ITestOutputHelper output) :
+                UserStore<ApplicationUserV2, IdentityRole, IdentityCloudContext>, DefaultKeyHelper> userFix, ITestOutputHelper output) :
             base(userFix, output)
         {
             
@@ -319,38 +320,17 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         
         [Fact(DisplayName = "CanFindByNameIfImmutableIdSetUp")]
         [Trait(UserStoreTraitProperties, "")]
-
-        public async Task CanFindByNameIfImmutableIdSetUp()
+        public override Task CanFindByNameIfImmutableIdSetUp()
         {
-            var userStore = GetImmutableUserIdStore();
-
-            var user = GenTestUser();
-            await userStore.CreateAsync(user);
-
-            var userFound = await userStore.FindByNameAsync(user.UserName);
-
-            Assert.NotNull(user);
-            Assert.Equal(user.Id, userFound.Id);
-            Assert.Equal(user.PartitionKey, userFound.PartitionKey);
-            Assert.Equal(user.RowKey, userFound.RowKey);
+            return base.CanFindByNameIfImmutableIdSetUp();
         }
+
 
         [Fact(DisplayName = "CanFindByIdIfImmutableIdSetUp")]
         [Trait(UserStoreTraitProperties, "")]
-
-        public async Task CanFindByIdIfImmutableIdSetUp()
+        public override Task CanFindByIdIfImmutableIdSetUp()
         {
-            var userStore = GetImmutableUserIdStore();
-
-            var user = GenTestUser();
-            await userStore.CreateAsync(user);
-
-            var userFound = await userStore.FindByIdAsync(user.Id);
-
-            Assert.NotNull(user);
-            Assert.Equal(user.Id, userFound.Id);
-            Assert.Equal(user.PartitionKey, userFound.PartitionKey);
-            Assert.Equal(user.RowKey, userFound.RowKey);
+            return base.CanFindByIdIfImmutableIdSetUp();
         }
     }
 }

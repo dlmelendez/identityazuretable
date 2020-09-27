@@ -19,7 +19,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             if (config == null)
             {
-                throw new ArgumentNullException("config");
+                throw new ArgumentNullException(nameof(config));
             }
             Initialize(config);
         }
