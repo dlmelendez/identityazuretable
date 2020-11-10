@@ -19,7 +19,7 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/dlmelendez/identityazuretable.git</RepositoryUrl>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>5.0.0-rc.2</Version>
+    <Version>5.0.0</Version>
     <PackageProjectUrl>https://dlmelendez.github.io/identityazuretable</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
