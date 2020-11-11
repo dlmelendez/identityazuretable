@@ -4,8 +4,7 @@
   "classifications": [ "Web", "MVC", "Razor Pages" ],
   "name": "ASP.NET Core Razor Pages Web App/Identity Azure Tables ",
   "identity": "ElCamino.AspNetCore.Identity.AzureTable.Web.RazorPages.Template",
-  "groupIdentity": "ElCamino.AspNetCore.Identity",
-  "shortName": "razorpages-id-azure-tables",
+  "shortName": "rzp-id-azure-tables",
   "tags": {
     "language": "C#",
     "type": "project"

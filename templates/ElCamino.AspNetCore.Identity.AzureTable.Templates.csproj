@@ -4,6 +4,7 @@
     <AssemblyTitle>Web Project Templates for Azure Table Storage Provider for ASP.NET Identity Core</AssemblyTitle>
     <Authors>David Melendez</Authors>
     <TargetFramework>net5.0</TargetFramework>
+    <Title>ElCamino.AspNetCore.Identity.AzureTable.Templates</Title>
     <PackageId>ElCamino.AspNetCore.Identity.AzureTable.Templates</PackageId>
     <Description>ASP.NET Core Web Template Pack for ElCamino Identity Azure Table Storage</Description>
     <PackageTags>ASP.NET;Identity Core;Azure;Table Storage;MVC;UserStore;RoleStore;UserManager;multi-tenant;RA-GRS;geo-redundant;Microsoft.AspNetCore.Identity</PackageTags>
@@ -15,11 +16,10 @@
     <ContentTargetFolders>content</ContentTargetFolders>
     <IsPackable>true</IsPackable>
     <PackageLicenseUrl></PackageLicenseUrl>
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/dlmelendez/identityazuretable.git</RepositoryUrl>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>5.0.0</Version>
+    <Version>5.0.1</Version>
     <PackageProjectUrl>https://dlmelendez.github.io/identityazuretable</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
@@ -28,8 +28,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="content\**" />
-    <Content Include="content\**\*" Exclude="content\**\bin\**;content\**\obj\**;content\.vs\**;content\**\*.user;content\**\*.suo" />
+    <Content Include="templates\**\*" Exclude="templates\**\bin\**;templates\**\obj\**" />
+    <Compile Remove="**\*" />
   </ItemGroup>
 
   <ItemGroup>
