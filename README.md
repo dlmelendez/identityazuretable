@@ -16,7 +16,7 @@ dotnet new --install ElCamino.AspNetCore.Identity.AzureTable.Templates
 #MVC Template
 dotnet new mvc-id-azure-tables 
 
-#Razore Pages Template
+#Razor Pages Template
 dotnet new rzp-id-azure-tables 
 ```
 
