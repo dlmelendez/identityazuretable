@@ -1,0 +1,54 @@
+﻿<div>
+    <h1>ElCamino.AspNetCore.Identity.AzureTable </h1>
+    <h2><a href="https://github.com/dlmelendez/identityazuretable/tree/master/templates/templates/StarterWebMvc-CSharp">Sample Core MVC with Identity Scaffolding Website</a></h2>
+    Included in the source is a MVC Core Website project that is an example of removing the EntityFramework and Identity EntityFramework references and replacing them with the Azure Table storage provider. It was created by using the <a href="https://docs.microsoft.com/en-us/aspnet/core/security/authentication/scaffold-identity?view=aspnetcore-2.2&tabs=visual-studio">Scaffold Identity in ASP.NET Core projects</a> process as a starting point.  <br>
+
+    <h3>Install the MVC template</h3>
+    <pre><code class="xml language-xml">
+        dotnet new --install ElCamino.AspNetCore.Identity.AzureTable.Templates
+
+        #MVC Template
+        dotnet new mvc-id-azure-tables 
+</code></pre>
+
+<h2><a href="https://github.com/dlmelendez/identityazuretable/tree/master/templates/templates/StarterWebRazorPages-CSharp">Sample Core Razor Pages with Identity Scaffolding Website</a></h2>
+Included in the source is a Razor Pages Core Website project that is an example of removing the EntityFramework and Identity EntityFramework references and replacing them with the Azure Table storage provider. It was created by using the <a href="https://docs.microsoft.com/en-us/aspnet/core/security/authentication/scaffold-identity?view=aspnetcore-2.2&tabs=visual-studio">Scaffold Identity in ASP.NET Core projects</a> process as a starting point.  <br>
+
+<h3>Install the Razor Pages template</h3>
+<pre><code class="xml language-xml">
+    dotnet new --install ElCamino.AspNetCore.Identity.AzureTable.Templates
+
+    #Razor Pages Template
+    dotnet new rzp-id-azure-tables 
+</code></pre>
+    <h3>
+        Changes to /appsettings.json        
+    </h3>
+   
+    Change the default local connection string to the Azure Storage Emulator in the appsettings.json.
+    TablePrefix can be left blank, any text here will prefix the Azure table storage names.
+    StorageConnectionString is the Azure table storage connection string.
+    LocationMode can be left empty (defaults to PrimaryOnly). Other storage location modes are listed <a href="https://msdn.microsoft.com/en-us/library/azure/microsoft.windowsazure.storage.retrypolicies.locationmode.aspx">here</a> and must be used with a RA-GRS storage account if changed from the default.
+    *TableName values can be null or left empty and default values are shown in the example below.
+    <br>
+    <div style="color:Black; background-color:White">
+        <pre>
+{
+...
+    "IdentityAzureTable": {
+        "IdentityConfiguration": {
+            "TablePrefix": <span style="color:#A31515">"v2"</span>
+            "StorageConnectionString": <span style="color:#A31515">"UseDevelopmentStorage=true;"</span>
+            "LocationMode": <span style="color:#A31515">"PrimaryOnly"</span>
+            "IndexTableName": <span style="color:#A31515">"AspNetIndex"</span>
+            "RoleTableName": <span style="color:#A31515">"AspNetRoles"</span>
+            "UserTableName": <span style="color:#A31515">"AspNetUsers"</span>
+        }
+    }...
+}
+</pre>
+    </div>
+    <br>
+    <h3>Tip: Don&#39;t forget to start your Azure Storage Emulator if running locally.</h3>
+</div>
+<div></div>

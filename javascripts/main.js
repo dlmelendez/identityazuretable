@@ -27,6 +27,9 @@ app.config(function ($routeProvider) {
     .when("/walkthroughcore4", {
         templateUrl: "content/walkthroughcore4.html"
     })
+    .when("/walkthroughcore5", {
+        templateUrl: "content/walkthroughcore5.html"
+    })
     .when("/ragrs", {
         templateUrl: "content/ragrs.html"
     })
