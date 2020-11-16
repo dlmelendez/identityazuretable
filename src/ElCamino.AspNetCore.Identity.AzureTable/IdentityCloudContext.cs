@@ -1,18 +1,18 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 using System;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
-using Microsoft.Azure.Cosmos.Table;
+using Azure.Data.Tables;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable
 {
     public class IdentityCloudContext : IDisposable
     {
-        protected CloudTableClient _client = null;
+        protected TableServiceClient _client = null;
         protected bool _disposed = false;
         protected IdentityConfiguration _config = null;
-        protected CloudTable _roleTable;
-        protected CloudTable _indexTable;
-        protected CloudTable _userTable;
+        protected TableClient _roleTable;
+        protected TableClient _indexTable;
+        protected TableClient _userTable;
 
         public IdentityCloudContext() { }
         public IdentityCloudContext(IdentityConfiguration config)
@@ -27,23 +27,23 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         protected virtual void Initialize(IdentityConfiguration config)
         {
             _config = config;
-            _client = CloudStorageAccount.Parse(_config.StorageConnectionString).CreateCloudTableClient();
-            _client.DefaultRequestOptions.PayloadFormat = TablePayloadFormat.Json;
-            if (!string.IsNullOrWhiteSpace(_config.LocationMode))
-            {
-                LocationMode mode = LocationMode.PrimaryOnly;
-                if (Enum.TryParse<LocationMode>(_config.LocationMode, out mode))
-                {
-                    _client.DefaultRequestOptions.LocationMode = mode;
-                }
-                else
-                {
-                    throw new ArgumentException("Invalid LocationMode defined in config. For more information on geo-replication location modes: http://msdn.microsoft.com/en-us/library/azure/microsoft.windowsazure.storage.retrypolicies.locationmode.aspx", "config.LocationMode");
-                }
-            }
-            _indexTable = _client.GetTableReference(FormatTableNameWithPrefix(!string.IsNullOrWhiteSpace(_config.IndexTableName) ? _config.IndexTableName : Constants.TableNames.IndexTable));
-            _roleTable = _client.GetTableReference(FormatTableNameWithPrefix(!string.IsNullOrWhiteSpace(_config.RoleTableName) ? _config.RoleTableName : Constants.TableNames.RolesTable));
-            _userTable = _client.GetTableReference(FormatTableNameWithPrefix(!string.IsNullOrWhiteSpace(_config.UserTableName) ? _config.UserTableName : Constants.TableNames.UsersTable));
+            _client = new TableServiceClient(_config.StorageConnectionString);
+            //if (!string.IsNullOrWhiteSpace(_config.LocationMode))
+            //{
+            //    LocationMode mode = LocationMode.PrimaryOnly;
+            //    if (Enum.TryParse<LocationMode>(_config.LocationMode, out mode))
+            //    {
+            //        _client.DefaultRequestOptions.LocationMode = mode;
+            //    }
+            //    else
+            //    {
+            //        throw new ArgumentException("Invalid LocationMode defined in config. For more information on geo-replication location modes: http://msdn.microsoft.com/en-us/library/azure/microsoft.windowsazure.storage.retrypolicies.locationmode.aspx", "config.LocationMode");
+            //    }
+            //}
+
+            _indexTable = _client.GetTableClient(FormatTableNameWithPrefix(!string.IsNullOrWhiteSpace(_config.IndexTableName) ? _config.IndexTableName : Constants.TableNames.IndexTable));
+            _roleTable = _client.GetTableClient(FormatTableNameWithPrefix(!string.IsNullOrWhiteSpace(_config.RoleTableName) ? _config.RoleTableName : Constants.TableNames.RolesTable));
+            _userTable = _client.GetTableClient(FormatTableNameWithPrefix(!string.IsNullOrWhiteSpace(_config.UserTableName) ? _config.UserTableName : Constants.TableNames.UsersTable));
         }
 
         ~IdentityCloudContext()
@@ -60,7 +60,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return baseTableName;
         }
 
-        public CloudTable RoleTable
+        public TableClient RoleTable
         {
             get
             {
@@ -69,7 +69,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
         }
 
-        public CloudTable UserTable
+        public TableClient UserTable
         {
             get
             {
@@ -78,7 +78,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
         }
 
-        public CloudTable IndexTable
+        public TableClient IndexTable
         {
             get
             {
@@ -87,7 +87,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
         }
 
-        public CloudTableClient Client
+        public TableServiceClient Client
         {
             get
             {

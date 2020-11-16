@@ -3,11 +3,13 @@
 using ElCamino.AspNetCore.Identity.AzureTable;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
-using Microsoft.Azure.Cosmos.Table;
+using Azure.Data.Tables;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Azure;
+using System.Net;
 
 namespace ElCamino.Identity.AzureTable.DataUtility
 {
@@ -29,14 +31,14 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             return tq;
         }
 
-        public void ProcessMigrate(IdentityCloudContext targetContext, IdentityCloudContext sourceContext, IList<DynamicTableEntity> sourceUserKeysResults, int maxDegreesParallel, Action updateComplete = null, Action<string> updateError = null)
+        public void ProcessMigrate(IdentityCloudContext targetContext, IdentityCloudContext sourceContext, IList<TableEntity> sourceUserKeysResults, int maxDegreesParallel, Action updateComplete = null, Action<string> updateError = null)
         {
 
             var result2 = Parallel.ForEach(sourceUserKeysResults, new ParallelOptions() { MaxDegreeOfParallelism = maxDegreesParallel }, (dte) =>
             {
                 try
                 {
-                    targetContext.RoleTable.ExecuteAsync(TableOperation.InsertOrReplace(ConvertToTargetRoleEntity(dte, sourceContext)));
+                    targetContext.RoleTable.UpsertEntity(ConvertToTargetRoleEntity(dte, sourceContext), TableUpdateMode.Replace);
                    
                     updateComplete?.Invoke();
                 }
@@ -54,54 +56,65 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
         private string GetRoleNameBySourceId(string roleRowKey, IdentityCloudContext sourcesContext)
         {
-
-            var tr = sourcesContext.RoleTable.ExecuteAsync(
-                TableOperation.Retrieve<DynamicTableEntity>(_keyHelper.ParsePartitionKeyIdentityRoleFromRowKey(roleRowKey),
-               roleRowKey, new List<string>() { "Name", "PartitionKey", "RowKey" })).Result;
-            if (tr.Result != null)
+            try
             {
-                var role = (DynamicTableEntity)tr.Result;
-                if (role.Properties.TryGetValue("Name", out EntityProperty nameProperty))
+                var tr = sourcesContext.RoleTable.GetEntityAsync<TableEntity>(
+                    _keyHelper.ParsePartitionKeyIdentityRoleFromRowKey(roleRowKey),
+                   roleRowKey, new List<string>() { "Name", "PartitionKey", "RowKey" }).Result;
+
+                if (tr?.Value != null)
                 {
-                    return nameProperty.StringValue;
+                    var role = (TableEntity)tr.Value;
+                    if (role.TryGetValue("Name", out object nameProperty))
+                    {
+                        return nameProperty?.ToString();
+                    }
                 }
+                return null;
+
             }
-            return null;
+            catch (RequestFailedException rfe)
+            when (rfe.Status == (int)HttpStatusCode.NotFound)
+            {
+                return null;
+            }
         }
 
-        private DynamicTableEntity ConvertToTargetRoleEntity(DynamicTableEntity sourceEntity, IdentityCloudContext sourcesContext)
+        private TableEntity ConvertToTargetRoleEntity(TableEntity sourceEntity, IdentityCloudContext sourcesContext)
         {
-            DynamicTableEntity targetEntity = null;
+            TableEntity targetEntity = null;
             //RoleClaim record
             if (sourceEntity.PartitionKey.StartsWith(_keyHelper.PreFixIdentityRole)
                 && sourceEntity.RowKey.StartsWith(_keyHelper.PreFixIdentityRoleClaim))
             {
-                sourceEntity.Properties.TryGetValue("ClaimType", out EntityProperty claimTypeProperty);
-                string claimType = claimTypeProperty.StringValue;
+                sourceEntity.TryGetValue("ClaimType", out object claimTypeProperty);
+                string claimType = claimTypeProperty.ToString();
 
-                sourceEntity.Properties.TryGetValue("ClaimValue", out EntityProperty claimValueProperty);
-                string claimValue = claimValueProperty.StringValue;
+                sourceEntity.TryGetValue("ClaimValue", out object claimValueProperty);
+                string claimValue = claimValueProperty.ToString();
 
                 string roleName = GetRoleNameBySourceId(sourceEntity.PartitionKey, sourcesContext);
 
-                targetEntity = new DynamicTableEntity(_keyHelper.GenerateRowKeyIdentityRole(roleName), 
-                    _keyHelper.GenerateRowKeyIdentityRoleClaim(claimType, claimValue), Constants.ETagWildcard, sourceEntity.Properties);
-                targetEntity.Properties["KeyVersion"] = new EntityProperty(_keyHelper.KeyVersion);
+                targetEntity = new TableEntity(sourceEntity);
+                targetEntity.ResetKeys(_keyHelper.GenerateRowKeyIdentityRole(roleName),
+                    _keyHelper.GenerateRowKeyIdentityRoleClaim(claimType, claimValue), Constants.ETagWildcard);
+                targetEntity["KeyVersion"] = _keyHelper.KeyVersion;
             }
             else if (sourceEntity.RowKey.StartsWith(_keyHelper.PreFixIdentityRole))
             {
-                sourceEntity.Properties.TryGetValue("Name", out EntityProperty roleNameProperty);
-                string roleName = roleNameProperty.StringValue;
+                sourceEntity.TryGetValue("Name", out object roleNameProperty);
+                string roleName = roleNameProperty.ToString();
 
-                targetEntity = new DynamicTableEntity(_keyHelper.GeneratePartitionKeyIdentityRole(roleName), _keyHelper.GenerateRowKeyIdentityRole(roleName), Constants.ETagWildcard, sourceEntity.Properties);
-                targetEntity.Properties["KeyVersion"] = new EntityProperty(_keyHelper.KeyVersion);
+                targetEntity = new TableEntity( sourceEntity);
+                targetEntity.ResetKeys(_keyHelper.GeneratePartitionKeyIdentityRole(roleName), _keyHelper.GenerateRowKeyIdentityRole(roleName), Constants.ETagWildcard);
+                targetEntity["KeyVersion"] = _keyHelper.KeyVersion;
 
             }
 
             return targetEntity;
         }
 
-        public bool UserWhereFilter(DynamicTableEntity d)
+        public bool UserWhereFilter(TableEntity d)
         {
             return true;
         }

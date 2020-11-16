@@ -136,8 +136,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         {
             using (RoleStore<IdentityRole> store = roleFixture.CreateRoleStore())
             {
-                var r = await store.CreateTableIfNotExistsAsync();
-                Assert.True(await store.Context.RoleTable.ExistsAsync());
+                await store.CreateTableIfNotExistsAsync();
             }
             ServiceCollection services = new ServiceCollection();
             // Adding coverage for CreateAzureTablesIfNotExists();

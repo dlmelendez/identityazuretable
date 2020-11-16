@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Azure.Cosmos.Table;
 using Xunit;
 using ElCamino.AspNetCore.Identity.AzureTable;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
@@ -12,6 +11,8 @@ using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
 using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
 using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser<string>;
 using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
+using Azure.Data.Tables;
+using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {
@@ -98,8 +99,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                 TableQuery query = new TableQuery();
                 query.SelectColumns = new List<string>() { "Id" };
                 query.FilterString = TableQuery.GenerateFilterCondition("Id", QueryComparisons.Equal, user.Id);
-                query.Take(1);
-                var results = await store.Context.IndexTable.ExecuteQuerySegmentedAsync(query, new TableContinuationToken());
+                query.TakeCount = 1;
+                var results = await store.Context.IndexTable.ExecuteQueryAsync<TableEntity>(query).ToListAsync();
                 Assert.DoesNotContain(results, (x) => x.RowKey.StartsWith(AzureTable.Constants.RowKeyConstants.PreFixIdentityUserEmail)); //, string.Format("Email index not deleted for user {0}", user.Id));
             }
             //Should not find old by old email.

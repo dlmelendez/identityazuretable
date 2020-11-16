@@ -3,7 +3,7 @@
 using ElCamino.AspNetCore.Identity.AzureTable;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
-using Microsoft.Azure.Cosmos.Table;
+using Azure.Data.Tables;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,10 +35,10 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         }
 
 
-        public bool UserWhereFilter(DynamicTableEntity d)
+        public bool UserWhereFilter(TableEntity d)
         {
-            string claimType = d.Properties["ClaimType"]?.StringValue;
-            string claimValue = d.Properties["ClaimValue"]?.StringValue;
+            string claimType = d["ClaimType"]?.ToString();
+            string claimValue = d["ClaimValue"]?.ToString();
 
             if(!string.IsNullOrWhiteSpace(claimType))
             {
@@ -50,7 +50,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
         public void ProcessMigrate(IdentityCloudContext targetContext,
             IdentityCloudContext sourceContext,
-            IList<DynamicTableEntity> claimResults,
+            IList<TableEntity> claimResults,
             int maxDegreesParallel,
             Action updateComplete = null,
             Action<string> updateError = null)
@@ -69,21 +69,20 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 try
                 {
 
-                    var claimNew = new DynamicTableEntity(claim.PartitionKey,
-                        _keyHelper.GenerateRowKeyIdentityUserClaim(claim.Properties["ClaimType"].StringValue, claim.Properties["ClaimValue"].StringValue),
-                        Constants.ETagWildcard,
-                        claim.Properties);
-                    if (claimNew.Properties.ContainsKey(KeyVersion))
+                    var claimNew = new TableEntity(claim);
+                    claimNew.ResetKeys(claim.PartitionKey,
+                        _keyHelper.GenerateRowKeyIdentityUserClaim(claim["ClaimType"].ToString(), claim["ClaimValue"].ToString()),
+                        Constants.ETagWildcard);
+                    if (claimNew.ContainsKey(KeyVersion))
                     {
-                        claimNew.Properties[KeyVersion].DoubleValue = _keyHelper.KeyVersion;
+                        claimNew[KeyVersion] = _keyHelper.KeyVersion;
                     }
                     else
                     {
-                        claimNew.Properties.Add(KeyVersion, EntityProperty.GeneratePropertyForDouble(_keyHelper.KeyVersion));
+                        claimNew.Add(KeyVersion, _keyHelper.KeyVersion);
                     }
 
-                    var taskExecute = targetContext.UserTable.ExecuteAsync(TableOperation.InsertOrReplace(claimNew));
-                    taskExecute.Wait();
+                    targetContext.UserTable.UpsertEntity(claimNew, TableUpdateMode.Replace);
 
                     updateComplete?.Invoke();
                 }

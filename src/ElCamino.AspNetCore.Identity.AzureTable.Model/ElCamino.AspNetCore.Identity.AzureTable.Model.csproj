@@ -1,20 +1,21 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Description>Azure Table Storage Provider to support ASPNET Core Identity</Description>
+    <Description>Azure Table Storage Provider to support ASPNET Core Identity Models</Description>
     <Copyright>Copyright ©  2020 David Melendez, MIT License</Copyright>
-    <AssemblyTitle>Azure Table Storage Provider for ASP.NET Identity Core</AssemblyTitle>
+    <AssemblyTitle>Azure Table Storage Provider for ASP.NET Identity Core Models</AssemblyTitle>
     <Authors>David Melendez</Authors>
     <TargetFrameworks>netstandard2.0;net5.0</TargetFrameworks>
     <LangVersion>9.0</LangVersion>
-    <AssemblyName>ElCamino.AspNetCore.Identity.AzureTable</AssemblyName>
+    <AssemblyName>ElCamino.AspNetCore.Identity.AzureTable.Model</AssemblyName>
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
-    <PackageId>ElCamino.AspNetCore.Identity.AzureTable</PackageId>
+    <PackageId>ElCamino.AspNetCore.Identity.AzureTable.Model</PackageId>
     <PackageTags>ASP.NET;Identity Core;Azure;Table Storage;MVC;UserStore;RoleStore;UserManager;multi-tenant;RA-GRS;geo-redundant;Microsoft.AspNetCore.Identity</PackageTags>
-    <PackageReleaseNotes>Check https://github.com/dlmelendez/identityazuretable/releases for the latest release information.
-      Important! Check https://dlmelendez.github.io/identityazuretable/#/migration for data migration information.</PackageReleaseNotes>
+    <PackageReleaseNotes>
+      Check https://github.com/dlmelendez/identityazuretable/releases for the latest release information.
+    </PackageReleaseNotes>
     <PackageIcon>projectNugetPic.png</PackageIcon>
     <PackageLicenseUrl></PackageLicenseUrl>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
@@ -31,28 +32,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="10.1.1" />
     <PackageReference Include="Azure.Data.Tables" Version="3.0.0-beta.3" />
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="1.1.1" />
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="2.2.0" />
-
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.2.0" />
   </ItemGroup>
-  
-  <ItemGroup>  
-    <None Include="projectNugetPic.png" Pack="true" PackagePath="\" />   
-  </ItemGroup>
-  
   <ItemGroup>
-    <ProjectReference Include="..\ElCamino.AspNetCore.Identity.AzureTable.Model\ElCamino.AspNetCore.Identity.AzureTable.Model.csproj" />
+    <None Include="projectNugetPic.png" Pack="true" PackagePath="\" />
   </ItemGroup>
+
 
 
 </Project>

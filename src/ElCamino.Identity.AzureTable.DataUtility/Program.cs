@@ -1,7 +1,6 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
 using ElCamino.AspNetCore.Identity.AzureTable;
-using Microsoft.Azure.Cosmos.Table;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -12,6 +11,7 @@ using ElCamino.AspNetCore.Identity.AzureTable.Model;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 using System.Threading;
 using System.IO;
+using Azure.Data.Tables;
 
 namespace ElCamino.Identity.AzureTable.DataUtility
 {
@@ -87,25 +87,25 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 Task.WhenAll(targetContext.IndexTable.CreateIfNotExistsAsync(),
                             targetContext.UserTable.CreateIfNotExistsAsync(),
                             targetContext.RoleTable.CreateIfNotExistsAsync()).Wait();
-                Console.WriteLine($"Target IndexTable: {targetContext.IndexTable.Name}");
-                Console.WriteLine($"Target UserTable: {targetContext.UserTable.Name}");
-                Console.WriteLine($"Target RoleTable: {targetContext.RoleTable.Name}");
+                Console.WriteLine($"Target IndexTable: {targetConfig.IndexTableName}");
+                Console.WriteLine($"Target UserTable: {targetConfig.UserTableName}");
+                Console.WriteLine($"Target RoleTable: {targetConfig.RoleTableName}");
 
                 string entityRecordName = "Users";
 
                 using (IdentityCloudContext sourceContext = new IdentityCloudContext(sourceConfig))
                 {
-                    Console.WriteLine($"Source IndexTable: {sourceContext.IndexTable.Name}");
-                    Console.WriteLine($"Source UserTable: {sourceContext.UserTable.Name}");
-                    Console.WriteLine($"Source RoleTable: {sourceContext.RoleTable.Name}");
+                    Console.WriteLine($"Source IndexTable: {sourceConfig.IndexTableName}");
+                    Console.WriteLine($"Source UserTable: {sourceConfig.UserTableName}");
+                    Console.WriteLine($"Source RoleTable: {sourceConfig.RoleTableName}");
 
                     DateTime startLoad = DateTime.UtcNow;
-                    var allDataList = new List<DynamicTableEntity>(iPageSize);
+                    var allDataList = new List<TableEntity>(iPageSize);
 
                     TableQuery tq = migration.GetSourceTableQuery();
 
                     tq.TakeCount = iPageSize;
-                    TableContinuationToken continueToken = new TableContinuationToken();
+                    string continueToken = string.Empty;
 
                     int iSkippedUserCount = 0;
                     int iSkippedPageCount = 0;
@@ -114,17 +114,18 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                     {
                         DateTime batchStart = DateTime.UtcNow;
 
-                        CloudTable sourceTable = sourceContext.UserTable;
+                        TableClient sourceTable = sourceContext.UserTable;
                         if (MigrateCommand == MigrationFactory.Roles)
                         {
                             sourceTable = sourceContext.RoleTable;
                             entityRecordName = "Role and Role Claims";
                         }
-                        var sourceResults = sourceTable.ExecuteQuerySegmentedAsync(tq, continueToken).Result;
+                        var sourceResults = sourceTable.Query<TableEntity>(tq.FilterString, tq.TakeCount).AsPages(continueToken, tq.TakeCount).FirstOrDefault();
+
                         continueToken = sourceResults.ContinuationToken;
 
 
-                        int batchCount = sourceResults.Count(migration.UserWhereFilter);
+                        int batchCount = sourceResults.Values.Count(migration.UserWhereFilter);
                         iUserTotal += batchCount;
                         iPageCounter++;
 
@@ -134,7 +135,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                         {
                             if (migrateOption)
                             {
-                                migration.ProcessMigrate(targetContext, sourceContext, sourceResults.Results, iMaxdegreesparallel,
+                                migration.ProcessMigrate(targetContext, sourceContext, sourceResults.Values.ToList(), iMaxdegreesparallel,
                                 () =>
                                 {
                                     Interlocked.Increment(ref iUserSuccessConvert);

@@ -5,8 +5,11 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Azure.Cosmos.Table;
+using Azure;
+using Azure.Data.Tables;
+using Azure.Data.Tables.Models;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 {
@@ -16,52 +19,74 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
     /// </summary>
     internal class BatchOperationHelper
     {
-        /// <summary>
-        /// Current max operations supported in a TableBatchOperation
-        /// http://azure.microsoft.com/en-us/documentation/articles/storage-dotnet-how-to-use-tables/#insert-batch
-        /// </summary>
-        public const int MaxOperationsPerBatch = 100;
 
-        private readonly List<TableBatchOperation> _batches = new List<TableBatchOperation>(100);
+        private readonly Dictionary<string, TableTransactionalBatch> _batches = new Dictionary<string, TableTransactionalBatch>();
 
-        public BatchOperationHelper() { }
-
-        /// <summary>
-        /// Adds a TableOperation to a TableBatchOperation
-        /// and automatically adds a new TableBatchOperation if max TableOperations are 
-        /// exceeded.
-        /// </summary>
-        /// <param name="operation"></param>
-        public void Add(TableOperation operation)
+        private TableClient _table;
+        public BatchOperationHelper(TableClient table) 
         {
-            TableBatchOperation current = GetCurrent();
-            if (current.Count == MaxOperationsPerBatch)
+            _table = table;
+        }
+        
+        public virtual void AddEntities<T>(IEnumerable<T> entities) where T : class, ITableEntity, new() 
+        { 
+            foreach(T entity in entities)
             {
-                _batches.Add(new TableBatchOperation());
-                current = GetCurrent();
+                AddEntity<T>(entity);
             }
-            current.Add(operation);
+        }
+        public virtual void AddEntity<T>(T entity) where T : class, ITableEntity, new() 
+        {
+            var current = GetCurrent(entity.PartitionKey);
+            current.AddEntity<T>(entity);
+        }
+        public virtual void DeleteEntity(string partitionKey, string rowKey, ETag ifMatch = default) 
+        {
+            var current = GetCurrent(partitionKey);
+            current.DeleteEntity(partitionKey, rowKey, ifMatch);
         }
 
-        public async Task<IEnumerable<TableResult>> ExecuteBatchAsync(CloudTable table)
+        public virtual IEnumerable<Response<TableBatchResponse>> SubmitBatch(CancellationToken cancellationToken = default) 
         {
-            ConcurrentBag<TableResult> results = new ConcurrentBag<TableResult>();
-            IEnumerable<Task> tasks = _batches.Select((batchOperation) =>
-            {
-                return table.ExecuteBatchAsync(batchOperation)
-                .ContinueWith((taskTableBatch) =>
-               {
-                   TableBatchResult batchResult = taskTableBatch.Result;
-                   foreach (var tr in batchResult)
-                   {
-                       results.Add(tr);
-                   }
-               });
-               
+            ConcurrentBag<Response<TableBatchResponse>> bag = new ConcurrentBag<Response<TableBatchResponse>>();
+
+            var result = Parallel.ForEach(this._batches.Values, (v) => {
+                bag.Add(v.SubmitBatch(cancellationToken));
             });
-            await Task.WhenAll(tasks).ConfigureAwait(false);
             Clear();
-            return results as IEnumerable<TableResult>;
+            return bag;
+        }
+        public async virtual Task<IEnumerable<Response<TableBatchResponse>>> SubmitBatchAsync(CancellationToken cancellationToken = default) 
+        {
+            Task<Response<TableBatchResponse>>[] tasks = this._batches.Values.Select(s => s.SubmitBatchAsync(cancellationToken)).ToArray();
+
+            await Task.WhenAll(tasks);
+            Clear();
+            return tasks.Select(t => t.Result);
+        }
+
+        public bool TryGetFailedEntityFromException(RequestFailedException exception, out ITableEntity failedEntity)
+        {
+            foreach(var t in _batches.Values)
+            {
+                if(t.TryGetFailedEntityFromException(exception, out failedEntity))
+                {
+                    return true;
+                }
+            }
+            failedEntity = null;
+            return false;
+        }
+        public virtual void UpdateEntity<T>(T entity, ETag ifMatch, TableUpdateMode mode = TableUpdateMode.Merge) where T : class, ITableEntity, new()
+        {
+            var current = GetCurrent(entity.PartitionKey);
+            current.UpdateEntity<T>(entity, ifMatch, mode);
+        }
+
+        public virtual void UpsertEntity<T>(T entity, TableUpdateMode mode = TableUpdateMode.Merge) where T : class, ITableEntity, new() 
+        {
+            var current = GetCurrent(entity.PartitionKey);
+            current.UpsertEntity<T>(entity, mode);
         }
 
         public void Clear()
@@ -69,14 +94,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             _batches.Clear();
         }
 
-        private TableBatchOperation GetCurrent()
+        private TableTransactionalBatch GetCurrent(string partitionKey)
         {
-            if (_batches.Count < 1)
+            if(!_batches.ContainsKey(partitionKey))
             {
-                _batches.Add(new TableBatchOperation());
+                _batches.Add(partitionKey, _table.CreateTransactionalBatch(partitionKey));
             }
 
-            return _batches[_batches.Count - 1];
+            return _batches[partitionKey];
         }
     }
 }

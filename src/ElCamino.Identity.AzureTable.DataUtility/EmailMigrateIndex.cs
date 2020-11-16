@@ -3,7 +3,7 @@
 using ElCamino.AspNetCore.Identity.AzureTable;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
-using Microsoft.Azure.Cosmos.Table;
+using Azure.Data.Tables;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,21 +36,21 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         }
 
 
-        public bool UserWhereFilter(DynamicTableEntity d)
+        public bool UserWhereFilter(TableEntity d)
         {
-            return !string.IsNullOrWhiteSpace(d.Properties["Email"].StringValue);
+            return !string.IsNullOrWhiteSpace(d["Email"].ToString());
         }
 
         public void ProcessMigrate(IdentityCloudContext targetContext,
             IdentityCloudContext sourceContext,
-            IList<DynamicTableEntity> userResults, 
+            IList<TableEntity> userResults, 
             int maxDegreesParallel,
             Action updateComplete = null,
             Action<string> updateError = null)
         {
             var userIds = userResults
                 .Where(UserWhereFilter)
-                .Select(d => new { UserId = d.PartitionKey, Email = d.Properties["Email"].StringValue })
+                .Select(d => new { UserId = d.PartitionKey, Email = d["Email"].ToString() })
                 .ToList();
 
 
@@ -61,7 +61,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 try
                 {
                     IdentityUserIndex index = CreateEmailIndex(userId.UserId, userId.Email);
-                    var r = targetContext.IndexTable.ExecuteAsync(TableOperation.InsertOrReplace(index)).Result;
+                    var r = targetContext.IndexTable.UpsertEntity<IdentityUserIndex>(index, mode:TableUpdateMode.Replace);
                     updateComplete?.Invoke();
                 }
                 catch (Exception ex)
