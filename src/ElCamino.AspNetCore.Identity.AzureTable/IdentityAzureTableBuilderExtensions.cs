@@ -29,7 +29,7 @@ namespace Microsoft.Extensions.DependencyInjection
             builder.Services.AddSingleton<IdentityConfiguration>(new Func<IServiceProvider, IdentityConfiguration>(p => configAction()));
 
             Type contextType = typeof(TContext);
-            builder.Services.AddScoped(contextType, contextType);
+            builder.Services.AddSingleton(contextType, contextType);
 
             Type userStoreType = builder.RoleType != null ? typeof(UserStore<,,>).MakeGenericType(builder.UserType, builder.RoleType, contextType)
                 : typeof(UserOnlyStore<,>).MakeGenericType(builder.UserType, contextType);
