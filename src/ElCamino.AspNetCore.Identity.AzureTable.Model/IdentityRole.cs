@@ -61,7 +61,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         public string PartitionKey { get; set; }
         public string RowKey { get; set; }
         public DateTimeOffset? Timestamp { get; set; }
-        public ETag ETag { get; set; } = ETag.All;
+        public ETag ETag { get; set; } =  ETag.All;
 
         public IdentityRole() : base()
         {

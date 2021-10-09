@@ -72,7 +72,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                     var claimNew = new TableEntity(claim);
                     claimNew.ResetKeys(claim.PartitionKey,
                         _keyHelper.GenerateRowKeyIdentityUserClaim(claim["ClaimType"].ToString(), claim["ClaimValue"].ToString()),
-                        Constants.ETagWildcard);
+                         TableConstants.ETagWildcard);
                     if (claimNew.ContainsKey(KeyVersion))
                     {
                         claimNew[KeyVersion] = _keyHelper.KeyVersion;

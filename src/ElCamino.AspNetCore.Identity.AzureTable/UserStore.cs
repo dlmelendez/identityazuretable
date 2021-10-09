@@ -128,7 +128,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             var userRoles =
                 (await _userTable.ExecuteQueryAsync<TableEntity>(tq).ToListAsync().ConfigureAwait(false))
                 .Where(w => w.ContainsKey(roleName))
-                .Select(d => d[roleName].ToString())
+                .Select(d => d.GetString(roleName))
                 .Where(di => !string.IsNullOrWhiteSpace(di));
 
             int userRoleTotalCount = userRoles.Count();
@@ -289,8 +289,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 {
                     var deleteRoleIndex = CreateRoleIndex(userPartitionKey, roleName);
                     await Task.WhenAll(
-                       _userTable.DeleteEntityAsync(item.Value.PartitionKey, item.Value.RowKey, ETag.All, cancellationToken),
-                       _indexTable.DeleteEntityAsync(deleteRoleIndex.PartitionKey, deleteRoleIndex.RowKey, ETag.All, cancellationToken)
+                       _userTable.DeleteEntityAsync(item.Value.PartitionKey, item.Value.RowKey,  TableConstants.ETagWildcard, cancellationToken),
+                       _indexTable.DeleteEntityAsync(deleteRoleIndex.PartitionKey, deleteRoleIndex.RowKey,  TableConstants.ETagWildcard, cancellationToken)
                     ).ConfigureAwait(false);
                 }
             }
@@ -462,7 +462,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             tasks.Add(DeleteAllUserRows(userPartitionKey, userRows));
 
             var deleteUserNameIndex = CreateUserNameIndex(userPartitionKey, user.UserName);
-            tasks.Add(_indexTable.DeleteEntityAsync(deleteUserNameIndex.PartitionKey, deleteUserNameIndex.RowKey, ETag.All, cancellationToken: cancellationToken));
+            tasks.Add(_indexTable.DeleteEntityAsync(deleteUserNameIndex.PartitionKey, deleteUserNameIndex.RowKey,  TableConstants.ETagWildcard, cancellationToken: cancellationToken));
 
             var userAgg = MapUserAggregate(userPartitionKey, userRows);
 
@@ -471,25 +471,25 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             foreach (var userLogin in userAgg.Logins)
             {
                 var deleteIndex = CreateLoginIndex(userPartitionKey, userLogin.LoginProvider, userLogin.ProviderKey);
-                tasks.Add(_indexTable.DeleteEntityAsync(deleteIndex.PartitionKey, deleteIndex.RowKey, ETag.All, cancellationToken: cancellationToken));
+                tasks.Add(_indexTable.DeleteEntityAsync(deleteIndex.PartitionKey, deleteIndex.RowKey,  TableConstants.ETagWildcard, cancellationToken: cancellationToken));
             }
 
             foreach (var userRole in userAgg.Roles)
             {
                 var deleteIndex = CreateRoleIndex(userPartitionKey, userRole.RoleName);
-                tasks.Add(_indexTable.DeleteEntityAsync(deleteIndex.PartitionKey, deleteIndex.RowKey, ETag.All, cancellationToken: cancellationToken));
+                tasks.Add(_indexTable.DeleteEntityAsync(deleteIndex.PartitionKey, deleteIndex.RowKey,  TableConstants.ETagWildcard, cancellationToken: cancellationToken));
             }
 
             foreach (var userClaim in userAgg.Claims)
             {
                 var deleteIndex = CreateClaimIndex(userPartitionKey, userClaim.ClaimType, userClaim.ClaimValue);
-                tasks.Add(_indexTable.DeleteEntityAsync(deleteIndex.PartitionKey, deleteIndex.RowKey, ETag.All, cancellationToken: cancellationToken));
+                tasks.Add(_indexTable.DeleteEntityAsync(deleteIndex.PartitionKey, deleteIndex.RowKey,  TableConstants.ETagWildcard, cancellationToken: cancellationToken));
             }
 
             if (!string.IsNullOrWhiteSpace(user.Email))
             {
                 var deleteIndex = CreateEmailIndex(userPartitionKey, user.Email);
-                tasks.Add(_indexTable.DeleteEntityAsync(deleteIndex.PartitionKey, deleteIndex.RowKey, ETag.All, cancellationToken: cancellationToken));
+                tasks.Add(_indexTable.DeleteEntityAsync(deleteIndex.PartitionKey, deleteIndex.RowKey,  TableConstants.ETagWildcard, cancellationToken: cancellationToken));
             }
 
             try

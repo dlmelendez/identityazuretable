@@ -101,7 +101,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                         //Add UserName Index
                         //Add Email Index
                         TableEntity tgtDte = new TableEntity(sourceEntity);
-                        tgtDte.ResetKeys(targetUserPartitionKey, targetUserPartitionKey, Constants.ETagWildcard);
+                        tgtDte.ResetKeys(targetUserPartitionKey, targetUserPartitionKey,  TableConstants.ETagWildcard);
                         tgtDte["Id"] = userId;
                         tgtDte["KeyVersion"] = _keyHelper.KeyVersion;
                         targetUserEntities.Add(tgtDte);
@@ -115,7 +115,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                             PartitionKey = userNameKey,
                             RowKey = targetUserPartitionKey,
                             KeyVersion = _keyHelper.KeyVersion,
-                            ETag = Constants.ETagWildcard
+                            ETag =  TableConstants.ETagWildcard
                         };
                         targetUserIndexes.Add(userNameIndex);
 
@@ -129,7 +129,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                                 PartitionKey = emailKey,
                                 RowKey = targetUserPartitionKey,
                                 KeyVersion = _keyHelper.KeyVersion,
-                                ETag = Constants.ETagWildcard
+                                ETag =  TableConstants.ETagWildcard
                             };
                             targetUserIndexes.Add(emailIndex);
                         }
@@ -147,7 +147,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
                         string targetUserRowKey = _keyHelper.GenerateRowKeyIdentityUserClaim(claimType, claimValue);
                         TableEntity tgtDte = new TableEntity(sourceEntity);
-                        tgtDte.ResetKeys(targetUserPartitionKey, targetUserRowKey, Constants.ETagWildcard);
+                        tgtDte.ResetKeys(targetUserPartitionKey, targetUserRowKey,  TableConstants.ETagWildcard);
                         tgtDte["UserId"] = userId;
                         tgtDte["KeyVersion"] = _keyHelper.KeyVersion;
                         targetUserEntities.Add(tgtDte);
@@ -159,7 +159,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                             PartitionKey = targetUserRowKey,
                             RowKey = targetUserPartitionKey,
                             KeyVersion = _keyHelper.KeyVersion,
-                            ETag = Constants.ETagWildcard
+                            ETag =  TableConstants.ETagWildcard
                         };
                         targetUserIndexes.Add(claimIndex);
                         continue;
@@ -176,7 +176,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
                         string targetUserRowKey = _keyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey);
                         TableEntity tgtDte = new TableEntity(sourceEntity);
-                        tgtDte.ResetKeys(targetUserPartitionKey, targetUserRowKey, Constants.ETagWildcard);
+                        tgtDte.ResetKeys(targetUserPartitionKey, targetUserRowKey,  TableConstants.ETagWildcard);
                         tgtDte["UserId"] = userId;
                         tgtDte["KeyVersion"] = _keyHelper.KeyVersion;
                         targetUserEntities.Add(tgtDte);
@@ -188,7 +188,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                             PartitionKey = _keyHelper.GeneratePartitionKeyIndexByLogin(loginProvider, providerKey),
                             RowKey = _keyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey),
                             KeyVersion = _keyHelper.KeyVersion,
-                            ETag = Constants.ETagWildcard
+                            ETag =  TableConstants.ETagWildcard
                         };
                         targetUserIndexes.Add(logonIndex);
                         continue;
@@ -203,7 +203,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
                         string targetUserRowKey = _keyHelper.GenerateRowKeyIdentityUserRole(roleName);
                         TableEntity tgtDte = new TableEntity(sourceEntity);
-                        tgtDte.ResetKeys(targetUserPartitionKey, targetUserRowKey, Constants.ETagWildcard);
+                        tgtDte.ResetKeys(targetUserPartitionKey, targetUserRowKey,  TableConstants.ETagWildcard);
                         tgtDte["UserId"] = userId;
                         tgtDte["KeyVersion"] = _keyHelper.KeyVersion;
                         targetUserEntities.Add(tgtDte);
@@ -215,7 +215,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                             PartitionKey = targetUserRowKey,
                             RowKey = targetUserPartitionKey,
                             KeyVersion = _keyHelper.KeyVersion,
-                            ETag = Constants.ETagWildcard
+                            ETag =  TableConstants.ETagWildcard
                         };
                         targetUserIndexes.Add(roleIndex);
                         continue;
@@ -231,7 +231,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
                         string targetUserRowKey = _keyHelper.GenerateRowKeyIdentityUserToken(loginProvider, tokenName);
                         TableEntity tgtDte = new TableEntity(sourceEntity);
-                        tgtDte.ResetKeys(targetUserPartitionKey, targetUserRowKey, Constants.ETagWildcard);
+                        tgtDte.ResetKeys(targetUserPartitionKey, targetUserRowKey,  TableConstants.ETagWildcard);
                         tgtDte["UserId"] = userId;
                         tgtDte["KeyVersion"] = _keyHelper.KeyVersion;
                         targetUserEntities.Add(tgtDte);

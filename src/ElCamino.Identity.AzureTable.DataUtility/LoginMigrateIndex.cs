@@ -87,7 +87,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 PartitionKey = _keyHelper.GeneratePartitionKeyIndexByLogin(loginProvider, providerKey),
                 RowKey = _keyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey),
                 KeyVersion = _keyHelper.KeyVersion,
-                ETag = Constants.ETagWildcard
+                ETag =  TableConstants.ETagWildcard
             };
 
         }

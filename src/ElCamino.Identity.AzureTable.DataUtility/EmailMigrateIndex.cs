@@ -87,7 +87,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 PartitionKey = _keyHelper.GenerateRowKeyUserEmail(email),
                 RowKey = userid,
                 KeyVersion = _keyHelper.KeyVersion,
-                ETag = Constants.ETagWildcard
+                ETag =  TableConstants.ETagWildcard
             };
         }
 

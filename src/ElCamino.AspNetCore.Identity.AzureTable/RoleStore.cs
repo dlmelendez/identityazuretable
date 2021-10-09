@@ -91,7 +91,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             if (role == null) throw new ArgumentNullException(nameof(role));
 
             // Execute the insert operation.
-            await _roleTable.DeleteEntityAsync(role.PartitionKey, role.RowKey, ETag.All).ConfigureAwait(false);
+            await _roleTable.DeleteEntityAsync(role.PartitionKey, role.RowKey, TableConstants.ETagWildcard).ConfigureAwait(false);
             return IdentityResult.Success;
         }
 
@@ -162,22 +162,22 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             Model.IGenerateKeys g = role as Model.IGenerateKeys;
             if (!g.PeekRowKey(_keyHelper).Equals(role.RowKey, StringComparison.Ordinal))
             {
-                var batch = _roleTable.CreateTransactionalBatch(role.PartitionKey);
+                BatchOperationHelper bHelper = new BatchOperationHelper(_roleTable);
                 TableEntity dRole = new TableEntity(role.PartitionKey, role.RowKey);
-                dRole.ETag = Constants.ETagWildcard;
+                dRole.ETag =  TableConstants.ETagWildcard;
                 dRole.Timestamp = role.Timestamp;
                 g.GenerateKeys(_keyHelper);
                 //PartitionKey has to be the same to participate in a batch transaction.
                 if (dRole.PartitionKey.Equals(role.PartitionKey))
                 {
-                    batch.DeleteEntity(dRole.PartitionKey, dRole.RowKey, ETag.All);
-                    batch.AddEntity(role);
-                    await batch.SubmitBatchAsync(cancellationToken:cancellationToken).ConfigureAwait(false);
+                    bHelper.DeleteEntity(dRole.PartitionKey, dRole.RowKey,  TableConstants.ETagWildcard);
+                    bHelper.AddEntity(role);
+                    await bHelper.SubmitBatchAsync(cancellationToken:cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
                     await Task.WhenAll(
-                    _roleTable.DeleteEntityAsync(dRole.PartitionKey, dRole.RowKey, ifMatch:ETag.All, cancellationToken:cancellationToken),
+                    _roleTable.DeleteEntityAsync(dRole.PartitionKey, dRole.RowKey, ifMatch: TableConstants.ETagWildcard, cancellationToken:cancellationToken),
                     _roleTable.AddEntityAsync(role, cancellationToken)).ConfigureAwait(false);
                 }
 
@@ -255,10 +255,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             item.RoleId = role.Id;
             item.ClaimType = claim.Type;
             item.ClaimValue = claim.Value;
-            item.ETag = Constants.ETagWildcard;
+            item.ETag =  TableConstants.ETagWildcard;
             ((Model.IGenerateKeys)item).GenerateKeys(_keyHelper);
 
-            await _roleTable.DeleteEntityAsync(item.PartitionKey, item.RowKey, ETag.All, cancellationToken).ConfigureAwait(false);
+            await _roleTable.DeleteEntityAsync(item.PartitionKey, item.RowKey,  TableConstants.ETagWildcard, cancellationToken).ConfigureAwait(false);
         }
 
         public TContext Context { get; private set; }

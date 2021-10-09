@@ -28,22 +28,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             _config = config;
             _client = new TableServiceClient(_config.StorageConnectionString);
-            //if (!string.IsNullOrWhiteSpace(_config.LocationMode))
-            //{
-            //    LocationMode mode = LocationMode.PrimaryOnly;
-            //    if (Enum.TryParse<LocationMode>(_config.LocationMode, out mode))
-            //    {
-            //        _client.DefaultRequestOptions.LocationMode = mode;
-            //    }
-            //    else
-            //    {
-            //        throw new ArgumentException("Invalid LocationMode defined in config. For more information on geo-replication location modes: http://msdn.microsoft.com/en-us/library/azure/microsoft.windowsazure.storage.retrypolicies.locationmode.aspx", "config.LocationMode");
-            //    }
-            //}
-
-            _indexTable = _client.GetTableClient(FormatTableNameWithPrefix(!string.IsNullOrWhiteSpace(_config.IndexTableName) ? _config.IndexTableName : Constants.TableNames.IndexTable));
-            _roleTable = _client.GetTableClient(FormatTableNameWithPrefix(!string.IsNullOrWhiteSpace(_config.RoleTableName) ? _config.RoleTableName : Constants.TableNames.RolesTable));
-            _userTable = _client.GetTableClient(FormatTableNameWithPrefix(!string.IsNullOrWhiteSpace(_config.UserTableName) ? _config.UserTableName : Constants.TableNames.UsersTable));
+           
+            _indexTable = _client.GetTableClient(FormatTableNameWithPrefix(!string.IsNullOrWhiteSpace(_config.IndexTableName) ? _config.IndexTableName : TableConstants.TableNames.IndexTable));
+            _roleTable = _client.GetTableClient(FormatTableNameWithPrefix(!string.IsNullOrWhiteSpace(_config.RoleTableName) ? _config.RoleTableName : TableConstants.TableNames.RolesTable));
+            _userTable = _client.GetTableClient(FormatTableNameWithPrefix(!string.IsNullOrWhiteSpace(_config.UserTableName) ? _config.UserTableName : TableConstants.TableNames.UsersTable));
         }
 
         ~IdentityCloudContext()

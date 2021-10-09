@@ -39,7 +39,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Azure.Data.Tables" Version="3.0.0-beta.3" />
+    <PackageReference Include="Azure.Data.Tables" Version="12.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="5.0.0" />

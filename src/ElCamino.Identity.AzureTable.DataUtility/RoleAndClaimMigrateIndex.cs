@@ -62,7 +62,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                         PartitionKey = dte.RowKey,
                         RowKey = dte.PartitionKey,
                         KeyVersion = _keyHelper.KeyVersion,
-                        ETag = Constants.ETagWildcard
+                        ETag =  TableConstants.ETagWildcard
                     };
                     var r = targetContext.IndexTable.UpsertEntity(index, TableUpdateMode.Replace);
                     updateComplete?.Invoke();
