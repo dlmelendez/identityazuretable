@@ -25,7 +25,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         IClassFixture<BaseFixture<TUser, TRole, TContext, TUserStore, TKeyHelper>>
          where TUser : IdentityUser, IApplicationUser, new()
          where TRole : IdentityRole, new()
-         where TContext : IdentityCloudContext, new()
+         where TContext : IdentityCloudContext
          where TUserStore : UserStore<TUser, TRole, TContext>
        where TKeyHelper : IKeyHelper, new()
     {
@@ -388,7 +388,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
     public partial class BaseUserStoreTests<TUser, TContext, TUserStore, TKeyHelper> : IClassFixture<BaseFixture<TUser, TContext, TUserStore, TKeyHelper>>
          where TUser : IdentityUser, IApplicationUser, new()
-         where TContext : IdentityCloudContext, new()
+         where TContext : IdentityCloudContext
          where TUserStore : UserOnlyStore<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken>
          where TKeyHelper : IKeyHelper, new()
     {

@@ -24,9 +24,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.ModelTests
         [Trait("IdentityCore.Azure.Model", "")]
         public void IdentityCloudContextCtors()
         {
-            var ic = new IdentityCloudContext();
-            Assert.NotNull(ic);
-
             Assert.Throws<ArgumentNullException>(() => new IdentityCloudContext(null));
             var locConfig = roleFixture.GetConfig();
             //LocationMode is deprecated

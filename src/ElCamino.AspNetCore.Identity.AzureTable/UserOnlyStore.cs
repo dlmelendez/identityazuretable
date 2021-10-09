@@ -28,7 +28,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
     public class UserOnlyStore<TUser, TContext> 
         : UserOnlyStore<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken>
         where TUser : Model.IdentityUser<string>, new()
-        where TContext : IdentityCloudContext, new()
+        where TContext : IdentityCloudContext
     {
         public UserOnlyStore(TContext context, IKeyHelper keyHelper, IdentityConfiguration config) : base(context, keyHelper, config) { }
     }
@@ -41,7 +41,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         where TUserLogin : Model.IdentityUserLogin<TKey>, new()
         where TUserClaim : Model.IdentityUserClaim<TKey>, new()
         where TUserToken : Model.IdentityUserToken<TKey>, new()
-        where TContext : IdentityCloudContext, new()
+        where TContext : IdentityCloudContext
     {
         protected bool _disposed;
 

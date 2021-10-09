@@ -35,10 +35,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         public void RoleStoreCtors()
         {
             Assert.Throws<ArgumentNullException>(() => roleFixture.CreateRoleStore(null));
-            var rs = new RoleStore<IdentityRole>();
-            Assert.NotNull(rs);
-            rs.Dispose();
-            using (var rstore = roleFixture.CreateRoleStore()) { }
+            using (var rstore = roleFixture.CreateRoleStore()) 
+            {
+                Assert.NotNull(rstore);
+            }
         }
 
         private Claim GenRoleClaim()

@@ -19,7 +19,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
     public class UserStore<TUser, TContext> : UserStore<TUser, Model.IdentityRole, string, Model.IdentityUserLogin, Model.IdentityUserRole, Model.IdentityUserClaim, Model.IdentityUserToken, TContext>
        , IUserStore<TUser>
        where TUser : Model.IdentityUser<string>, new()
-       where TContext : IdentityCloudContext, new()
+       where TContext : IdentityCloudContext
     {
         public UserStore(TContext context, Model.IKeyHelper keyHelper, Model.IdentityConfiguration config) : base(context, keyHelper, config) { }
     }
@@ -34,7 +34,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         , IUserStore<TUser>
         where TUser : Model.IdentityUser<string>, new()
         where TRole : Model.IdentityRole<string, Model.IdentityUserRole>, new()
-        where TContext : IdentityCloudContext, new()
+        where TContext : IdentityCloudContext
     {
         public UserStore(TContext context, Model.IKeyHelper keyHelper, Model.IdentityConfiguration config) : base(context, keyHelper, config) { }
     }
@@ -50,7 +50,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         where TUserRole : Model.IdentityUserRole<TKey>, new()
         where TUserClaim : Model.IdentityUserClaim<TKey>, new()
         where TUserToken : Model.IdentityUserToken<TKey>, new()
-        where TContext : IdentityCloudContext, new()
+        where TContext : IdentityCloudContext
     {
         protected TableClient _roleTable;
 

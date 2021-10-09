@@ -22,7 +22,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
         : BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore, TKeyHelper>
         where TUser : IdentityUser, new()
         where TRole : IdentityRole, new()
-        where TContext : IdentityCloudContext, new()
+        where TContext : IdentityCloudContext
         where TUserStore : UserStore<TUser, TRole, TContext>
         where TKeyHelper : IKeyHelper, new()
     {
@@ -123,7 +123,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
     public class BaseFixture<TUser, TContext, TUserStore, TKeyHelper>
     : BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore, TKeyHelper>
     where TUser : IdentityUser, new()
-    where TContext : IdentityCloudContext, new()
+    where TContext : IdentityCloudContext
     where TUserStore : UserOnlyStore<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken>
     where TKeyHelper : IKeyHelper, new()
     {
@@ -136,7 +136,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
         where TUserLogin : Model.IdentityUserLogin<TKey>, new()
         where TUserClaim : Model.IdentityUserClaim<TKey>, new()
         where TUserToken : Model.IdentityUserToken<TKey>, new()
-        where TContext : IdentityCloudContext, new()
+        where TContext : IdentityCloudContext
         where TUserStore : UserOnlyStore<TUser, TContext, TKey, TUserClaim, TUserLogin, TUserToken>
         where TKeyHelper : IKeyHelper, new()
     {

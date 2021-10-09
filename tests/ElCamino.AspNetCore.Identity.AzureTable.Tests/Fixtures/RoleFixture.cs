@@ -15,7 +15,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
     public partial class RoleFixture<TUser, TRole, TContext, TKeyHelper> : BaseFixture<TUser, TRole, TContext, UserStore<TUser, TRole, TContext>, TKeyHelper>
         where TUser : AspNetCore.Identity.AzureTable.Model.IdentityUser, new()
         where TRole : IdentityRole, new()
-        where TContext : IdentityCloudContext, new()
+        where TContext : IdentityCloudContext
         where TKeyHelper : IKeyHelper, new()
     {
 

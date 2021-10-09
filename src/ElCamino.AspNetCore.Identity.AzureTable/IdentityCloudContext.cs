@@ -14,7 +14,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         protected TableClient _indexTable;
         protected TableClient _userTable;
 
-        public IdentityCloudContext() { }
         public IdentityCloudContext(IdentityConfiguration config)
         {
             if (config == null)

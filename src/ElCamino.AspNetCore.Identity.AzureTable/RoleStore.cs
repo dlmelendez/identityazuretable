@@ -18,10 +18,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
     public class RoleStore<TRole> : RoleStore<TRole, IdentityCloudContext>
     where TRole : Model.IdentityRole, new()
     {
-        public RoleStore()
-            : this(new IdentityCloudContext(), new DefaultKeyHelper())
-        {
-        }
 
         public RoleStore(IdentityCloudContext context, IKeyHelper keyHelper)
             : base(context, keyHelper)
@@ -31,7 +27,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
     public class RoleStore<TRole, TContext> : RoleStore<TRole, string, Model.IdentityUserRole, Model.IdentityRoleClaim, TContext>
         where TRole : Model.IdentityRole, new()
-        where TContext : IdentityCloudContext, new()
+        where TContext : IdentityCloudContext
     {
         public RoleStore(TContext context, IKeyHelper keyHelper) : base(context, keyHelper) { }
 
@@ -47,7 +43,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         where TRole : Model.IdentityRole<TKey, TUserRole>, new()
         where TUserRole : Model.IdentityUserRole<TKey>, new()
         where TRoleClaim : Model.IdentityRoleClaim<TKey>, new()
-        where TContext : IdentityCloudContext, new()
+        where TContext : IdentityCloudContext
         where TKey : IEquatable<TKey>
     {
         private bool _disposed;

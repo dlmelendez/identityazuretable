@@ -21,7 +21,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns><see cref="IdentityBuilder"/></returns>
         public static IdentityBuilder AddAzureTableStores<TContext>(this IdentityBuilder builder, Func<IdentityConfiguration> configAction,
             IKeyHelper keyHelper = null)
-            where TContext : IdentityCloudContext, new()
+            where TContext : IdentityCloudContext
         {
                 
             builder.Services.AddSingleton<IKeyHelper>(keyHelper?? new DefaultKeyHelper());
@@ -55,7 +55,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="builder"><see cref="IdentityBuilder"/> aspnet identity pipeline</param>
         /// <returns><see cref="IdentityBuilder"/></returns>
         public static IdentityBuilder CreateAzureTablesIfNotExists<TContext>(this IdentityBuilder builder)
-            where TContext : IdentityCloudContext, new()
+            where TContext : IdentityCloudContext
         {
             Type contextType = typeof(TContext);
             Type userStoreType = typeof(IUserStore<>).MakeGenericType(builder.UserType);
