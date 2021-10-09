@@ -57,13 +57,12 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IdentityBuilder CreateAzureTablesIfNotExists<TContext>(this IdentityBuilder builder)
             where TContext : IdentityCloudContext
         {
-            Type contextType = typeof(TContext);
             Type userStoreType = typeof(IUserStore<>).MakeGenericType(builder.UserType);
 
             var userStore = ActivatorUtilities.GetServiceOrCreateInstance(builder.Services.BuildServiceProvider(),
                 userStoreType) as dynamic;
 
-            userStore.CreateTablesIfNotExistsAsync();
+            userStore.CreateTablesIfNotExistsAsync().Wait();
 
             return builder;
         }
