@@ -18,6 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElCamino.AspNetCore.Identity.AzureTable.Templates", "templates\ElCamino.AspNetCore.Identity.AzureTable.Templates.csproj", "{F8EBDAC0-0F00-4EED-99B4-6F7FF234CCBB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElCamino.AspNetCore.Identity.AzureTable.Model", "src\ElCamino.AspNetCore.Identity.AzureTable.Model\ElCamino.AspNetCore.Identity.AzureTable.Model.csproj", "{C90FB0E3-5BE2-41E7-9DA3-9083C7700F91}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +51,12 @@ Global
 		{F8EBDAC0-0F00-4EED-99B4-6F7FF234CCBB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F8EBDAC0-0F00-4EED-99B4-6F7FF234CCBB}.Signed|Any CPU.ActiveCfg = Release|Any CPU
 		{F8EBDAC0-0F00-4EED-99B4-6F7FF234CCBB}.Signed|Any CPU.Build.0 = Release|Any CPU
+		{C90FB0E3-5BE2-41E7-9DA3-9083C7700F91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C90FB0E3-5BE2-41E7-9DA3-9083C7700F91}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C90FB0E3-5BE2-41E7-9DA3-9083C7700F91}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C90FB0E3-5BE2-41E7-9DA3-9083C7700F91}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C90FB0E3-5BE2-41E7-9DA3-9083C7700F91}.Signed|Any CPU.ActiveCfg = Debug|Any CPU
+		{C90FB0E3-5BE2-41E7-9DA3-9083C7700F91}.Signed|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

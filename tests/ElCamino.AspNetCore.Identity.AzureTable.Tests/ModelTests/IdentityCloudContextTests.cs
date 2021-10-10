@@ -24,13 +24,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.ModelTests
         [Trait("IdentityCore.Azure.Model", "")]
         public void IdentityCloudContextCtors()
         {
-            var ic = new IdentityCloudContext();
-            Assert.NotNull(ic);
-
             Assert.Throws<ArgumentNullException>(() => new IdentityCloudContext(null));
             var locConfig = roleFixture.GetConfig();
-            locConfig.LocationMode = "invalidMode";
-            Assert.Throws<ArgumentException>(() => new IdentityCloudContext(locConfig));
+            //LocationMode is deprecated
+            //locConfig.LocationMode = "invalidMode";
+            //Assert.Throws<ArgumentException>(() => new IdentityCloudContext(locConfig));
 
             //Coverage for FormatTableNameWithPrefix()
             var tableConfig = roleFixture.GetConfig();

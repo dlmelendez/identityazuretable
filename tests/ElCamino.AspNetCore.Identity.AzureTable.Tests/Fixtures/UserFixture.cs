@@ -13,7 +13,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
     public class UserFixture<TUser, TRole, TContext, TUserStore, TKeyHelper> : BaseFixture<TUser, TRole, TContext, TUserStore, TKeyHelper>
         where TUser : IdentityUser, IApplicationUser, new()
         where TRole : IdentityRole, new()
-        where TContext : IdentityCloudContext, new()
+        where TContext : IdentityCloudContext
         where TUserStore : UserStore<TUser, TRole, TContext>
         where TKeyHelper : IKeyHelper, new()
     {
@@ -31,7 +31,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 
     public class UserFixture<TUser, TContext, TUserStore, TKeyHelper> : BaseFixture<TUser, TContext, TUserStore, TKeyHelper>
        where TUser : IdentityUser, IApplicationUser, new()
-       where TContext : IdentityCloudContext, new()
+       where TContext : IdentityCloudContext
        where TUserStore : UserOnlyStore<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken>
        where TKeyHelper : IKeyHelper, new()
     {

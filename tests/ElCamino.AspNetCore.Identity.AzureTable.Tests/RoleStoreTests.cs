@@ -35,10 +35,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         public void RoleStoreCtors()
         {
             Assert.Throws<ArgumentNullException>(() => roleFixture.CreateRoleStore(null));
-            var rs = new RoleStore<IdentityRole>();
-            Assert.NotNull(rs);
-            rs.Dispose();
-            using (var rstore = roleFixture.CreateRoleStore()) { }
+            using (var rstore = roleFixture.CreateRoleStore()) 
+            {
+                Assert.NotNull(rstore);
+            }
         }
 
         private Claim GenRoleClaim()
@@ -136,8 +136,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         {
             using (RoleStore<IdentityRole> store = roleFixture.CreateRoleStore())
             {
-                var r = await store.CreateTableIfNotExistsAsync();
-                Assert.True(await store.Context.RoleTable.ExistsAsync());
+                await store.CreateTableIfNotExistsAsync();
             }
             ServiceCollection services = new ServiceCollection();
             // Adding coverage for CreateAzureTablesIfNotExists();

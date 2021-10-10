@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ElCamino.AspNetCore.Identity.AzureTable;
-using Microsoft.Azure.Cosmos.Table;
+using Azure.Data.Tables;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
 
@@ -44,7 +44,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             return tq;
         }
 
-        public void ProcessMigrate(IdentityCloudContext targetContext, IdentityCloudContext sourceContext, IList<DynamicTableEntity> sourceUserResults, int maxDegreesParallel, Action updateComplete = null, Action<string> updateError = null)
+        public void ProcessMigrate(IdentityCloudContext targetContext, IdentityCloudContext sourceContext, IList<TableEntity> sourceUserResults, int maxDegreesParallel, Action updateComplete = null, Action<string> updateError = null)
         {
             var rolesAndClaims = sourceUserResults
                             .Where(UserWhereFilter);
@@ -62,9 +62,9 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                         PartitionKey = dte.RowKey,
                         RowKey = dte.PartitionKey,
                         KeyVersion = _keyHelper.KeyVersion,
-                        ETag = Constants.ETagWildcard
+                        ETag =  TableConstants.ETagWildcard
                     };
-                    var r = targetContext.IndexTable.ExecuteAsync(TableOperation.InsertOrReplace(index)).Result;
+                    var r = targetContext.IndexTable.UpsertEntity(index, TableUpdateMode.Replace);
                     updateComplete?.Invoke();
                 }
                 catch (Exception ex)
@@ -75,7 +75,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             });
         }
 
-        public bool UserWhereFilter(DynamicTableEntity d)
+        public bool UserWhereFilter(TableEntity d)
         {
             return d.RowKey.StartsWith(_keyHelper.PreFixIdentityUserRole) || d.RowKey.StartsWith(_keyHelper.PreFixIdentityUserClaim);
         }

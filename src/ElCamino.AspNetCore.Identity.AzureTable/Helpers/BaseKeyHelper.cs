@@ -16,51 +16,51 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
     public abstract class BaseKeyHelper : IKeyHelper
     {
         #region RowConstants
-        public virtual string PreFixIdentityUserClaim => Constants.RowKeyConstants.PreFixIdentityUserClaim;
+        public virtual string PreFixIdentityUserClaim => TableConstants.RowKeyConstants.PreFixIdentityUserClaim;
 
-        public virtual string PreFixIdentityUserClaimUpperBound => Constants.RowKeyConstants.PreFixIdentityUserClaimUpperBound;
+        public virtual string PreFixIdentityUserClaimUpperBound => TableConstants.RowKeyConstants.PreFixIdentityUserClaimUpperBound;
 
-        public virtual string PreFixIdentityUserRole => Constants.RowKeyConstants.PreFixIdentityUserRole;
+        public virtual string PreFixIdentityUserRole => TableConstants.RowKeyConstants.PreFixIdentityUserRole;
 
-        public virtual string PreFixIdentityUserRoleUpperBound => Constants.RowKeyConstants.PreFixIdentityUserRoleUpperBound;
+        public virtual string PreFixIdentityUserRoleUpperBound => TableConstants.RowKeyConstants.PreFixIdentityUserRoleUpperBound;
 
-        public virtual string PreFixIdentityUserLogin => Constants.RowKeyConstants.PreFixIdentityUserLogin;
+        public virtual string PreFixIdentityUserLogin => TableConstants.RowKeyConstants.PreFixIdentityUserLogin;
 
-        public virtual string PreFixIdentityUserLoginUpperBound => Constants.RowKeyConstants.PreFixIdentityUserLoginUpperBound;
+        public virtual string PreFixIdentityUserLoginUpperBound => TableConstants.RowKeyConstants.PreFixIdentityUserLoginUpperBound;
 
-        public virtual string PreFixIdentityUserEmail => Constants.RowKeyConstants.PreFixIdentityUserEmail;
+        public virtual string PreFixIdentityUserEmail => TableConstants.RowKeyConstants.PreFixIdentityUserEmail;
 
-        public virtual string PreFixIdentityUserToken => Constants.RowKeyConstants.PreFixIdentityUserToken;
+        public virtual string PreFixIdentityUserToken => TableConstants.RowKeyConstants.PreFixIdentityUserToken;
 
-        public virtual string PreFixIdentityUserId => Constants.RowKeyConstants.PreFixIdentityUserId;
+        public virtual string PreFixIdentityUserId => TableConstants.RowKeyConstants.PreFixIdentityUserId;
 
-        public virtual string PreFixIdentityUserIdUpperBound => Constants.RowKeyConstants.PreFixIdentityUserIdUpperBound;
+        public virtual string PreFixIdentityUserIdUpperBound => TableConstants.RowKeyConstants.PreFixIdentityUserIdUpperBound;
 
-        public virtual string PreFixIdentityUserName => Constants.RowKeyConstants.PreFixIdentityUserName;
+        public virtual string PreFixIdentityUserName => TableConstants.RowKeyConstants.PreFixIdentityUserName;
 
-        public virtual string FormatterIdentityUserClaim => Constants.RowKeyConstants.FormatterIdentityUserClaim;
+        public virtual string FormatterIdentityUserClaim => TableConstants.RowKeyConstants.FormatterIdentityUserClaim;
 
-        public virtual string FormatterIdentityUserRole => Constants.RowKeyConstants.FormatterIdentityUserRole;
+        public virtual string FormatterIdentityUserRole => TableConstants.RowKeyConstants.FormatterIdentityUserRole;
 
-        public virtual string FormatterIdentityUserLogin => Constants.RowKeyConstants.FormatterIdentityUserLogin;
+        public virtual string FormatterIdentityUserLogin => TableConstants.RowKeyConstants.FormatterIdentityUserLogin;
 
-        public virtual string FormatterIdentityUserEmail => Constants.RowKeyConstants.FormatterIdentityUserEmail;
+        public virtual string FormatterIdentityUserEmail => TableConstants.RowKeyConstants.FormatterIdentityUserEmail;
 
-        public virtual string FormatterIdentityUserToken => Constants.RowKeyConstants.FormatterIdentityUserToken;
+        public virtual string FormatterIdentityUserToken => TableConstants.RowKeyConstants.FormatterIdentityUserToken;
 
-        public virtual string FormatterIdentityUserId => Constants.RowKeyConstants.FormatterIdentityUserId;
+        public virtual string FormatterIdentityUserId => TableConstants.RowKeyConstants.FormatterIdentityUserId;
 
-        public virtual string FormatterIdentityUserName => Constants.RowKeyConstants.FormatterIdentityUserName;
+        public virtual string FormatterIdentityUserName => TableConstants.RowKeyConstants.FormatterIdentityUserName;
 
-        public virtual string PreFixIdentityRole => Constants.RowKeyConstants.PreFixIdentityRole;
+        public virtual string PreFixIdentityRole => TableConstants.RowKeyConstants.PreFixIdentityRole;
 
-        public virtual string PreFixIdentityRoleUpperBound => Constants.RowKeyConstants.PreFixIdentityRoleUpperBound;
+        public virtual string PreFixIdentityRoleUpperBound => TableConstants.RowKeyConstants.PreFixIdentityRoleUpperBound;
 
-        public virtual string PreFixIdentityRoleClaim => Constants.RowKeyConstants.PreFixIdentityRoleClaim;
+        public virtual string PreFixIdentityRoleClaim => TableConstants.RowKeyConstants.PreFixIdentityRoleClaim;
 
-        public virtual string FormatterIdentityRole => Constants.RowKeyConstants.FormatterIdentityRole;
+        public virtual string FormatterIdentityRole => TableConstants.RowKeyConstants.FormatterIdentityRole;
 
-        public virtual string FormatterIdentityRoleClaim => Constants.RowKeyConstants.FormatterIdentityRoleClaim;
+        public virtual string FormatterIdentityRoleClaim => TableConstants.RowKeyConstants.FormatterIdentityRoleClaim;
 
         #endregion
 
@@ -150,7 +150,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             return string.Format(FormatterIdentityUserLogin, hash);
         }
 
-        public double KeyVersion => 5.0;
+        public double KeyVersion => 5.1;
 
         public abstract string ConvertKeyToHash(string input);
 

@@ -7,19 +7,17 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Azure.Cosmos.Table;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
+using Azure.Data.Tables;
+using System.Net;
+using Azure;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable
 {
     public class RoleStore<TRole> : RoleStore<TRole, IdentityCloudContext>
     where TRole : Model.IdentityRole, new()
     {
-        public RoleStore()
-            : this(new IdentityCloudContext(), new DefaultKeyHelper())
-        {
-        }
 
         public RoleStore(IdentityCloudContext context, IKeyHelper keyHelper)
             : base(context, keyHelper)
@@ -29,7 +27,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
     public class RoleStore<TRole, TContext> : RoleStore<TRole, string, Model.IdentityUserRole, Model.IdentityRoleClaim, TContext>
         where TRole : Model.IdentityRole, new()
-        where TContext : IdentityCloudContext, new()
+        where TContext : IdentityCloudContext
     {
         public RoleStore(TContext context, IKeyHelper keyHelper) : base(context, keyHelper) { }
 
@@ -45,11 +43,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         where TRole : Model.IdentityRole<TKey, TUserRole>, new()
         where TUserRole : Model.IdentityUserRole<TKey>, new()
         where TRoleClaim : Model.IdentityRoleClaim<TKey>, new()
-        where TContext : IdentityCloudContext, new()
+        where TContext : IdentityCloudContext
         where TKey : IEquatable<TKey>
     {
         private bool _disposed;
-        private CloudTable _roleTable;
+        private TableClient _roleTable;
         private IdentityErrorDescriber _errorDescriber = new IdentityErrorDescriber();
         protected IKeyHelper _keyHelper;
         private readonly string FilterString;
@@ -67,8 +65,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
         }
 
-        public Task<bool> CreateTableIfNotExistsAsync()
-         => Context.RoleTable.CreateIfNotExistsAsync();
+        public Task CreateTableIfNotExistsAsync() => Context.RoleTable.CreateIfNotExistsAsync();
 
         public override async Task<IdentityResult> CreateAsync(TRole role, CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -78,11 +75,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             ((Model.IGenerateKeys)role).GenerateKeys(_keyHelper);
 
-            // Create the TableOperation that inserts the role entity.
-            TableOperation insertOperation = TableOperation.Insert(role);
-
             // Execute the insert operation.
-            await _roleTable.ExecuteAsync(insertOperation).ConfigureAwait(false);
+            await _roleTable.AddEntityAsync(role).ConfigureAwait(false);
             return IdentityResult.Success;
         }
 
@@ -92,11 +86,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             ThrowIfDisposed();
             if (role == null) throw new ArgumentNullException(nameof(role));
 
-            // Create the TableOperation that deletes the role entity.
-            TableOperation deleteOperation = TableOperation.Delete(role);
-
             // Execute the insert operation.
-            await _roleTable.ExecuteAsync(deleteOperation).ConfigureAwait(false);
+            await _roleTable.DeleteEntityAsync(role.PartitionKey, role.RowKey, TableConstants.ETagWildcard).ConfigureAwait(false);
             return IdentityResult.Success;
         }
 
@@ -124,25 +115,34 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             this.ThrowIfDisposed();
-            TableOperation getOperation = TableOperation.Retrieve<TRole>(
-                _keyHelper.ParsePartitionKeyIdentityRoleFromRowKey(roleId),
-                roleId.ToString());
 
-            TableResult tresult = await _roleTable.ExecuteAsync(getOperation).ConfigureAwait(false);
-            return tresult.Result == null ? null : (TRole)tresult.Result;
+            try
+            {
+                return await _roleTable.GetEntityAsync<TRole>(_keyHelper.ParsePartitionKeyIdentityRoleFromRowKey(roleId),
+                    roleId.ToString(), cancellationToken: cancellationToken).ConfigureAwait(false);
+            }
+            catch (RequestFailedException rfe)
+            when (rfe.Status == (int)HttpStatusCode.NotFound)
+            {
+                return default(TRole);
+            }
         }
 
         public override async Task<TRole> FindByNameAsync(string roleName, CancellationToken cancellationToken = default(CancellationToken))
         {
             cancellationToken.ThrowIfCancellationRequested();
             this.ThrowIfDisposed();
-
-            TableOperation getOperation = TableOperation.Retrieve<TRole>(
-                _keyHelper.GeneratePartitionKeyIdentityRole(roleName),
-                _keyHelper.GenerateRowKeyIdentityRole(roleName));
-
-            TableResult tresult = await _roleTable.ExecuteAsync(getOperation).ConfigureAwait(false);
-            return tresult.Result == null ? null : (TRole)tresult.Result;
+           
+            try
+            {
+                return await _roleTable.GetEntityAsync<TRole>(_keyHelper.GeneratePartitionKeyIdentityRole(roleName),
+                _keyHelper.GenerateRowKeyIdentityRole(roleName), cancellationToken: cancellationToken).ConfigureAwait(false);
+            }
+            catch (RequestFailedException rfe)
+            when (rfe.Status == (int)HttpStatusCode.NotFound)
+            {
+                return default(TRole);
+            }
         }
        
 
@@ -158,23 +158,23 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             Model.IGenerateKeys g = role as Model.IGenerateKeys;
             if (!g.PeekRowKey(_keyHelper).Equals(role.RowKey, StringComparison.Ordinal))
             {
-                TableBatchOperation batch = new TableBatchOperation();
-                DynamicTableEntity dRole = new DynamicTableEntity(role.PartitionKey, role.RowKey);
-                dRole.ETag = Constants.ETagWildcard;
+                BatchOperationHelper bHelper = new BatchOperationHelper(_roleTable);
+                TableEntity dRole = new TableEntity(role.PartitionKey, role.RowKey);
+                dRole.ETag =  TableConstants.ETagWildcard;
                 dRole.Timestamp = role.Timestamp;
                 g.GenerateKeys(_keyHelper);
                 //PartitionKey has to be the same to participate in a batch transaction.
                 if (dRole.PartitionKey.Equals(role.PartitionKey))
                 {
-                    batch.Add(TableOperation.Delete(dRole));
-                    batch.Add(TableOperation.Insert(role));
-                    await _roleTable.ExecuteBatchAsync(batch).ConfigureAwait(false);
+                    bHelper.DeleteEntity(dRole.PartitionKey, dRole.RowKey,  TableConstants.ETagWildcard);
+                    bHelper.AddEntity(role);
+                    await bHelper.SubmitBatchAsync(cancellationToken:cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
                     await Task.WhenAll(
-                    _roleTable.ExecuteAsync(TableOperation.Delete(dRole)),
-                    _roleTable.ExecuteAsync(TableOperation.Insert(role))).ConfigureAwait(false);
+                    _roleTable.DeleteEntityAsync(dRole.PartitionKey, dRole.RowKey, ifMatch: TableConstants.ETagWildcard, cancellationToken:cancellationToken),
+                    _roleTable.AddEntityAsync(role, cancellationToken)).ConfigureAwait(false);
                 }
 
                 return IdentityResult.Success;
@@ -200,18 +200,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             string filter = TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowFilter);
 
-            TableQuery tq = new TableQuery();
-            tq.FilterString = filter;
-            OperationContext oc = new OperationContext();
             return 
 
-                (await _roleTable.ExecuteQueryAsync(tq).ToListAsync().ConfigureAwait(false))                
-                .Select(s =>
-                {
-                    TRoleClaim trc = (TRoleClaim)Activator.CreateInstance(typeof(TRoleClaim));
-                    trc.ReadEntity(s.Properties, oc);
-                    return trc;
-                })
+                (await _roleTable.QueryAsync<TRoleClaim>(filter, cancellationToken:cancellationToken ).ToListAsync().ConfigureAwait(false))                                
                 .Select(w => new Claim(w.ClaimType, w.ClaimValue))
                 .ToList() as IList<Claim>;
         }
@@ -235,7 +226,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             item.ClaimValue = claim.Value;
             ((Model.IGenerateKeys)item).GenerateKeys(_keyHelper);
 
-            await _roleTable.ExecuteAsync(TableOperation.Insert(item)).ConfigureAwait(false);
+            await _roleTable.AddEntityAsync(item).ConfigureAwait(false);
         }
 
         public override async Task RemoveClaimAsync(TRole role, Claim claim, CancellationToken cancellationToken = default(CancellationToken))
@@ -260,10 +251,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             item.RoleId = role.Id;
             item.ClaimType = claim.Type;
             item.ClaimValue = claim.Value;
-            item.ETag = Constants.ETagWildcard;
+            item.ETag =  TableConstants.ETagWildcard;
             ((Model.IGenerateKeys)item).GenerateKeys(_keyHelper);
 
-            await _roleTable.ExecuteAsync(TableOperation.Delete(item)).ConfigureAwait(false);
+            await _roleTable.DeleteEntityAsync(item.PartitionKey, item.RowKey,  TableConstants.ETagWildcard, cancellationToken).ConfigureAwait(false);
         }
 
         public TContext Context { get; private set; }
@@ -275,9 +266,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             get
             {
-                TableQuery<TRole> tableQuery = _roleTable.CreateQuery<TRole>();
-                tableQuery.FilterString = FilterString;
-                return tableQuery.AsQueryable();
+                return _roleTable.Query<TRole>(FilterString).AsQueryable();
             }
         }
 

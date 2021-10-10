@@ -11,7 +11,7 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <EnableDefaultContentItems>false</EnableDefaultContentItems>
-    <Version>5.0.1</Version>
+    <Version>5.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,6 +20,17 @@
     <Compile Remove="bin\**" />
     <EmbeddedResource Remove="bin\**" />
     <None Remove="bin\**" />
+    <Compile Remove="..\ElCamino.AspNetCore.Identity.AzureTable\Constants.cs" />
+    <Compile Remove="..\ElCamino.AspNetCore.Identity.AzureTable\Helpers\AzureSdkHelper.cs" />
+    <Compile Remove="..\ElCamino.AspNetCore.Identity.AzureTable\Helpers\BaseKeyHelper.cs" />
+    <Compile Remove="..\ElCamino.AspNetCore.Identity.AzureTable\Helpers\DefaultKeyHelper.cs" />
+    <Compile Remove="..\ElCamino.AspNetCore.Identity.AzureTable\Helpers\IAsyncEnumerableExtensions.cs" />
+    <Compile Remove="..\ElCamino.AspNetCore.Identity.AzureTable\Helpers\SHA256KeyHelper.cs" />
+    <Compile Remove="..\ElCamino.AspNetCore.Identity.AzureTable\IdentityCloudContext.cs" />
+    <Compile Remove="..\ElCamino.AspNetCore.Identity.AzureTable\IdentityResources.Designer.cs" />
+    <Compile Remove="..\ElCamino.AspNetCore.Identity.AzureTable\RoleStore.cs" />
+    <Compile Remove="..\ElCamino.AspNetCore.Identity.AzureTable\UserOnlyStore.cs" />
+    <Compile Remove="..\ElCamino.AspNetCore.Identity.AzureTable\UserStore.cs" />
     <EmbeddedResource Include=".\help.txt" Exclude="bin\**;obj\**;**\*.xproj;packages\**;@(EmbeddedResource)" />
     <Content Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -28,7 +39,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Azure.Cosmos.Table" Version="1.0.8" />
+    <PackageReference Include="Azure.Data.Tables" Version="12.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="5.0.0" />
@@ -36,6 +47,11 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ElCamino.AspNetCore.Identity.AzureTable.Model\ElCamino.AspNetCore.Identity.AzureTable.Model.csproj" />
+    <ProjectReference Include="..\ElCamino.AspNetCore.Identity.AzureTable\ElCamino.AspNetCore.Identity.AzureTable.csproj" />
   </ItemGroup>
 
   <ItemGroup>

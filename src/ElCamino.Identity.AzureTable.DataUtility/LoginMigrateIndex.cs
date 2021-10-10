@@ -3,7 +3,7 @@
 using ElCamino.AspNetCore.Identity.AzureTable;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
-using Microsoft.Azure.Cosmos.Table;
+using Azure.Data.Tables;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,15 +36,15 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         }
 
 
-        public bool UserWhereFilter(DynamicTableEntity d)
+        public bool UserWhereFilter(TableEntity d)
         {
-            return !string.IsNullOrWhiteSpace(d.Properties["LoginProvider"].StringValue)
-                && !string.IsNullOrWhiteSpace(d.Properties["ProviderKey"].StringValue);
+            return !string.IsNullOrWhiteSpace(d["LoginProvider"].ToString())
+                && !string.IsNullOrWhiteSpace(d["ProviderKey"].ToString());
         }
 
         public void ProcessMigrate(IdentityCloudContext targetContext,
             IdentityCloudContext sourceContext,
-            IList<DynamicTableEntity> sourceUserResults,
+            IList<TableEntity> sourceUserResults,
             int maxDegreesParallel,
             Action updateComplete = null,
             Action<string> updateError = null)
@@ -54,8 +54,8 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 .Select(d => new
                 {
                     UserId = d.PartitionKey,
-                    LoginProvider = d.Properties["LoginProvider"].StringValue,
-                    ProviderKey = d.Properties["ProviderKey"].StringValue
+                    LoginProvider = d["LoginProvider"].ToString(),
+                    ProviderKey = d["ProviderKey"].ToString()
                 })
                 .ToList();
 
@@ -67,7 +67,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 try
                 {
                     IdentityUserIndex index = CreateLoginIndex(userId.UserId, userId.LoginProvider, userId.ProviderKey);
-                    var r = targetContext.IndexTable.ExecuteAsync(TableOperation.InsertOrReplace(index)).Result;
+                    var r = targetContext.IndexTable.UpsertEntity(index, TableUpdateMode.Replace);
                     updateComplete?.Invoke();
                 }
                 catch (Exception ex)
@@ -87,7 +87,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 PartitionKey = _keyHelper.GeneratePartitionKeyIndexByLogin(loginProvider, providerKey),
                 RowKey = _keyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey),
                 KeyVersion = _keyHelper.KeyVersion,
-                ETag = Constants.ETagWildcard
+                ETag =  TableConstants.ETagWildcard
             };
 
         }
