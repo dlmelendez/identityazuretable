@@ -28,7 +28,6 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -47,10 +46,6 @@
   </ItemGroup>
   
   <ItemGroup>  
-    <None Include="..\..\README.md">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>  
     <None Include="projectNugetPic.png" Pack="true" PackagePath="\" />   
   </ItemGroup>
   
