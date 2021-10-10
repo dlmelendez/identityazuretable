@@ -234,10 +234,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             if (!_disposed && disposing)
             {
-                if (this.Context != null)
-                {
-                    this.Context.Dispose();
-                }
                 this._indexTable = null;
                 this._userTable = null;
                 this.Context = null;

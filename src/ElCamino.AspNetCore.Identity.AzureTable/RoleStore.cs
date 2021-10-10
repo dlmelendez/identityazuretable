@@ -101,10 +101,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             if (!_disposed && disposing)
             {
-                if (this.Context != null)
-                {
-                    this.Context.Dispose();
-                }
                 this._roleTable = null;
                 this.Context = null;
                 this._disposed = true;

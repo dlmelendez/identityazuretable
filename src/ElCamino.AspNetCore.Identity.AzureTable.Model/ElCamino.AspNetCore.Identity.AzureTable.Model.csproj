@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Azure Table Storage Provider to support ASPNET Core Identity Models</Description>
-    <Copyright>Copyright ©  2020 David Melendez, MIT License</Copyright>
+    <Copyright>Copyright ©  2021 David Melendez, MIT License</Copyright>
     <AssemblyTitle>Azure Table Storage Provider for ASP.NET Identity Core Models</AssemblyTitle>
     <Authors>David Melendez</Authors>
     <TargetFrameworks>netstandard2.0;net5.0</TargetFrameworks>
