@@ -66,18 +66,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             return bag;
         }
 
-        //public bool TryGetFailedEntityFromException(RequestFailedException exception, out ITableEntity failedEntity)
-        //{
-        //    foreach(var t in _batches.Values.SelectMany(s => s))
-        //    {
-        //        if(t.TryGetFailedEntityFromException(exception, out failedEntity))
-        //        {
-        //            return true;
-        //        }
-        //    }
-        //    failedEntity = null;
-        //    return false;
-        //}
         public virtual void UpdateEntity<T>(T entity, ETag ifMatch, TableUpdateMode mode = TableUpdateMode.Merge) where T : class, ITableEntity, new()
         {
             var current = GetCurrent(entity.PartitionKey);
