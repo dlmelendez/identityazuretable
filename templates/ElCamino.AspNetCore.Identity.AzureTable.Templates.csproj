@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyTitle>Web Project Templates for Azure Table Storage Provider for ASP.NET Identity Core</AssemblyTitle>
     <Authors>David Melendez</Authors>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <Title>ElCamino.AspNetCore.Identity.AzureTable.Templates</Title>
     <PackageId>ElCamino.AspNetCore.Identity.AzureTable.Templates</PackageId>
     <Description>ASP.NET Core Web Template Pack for ElCamino Identity Azure Table Storage</Description>
@@ -19,7 +19,7 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/dlmelendez/identityazuretable.git</RepositoryUrl>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>5.1</Version>
+    <Version>6.0</Version>
     <PackageProjectUrl>https://dlmelendez.github.io/identityazuretable</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>

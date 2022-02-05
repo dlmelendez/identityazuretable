@@ -1,13 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using samplemvccore5.Models;
-using System;
-using System.Collections.Generic;
+using samplemvccore.Models;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace samplemvccore5.Controllers
+namespace samplemvccore.Controllers
 {
     public class HomeController : Controller
     {
