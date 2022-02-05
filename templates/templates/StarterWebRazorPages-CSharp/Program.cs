@@ -3,7 +3,6 @@ using ElCamino.AspNetCore.Identity.AzureTable;
 using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
 using samplerazorpagescore.Data;
-using samplerazorpagescore.Areas.Identity.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
