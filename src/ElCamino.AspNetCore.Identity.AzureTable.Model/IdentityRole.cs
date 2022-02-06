@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using System;
 using Azure.Data.Tables;
 using Azure;
+using System.Runtime.Serialization;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 {
@@ -40,7 +41,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
             base.Name = roleName;
         }
 
-        //[IgnoreProperty]
+        [IgnoreDataMember]
         public override string Id
         {
             get
@@ -67,7 +68,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         {
         }
 
-        //[IgnoreProperty]
+        [IgnoreDataMember]
         public override TKey Id { get; set; }
 
 

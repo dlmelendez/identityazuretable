@@ -4,6 +4,7 @@ using Azure.Data.Tables;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -46,10 +47,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         public DateTimeOffset? Timestamp { get; set; }
         public ETag ETag { get; set; } = ETag.All;
 
-        //[IgnoreProperty]
+        [IgnoreDataMember]
         public override string Name { get => base.Name; set => base.Name = value; }
 
-        //[IgnoreProperty]
+        [IgnoreDataMember]
         public override string Value { get => base.Value; set => base.Value = value; }
 
         //These properties are more descriptive fields in storage, also allows for backcompat

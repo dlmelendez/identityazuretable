@@ -5,6 +5,7 @@ using Azure.Data.Tables;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -35,7 +36,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 
         public double KeyVersion { get; set; }
 
-        //[IgnoreProperty]
+        [IgnoreDataMember]
         public override string RoleId
         {
             get

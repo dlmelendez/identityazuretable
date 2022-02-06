@@ -5,6 +5,7 @@ using Azure.Data.Tables;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -75,7 +76,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// <summary>
         /// LockoutEnd is stored as LockoutEndDateUtc for backwards compat.
         /// </summary>
-        //[IgnoreProperty]
+        [IgnoreDataMember]
         public override DateTimeOffset? LockoutEnd
         {
             get
