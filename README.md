@@ -9,7 +9,7 @@ This project provides a high performance cloud solution for ASP.NET Identity Cor
 
 Project site at https://dlmelendez.github.io/identityazuretable/.
 
-Identity Core 5 template
+Identity Core latest template
 ```
 dotnet new --install ElCamino.AspNetCore.Identity.AzureTable.Templates
 
