@@ -13,7 +13,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 {
     public class RoleAndClaimMigrateIndex : IMigration
     {
-        private IKeyHelper _keyHelper;
+        private readonly IKeyHelper _keyHelper;
         public RoleAndClaimMigrateIndex(IKeyHelper keyHelper)
         {
             _keyHelper = keyHelper;

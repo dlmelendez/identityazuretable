@@ -19,7 +19,7 @@ namespace Azure.Data.Tables
 #endif
 
             AsyncPageable<T> segment = ct.QueryAsync<T>(tq.FilterString, tq.TakeCount, tq.SelectColumns);
-            await foreach (T result in segment)
+            await foreach (T result in segment.ConfigureAwait(false))
             {
 #if DEBUG
                 iCounter++;

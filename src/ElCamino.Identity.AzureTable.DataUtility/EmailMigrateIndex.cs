@@ -13,7 +13,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 {
     public class EmailMigrateIndex : IMigration
     {
-        private IKeyHelper _keyHelper;
+        private readonly IKeyHelper _keyHelper;
         public EmailMigrateIndex(IKeyHelper keyHelper)
         {
             _keyHelper = keyHelper;

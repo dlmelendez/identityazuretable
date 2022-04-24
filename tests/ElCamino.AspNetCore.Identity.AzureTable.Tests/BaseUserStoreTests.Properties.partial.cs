@@ -34,50 +34,46 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
     {
         public virtual async Task AccessFailedCount()
         {
-            using (var store = userFixture.CreateUserStore())
+            using var store = userFixture.CreateUserStore();
+            var idOptions = new IdentityOptions()
             {
-                var idOptions = new IdentityOptions()
+                Lockout = new LockoutOptions()
                 {
-                    Lockout = new LockoutOptions()
-                    {
-                        DefaultLockoutTimeSpan = TimeSpan.FromHours(2),
-                        MaxFailedAccessAttempts = 2
-                    }
-                };
-
-                using (var manager = userFixture.CreateUserManager(idOptions))
-                {
-                    var user = await CreateTestUserLiteAsync(createPassword: true, createEmail: true);
-                    var accessFailedCount = await manager.GetAccessFailedCountAsync(user);
-
-                    Assert.Equal<int>(user.AccessFailedCount, accessFailedCount);
-
-                    var taskAccessResult = await manager.AccessFailedAsync(user);
-
-                    Assert.True(taskAccessResult.Succeeded, string.Concat(taskAccessResult.Errors.Select(e => e.Code).ToArray()));
-                    await manager.AccessFailedAsync(user);
-                    await manager.AccessFailedAsync(user);
-
-                    DateTime dtUtc = DateTime.UtcNow;
-                    user = await manager.FindByIdAsync(user.Id);
-                    Assert.True(user.LockoutEnd.HasValue);
-                    Assert.True(user.LockoutEnd.Value < dtUtc.Add(idOptions.Lockout.DefaultLockoutTimeSpan));
-                    Assert.True(user.LockoutEnd.Value > dtUtc.Add(idOptions.Lockout.DefaultLockoutTimeSpan.Add(TimeSpan.FromMinutes(-1.0))));
-
-                    var resetAccessFailedCountResult = await manager.ResetAccessFailedCountAsync(user);
-                    Assert.True(resetAccessFailedCountResult.Succeeded, string.Concat(resetAccessFailedCountResult.Errors));
-
-                    user = await manager.FindByIdAsync(user.Id);
-                    Assert.True(user.AccessFailedCount == 0);
-
-                    await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetAccessFailedCountAsync(null));
-                    await Assert.ThrowsAsync<ArgumentNullException>(() => store.IncrementAccessFailedCountAsync(null));
-                    await Assert.ThrowsAsync<ArgumentNullException>(() => store.ResetAccessFailedCountAsync(null));
+                    DefaultLockoutTimeSpan = TimeSpan.FromHours(2),
+                    MaxFailedAccessAttempts = 2
                 }
-            }
+            };
+
+            using var manager = userFixture.CreateUserManager(idOptions);
+            var user = await CreateTestUserLiteAsync(createPassword: true, createEmail: true);
+            var accessFailedCount = await manager.GetAccessFailedCountAsync(user);
+
+            Assert.Equal<int>(user.AccessFailedCount, accessFailedCount);
+
+            var taskAccessResult = await manager.AccessFailedAsync(user);
+
+            Assert.True(taskAccessResult.Succeeded, string.Concat(taskAccessResult.Errors.Select(e => e.Code).ToArray()));
+            await manager.AccessFailedAsync(user);
+            await manager.AccessFailedAsync(user);
+
+            DateTime dtUtc = DateTime.UtcNow;
+            user = await manager.FindByIdAsync(user.Id);
+            Assert.True(user.LockoutEnd.HasValue);
+            Assert.True(user.LockoutEnd.Value < dtUtc.Add(idOptions.Lockout.DefaultLockoutTimeSpan));
+            Assert.True(user.LockoutEnd.Value > dtUtc.Add(idOptions.Lockout.DefaultLockoutTimeSpan.Add(TimeSpan.FromMinutes(-1.0))));
+
+            var resetAccessFailedCountResult = await manager.ResetAccessFailedCountAsync(user);
+            Assert.True(resetAccessFailedCountResult.Succeeded, string.Concat(resetAccessFailedCountResult.Errors));
+
+            user = await manager.FindByIdAsync(user.Id);
+            Assert.True(user.AccessFailedCount == 0);
+
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetAccessFailedCountAsync(null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.IncrementAccessFailedCountAsync(null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.ResetAccessFailedCountAsync(null));
         }
 
-        private async Task SetValidateEmailAsync(UserManager<TUser> manager,
+        private static async Task SetValidateEmailAsync(UserManager<TUser> manager,
             TUserStore store,
             TUser user,
             string strNewEmail)
@@ -114,212 +110,176 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
         public virtual async Task EmailNone()
         {
-            using (var store = userFixture.CreateUserStore())
-            {
-                using (var manager = userFixture.CreateUserManager())
-                {
-                    var user = await CreateTestUserLiteAsync(createPassword: false, createEmail: false);
-                    string strNewEmail = string.Format("{0}@hotmail.com", Guid.NewGuid().ToString("N"));
-                    await SetValidateEmailAsync(manager, store, user, strNewEmail);
-                    await SetValidateEmailAsync(manager, store, user, string.Empty);
-                }
-            }
+            using var store = userFixture.CreateUserStore();
+            using var manager = userFixture.CreateUserManager();
+            var user = await CreateTestUserLiteAsync(createPassword: false, createEmail: false);
+            string strNewEmail = string.Format("{0}@hotmail.com", Guid.NewGuid().ToString("N"));
+            await SetValidateEmailAsync(manager, store, user, strNewEmail);
+            await SetValidateEmailAsync(manager, store, user, string.Empty);
         }
 
         public virtual async Task Email()
         {
-            using (var store = userFixture.CreateUserStore())
-            {
-                using (var manager = userFixture.CreateUserManager())
-                {
-                    var user = await CreateTestUserLiteAsync(createPassword: true, createEmail: true);
+            using var store = userFixture.CreateUserStore();
+            using var manager = userFixture.CreateUserManager();
+            var user = await CreateTestUserLiteAsync(createPassword: true, createEmail: true);
 
-                    string strNewEmail = string.Format("{0}@gmail.com", Guid.NewGuid().ToString("N"));
-                    await SetValidateEmailAsync(manager, store, user, strNewEmail);
+            string strNewEmail = string.Format("{0}@gmail.com", Guid.NewGuid().ToString("N"));
+            await SetValidateEmailAsync(manager, store, user, strNewEmail);
 
-                    await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetEmailAsync(null));
-                    await Assert.ThrowsAsync<ArgumentNullException>(() => store.SetEmailAsync(null, strNewEmail));
-                    // TODO: check
-                    // await Assert.ThrowsAsync<ArgumentNullException>(() => store.SetEmailAsync(user, null));
-                }
-            }
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetEmailAsync(null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.SetEmailAsync(null, strNewEmail));
+            // TODO: check
+            // await Assert.ThrowsAsync<ArgumentNullException>(() => store.SetEmailAsync(user, null));
         }
 
         public virtual async Task EmailConfirmed()
         {
-            using (var store = userFixture.CreateUserStore())
-            {
-                using (var manager = userFixture.CreateUserManager())
-                {
-                    var user = await CreateTestUserLiteAsync(createPassword: true, createEmail: true);
-                    var token = await manager.GenerateEmailConfirmationTokenAsync(user);
-                    Assert.False(string.IsNullOrWhiteSpace(token), "GenerateEmailConfirmationToken failed.");
+            using var store = userFixture.CreateUserStore();
+            using var manager = userFixture.CreateUserManager();
+            var user = await CreateTestUserLiteAsync(createPassword: true, createEmail: true);
+            var token = await manager.GenerateEmailConfirmationTokenAsync(user);
+            Assert.False(string.IsNullOrWhiteSpace(token), "GenerateEmailConfirmationToken failed.");
 
-                    var confirmation = await manager.ConfirmEmailAsync(user, token);
-                    Assert.True(confirmation.Succeeded, string.Concat(confirmation.Errors));
+            var confirmation = await manager.ConfirmEmailAsync(user, token);
+            Assert.True(confirmation.Succeeded, string.Concat(confirmation.Errors));
 
-                    user = await manager.FindByEmailAsync(user.Email);
-                    var confirmationResult2 = await store.GetEmailConfirmedAsync(user);
-                    Assert.True(confirmationResult2, "Email not confirmed");
+            user = await manager.FindByEmailAsync(user.Email);
+            var confirmationResult2 = await store.GetEmailConfirmedAsync(user);
+            Assert.True(confirmationResult2, "Email not confirmed");
 
-                    await Assert.ThrowsAsync<ArgumentNullException>(() => store.SetEmailConfirmedAsync(null, true));
-                    await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetEmailConfirmedAsync(null));
-                }
-            }
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.SetEmailConfirmedAsync(null, true));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetEmailConfirmedAsync(null));
         }
 
         public virtual async Task LockoutEnabled()
         {
-            using (var store = userFixture.CreateUserStore())
-            {
-                using (var manager = userFixture.CreateUserManager())
-                {
-                    var user = await CreateTestUserLiteAsync(createPassword: true, createEmail: true);
-                    var enableLockoutResult = await manager.SetLockoutEnabledAsync(user, true);
-                    Assert.True(enableLockoutResult.Succeeded, string.Concat(enableLockoutResult.Errors));
+            using var store = userFixture.CreateUserStore();
+            using var manager = userFixture.CreateUserManager();
+            var user = await CreateTestUserLiteAsync(createPassword: true, createEmail: true);
+            var enableLockoutResult = await manager.SetLockoutEnabledAsync(user, true);
+            Assert.True(enableLockoutResult.Succeeded, string.Concat(enableLockoutResult.Errors));
 
-                    DateTimeOffset offSet = new DateTimeOffset(DateTime.Now.AddMinutes(3));
-                    var setLockoutEndDateResult = await manager.SetLockoutEndDateAsync(user, offSet);
-                    Assert.True(setLockoutEndDateResult.Succeeded, string.Concat(setLockoutEndDateResult.Errors));
+            DateTimeOffset offSet = new DateTimeOffset(DateTime.Now.AddMinutes(3));
+            var setLockoutEndDateResult = await manager.SetLockoutEndDateAsync(user, offSet);
+            Assert.True(setLockoutEndDateResult.Succeeded, string.Concat(setLockoutEndDateResult.Errors));
 
-                    var lockoutEnabled = await manager.GetLockoutEnabledAsync(user);
-                    Assert.True(lockoutEnabled, "Lockout not true");
+            var lockoutEnabled = await manager.GetLockoutEnabledAsync(user);
+            Assert.True(lockoutEnabled, "Lockout not true");
 
-                    var lockoutEndDate = await manager.GetLockoutEndDateAsync(user);
-                    Assert.Equal(offSet, lockoutEndDate);
+            var lockoutEndDate = await manager.GetLockoutEndDateAsync(user);
+            Assert.Equal(offSet, lockoutEndDate);
 
-                    DateTime tmpDate = DateTime.UtcNow.AddDays(1);
-                    user.LockoutEnd = tmpDate;
-                    lockoutEndDate = await store.GetLockoutEndDateAsync(user);
-                    Assert.Equal<DateTimeOffset?>(new DateTimeOffset?(tmpDate), lockoutEndDate);
+            DateTime tmpDate = DateTime.UtcNow.AddDays(1);
+            user.LockoutEnd = tmpDate;
+            lockoutEndDate = await store.GetLockoutEndDateAsync(user);
+            Assert.Equal<DateTimeOffset?>(new DateTimeOffset?(tmpDate), lockoutEndDate);
 
-                    user.LockoutEnd = null;
-                    lockoutEndDate = await store.GetLockoutEndDateAsync(user);
-                    Assert.Equal<DateTimeOffset?>(new DateTimeOffset?(), lockoutEndDate);
+            user.LockoutEnd = null;
+            lockoutEndDate = await store.GetLockoutEndDateAsync(user);
+            Assert.Equal<DateTimeOffset?>(new DateTimeOffset?(), lockoutEndDate);
 
-                    var minOffSet = DateTimeOffset.MinValue;
-                    var setLockoutEndDateResult2 = store.SetLockoutEndDateAsync(user, minOffSet);
-                    Assert.NotNull(user.LockoutEnd);
+            var minOffSet = DateTimeOffset.MinValue;
+            var setLockoutEndDateResult2 = store.SetLockoutEndDateAsync(user, minOffSet);
+            Assert.NotNull(user.LockoutEnd);
 
-                    await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetLockoutEnabledAsync(null));
-                    await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetLockoutEndDateAsync(null));
-                    await Assert.ThrowsAsync<ArgumentNullException>(() => store.SetLockoutEndDateAsync(null, offSet));
-                    await Assert.ThrowsAsync<ArgumentNullException>(() => store.SetLockoutEnabledAsync(null, false));
-                }
-            }
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetLockoutEnabledAsync(null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetLockoutEndDateAsync(null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.SetLockoutEndDateAsync(null, offSet));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.SetLockoutEnabledAsync(null, false));
         }
 
         public virtual async Task PhoneNumber()
         {
-            using (var store = userFixture.CreateUserStore())
-            {
-                using (var manager = userFixture.CreateUserManager())
-                {
-                    var user = await CreateTestUserLiteAsync(createPassword: true, createEmail: true);
+            using var store = userFixture.CreateUserStore();
+            using var manager = userFixture.CreateUserManager();
+            var user = await CreateTestUserLiteAsync(createPassword: true, createEmail: true);
 
-                    string strNewPhoneNumber = "542-887-3434";
-                    var setPhoneNumberResult = await manager.SetPhoneNumberAsync(user, strNewPhoneNumber);
-                    Assert.True(setPhoneNumberResult.Succeeded, string.Concat(setPhoneNumberResult.Errors));
+            string strNewPhoneNumber = "542-887-3434";
+            var setPhoneNumberResult = await manager.SetPhoneNumberAsync(user, strNewPhoneNumber);
+            Assert.True(setPhoneNumberResult.Succeeded, string.Concat(setPhoneNumberResult.Errors));
 
-                    var phoneNumber = await manager.GetPhoneNumberAsync(user);
-                    Assert.Equal(strNewPhoneNumber, phoneNumber);
+            var phoneNumber = await manager.GetPhoneNumberAsync(user);
+            Assert.Equal(strNewPhoneNumber, phoneNumber);
 
-                    await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetPhoneNumberAsync(null));
-                    await Assert.ThrowsAsync<ArgumentNullException>(() => store.SetPhoneNumberAsync(null, strNewPhoneNumber));
-                    // TODO: check
-                    // await Assert.ThrowsAsync<ArgumentNullException>(() => store.SetPhoneNumberAsync(user, null));
-                }
-            }
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetPhoneNumberAsync(null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.SetPhoneNumberAsync(null, strNewPhoneNumber));
+            // TODO: check
+            // await Assert.ThrowsAsync<ArgumentNullException>(() => store.SetPhoneNumberAsync(user, null));
         }
 
         public virtual async Task PhoneNumberConfirmed()
         {
-            using (var store = userFixture.CreateUserStore())
-            {
-                using (var manager = userFixture.CreateUserManager())
-                {
-                    var user = await CreateTestUserLiteAsync(createPassword: true, createEmail: true);
-                    string strNewPhoneNumber = "425-555-1111";
-                    var token = await manager.GenerateChangePhoneNumberTokenAsync(user, strNewPhoneNumber);
-                    Assert.False(string.IsNullOrWhiteSpace(token), "GeneratePhoneConfirmationToken failed.");
+            using var store = userFixture.CreateUserStore();
+            using var manager = userFixture.CreateUserManager();
+            var user = await CreateTestUserLiteAsync(createPassword: true, createEmail: true);
+            string strNewPhoneNumber = "425-555-1111";
+            var token = await manager.GenerateChangePhoneNumberTokenAsync(user, strNewPhoneNumber);
+            Assert.False(string.IsNullOrWhiteSpace(token), "GeneratePhoneConfirmationToken failed.");
 
-                    var confirmationResult = await manager.ChangePhoneNumberAsync(user, strNewPhoneNumber, token);
-                    Assert.True(confirmationResult.Succeeded, string.Concat(confirmationResult.Errors));
+            var confirmationResult = await manager.ChangePhoneNumberAsync(user, strNewPhoneNumber, token);
+            Assert.True(confirmationResult.Succeeded, string.Concat(confirmationResult.Errors));
 
-                    user = await manager.FindByEmailAsync(user.Email);
-                    var confirmation = await store.GetPhoneNumberConfirmedAsync(user);
-                    Assert.True(confirmation, "Phone not confirmed");
+            user = await manager.FindByEmailAsync(user.Email);
+            var confirmation = await store.GetPhoneNumberConfirmedAsync(user);
+            Assert.True(confirmation, "Phone not confirmed");
 
-                    await Assert.ThrowsAsync<ArgumentNullException>(() => store.SetPhoneNumberConfirmedAsync(null, true));
-                    await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetPhoneNumberConfirmedAsync(null));
-                }
-            }
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.SetPhoneNumberConfirmedAsync(null, true));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetPhoneNumberConfirmedAsync(null));
         }
 
         public virtual async Task TwoFactorEnabled()
         {
-            using (var store = userFixture.CreateUserStore())
-            {
-                using (var manager = userFixture.CreateUserManager())
-                {
-                    var user = await CreateTestUserLiteAsync(createPassword: true, createEmail: true);
+            using var store = userFixture.CreateUserStore();
+            using var manager = userFixture.CreateUserManager();
+            var user = await CreateTestUserLiteAsync(createPassword: true, createEmail: true);
 
-                    bool twoFactorEnabled = true;
-                    var setTwoFactorEnabledResult = await manager.SetTwoFactorEnabledAsync(user, twoFactorEnabled);
-                    Assert.True(setTwoFactorEnabledResult.Succeeded, string.Concat(setTwoFactorEnabledResult.Errors));
+            bool twoFactorEnabled = true;
+            var setTwoFactorEnabledResult = await manager.SetTwoFactorEnabledAsync(user, twoFactorEnabled);
+            Assert.True(setTwoFactorEnabledResult.Succeeded, string.Concat(setTwoFactorEnabledResult.Errors));
 
-                    var twoFactorEnabledResult = await manager.GetTwoFactorEnabledAsync(user);
-                    Assert.Equal<bool>(twoFactorEnabled, twoFactorEnabledResult);
+            var twoFactorEnabledResult = await manager.GetTwoFactorEnabledAsync(user);
+            Assert.Equal<bool>(twoFactorEnabled, twoFactorEnabledResult);
 
-                    await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetTwoFactorEnabledAsync(null));
-                    await Assert.ThrowsAsync<ArgumentNullException>(() => store.SetTwoFactorEnabledAsync(null, twoFactorEnabled));
-                }
-            }
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetTwoFactorEnabledAsync(null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.SetTwoFactorEnabledAsync(null, twoFactorEnabled));
         }
 
         public virtual async Task PasswordHash()
         {
-            using (var store = userFixture.CreateUserStore())
-            {
-                using (var manager = userFixture.CreateUserManager())
-                {
-                    var user = await CreateTestUserLiteAsync(createPassword: true, createEmail: true);
-                    string passwordPlain = Guid.NewGuid().ToString("N");
-                    string passwordHash = new PasswordHasher<TUser>().HashPassword(user, passwordPlain);
-                    await store.SetPasswordHashAsync(user, passwordHash);
+            using var store = userFixture.CreateUserStore();
+            using var manager = userFixture.CreateUserManager();
+            var user = await CreateTestUserLiteAsync(createPassword: true, createEmail: true);
+            string passwordPlain = Guid.NewGuid().ToString("N");
+            string passwordHash = new PasswordHasher<TUser>().HashPassword(user, passwordPlain);
+            await store.SetPasswordHashAsync(user, passwordHash);
 
-                    var hasPasswordHash = await manager.HasPasswordAsync(user);
-                    Assert.True(hasPasswordHash, "PasswordHash not set");
+            var hasPasswordHash = await manager.HasPasswordAsync(user);
+            Assert.True(hasPasswordHash, "PasswordHash not set");
 
-                    var passwordHashResult = await store.GetPasswordHashAsync(user);
-                    Assert.Equal(passwordHash, passwordHashResult);
+            var passwordHashResult = await store.GetPasswordHashAsync(user);
+            Assert.Equal(passwordHash, passwordHashResult);
 
-                    user.PasswordHash = passwordHash;
+            user.PasswordHash = passwordHash;
 
-                    await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetPasswordHashAsync(null));
-                }
-            }
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetPasswordHashAsync(null));
         }
 
         public virtual async Task SecurityStamp()
         {
-            using (var store = userFixture.CreateUserStore())
-            {
-                using (var manager = userFixture.CreateUserManager())
-                {
-                    var user = await CreateTestUserLiteAsync(createPassword: true, createEmail: true);
-                    var stamp = await manager.GetSecurityStampAsync(user);
-                    Assert.Equal(user.SecurityStamp, stamp);
+            using var store = userFixture.CreateUserStore();
+            using var manager = userFixture.CreateUserManager();
+            var user = await CreateTestUserLiteAsync(createPassword: true, createEmail: true);
+            var stamp = await manager.GetSecurityStampAsync(user);
+            Assert.Equal(user.SecurityStamp, stamp);
 
-                    string strNewSecurityStamp = Guid.NewGuid().ToString("N");
-                    await store.SetSecurityStampAsync(user, strNewSecurityStamp);
+            string strNewSecurityStamp = Guid.NewGuid().ToString("N");
+            await store.SetSecurityStampAsync(user, strNewSecurityStamp);
 
-                    await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetSecurityStampAsync(null));
-                    await Assert.ThrowsAsync<ArgumentNullException>(() => store.SetSecurityStampAsync(null, strNewSecurityStamp));
-                    // TODO: check
-                    // await Assert.ThrowsAsync<ArgumentNullException>(() => store.SetSecurityStampAsync(user, null));
-                }
-            }
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetSecurityStampAsync(null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.SetSecurityStampAsync(null, strNewSecurityStamp));
+            // TODO: check
+            // await Assert.ThrowsAsync<ArgumentNullException>(() => store.SetSecurityStampAsync(user, null));
         }
     }
 

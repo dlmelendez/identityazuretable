@@ -15,29 +15,25 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             this IAsyncEnumerable<T> asyncEnumerable, 
             CancellationToken cancellationToken = default)
         {
-            await using (var enumerator = asyncEnumerable.GetAsyncEnumerator(cancellationToken))
+            await using var enumerator = asyncEnumerable.GetAsyncEnumerator(cancellationToken);
+            if (await enumerator.MoveNextAsync().ConfigureAwait(false))
             {
-                if (await enumerator.MoveNextAsync().ConfigureAwait(false))
-                {
-                    return enumerator.Current;
-                }
-                return default;
+                return enumerator.Current;
             }
+            return default;
         }
 
         public static async Task<List<T>> ToListAsync<T>(
             this IAsyncEnumerable<T> asyncEnumerable, 
             CancellationToken cancellationToken = default)
         {
-            await using (var enumerator = asyncEnumerable.GetAsyncEnumerator(cancellationToken))
+            await using var enumerator = asyncEnumerable.GetAsyncEnumerator(cancellationToken);
+            List<T> list = new List<T>();
+            while (await enumerator.MoveNextAsync().ConfigureAwait(false))
             {
-                List<T> list = new List<T>();
-                while (await enumerator.MoveNextAsync().ConfigureAwait(false))
-                {
-                    list.Add(enumerator.Current);
-                }
-                return list;
+                list.Add(enumerator.Current);
             }
+            return list;
         }
 
         public static async Task ForEachAsync<T>(
@@ -45,12 +41,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             Action<T> action,
             CancellationToken cancellationToken = default)
         {
-            await using (var enumerator = asyncEnumerable.GetAsyncEnumerator(cancellationToken))
+            await using var enumerator = asyncEnumerable.GetAsyncEnumerator(cancellationToken);
+            while (await enumerator.MoveNextAsync().ConfigureAwait(false))
             {
-                while (await enumerator.MoveNextAsync().ConfigureAwait(false))
-                {
-                    action(enumerator.Current);
-                }
+                action(enumerator.Current);
             }
         }
 
@@ -58,8 +52,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
            this IAsyncEnumerable<T> asyncEnumerable,
            CancellationToken cancellationToken = default)
         {
-            await using (var enumerator = asyncEnumerable.GetAsyncEnumerator(cancellationToken))
-                return await enumerator.MoveNextAsync().ConfigureAwait(false);
+            await using var enumerator = asyncEnumerable.GetAsyncEnumerator(cancellationToken);
+            return await enumerator.MoveNextAsync().ConfigureAwait(false);
         }
     }
 }

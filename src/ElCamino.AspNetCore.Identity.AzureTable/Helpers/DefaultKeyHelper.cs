@@ -11,10 +11,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         {
             if (input != null)
             {
-                using (SHA1 sha = SHA1.Create())
-                {
-                    return GetHash(sha, input, Encoding.Unicode, 40);
-                }
+                using SHA1 sha = SHA1.Create();
+                return GetHash(sha, input, Encoding.Unicode, 40);
             }
             return null;
         }

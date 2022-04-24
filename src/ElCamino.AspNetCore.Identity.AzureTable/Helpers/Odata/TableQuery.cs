@@ -25,7 +25,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         /// <returns>A string containing the formatted filter condition.</returns>
         public static string GenerateFilterCondition(string propertyName, string operation, string givenValue)
         {
-            givenValue = givenValue ?? string.Empty; 
+            givenValue ??= string.Empty; 
             return GenerateFilterCondition(propertyName, operation, givenValue, EdmType.String);
         }
 
@@ -48,7 +48,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         /// <param name="operation">A string containing the comparison operator to use.</param>
         /// <param name="givenValue">A byte array containing the value to compare with the property.</param>
         /// <returns>A string containing the formatted filter condition.</returns>
-        [SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1118:ParameterMustNotSpanMultipleLines", Justification = "Needed for Common Code preprocessor directives.")]
         public static string GenerateFilterConditionForBinary(
             string propertyName,
             string operation,
@@ -96,7 +95,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         /// <param name="operation">A string containing the comparison operator to use.</param>
         /// <param name="givenValue">An <see cref="int"/> containing the value to compare with the property.</param>
         /// <returns>A string containing the formatted filter condition.</returns>
-        [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "ForInt", Justification = "Reviewed")]
         public static string GenerateFilterConditionForInt(string propertyName, string operation, int givenValue)
         {
             return GenerateFilterCondition(propertyName, operation, Convert.ToString(givenValue, CultureInfo.InvariantCulture), EdmType.Int32);
@@ -136,16 +134,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         /// <returns>A string containing the formatted filter condition.</returns>
         private static string GenerateFilterCondition(string propertyName, string operation, string givenValue, EdmType edmType)
         {
-            string valueOperand = null;
-
+            string valueOperand;
             if (edmType == EdmType.Boolean || edmType == EdmType.Int32)
             {
                 valueOperand = givenValue;
             }
             else if (edmType == EdmType.Double)
             {
-                int parsedInt;
-                bool isInteger = int.TryParse(givenValue, out parsedInt);
+                bool isInteger = int.TryParse(givenValue, out int parsedInt);
                 valueOperand = isInteger ? string.Format(CultureInfo.InvariantCulture, "{0}.0", givenValue) : givenValue;
             }
             else if (edmType == EdmType.Int64)
@@ -180,7 +176,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         /// <param name="operatorString">A string containing the operator to use (AND, OR).</param>
         /// <param name="filterB">A string containing the second formatted filter condition.</param>
         /// <returns>A string containing the combined filter expression.</returns>
-        [SuppressMessage("Microsoft.Naming", "CA1720:IdentifiersShouldNotContainTypeNames", MessageId = "string", Justification = "Back compatibility.")]
         public static string CombineFilters(string filterA, string operatorString, string filterB)
         {
             return string.Format(CultureInfo.InvariantCulture, "({0}) {1} ({2})", filterA, operatorString, filterB);

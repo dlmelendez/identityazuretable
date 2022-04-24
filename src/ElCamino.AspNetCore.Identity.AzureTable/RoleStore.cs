@@ -48,7 +48,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
     {
         private bool _disposed;
         private TableClient _roleTable;
-        private IdentityErrorDescriber _errorDescriber = new IdentityErrorDescriber();
+        private readonly IdentityErrorDescriber _errorDescriber = new IdentityErrorDescriber();
         protected IKeyHelper _keyHelper;
         private readonly string FilterString;
 
@@ -67,7 +67,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
         public Task CreateTableIfNotExistsAsync() => Context.RoleTable.CreateIfNotExistsAsync();
 
-        public override async Task<IdentityResult> CreateAsync(TRole role, CancellationToken cancellationToken = default(CancellationToken))
+        public override async Task<IdentityResult> CreateAsync(TRole role, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -76,18 +76,18 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             ((Model.IGenerateKeys)role).GenerateKeys(_keyHelper);
 
             // Execute the insert operation.
-            await _roleTable.AddEntityAsync(role).ConfigureAwait(false);
+            _ = await _roleTable.AddEntityAsync(role, cancellationToken).ConfigureAwait(false);
             return IdentityResult.Success;
         }
 
-        public override async Task<IdentityResult> DeleteAsync(TRole role, CancellationToken cancellationToken = default(CancellationToken))
+        public override async Task<IdentityResult> DeleteAsync(TRole role, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
             if (role == null) throw new ArgumentNullException(nameof(role));
 
             // Execute the insert operation.
-            await _roleTable.DeleteEntityAsync(role.PartitionKey, role.RowKey, TableConstants.ETagWildcard).ConfigureAwait(false);
+            _ = await _roleTable.DeleteEntityAsync(role.PartitionKey, role.RowKey, TableConstants.ETagWildcard, cancellationToken: cancellationToken).ConfigureAwait(false);
             return IdentityResult.Success;
         }
 
@@ -107,7 +107,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
         }
 
-        public override async Task<TRole> FindByIdAsync(string roleId, CancellationToken cancellationToken = default(CancellationToken))
+        public override async Task<TRole> FindByIdAsync(string roleId, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             this.ThrowIfDisposed();
@@ -120,11 +120,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             catch (RequestFailedException rfe)
             when (rfe.Status == (int)HttpStatusCode.NotFound)
             {
-                return default(TRole);
+                return default;
             }
         }
 
-        public override async Task<TRole> FindByNameAsync(string roleName, CancellationToken cancellationToken = default(CancellationToken))
+        public override async Task<TRole> FindByNameAsync(string roleName, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             this.ThrowIfDisposed();
@@ -137,12 +137,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             catch (RequestFailedException rfe)
             when (rfe.Status == (int)HttpStatusCode.NotFound)
             {
-                return default(TRole);
+                return default;
             }
         }
        
 
-        public override async Task<IdentityResult> UpdateAsync(TRole role, CancellationToken cancellationToken = default(CancellationToken))
+        public override async Task<IdentityResult> UpdateAsync(TRole role, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -164,11 +164,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 {
                     bHelper.DeleteEntity(dRole.PartitionKey, dRole.RowKey,  TableConstants.ETagWildcard);
                     bHelper.AddEntity(role);
-                    await bHelper.SubmitBatchAsync(cancellationToken:cancellationToken).ConfigureAwait(false);
+                    _ = await bHelper.SubmitBatchAsync(cancellationToken:cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
-                    await Task.WhenAll(
+                    _ = await Task.WhenAll(
                     _roleTable.DeleteEntityAsync(dRole.PartitionKey, dRole.RowKey, ifMatch: TableConstants.ETagWildcard, cancellationToken:cancellationToken),
                     _roleTable.AddEntityAsync(role, cancellationToken)).ConfigureAwait(false);
                 }
@@ -180,7 +180,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         }      
 
 
-        public override async Task<IList<Claim>> GetClaimsAsync(TRole role, CancellationToken cancellationToken = default(CancellationToken))
+        public override async Task<IList<Claim>> GetClaimsAsync(TRole role, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -198,12 +198,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             return 
 
-                (await _roleTable.QueryAsync<TRoleClaim>(filter, cancellationToken:cancellationToken ).ToListAsync().ConfigureAwait(false))                                
+                (await _roleTable.QueryAsync<TRoleClaim>(filter, cancellationToken:cancellationToken ).ToListAsync(cancellationToken).ConfigureAwait(false))                                
                 .Select(w => new Claim(w.ClaimType, w.ClaimValue))
                 .ToList() as IList<Claim>;
         }
 
-        public override async Task AddClaimAsync(TRole role, Claim claim, CancellationToken cancellationToken = default(CancellationToken))
+        public override async Task AddClaimAsync(TRole role, Claim claim, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -222,10 +222,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             item.ClaimValue = claim.Value;
             ((Model.IGenerateKeys)item).GenerateKeys(_keyHelper);
 
-            await _roleTable.AddEntityAsync(item).ConfigureAwait(false);
+            _ = await _roleTable.AddEntityAsync(item, cancellationToken).ConfigureAwait(false);
         }
 
-        public override async Task RemoveClaimAsync(TRole role, Claim claim, CancellationToken cancellationToken = default(CancellationToken))
+        public override async Task RemoveClaimAsync(TRole role, Claim claim, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -240,7 +240,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             if (string.IsNullOrWhiteSpace(claim.Type))
             {
-                throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(claim.Type));
+                throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(claim));
             }
 
             TRoleClaim item = Activator.CreateInstance<TRoleClaim>();
@@ -250,7 +250,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             item.ETag =  TableConstants.ETagWildcard;
             ((Model.IGenerateKeys)item).GenerateKeys(_keyHelper);
 
-            await _roleTable.DeleteEntityAsync(item.PartitionKey, item.RowKey,  TableConstants.ETagWildcard, cancellationToken).ConfigureAwait(false);
+            _ = await _roleTable.DeleteEntityAsync(item.PartitionKey, item.RowKey, TableConstants.ETagWildcard, cancellationToken).ConfigureAwait(false);
         }
 
         public TContext Context { get; private set; }

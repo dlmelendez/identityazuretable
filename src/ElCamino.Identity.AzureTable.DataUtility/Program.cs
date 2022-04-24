@@ -20,8 +20,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         private static int iUserTotal = 0;
         private static int iUserSuccessConvert = 0;
         private static int iUserFailureConvert = 0;
-        private static object ObjectLock = new object();
-        private static ConcurrentBag<string> userIdFailures = new ConcurrentBag<string>();
+        private static readonly ConcurrentBag<string> userIdFailures = new ConcurrentBag<string>();
 
         private readonly static List<string> helpTokens = new List<string>() { "/?", "/help" };
         private const string previewToken = "/preview:";
@@ -91,101 +90,98 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
                 string entityRecordName = "Users";
 
-                using (IdentityCloudContext sourceContext = new IdentityCloudContext(sourceConfig))
+                using IdentityCloudContext sourceContext = new IdentityCloudContext(sourceConfig);
+                Console.WriteLine($"Source IndexTable: {sourceConfig.IndexTableName}");
+                Console.WriteLine($"Source UserTable: {sourceConfig.UserTableName}");
+                Console.WriteLine($"Source RoleTable: {sourceConfig.RoleTableName}");
+
+                DateTime startLoad = DateTime.UtcNow;
+                var allDataList = new List<TableEntity>(iPageSize);
+
+                TableQuery tq = migration.GetSourceTableQuery();
+
+                tq.TakeCount = iPageSize;
+                string continueToken = string.Empty;
+
+                int iSkippedUserCount = 0;
+                int iSkippedPageCount = 0;
+                int iPageCounter = 0;
+                while (continueToken != null)
                 {
-                    Console.WriteLine($"Source IndexTable: {sourceConfig.IndexTableName}");
-                    Console.WriteLine($"Source UserTable: {sourceConfig.UserTableName}");
-                    Console.WriteLine($"Source RoleTable: {sourceConfig.RoleTableName}");
+                    DateTime batchStart = DateTime.UtcNow;
 
-                    DateTime startLoad = DateTime.UtcNow;
-                    var allDataList = new List<TableEntity>(iPageSize);
-
-                    TableQuery tq = migration.GetSourceTableQuery();
-
-                    tq.TakeCount = iPageSize;
-                    string continueToken = string.Empty;
-
-                    int iSkippedUserCount = 0;
-                    int iSkippedPageCount = 0;
-                    int iPageCounter = 0;
-                    while (continueToken != null)
+                    TableClient sourceTable = sourceContext.UserTable;
+                    if (MigrateCommand == MigrationFactory.Roles)
                     {
-                        DateTime batchStart = DateTime.UtcNow;
+                        sourceTable = sourceContext.RoleTable;
+                        entityRecordName = "Role and Role Claims";
+                    }
+                    var sourceResults = sourceTable.Query<TableEntity>(tq.FilterString, tq.TakeCount).AsPages(continueToken, tq.TakeCount).FirstOrDefault();
 
-                        TableClient sourceTable = sourceContext.UserTable;
-                        if (MigrateCommand == MigrationFactory.Roles)
+                    continueToken = sourceResults.ContinuationToken;
+
+
+                    int batchCount = sourceResults.Values.Count(migration.UserWhereFilter);
+                    iUserTotal += batchCount;
+                    iPageCounter++;
+
+                    bool includePage = (iStartPage == -1 || iPageCounter >= iStartPage) && (iFinishPage == -1 || iPageCounter <= iFinishPage);
+
+                    if (includePage)
+                    {
+                        if (migrateOption)
                         {
-                            sourceTable = sourceContext.RoleTable;
-                            entityRecordName = "Role and Role Claims";
-                        }
-                        var sourceResults = sourceTable.Query<TableEntity>(tq.FilterString, tq.TakeCount).AsPages(continueToken, tq.TakeCount).FirstOrDefault();
-
-                        continueToken = sourceResults.ContinuationToken;
-
-
-                        int batchCount = sourceResults.Values.Count(migration.UserWhereFilter);
-                        iUserTotal += batchCount;
-                        iPageCounter++;
-
-                        bool includePage = (iStartPage == -1 || iPageCounter >= iStartPage) && (iFinishPage == -1 || iPageCounter <= iFinishPage);
-
-                        if (includePage)
-                        {
-                            if (migrateOption)
+                            migration.ProcessMigrate(targetContext, sourceContext, sourceResults.Values.ToList(), iMaxdegreesparallel,
+                            () =>
                             {
-                                migration.ProcessMigrate(targetContext, sourceContext, sourceResults.Values.ToList(), iMaxdegreesparallel,
-                                () =>
+                                Interlocked.Increment(ref iUserSuccessConvert);
+                                Console.WriteLine($"{entityRecordName}(s) Complete: {iUserSuccessConvert}");
+                            },
+                            (exMessage) =>
+                            {
+                                if (!string.IsNullOrWhiteSpace(exMessage))
                                 {
-                                    Interlocked.Increment(ref iUserSuccessConvert);
-                                    Console.WriteLine($"{entityRecordName}(s) Complete: {iUserSuccessConvert}");
-                                },
-                                (exMessage) =>
-                                {
-                                    if (!string.IsNullOrWhiteSpace(exMessage))
-                                    {
-                                        userIdFailures.Add(exMessage);
-                                    }
-                                    Interlocked.Increment(ref iUserFailureConvert);
-                                });
-                            }
-
-                        }
-                        else
-                        {
-                            iSkippedPageCount++;
-                            iSkippedUserCount += batchCount;
+                                    userIdFailures.Add(exMessage);
+                                }
+                                Interlocked.Increment(ref iUserFailureConvert);
+                            });
                         }
 
-                        Console.WriteLine("Page: {2}{3}, {4} Batch: {1}: {0} seconds", (DateTime.UtcNow - batchStart).TotalSeconds, batchCount, iPageCounter, includePage ? string.Empty : "(Skipped)", entityRecordName);
-
-                        //Are we done yet?
-                        if (iFinishPage > 0 && iPageCounter >= iFinishPage)
-                        {
-                            break;
-                        }
+                    }
+                    else
+                    {
+                        iSkippedPageCount++;
+                        iSkippedUserCount += batchCount;
                     }
 
+                    Console.WriteLine("Page: {2}{3}, {4} Batch: {1}: {0} seconds", (DateTime.UtcNow - batchStart).TotalSeconds, batchCount, iPageCounter, includePage ? string.Empty : "(Skipped)", entityRecordName);
 
-                    Console.WriteLine("");
-                    Console.WriteLine("Elapsed time: {0} seconds", (DateTime.UtcNow - startLoad).TotalSeconds);
-                    Console.WriteLine("Total {2} Skipped: {0}, Total Pages: {1}", iSkippedUserCount, iSkippedPageCount, entityRecordName);
-                    Console.WriteLine("Total {2} To Convert: {0}, Total Pages: {1}", iUserTotal - iSkippedUserCount, iPageCounter - iSkippedPageCount, entityRecordName);
-
-                    Console.WriteLine("");
-                    if (migrateOption)
+                    //Are we done yet?
+                    if (iFinishPage > 0 && iPageCounter >= iFinishPage)
                     {
-                        Console.WriteLine("Total {1} Successfully Converted: {0}", iUserSuccessConvert, entityRecordName);
-                        Console.WriteLine("Total {1} Failed to Convert: {0}", iUserFailureConvert, entityRecordName);
-                        if (iUserFailureConvert > 0)
+                        break;
+                    }
+                }
+
+
+                Console.WriteLine("");
+                Console.WriteLine("Elapsed time: {0} seconds", (DateTime.UtcNow - startLoad).TotalSeconds);
+                Console.WriteLine("Total {2} Skipped: {0}, Total Pages: {1}", iSkippedUserCount, iSkippedPageCount, entityRecordName);
+                Console.WriteLine("Total {2} To Convert: {0}, Total Pages: {1}", iUserTotal - iSkippedUserCount, iPageCounter - iSkippedPageCount, entityRecordName);
+
+                Console.WriteLine("");
+                if (migrateOption)
+                {
+                    Console.WriteLine("Total {1} Successfully Converted: {0}", iUserSuccessConvert, entityRecordName);
+                    Console.WriteLine("Total {1} Failed to Convert: {0}", iUserFailureConvert, entityRecordName);
+                    if (iUserFailureConvert > 0)
+                    {
+                        Console.WriteLine($"{entityRecordName} Ids Failed:");
+                        foreach (string s in userIdFailures)
                         {
-                            Console.WriteLine($"{entityRecordName} Ids Failed:");
-                            foreach (string s in userIdFailures)
-                            {
-                                Console.WriteLine(s);
-                            }
+                            Console.WriteLine(s);
                         }
                     }
-
                 }
             }
 
@@ -264,9 +260,8 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             if (!string.IsNullOrWhiteSpace(args))
             {
                 string[] splitArgs = args.Split(":".ToCharArray());
-                int iTempValue = 0;
                 if (splitArgs.Length == 2
-                    && int.TryParse(splitArgs[1], out iTempValue)
+                    && int.TryParse(splitArgs[1], out int iTempValue)
                     && iTempValue > 0)
                 {
                     iTokenValue = iTempValue;

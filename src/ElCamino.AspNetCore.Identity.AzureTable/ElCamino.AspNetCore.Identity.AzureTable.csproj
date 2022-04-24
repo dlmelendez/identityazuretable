@@ -46,6 +46,7 @@
   </ItemGroup>
   
   <ItemGroup>  
+    <None Include="..\..\.editorconfig" Link=".editorconfig" />  
     <None Include="projectNugetPic.png" Pack="true" PackagePath="\" />   
   </ItemGroup>
   

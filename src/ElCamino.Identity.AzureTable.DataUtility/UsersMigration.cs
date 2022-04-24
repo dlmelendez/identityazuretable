@@ -13,7 +13,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 {
     public class UsersMigration : IMigration
     {
-        private IKeyHelper _keyHelper;
+        private readonly IKeyHelper _keyHelper;
         public UsersMigration(IKeyHelper keyHelper)
         {
             _keyHelper = keyHelper;
@@ -79,7 +79,6 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             string partitionKeyFilter = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, userPartitionKey);
             string keyVersionFilter = TableQuery.GenerateFilterConditionForDouble("KeyVersion", QueryComparisons.LessThan, _keyHelper.KeyVersion);
             tq.FilterString = TableQuery.CombineFilters(partitionKeyFilter, TableOperators.And, keyVersionFilter);
-            string token = string.Empty;
             var r = sourcesContext.UserTable.Query<TableEntity>(tq.FilterString);
             return r.ToList();
         }

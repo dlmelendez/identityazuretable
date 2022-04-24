@@ -181,6 +181,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             return base.IsUserInRole();
         }
 
+        [Fact(DisplayName = "MapEntityTest")]
+        [Trait(UserStoreTrait, "")]
+        public override void MapEntityTest()
+        {
+            base.MapEntityTest();
+        }
+
         [Fact(DisplayName = "ThrowIfDisposed")]
         [Trait(UserStoreTrait, "")]
         public override Task ThrowIfDisposed()
@@ -208,7 +215,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                new UserStore<ApplicationUserV2, IdentityRole, IdentityCloudContext>(null, null, null);
+                new UserStore<ApplicationUserV2, IdentityRole, IdentityCloudContext>(null, null);
             });
         }
 
@@ -313,7 +320,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         private UserStore<ApplicationUserV2, IdentityRole, IdentityCloudContext> GetImmutableUserIdStore()
         {
             var config = userFixture.GetConfig();
-            var userStore = userFixture.CreateUserStore(userFixture.GetContext(config), config);
+            var userStore = userFixture.CreateUserStore(userFixture.GetContext(config));
             return userStore;
         }
 

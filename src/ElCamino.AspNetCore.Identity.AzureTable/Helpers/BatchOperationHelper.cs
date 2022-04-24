@@ -17,12 +17,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
     /// Used to instantiate multiple TableBatchOperations when the
     /// TableOperation maximum is reached on a single TableBatchOperation
     /// </summary>
-    internal class BatchOperationHelper
+    public class BatchOperationHelper
     {
 
         private readonly Dictionary<string, List<TableTransactionAction>> _batches = new Dictionary<string, List<TableTransactionAction>>();
 
-        private TableClient _table;
+        private readonly TableClient _table;
         public BatchOperationHelper(TableClient table) 
         {
             _table = table;
@@ -59,9 +59,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
                         {
                             bag.Add(r);
                         }
-                    }));
+                    }, cancellationToken));
             }
-            await Task.WhenAll(batches);
+            await Task.WhenAll(batches).ConfigureAwait(false);
             Clear();
             return bag;
         }
