@@ -598,7 +598,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             {
                 await AddUserClaimHelper(user, GenAdminClaim());
                 await AddUserLoginAsyncHelper(user, GenGoogleLogin());
-                // await AddUserRoleAsyncHelper(user, string.Format("{0}_{1}", Constants.AccountRoles.AccountTestUserRole, Guid.NewGuid().ToString("N")));
                 await manager.SetAuthenticationTokenAsync(user,
                     Constants.LoginProviders.GoogleProvider.LoginProvider,
                     string.Format("TokenName{0}", Guid.NewGuid().ToString()),
@@ -732,8 +731,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             string userNameChange = Guid.NewGuid().ToString("N");
 
             const int count = 2;
-            //var firstUserRoles = await manager.GetRolesAsync(firstUser);
-            //Assert.True(firstUserRoles.Count == count);
             var firstUserClaims = await manager.GetClaimsAsync(firstUser);
             Assert.True(firstUserClaims.Count == count);
             var firstUserLogins = await manager.GetLoginsAsync(firstUser);
@@ -842,7 +839,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             sw.Start();
             var allResult = await store.FindAllByEmailAsync(strEmail);
             sw.Stop();
-            output.WriteLine("FindAllByEmailAsync: {0} seconds", sw.Elapsed.TotalSeconds);
+            output.WriteLine($"{nameof(store.FindAllByEmailAsync)}: {0} seconds", sw.Elapsed.TotalSeconds);
             output.WriteLine("Users Found: {0}", allResult.Count());
             Assert.Equal<int>(createdCount, allResult.Count());
 
@@ -860,7 +857,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             sw.Restart();
 
             allResult = await store.FindAllByEmailAsync(strEmail);
-            output.WriteLine("FindAllByEmailAsync: {0} seconds", sw.Elapsed.TotalSeconds);
+            output.WriteLine($"{nameof(store.FindAllByEmailAsync)}: {0} seconds", sw.Elapsed.TotalSeconds);
             output.WriteLine("Users Found: {0}", allResult.Count());
             Assert.Equal<int>(listCreated.Count - 1, allResult.Count());
         }
@@ -874,7 +871,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             sw.Start();
             var result = await manager.FindByIdAsync(user.Id);
             sw.Stop();
-            output.WriteLine("FindByIdAsync: {0} seconds", sw.Elapsed.TotalSeconds);
+            output.WriteLine($"{nameof(manager.FindByIdAsync)}: {0} seconds", sw.Elapsed.TotalSeconds);
 
             Assert.Equal(user.Id, result.Id);
         }
@@ -889,7 +886,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             sw.Start();
             var result = await manager.FindByNameAsync(user.UserName);
             sw.Stop();
-            output.WriteLine("FindByNameAsync: {0} seconds", sw.Elapsed.TotalSeconds);
+            output.WriteLine($"{nameof(manager.FindByNameAsync)}: {0} seconds", sw.Elapsed.TotalSeconds);
 
             Assert.Equal(user.UserName, result.UserName);
 
@@ -918,7 +915,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             sw.Start();
             var loginResult2 = await manager.FindByLoginAsync(loginsResult.First().LoginProvider, loginsResult.First().ProviderKey);
             sw.Stop();
-            Debug.WriteLine(string.Format("FindAsync(By Login): {0} seconds", sw.Elapsed.TotalSeconds));
+            Debug.WriteLine(string.Format($"{nameof(manager.FindByLoginAsync)}: {0} seconds", sw.Elapsed.TotalSeconds));
             Assert.Equal(user.Id, loginResult2.Id);
         }
 
@@ -1087,8 +1084,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                 sw.Start();
                 var users = await manager.GetUsersForClaimAsync(claim);
                 sw.Stop();
-                output.WriteLine("GetUsersForClaimAsync(): {0} seconds", sw.Elapsed.TotalSeconds);
-                output.WriteLine("GetUsersForClaimAsync(): {0} user count", users.Count);
+                output.WriteLine($"{nameof(manager.GetUsersForClaimAsync)}: {0} seconds", sw.Elapsed.TotalSeconds);
+                output.WriteLine($"{nameof(manager.GetUsersForClaimAsync)}: {0} user count", users.Count);
                 Assert.Equal(userCount, users.Count);
             }
 
