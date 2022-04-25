@@ -35,7 +35,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
         ~IdentityCloudContext()
         {
-            this.Dispose(false);
+            Dispose(false);
         }
 
         private string FormatTableNameWithPrefix(string baseTableName)
@@ -85,14 +85,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
         private void ThrowIfDisposed()
         {
-            if (this._disposed)
+            if (_disposed)
             {
                 throw new ObjectDisposedException(base.GetType().Name);
             }
         }
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
         }
 
         protected virtual void Dispose(bool disposing)

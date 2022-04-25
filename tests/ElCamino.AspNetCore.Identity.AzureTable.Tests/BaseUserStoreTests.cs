@@ -87,7 +87,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             sw.Stop();
             var getout = string.Format("{0} ms", sw.Elapsed.TotalMilliseconds);
             Debug.WriteLine(getout);
-            output.WriteLine(getout);
+            _output.WriteLine(getout);
             Assert.True(roles.Contains(roleName), "Role not found");
 
             sw.Start();
@@ -95,7 +95,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             sw.Stop();
             var isInout = string.Format("{0} ms", sw.Elapsed.TotalMilliseconds);
             Debug.WriteLine(isInout);
-            output.WriteLine(isInout);
+            _output.WriteLine(isInout);
             Assert.True(roles2, "Role not found");
 
             var userRemoveResult = await manager.RemoveFromRoleAsync(user, roleName);
@@ -125,7 +125,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             sw.Start();
             var result = await manager.IsInRoleAsync(user, roleName);
             sw.Stop();
-            output.WriteLine("IsInRoleAsync: {0} seconds", sw.Elapsed.TotalSeconds);
+            _output.WriteLine("IsInRoleAsync: {0} seconds", sw.Elapsed.TotalSeconds);
             Assert.True(result, "Role not found");
 
             await Assert.ThrowsAsync<ArgumentNullException>(() => store.IsInRoleAsync(null, roleName));
@@ -202,7 +202,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             var userDelitionResult = await manager.DeleteAsync(user);
             sw.Stop();
             Assert.True(userDelitionResult.Succeeded, string.Concat(userCreationResult.Errors));
-            output.WriteLine("DeleteAsync: {0} seconds", sw.Elapsed.TotalSeconds);
+            _output.WriteLine("DeleteAsync: {0} seconds", sw.Elapsed.TotalSeconds);
 
             await Task.Delay(2000);
 
@@ -232,21 +232,21 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             for (int i = 0; i < userCount; i++)
             {
                 var sw = new Stopwatch();
-                output.WriteLine("CreateTestUserLite()");
+                _output.WriteLine("CreateTestUserLite()");
                 sw.Start();
                 tempUser = await CreateTestUserLiteAsync(true, true);
                 sw.Stop();
-                output.WriteLine("CreateTestUserLite(): {0} seconds", sw.Elapsed.TotalSeconds);
+                _output.WriteLine("CreateTestUserLite(): {0} seconds", sw.Elapsed.TotalSeconds);
                 await AddUserRoleAsyncHelper(tempUser, strUserRole);
             }
             sw2.Stop();
-            output.WriteLine("GenerateUsers(): {0} user count", userCount);
-            output.WriteLine("GenerateUsers(): {0} seconds", sw2.Elapsed.TotalSeconds);
+            _output.WriteLine("GenerateUsers(): {0} user count", userCount);
+            _output.WriteLine("GenerateUsers(): {0} seconds", sw2.Elapsed.TotalSeconds);
 
             sw2.Reset();
             sw2.Start();
             var users = await manager.GetUsersInRoleAsync(strUserRole);
-            output.WriteLine("GetUsersInRoleAsync(): {0} seconds", sw2.Elapsed.TotalSeconds);
+            _output.WriteLine("GetUsersInRoleAsync(): {0} seconds", sw2.Elapsed.TotalSeconds);
             Assert.Equal(userCount, users.Count);
 
             users = await manager.GetUsersInRoleAsync(Guid.NewGuid().ToString());
@@ -260,7 +260,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             using var store = userFixture.CreateUserStore();
             using var manager = userFixture.CreateUserManager();
             var firstUser = await CreateTestUserAsync<TUser>();
-            output.WriteLine("{0}", "Original User");
+            _output.WriteLine("{0}", "Original User");
             WriteLineObject(firstUser);
             string originalPlainUserName = firstUser.UserName;
             string originalUserId = firstUser.Id;
@@ -286,13 +286,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             sw.Start();
             var userUpdate = await manager.SetUserNameAsync(firstUser, userNameChange);
             sw.Stop();
-            output.WriteLine("UpdateAsync(ChangeUserName): {0} seconds", sw.Elapsed.TotalSeconds);
+            _output.WriteLine("UpdateAsync(ChangeUserName): {0} seconds", sw.Elapsed.TotalSeconds);
             Assert.True(userUpdate.Succeeded, string.Concat(userUpdate.Errors));
 
             await Task.Delay(200);
             var userChangedResult = await manager.FindByNameAsync(userNameChange);
             var changedUser = userChangedResult;
-            output.WriteLine("{0}", "Changed User");
+            _output.WriteLine("{0}", "Changed User");
             WriteLineObject<IdentityUser>(changedUser);
 
             Assert.NotNull(changedUser);
@@ -369,11 +369,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         #region Static and Const Members
         public static readonly string DefaultUserPassword = "M" + Guid.NewGuid().ToString();
 
-        protected static bool tablesCreated = false;
+        protected static bool _tablesCreated = false;
 
         #endregion
 
-        protected readonly ITestOutputHelper output;
+        protected readonly ITestOutputHelper _output;
 
 
         protected BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore, TKeyHelper> userFixture;
@@ -383,7 +383,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             userFixture = userFix;
 
             Initialize();
-            this.output = output;
+            _output = output;
         }
 
         #region Test Initialization
@@ -391,7 +391,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         {
             //--Changes to speed up tests that don't require a new user, sharing a static user
             //--Also limiting table creation to once per test run
-            if (!tablesCreated)
+            if (!_tablesCreated)
             {
                 Task.Run(async () => {
                     using var store = userFixture.CreateUserStore();
@@ -399,7 +399,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                 }).Wait();
 
 
-                tablesCreated = true;
+                _tablesCreated = true;
             }
             //--
         }
@@ -407,9 +407,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
         protected void WriteLineObject<t>(t obj) where t : class
         {
-            output.WriteLine(typeof(t).Name);
+            _output.WriteLine(typeof(t).Name);
             string strLine = obj == null ? "Null" : Newtonsoft.Json.JsonConvert.SerializeObject(obj, Newtonsoft.Json.Formatting.Indented);
-            output.WriteLine("{0}", strLine);
+            _output.WriteLine("{0}", strLine);
         }
 
         protected static string GenClaimValue()
@@ -531,7 +531,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             var testMap = entity.MapTableEntity<TUser>();
             sw.Stop();
             var getout = string.Format("Take1 {0} ms", sw.Elapsed.TotalMilliseconds);
-            output.WriteLine(getout);
+            _output.WriteLine(getout);
 
             sw.Reset();
             var entity2 = new TableEntity(type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty)
@@ -540,7 +540,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             var testMap2 = entity2.MapTableEntity<TUser>();
             sw.Stop();
             var getout2 = string.Format("Take2: {0} ms", sw.Elapsed.TotalMilliseconds);
-            output.WriteLine(getout2);
+            _output.WriteLine(getout2);
 
             sw.Reset();
             var entity3 = new TableEntity(type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty)
@@ -549,7 +549,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             var testMap3 = entity3.MapTableEntity<TUser>();
             sw.Stop();
             var getout3 = string.Format("Take3: {0} ms", sw.Elapsed.TotalMilliseconds);
-            output.WriteLine(getout3);
+            _output.WriteLine(getout3);
 
             sw.Reset();
             var entity4 = new TableEntity(type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty)
@@ -558,7 +558,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             var testMap4 = entity4.MapTableEntity<TUser>();
             sw.Stop();
             var getout4 = string.Format("Take4: {0} ms", sw.Elapsed.TotalMilliseconds);
-            output.WriteLine(getout4);
+            _output.WriteLine(getout4);
             sw.Reset();
 
             WriteLineObject(testMap);
@@ -664,7 +664,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             var userDelitionResult = await manager.DeleteAsync(user);
             sw.Stop();
             Assert.True(userDelitionResult.Succeeded, string.Concat(userCreationResult.Errors));
-            output.WriteLine("DeleteAsync: {0} seconds", sw.Elapsed.TotalSeconds);
+            _output.WriteLine("DeleteAsync: {0} seconds", sw.Elapsed.TotalSeconds);
 
             await Task.Delay(2000);
 
@@ -724,7 +724,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             using var store = userFixture.CreateUserStore();
             using var manager = userFixture.CreateUserManager();
             var firstUser = await CreateTestUserAsync<TUser>();
-            output.WriteLine("{0}", "Original User");
+            _output.WriteLine("{0}", "Original User");
             WriteLineObject(firstUser);
             string originalPlainUserName = firstUser.UserName;
             string originalUserId = firstUser.Id;
@@ -748,13 +748,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             sw.Start();
             var userUpdate = await manager.SetUserNameAsync(firstUser, userNameChange);
             sw.Stop();
-            output.WriteLine("UpdateAsync(ChangeUserName): {0} seconds", sw.Elapsed.TotalSeconds);
+            _output.WriteLine("UpdateAsync(ChangeUserName): {0} seconds", sw.Elapsed.TotalSeconds);
             Assert.True(userUpdate.Succeeded, string.Concat(userUpdate.Errors));
 
             await Task.Delay(200);
             var userChangedResult = await manager.FindByNameAsync(userNameChange);
             var changedUser = userChangedResult;
-            output.WriteLine("{0}", "Changed User");
+            _output.WriteLine("{0}", "Changed User");
             WriteLineObject<IdentityUser>(changedUser);
 
             Assert.NotNull(changedUser);
@@ -817,7 +817,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             sw.Start();
             var findUserResult = await manager.FindByEmailAsync(user.Email);
             sw.Stop();
-            output.WriteLine("FindByEmailAsync: {0} seconds", sw.Elapsed.TotalSeconds);
+            _output.WriteLine("FindByEmailAsync: {0} seconds", sw.Elapsed.TotalSeconds);
 
             Assert.Equal(user.Email, findUserResult.Email);
         }
@@ -834,13 +834,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                 await CreateTestUserLiteAsync(true, true, strEmail);
             }
 
-            output.WriteLine("FindAllByEmailAsync: {0}", strEmail);
+            _output.WriteLine("FindAllByEmailAsync: {0}", strEmail);
             var sw = new Stopwatch();
             sw.Start();
             var allResult = await store.FindAllByEmailAsync(strEmail);
             sw.Stop();
-            output.WriteLine($"{nameof(store.FindAllByEmailAsync)}: {0} seconds", sw.Elapsed.TotalSeconds);
-            output.WriteLine("Users Found: {0}", allResult.Count());
+            _output.WriteLine($"{nameof(store.FindAllByEmailAsync)}: {0} seconds", sw.Elapsed.TotalSeconds);
+            _output.WriteLine("Users Found: {0}", allResult.Count());
             Assert.Equal<int>(createdCount, allResult.Count());
 
             var listCreated = allResult.ToList();
@@ -857,8 +857,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             sw.Restart();
 
             allResult = await store.FindAllByEmailAsync(strEmail);
-            output.WriteLine($"{nameof(store.FindAllByEmailAsync)}: {0} seconds", sw.Elapsed.TotalSeconds);
-            output.WriteLine("Users Found: {0}", allResult.Count());
+            _output.WriteLine($"{nameof(store.FindAllByEmailAsync)}: {0} seconds", sw.Elapsed.TotalSeconds);
+            _output.WriteLine("Users Found: {0}", allResult.Count());
             Assert.Equal<int>(listCreated.Count - 1, allResult.Count());
         }
 
@@ -871,7 +871,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             sw.Start();
             var result = await manager.FindByIdAsync(user.Id);
             sw.Stop();
-            output.WriteLine($"{nameof(manager.FindByIdAsync)}: {0} seconds", sw.Elapsed.TotalSeconds);
+            _output.WriteLine($"{nameof(manager.FindByIdAsync)}: {0} seconds", sw.Elapsed.TotalSeconds);
 
             Assert.Equal(user.Id, result.Id);
         }
@@ -886,7 +886,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             sw.Start();
             var result = await manager.FindByNameAsync(user.UserName);
             sw.Stop();
-            output.WriteLine($"{nameof(manager.FindByNameAsync)}: {0} seconds", sw.Elapsed.TotalSeconds);
+            _output.WriteLine($"{nameof(manager.FindByNameAsync)}: {0} seconds", sw.Elapsed.TotalSeconds);
 
             Assert.Equal(user.UserName, result.UserName);
 
@@ -894,7 +894,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             sw.Start();
             var result1 = manager.Users.Where(w => w.UserName == user.UserName).ToList().FirstOrDefault();
             sw.Stop();
-            output.WriteLine("Users where UserName: {0} seconds", sw.Elapsed.TotalSeconds);
+            _output.WriteLine("Users where UserName: {0} seconds", sw.Elapsed.TotalSeconds);
             Assert.Equal(user.UserName, result1.UserName);
         }
 
@@ -1077,15 +1077,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                     await store.AddClaimAsync(tempUser, claim);
                 }
                 sw.Stop();
-                output.WriteLine("GenerateUsers(): {0} user count", userCount);
-                output.WriteLine("GenerateUsers(): {0} seconds", sw.Elapsed.TotalSeconds);
+                _output.WriteLine("GenerateUsers(): {0} user count", userCount);
+                _output.WriteLine("GenerateUsers(): {0} seconds", sw.Elapsed.TotalSeconds);
 
                 sw.Reset();
                 sw.Start();
                 var users = await manager.GetUsersForClaimAsync(claim);
                 sw.Stop();
-                output.WriteLine($"{nameof(manager.GetUsersForClaimAsync)}: {0} seconds", sw.Elapsed.TotalSeconds);
-                output.WriteLine($"{nameof(manager.GetUsersForClaimAsync)}: {0} user count", users.Count);
+                _output.WriteLine($"{nameof(manager.GetUsersForClaimAsync)}: {0} seconds", sw.Elapsed.TotalSeconds);
+                _output.WriteLine($"{nameof(manager.GetUsersForClaimAsync)}: {0} user count", users.Count);
                 Assert.Equal(userCount, users.Count);
             }
 

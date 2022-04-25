@@ -56,7 +56,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
         public UserStore(TContext context, Model.IKeyHelper keyHelper) : base(context, keyHelper) 
         {
-            this._roleTable = context.RoleTable;
+            _roleTable = context.RoleTable;
         }
 
         public override Task CreateTablesIfNotExistsAsync()
@@ -73,7 +73,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         public virtual async Task AddToRoleAsync(TUser user, string roleName, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
+            ThrowIfDisposed();
             if (user == null) throw new ArgumentNullException(nameof(user));
             if (string.IsNullOrWhiteSpace(roleName))
             {
@@ -106,7 +106,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         public async virtual Task<IList<string>> GetRolesAsync(TUser user, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
+            ThrowIfDisposed();
             if (user == null) throw new ArgumentNullException(nameof(user));
             if (EqualityComparer<TKey>.Default.Equals(user.Id, default))
             {
@@ -218,7 +218,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 }
 
 
-                return (await this.GetUsersAggregateByIndexQueryAsync(GetUserByRoleQuery(roleName), (userId) => {
+                return (await GetUsersAggregateByIndexQueryAsync(GetUserByRoleQuery(roleName), (userId) => {
                     return GetUserAggregateQueryAsync(userId, setFilterByUserId: getTableQueryFilterByUserId, whereClaim: null, whereRole: (ur) =>
                     {
                         return ur.RowKey == _keyHelper.GenerateRowKeyIdentityUserRole(roleName);
@@ -233,7 +233,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         public async virtual Task<bool> IsInRoleAsync(TUser user, string roleName, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
+            ThrowIfDisposed();
             if (user == null) throw new ArgumentNullException(nameof(user));
             if (string.IsNullOrWhiteSpace(roleName))
             {
@@ -276,7 +276,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         public virtual async Task RemoveFromRoleAsync(TUser user, string roleName, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
+            ThrowIfDisposed();
             if (user == null) throw new ArgumentNullException(nameof(user));
             if (string.IsNullOrWhiteSpace(roleName))
                 throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(roleName));
@@ -509,7 +509,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             if (!_disposed && disposing)
             {
-                this._roleTable = null;
+                _roleTable = null;
             }
             base.Dispose(disposing);
         }

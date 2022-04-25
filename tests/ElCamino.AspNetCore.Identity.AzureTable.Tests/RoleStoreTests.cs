@@ -18,11 +18,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {
     public class RoleStoreTests : IClassFixture<RoleFixture<Model.IdentityUser, IdentityRole, IdentityCloudContext, DefaultKeyHelper>>
     {
-        private readonly ITestOutputHelper output;
+        private readonly ITestOutputHelper _output;
         private readonly RoleFixture<Model.IdentityUser, IdentityRole, IdentityCloudContext, DefaultKeyHelper> roleFixture;
         public RoleStoreTests(RoleFixture<Model.IdentityUser, IdentityRole, IdentityCloudContext, DefaultKeyHelper> roleFix, ITestOutputHelper output)
         {
-            this.output = output;
+            _output = output;
             roleFixture = roleFix;
             Task.Run(async() => {
                 await CreateRoleTable().ConfigureAwait(continueOnCapturedContext: false);
@@ -55,7 +55,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             await manager.CreateAsync(role);
             sw.Stop();
 
-            output.WriteLine("CreateRoleAsync: {0} seconds", sw.Elapsed.TotalSeconds);
+            _output.WriteLine("CreateRoleAsync: {0} seconds", sw.Elapsed.TotalSeconds);
             Claim c1 = GenRoleClaim();
             Claim c2 = GenRoleClaim();
 
@@ -78,7 +78,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             await manager.CreateAsync(role);
             sw.Stop();
 
-            output.WriteLine("CreateRoleAsync: {0} seconds", sw.Elapsed.TotalSeconds);
+            _output.WriteLine("CreateRoleAsync: {0} seconds", sw.Elapsed.TotalSeconds);
 
             await AddRoleClaimAsyncHelper(role, GenRoleClaim());
         } 
@@ -152,7 +152,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             await manager.CreateAsync(role);
             sw.Stop();
 
-            output.WriteLine("CreateRoleAsync: {0} seconds", sw.Elapsed.TotalSeconds);
+            _output.WriteLine("CreateRoleAsync: {0} seconds", sw.Elapsed.TotalSeconds);
             return role;
         }
 
@@ -224,7 +224,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             sw.Start();
             await manager.DeleteAsync(role);
             sw.Stop();
-            output.WriteLine("DeleteRole: {0} seconds", sw.Elapsed.TotalSeconds);
+            _output.WriteLine("DeleteRole: {0} seconds", sw.Elapsed.TotalSeconds);
 
             var result = await manager.FindByIdAsync(role.RowKey);
             Assert.Null(result);
@@ -243,7 +243,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             sw.Start();
             var result = await manager.FindByIdAsync(role.Id);
             sw.Stop();
-            output.WriteLine("FindByIdAsync: {0} seconds", sw.Elapsed.TotalSeconds);
+            _output.WriteLine("FindByIdAsync: {0} seconds", sw.Elapsed.TotalSeconds);
 
             Assert.NotNull(result);
             WriteLineObject<IdentityRole>(result);
@@ -262,7 +262,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             sw.Start();
             var result = await manager.FindByNameAsync(role.Name);
             sw.Stop();
-            output.WriteLine("FindByNameAsync: {0} seconds", sw.Elapsed.TotalSeconds);
+            _output.WriteLine("FindByNameAsync: {0} seconds", sw.Elapsed.TotalSeconds);
 
             Assert.NotNull(result);
             Assert.Equal(role.Name, result.Name);
@@ -271,7 +271,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             sw.Start();
             var result1 = manager.Roles.Where(r => r.Name == role.Name).ToList();
             sw.Stop();
-            output.WriteLine("RoleManager.Roles where name: {0} seconds", sw.Elapsed.TotalSeconds);
+            _output.WriteLine("RoleManager.Roles where name: {0} seconds", sw.Elapsed.TotalSeconds);
 
             Assert.NotNull(result1.SingleOrDefault());
             Assert.Equal(role.Name, result1.SingleOrDefault().Name);
@@ -279,9 +279,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
         private void WriteLineObject<t>(t obj) where t : class
         {
-            output.WriteLine(typeof(t).Name);
+            _output.WriteLine(typeof(t).Name);
             string strLine = obj == null ? "Null" : Newtonsoft.Json.JsonConvert.SerializeObject(obj, Newtonsoft.Json.Formatting.Indented);
-            output.WriteLine("{0}", strLine);
+            _output.WriteLine("{0}", strLine);
         }
     }
 }

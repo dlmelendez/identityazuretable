@@ -226,17 +226,17 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         public new void Dispose()
         {
             base.Dispose();
-            this.Dispose(true);
+            Dispose(true);
         }
 
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposed && disposing)
             {
-                this._indexTable = null;
-                this._userTable = null;
-                this.Context = null;
-                this._disposed = true;
+                _indexTable = null;
+                _userTable = null;
+                Context = null;
+                _disposed = true;
             }
         }
 
@@ -302,15 +302,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         public override Task<TUser> FindByEmailAsync(string plainEmail, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
-            return this.GetUserAggregateAsync(FindByEmailQuery(plainEmail));
+            ThrowIfDisposed();
+            return GetUserAggregateAsync(FindByEmailQuery(plainEmail));
         }
 
 
 
         public async Task<IEnumerable<TUser>> FindAllByEmailAsync(string plainEmail)
         {
-            this.ThrowIfDisposed();
+            ThrowIfDisposed();
             IEnumerable<TUser> users = await GetUsersAggregateByIndexQueryAsync(FindByEmailQuery(plainEmail), GetUserQueryAsync).ConfigureAwait(false);
             return users.Where(user => _keyHelper.GenerateRowKeyUserEmail(plainEmail) == _keyHelper.GenerateRowKeyUserEmail(user.Email));
         }
@@ -395,7 +395,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         public override async Task<IList<Claim>> GetClaimsAsync(TUser user, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
+            ThrowIfDisposed();
             if (user == null) throw new ArgumentNullException(nameof(user));
             List<Claim> rClaims = new List<Claim>();
 
@@ -423,7 +423,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         public override async Task<IList<UserLoginInfo>> GetLoginsAsync(TUser user, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
+            ThrowIfDisposed();
             if (user == null) throw new ArgumentNullException(nameof(user));
 
             List<UserLoginInfo> rLogins = new List<UserLoginInfo>();
@@ -782,7 +782,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             List<Task> tasks = new List<Task>();
             string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
             BatchOperationHelper bHelper = new BatchOperationHelper(_userTable);
-            var userClaims = await this.GetClaimsAsync(user, cancellationToken).ConfigureAwait(false);
+            var userClaims = await GetClaimsAsync(user, cancellationToken).ConfigureAwait(false);
             foreach (Claim claim in claims)
             {
                 Claim local = (from uc in userClaims
@@ -823,7 +823,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         public override async Task RemoveLoginAsync(TUser user, string loginProvider, string providerKey, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
+            ThrowIfDisposed();
             if (user == null) throw new ArgumentNullException(nameof(user));
             string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
             TUserLogin item = await FindUserLoginAsync(userPartitionKey, loginProvider, providerKey).ConfigureAwait(false);
@@ -839,7 +839,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         public override async Task SetUserNameAsync(TUser user, string userName, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
+            ThrowIfDisposed();
             if (user == null) throw new ArgumentNullException(nameof(user));
 
             //Only remove the username if different
@@ -854,7 +854,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         public override async Task SetEmailAsync(TUser user, string email, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
+            ThrowIfDisposed();
             if (user == null) throw new ArgumentNullException(nameof(user));
 
             //Only remove the email if different
@@ -1060,7 +1060,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 return tqFilter;
             }
 
-            return (await this.GetUsersAggregateByIndexQueryAsync(GetUserByClaimQuery(claim), (userId) => {
+            return (await GetUsersAggregateByIndexQueryAsync(GetUserByClaimQuery(claim), (userId) => {
                 return GetUserAggregateQueryAsync(userId, setFilterByUserId: getTableQueryFilterByUserId, whereClaim: (uc) =>
                 {
                     return uc.RowKey == _keyHelper.GenerateRowKeyIdentityUserClaim(claim.Type, claim.Value);

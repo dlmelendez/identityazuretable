@@ -18,7 +18,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         public IdentityUser(string userName)
             : this()
         {
-            this.UserName = userName;
+            UserName = userName;
         }
 
         /// <summary>

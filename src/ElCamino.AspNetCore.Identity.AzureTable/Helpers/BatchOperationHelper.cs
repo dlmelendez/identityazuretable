@@ -49,8 +49,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         public virtual async Task<IEnumerable<Response>> SubmitBatchAsync(CancellationToken cancellationToken = default) 
         {
             ConcurrentBag<Response> bag = new ConcurrentBag<Response>();
-            List<Task> batches = new List<Task>(this._batches.Count);
-            foreach(KeyValuePair<string, List<TableTransactionAction>> kv in this._batches)
+            List<Task> batches = new List<Task>(_batches.Count);
+            foreach(KeyValuePair<string, List<TableTransactionAction>> kv in _batches)
             {
                 batches.Add(_table.SubmitTransactionAsync(kv.Value, cancellationToken)
                     .ContinueWith((result) =>

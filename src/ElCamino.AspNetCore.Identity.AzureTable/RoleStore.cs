@@ -94,23 +94,23 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         public new void Dispose()
         {
             base.Dispose();
-            this.Dispose(true);
+            Dispose(true);
         }
 
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposed && disposing)
             {
-                this._roleTable = null;
-                this.Context = null;
-                this._disposed = true;
+                _roleTable = null;
+                Context = null;
+                _disposed = true;
             }
         }
 
         public override async Task<TRole> FindByIdAsync(string roleId, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
+            ThrowIfDisposed();
 
             try
             {
@@ -127,7 +127,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         public override async Task<TRole> FindByNameAsync(string roleName, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            this.ThrowIfDisposed();
+            ThrowIfDisposed();
            
             try
             {
