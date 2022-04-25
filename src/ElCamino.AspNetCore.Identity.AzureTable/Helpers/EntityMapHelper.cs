@@ -1,4 +1,6 @@
-﻿using Azure.Data.Tables;
+﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
+
+using Azure.Data.Tables;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -25,11 +27,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         public static T MapTableEntity<T>(this TableEntity dte) where T : ITableEntity, new()
         {
             T t = new();
-            var properties = GetProperties(typeof(T));
-            foreach (var prop in properties)
-            {             
-                prop.SetValue(t, dte[prop.Name]);
+            foreach (var prop in GetProperties(typeof(T)))
+            {
+                if (dte.TryGetValue(prop.Name, out object obj))
+                {
+                    prop.SetValue(t, obj);
+                }
             }
+
             return t;
         }
     }
