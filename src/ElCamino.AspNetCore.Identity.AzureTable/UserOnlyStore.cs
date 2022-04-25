@@ -140,7 +140,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 , _indexTable.UpsertEntityAsync(index, cancellationToken: cancellationToken));
         }
 
-        public async override Task<IdentityResult> CreateAsync(TUser user, CancellationToken cancellationToken = default)
+        public override async Task<IdentityResult> CreateAsync(TUser user, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -173,7 +173,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
         }
 
-        public async override Task<IdentityResult> DeleteAsync(TUser user, CancellationToken cancellationToken = default)
+        public override async Task<IdentityResult> DeleteAsync(TUser user, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -444,7 +444,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return rLogins;
         }
 
-        protected async virtual Task<TUser> GetUserAsync(string userId)
+        protected virtual async Task<TUser> GetUserAsync(string userId)
         {
             try
             {
@@ -553,7 +553,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return bag;
         }
 
-        protected async virtual Task<IEnumerable<TUser>> GetUserQueryAsync(IEnumerable<string> userIds)
+        protected virtual async Task<IEnumerable<TUser>> GetUserQueryAsync(IEnumerable<string> userIds)
         {
             const double pageSize = 50.0;
             int pages = (int)Math.Ceiling(((double)userIds.Count() / pageSize));

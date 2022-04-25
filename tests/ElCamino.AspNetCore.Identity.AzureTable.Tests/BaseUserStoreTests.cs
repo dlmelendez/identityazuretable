@@ -1172,7 +1172,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             Assert.Equal(user.RowKey, userFound.RowKey);
         }
 
-        public async virtual Task CanFindByIdIfImmutableIdSetUp()
+        public virtual async Task CanFindByIdIfImmutableIdSetUp()
         {
             var userStore = userFixture.CreateUserStore();
 

@@ -22,10 +22,10 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         private static int iUserFailureConvert = 0;
         private static readonly ConcurrentBag<string> userIdFailures = new ConcurrentBag<string>();
 
-        private readonly static List<string> helpTokens = new List<string>() { "/?", "/help" };
+        private static readonly List<string> helpTokens = new List<string>() { "/?", "/help" };
         private const string previewToken = "/preview:";
         private const string migrateToken = "/migrate:";
-        private readonly static List<string> validCommands = new List<string>() {
+        private static readonly List<string> validCommands = new List<string>() {
             MigrationFactory.Roles,
             MigrationFactory.Users
         };

@@ -103,7 +103,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             await Task.WhenAll(tasks).ConfigureAwait(false);
         }
 
-        public async virtual Task<IList<string>> GetRolesAsync(TUser user, CancellationToken cancellationToken = default)
+        public virtual async Task<IList<string>> GetRolesAsync(TUser user, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -193,7 +193,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 rowFilter);
         }
 
-        public async virtual Task<IList<TUser>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken = default)
+        public virtual async Task<IList<TUser>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -230,7 +230,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return new List<TUser>();
         }
 
-        public async virtual Task<bool> IsInRoleAsync(TUser user, string roleName, CancellationToken cancellationToken = default)
+        public virtual async Task<bool> IsInRoleAsync(TUser user, string roleName, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -451,7 +451,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return (user, roles, claims, logins, tokens);
         }
 
-        public async override Task<IdentityResult> DeleteAsync(TUser user, CancellationToken cancellationToken = default)
+        public override async Task<IdentityResult> DeleteAsync(TUser user, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
