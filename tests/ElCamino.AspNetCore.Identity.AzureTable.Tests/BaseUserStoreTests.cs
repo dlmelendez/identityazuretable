@@ -393,12 +393,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             //--Also limiting table creation to once per test run
             if (!_tablesCreated)
             {
-                Task.Run(async () => {
-                    using var store = userFixture.CreateUserStore();
-                    await store.CreateTablesIfNotExistsAsync().ConfigureAwait(continueOnCapturedContext: false);
-                }).Wait();
-
-
+                using var store = userFixture.CreateUserStore();
+                store.CreateTablesIfNotExistsAsync().Wait();
                 _tablesCreated = true;
             }
             //--

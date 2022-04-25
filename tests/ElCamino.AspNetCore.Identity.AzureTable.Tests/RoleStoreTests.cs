@@ -24,10 +24,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         {
             _output = output;
             roleFixture = roleFix;
-            Task.Run(async() => {
-                await CreateRoleTable().ConfigureAwait(continueOnCapturedContext: false);
-            }).Wait();
-            
+            CreateRoleTable().Wait();
         }
 
         [Fact(DisplayName = "RoleStoreCtors")]
