@@ -835,7 +835,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             sw.Start();
             var allResult = await store.FindAllByEmailAsync(strEmail);
             sw.Stop();
-            _output.WriteLine($"{nameof(store.FindAllByEmailAsync)}: {0} seconds", sw.Elapsed.TotalSeconds);
+            _output.WriteLine($"{nameof(store.FindAllByEmailAsync)}: {sw.Elapsed.Milliseconds} ms");
             _output.WriteLine("Users Found: {0}", allResult.Count());
             Assert.Equal<int>(createdCount, allResult.Count());
 
@@ -850,10 +850,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             Assert.NotEqual<string>(strEmail, changedResult.Email);
 
             //Make sure changed user doesn't show up in previous query
-            sw.Restart();
-
+            sw.Reset();
+            sw.Start();
             allResult = await store.FindAllByEmailAsync(strEmail);
-            _output.WriteLine($"{nameof(store.FindAllByEmailAsync)}: {0} seconds", sw.Elapsed.TotalSeconds);
+            sw.Stop();
+            _output.WriteLine($"{nameof(store.FindAllByEmailAsync)}: {sw.Elapsed.Milliseconds} ms");
             _output.WriteLine("Users Found: {0}", allResult.Count());
             Assert.Equal<int>(listCreated.Count - 1, allResult.Count());
         }
@@ -867,7 +868,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             sw.Start();
             var result = await manager.FindByIdAsync(user.Id);
             sw.Stop();
-            _output.WriteLine($"{nameof(manager.FindByIdAsync)}: {0} seconds", sw.Elapsed.TotalSeconds);
+            _output.WriteLine($"{nameof(manager.FindByIdAsync)}: {sw.Elapsed.TotalSeconds} seconds");
 
             Assert.Equal(user.Id, result.Id);
         }
@@ -882,7 +883,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             sw.Start();
             var result = await manager.FindByNameAsync(user.UserName);
             sw.Stop();
-            _output.WriteLine($"{nameof(manager.FindByNameAsync)}: {0} seconds", sw.Elapsed.TotalSeconds);
+            _output.WriteLine($"{nameof(manager.FindByNameAsync)}: {sw.Elapsed.TotalSeconds} seconds");
 
             Assert.Equal(user.UserName, result.UserName);
 
@@ -911,7 +912,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             sw.Start();
             var loginResult2 = await manager.FindByLoginAsync(loginsResult.First().LoginProvider, loginsResult.First().ProviderKey);
             sw.Stop();
-            Debug.WriteLine(string.Format($"{nameof(manager.FindByLoginAsync)}: {0} seconds", sw.Elapsed.TotalSeconds));
+            _output.WriteLine(string.Format($"{nameof(manager.FindByLoginAsync)}: {sw.Elapsed.TotalSeconds} seconds"));
             Assert.Equal(user.Id, loginResult2.Id);
         }
 
@@ -1080,8 +1081,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                 sw.Start();
                 var users = await manager.GetUsersForClaimAsync(claim);
                 sw.Stop();
-                _output.WriteLine($"{nameof(manager.GetUsersForClaimAsync)}: {0} seconds", sw.Elapsed.TotalSeconds);
-                _output.WriteLine($"{nameof(manager.GetUsersForClaimAsync)}: {0} user count", users.Count);
+                _output.WriteLine($"{nameof(manager.GetUsersForClaimAsync)}: {sw.Elapsed.TotalSeconds} seconds");
+                _output.WriteLine($"{nameof(manager.GetUsersForClaimAsync)}: {users.Count} user count");
                 Assert.Equal(userCount, users.Count);
             }
 
