@@ -16,6 +16,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
     {
         private readonly static ConcurrentDictionary<string, PropertyInfo[]> TypeProperties = new ConcurrentDictionary<string, PropertyInfo[]>();
 
+        /// <summary>
+        /// Threadsafe caching PropertyInfo[] because the check for the IgnoreDataMemberAttribute slows property lookup
+        /// </summary>
+        /// <param name="type">Type that implements ITableEntity and new() </param>
+        /// <returns><seealso cref="PropertyInfo[]"/></returns>
         private static PropertyInfo[] GetProperties(Type type)
         {
             return TypeProperties.GetOrAdd(type.FullName,
