@@ -382,7 +382,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             _output = output;
         }
 
-        #region Test Initialization
         public void Initialize()
         {
             //--Changes to speed up tests that don't require a new user, sharing a static user
@@ -395,7 +394,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             }
             //--
         }
-        #endregion
 
         protected void WriteLineObject<t>(t obj) where t : class
         {

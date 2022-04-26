@@ -219,8 +219,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             });
         }
 
-        #region Properties
-
         [Fact(DisplayName = "AccessFailedCount")]
         [Trait(UserStoreTraitProperties, "")]
         public override Task AccessFailedCount()
@@ -290,8 +288,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         {
             return base.TwoFactorEnabled();
         }
-
-        #endregion
 
 
         [Fact(DisplayName = "UserIdNotChangedIfImmutableIdSetUp")]

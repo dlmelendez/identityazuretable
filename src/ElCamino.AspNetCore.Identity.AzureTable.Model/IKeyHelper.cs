@@ -6,7 +6,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 {
     public interface IKeyHelper
     {
-        #region Identity User
         string PreFixIdentityUserClaim { get; }
         string PreFixIdentityUserClaimUpperBound { get; }
         string PreFixIdentityUserRole { get; }
@@ -27,16 +26,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         string FormatterIdentityUserId { get; }
         string FormatterIdentityUserName { get; }
 
-        #endregion
-
-        #region Identity Role
         string PreFixIdentityRole { get; }
         string PreFixIdentityRoleUpperBound { get; }
         string PreFixIdentityRoleClaim { get; }
         string FormatterIdentityRole { get; }
         string FormatterIdentityRoleClaim { get; }
-
-        #endregion
 
         string GeneratePartitionKeyIndexByLogin(string plainLoginProvider, string plainProviderKey);
 

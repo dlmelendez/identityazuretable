@@ -14,8 +14,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 
         public List<string> SelectColumns { get; set; } = null;
 
-        #region Filter Generation
-
         /// <summary>
         /// Generates a property filter condition string for the string value.
         /// </summary>
@@ -182,8 +180,5 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         {
             return string.Format(CultureInfo.InvariantCulture, "({0}) {1} ({2})", filterA, operatorString, filterB);
         }
-
-        #endregion
-
     }
 }
