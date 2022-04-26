@@ -3,13 +3,10 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Azure;
 using Azure.Data.Tables;
-using Azure.Data.Tables.Models;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 {
