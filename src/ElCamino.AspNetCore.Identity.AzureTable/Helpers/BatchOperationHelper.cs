@@ -20,7 +20,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
     public class BatchOperationHelper
     {
 
-        private readonly Dictionary<string, List<TableTransactionAction>> _batches = new Dictionary<string, List<TableTransactionAction>>();
+        private readonly Dictionary<string, List<TableTransactionAction>> _batches = new();
 
         private readonly TableClient _table;
         public BatchOperationHelper(TableClient table) 

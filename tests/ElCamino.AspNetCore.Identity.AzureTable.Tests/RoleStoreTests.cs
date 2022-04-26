@@ -37,14 +37,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         }
 
         private static Claim GenRoleClaim()
-         => new Claim(Constants.AccountClaimTypes.AccountTestUserClaim, Guid.NewGuid().ToString());
+         => new(Constants.AccountClaimTypes.AccountTestUserClaim, Guid.NewGuid().ToString());
 
         [Fact(DisplayName = "AddRemoveRoleClaim")]
         [Trait("IdentityCore.Azure.RoleStore", "")]
         public async Task AddRemoveRoleClaim()
         {
-            using RoleStore<IdentityRole> store = roleFixture.CreateRoleStore();
-            using RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager(store);
+            using RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager();
             string roleNew = string.Format("TestRole_{0}", Guid.NewGuid());
             var role = new IdentityRole(roleNew);
             var sw = new Stopwatch();
@@ -66,8 +65,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         [Trait("IdentityCore.Azure.RoleStore", "")]
         public async Task AddRoleClaim()
         {
-            using RoleStore<IdentityRole> store = roleFixture.CreateRoleStore();
-            using RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager(store);
+            using RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager();
             string roleNew = string.Format("TestRole_{0}", Guid.NewGuid());
             var role = new IdentityRole(roleNew);
             var sw = new Stopwatch();
@@ -83,7 +81,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         private async Task AddRoleClaimAsyncHelper(IdentityRole role, Claim claim)
         {
             using RoleStore<IdentityRole> store = roleFixture.CreateRoleStore();
-            using RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager(store);
+            using RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager();
             await manager.AddClaimAsync(role, claim);
             await Assert.ThrowsAsync<ArgumentNullException>(() => store.AddClaimAsync(null, claim));
             await Assert.ThrowsAsync<ArgumentNullException>(() => store.AddClaimAsync(role, null));
@@ -96,7 +94,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         private async Task RemoveRoleClaimAsyncHelper(IdentityRole role, Claim claim)
         {
             using RoleStore<IdentityRole> store = roleFixture.CreateRoleStore();
-            using RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager(store);
+            using RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager();
             await manager.RemoveClaimAsync(role, claim);
             await Assert.ThrowsAsync<ArgumentNullException>(() => store.RemoveClaimAsync(null, claim));
             await Assert.ThrowsAsync<ArgumentNullException>(() => store.RemoveClaimAsync(role, null));
@@ -140,8 +138,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
         protected async Task<IdentityRole> CreateRoleAsync()
         {
-            using RoleStore<IdentityRole> store = roleFixture.CreateRoleStore();
-            using RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager(store);
+            using RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager();
             string roleNew = string.Format("TestRole_{0}", Guid.NewGuid());
             var role = new IdentityRole(roleNew);
             var sw = new Stopwatch();
@@ -159,7 +156,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         public async Task ThrowIfDisposed()
         {
             using RoleStore<IdentityRole> store = roleFixture.CreateRoleStore();
-            RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager(store);
+            RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager();
             manager.Dispose();
             await Assert.ThrowsAsync<ArgumentNullException>(() => store.DeleteAsync(null));
         }
@@ -169,7 +166,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         public async Task UpdateRole()
         {
             using RoleStore<IdentityRole> store = roleFixture.CreateRoleStore();
-            using RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager(store);
+            using RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager();
             string roleNew = string.Format("TestRole_{0}", Guid.NewGuid());
 
             var role = new IdentityRole(roleNew);
@@ -190,8 +187,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         [Trait("IdentityCore.Azure.RoleStore", "")]
         public async Task UpdateRole2()
         {
-            using RoleStore<IdentityRole> store = roleFixture.CreateRoleStore();
-            using RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager(store);
+            using RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager();
             string roleNew = string.Format("{0}_TestRole", Guid.NewGuid());
 
             var role = new IdentityRole(roleNew);
@@ -212,7 +208,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         public async Task DeleteRole()
         {
             using RoleStore<IdentityRole> store = roleFixture.CreateRoleStore();
-            using RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager(store);
+            using RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager();
             string roleNew = string.Format("TestRole_{0}", Guid.NewGuid());
             var role = new IdentityRole(roleNew);
             await manager.CreateAsync(role);
@@ -235,7 +231,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         {
             var role = await CreateRoleAsync();
             using RoleStore<IdentityRole> store = roleFixture.CreateRoleStore();
-            using RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager(store);
+            using RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager();
             var sw = new Stopwatch();
             sw.Start();
             var result = await manager.FindByIdAsync(role.Id);
@@ -253,8 +249,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         {
             var role = await CreateRoleAsync();
 
-            using RoleStore<IdentityRole> store = roleFixture.CreateRoleStore();
-            using RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager(store);
+            using RoleManager<IdentityRole> manager = roleFixture.CreateRoleManager();
             var sw = new Stopwatch();
             sw.Start();
             var result = await manager.FindByNameAsync(role.Name);

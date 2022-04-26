@@ -20,23 +20,23 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         private static int iUserTotal = 0;
         private static int iUserSuccessConvert = 0;
         private static int iUserFailureConvert = 0;
-        private static readonly ConcurrentBag<string> userIdFailures = new ConcurrentBag<string>();
+        private static readonly ConcurrentBag<string> userIdFailures = new();
 
-        private static readonly List<string> helpTokens = new List<string>() { "/?", "/help" };
-        private const string previewToken = "/preview:";
-        private const string migrateToken = "/migrate:";
-        private static readonly List<string> validCommands = new List<string>() {
+        private static readonly List<string> helpTokens = new() { "/?", "/help" };
+        private const string PreviewToken = "/preview:";
+        private const string MigrateToken = "/migrate:";
+        private static readonly List<string> validCommands = new() {
             MigrationFactory.Roles,
             MigrationFactory.Users
         };
-        private const string nodeleteToken = "/nodelete";
-        private const string maxdegreesparallelToken = "/maxparallel:";
+        private const string NoDeleteToken = "/nodelete";
+        private const string MaxDegreesParallelToken = "/maxparallel:";
         private static int iMaxdegreesparallel = Environment.ProcessorCount * 2;
         private static string MigrateCommand = string.Empty;
 
-        private const string startPageToken = "/startpage:";
-        private const string finishPageToken = "/finishpage:";
-        private const string pageSizeToken = "/pagesize:";
+        private const string StartPageToken = "/startpage:";
+        private const string FinishPageToken = "/finishpage:";
+        private const string PageSizeToken = "/pagesize:";
 
 
         private static int iStartPage = -1;
@@ -44,7 +44,6 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         private static int iPageSize = 1000;
 
         private static bool migrateOption = false;
-        private static bool deleteOption = false;
 
         public static IConfigurationRoot Configuration { get; private set; }
 
@@ -204,51 +203,50 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             }
             else
             {
-                List<string> nonHelpTokens = new List<string>() { previewToken, migrateToken, nodeleteToken, maxdegreesparallelToken, startPageToken, finishPageToken, pageSizeToken };
+                List<string> nonHelpTokens = new List<string>() { PreviewToken, MigrateToken, NoDeleteToken, MaxDegreesParallelToken, StartPageToken, FinishPageToken, PageSizeToken };
                 if (!args.All(a => nonHelpTokens.Any(h => a.StartsWith(h, StringComparison.OrdinalIgnoreCase))))
                 {
                     DisplayInvalidArgs(args.Where(a => !nonHelpTokens.Any(h => h.StartsWith(a, StringComparison.OrdinalIgnoreCase))).ToList());
                     return false;
                 }
-                bool isPreview = args.Any(a => a.StartsWith(previewToken, StringComparison.OrdinalIgnoreCase));
-                bool isMigrate = args.Any(a => a.StartsWith(migrateToken, StringComparison.OrdinalIgnoreCase));
+                bool isPreview = args.Any(a => a.StartsWith(PreviewToken, StringComparison.OrdinalIgnoreCase));
+                bool isMigrate = args.Any(a => a.StartsWith(MigrateToken, StringComparison.OrdinalIgnoreCase));
                 if (isPreview && isMigrate)
                 {
-                    DisplayInvalidArgs(new List<string>() { previewToken, migrateToken, "Cannot define /preview and /migrate. Only one can be used." });
+                    DisplayInvalidArgs(new List<string>() { PreviewToken, MigrateToken, "Cannot define /preview and /migrate. Only one can be used." });
                     return false;
                 }
-                bool isNoDelete = args.Any(a => a.Equals(nodeleteToken, StringComparison.OrdinalIgnoreCase));
+                bool isNoDelete = args.Any(a => a.Equals(NoDeleteToken, StringComparison.OrdinalIgnoreCase));
                 if (isNoDelete && !isMigrate)
                 {
-                    DisplayInvalidArgs(new List<string>() { nodeleteToken, "/nodelete must be used with /migrate option." });
+                    DisplayInvalidArgs(new List<string>() { NoDeleteToken, "/nodelete must be used with /migrate option." });
                     return false;
                 }
 
-                if (!ValidateIntToken(maxdegreesparallelToken, ref iMaxdegreesparallel)
-                    || !ValidateIntToken(startPageToken, ref iStartPage)
-                    || !ValidateIntToken(finishPageToken, ref iFinishPage)
-                    || !ValidateIntToken(pageSizeToken, ref iPageSize))
+                if (!ValidateIntToken(MaxDegreesParallelToken, ref iMaxdegreesparallel)
+                    || !ValidateIntToken(StartPageToken, ref iStartPage)
+                    || !ValidateIntToken(FinishPageToken, ref iFinishPage)
+                    || !ValidateIntToken(PageSizeToken, ref iPageSize))
                     return false;
 
                 if (isPreview)
                 {
-                    if(!ValidateCommandToken(previewToken, ref MigrateCommand))
+                    if(!ValidateCommandToken(PreviewToken, ref MigrateCommand))
                         return false;
                 }
 
                 if (isMigrate)
                 {
-                    if (!ValidateCommandToken(migrateToken, ref MigrateCommand))
+                    if (!ValidateCommandToken(MigrateToken, ref MigrateCommand))
                         return false;
                 }
 
                 if (iPageSize > 1000)
                 {
-                    DisplayInvalidArgs(new List<string>() { pageSizeToken, string.Format("{0} must be less than 1000", pageSizeToken) });
+                    DisplayInvalidArgs(new List<string>() { PageSizeToken, string.Format("{0} must be less than 1000", PageSizeToken) });
                     return false;
                 }
                 migrateOption = isMigrate;
-                deleteOption = isMigrate && !isNoDelete;
 
                 return true;
             }

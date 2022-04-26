@@ -14,7 +14,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 {
     public static class EntityMapHelper
     {
-        private static readonly ConcurrentDictionary<string, PropertyInfo[]> TypeProperties = new ConcurrentDictionary<string, PropertyInfo[]>();
+        private static readonly ConcurrentDictionary<string, PropertyInfo[]> TypeProperties = new();
 
         /// <summary>
         /// Threadsafe caching PropertyInfo[] because the check for the IgnoreDataMemberAttribute slows property lookup

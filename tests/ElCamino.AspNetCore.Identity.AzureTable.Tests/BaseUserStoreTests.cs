@@ -366,15 +366,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
          where TUserStore : UserOnlyStore<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken>
          where TKeyHelper : IKeyHelper, new()
     {
-        #region Static and Const Members
         public static readonly string DefaultUserPassword = "M" + Guid.NewGuid().ToString();
 
-        protected static bool _tablesCreated = false;
-
-        #endregion
+        public static bool TablesCreated { get; protected set; }
 
         protected readonly ITestOutputHelper _output;
-
 
         protected BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore, TKeyHelper> userFixture;
 
@@ -391,11 +387,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         {
             //--Changes to speed up tests that don't require a new user, sharing a static user
             //--Also limiting table creation to once per test run
-            if (!_tablesCreated)
+            if (!TablesCreated)
             {
                 using var store = userFixture.CreateUserStore();
                 store.CreateTablesIfNotExistsAsync().Wait();
-                _tablesCreated = true;
+                TablesCreated = true;
             }
             //--
         }
@@ -435,7 +431,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         }
 
         protected static UserLoginInfo GenGoogleLogin()
-         => new UserLoginInfo(Constants.LoginProviders.GoogleProvider.LoginProvider,
+         => new(Constants.LoginProviders.GoogleProvider.LoginProvider,
                               Constants.LoginProviders.GoogleProvider.ProviderKey, string.Empty);
 
         protected static TUser GenTestUser()

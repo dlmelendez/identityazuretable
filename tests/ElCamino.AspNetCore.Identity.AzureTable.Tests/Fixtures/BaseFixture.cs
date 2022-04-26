@@ -39,17 +39,6 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 
         public RoleManager<TRole> CreateRoleManager()
         {
-            return CreateRoleManager(CreateRoleStore());
-        }
-
-        public RoleManager<TRole> CreateRoleManager(TContext context)
-        {
-            return CreateRoleManager(new RoleStore<TRole>(context, new TKeyHelper()));
-        }
-
-        public RoleManager<TRole> CreateRoleManager(RoleStore<TRole> store)
-        {
-            //return new RoleManager<TRole>(store);
             IServiceCollection services = new ServiceCollection();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             // Add Identity services to the services container.
@@ -141,7 +130,6 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
         where TKeyHelper : IKeyHelper, new()
     {
 
-        #region IDisposable Support
         protected bool disposedValue = false;
 
         protected virtual void Dispose(bool disposing)
@@ -163,8 +151,8 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
         public void Dispose()
         {
             Dispose(true);
+            GC.SuppressFinalize(this);
         }
-        #endregion
 
         public TKeyHelper GetKeyHelper()
         {
@@ -224,7 +212,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
             {
                 options = new IdentityOptions();
             }
-            //return new RoleManager<TRole>(store);
+
             IServiceCollection services = new ServiceCollection();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 

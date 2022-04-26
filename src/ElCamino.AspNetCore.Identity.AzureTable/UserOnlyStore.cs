@@ -227,6 +227,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             base.Dispose();
             Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -620,7 +621,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             IEnumerable<TUserClaim> Claims,
             IEnumerable<TUserLogin> Logins,
             IEnumerable<TUserToken> Tokens)
-            MapUserAggregate(string userId, IEnumerable<TableEntity> userResults)
+        MapUserAggregate(string userId,
+            IEnumerable<TableEntity> userResults)
         {
 
             TUser user = default;

@@ -114,7 +114,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         public virtual string GeneratePartitionKeyIdentityRole(string plainRoleName)
         {
             string hash = ConvertKeyToHash(plainRoleName?.ToUpper());
-            return hash.Substring(0, 1);
+            return hash.Substring(startIndex: 0, length: 1);
         }
 
         public virtual string GenerateRowKeyIdentityUserClaim(string claimType, string claimValue)

@@ -48,7 +48,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
     {
         private bool _disposed;
         private TableClient _roleTable;
-        private readonly IdentityErrorDescriber _errorDescriber = new IdentityErrorDescriber();
+        private readonly IdentityErrorDescriber _errorDescriber = new();
         protected IKeyHelper _keyHelper;
         private readonly string FilterString;
 

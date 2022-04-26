@@ -394,15 +394,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return bag;
         }
 
-        protected (TUser User,
+        protected new (TUser User,
             IEnumerable<TUserRole> Roles,
             IEnumerable<TUserClaim> Claims,
             IEnumerable<TUserLogin> Logins,
             IEnumerable<TUserToken> Tokens)
         MapUserAggregate(string userId, 
-            IEnumerable<TableEntity> userResults,
-            Func<TUserRole, bool> whereRole = null,
-            Func<TUserClaim, bool> whereClaim = null)
+            IEnumerable<TableEntity> userResults)
         {
 
             TUser user = default;
