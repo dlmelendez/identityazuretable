@@ -141,7 +141,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             }
             else if (edmType == EdmType.Double)
             {
+#pragma warning disable IDE0059 // Unnecessary assignment of a value
                 bool isInteger = int.TryParse(givenValue, out int parsedInt);
+#pragma warning restore IDE0059 // Unnecessary assignment of a value
                 valueOperand = isInteger ? string.Format(CultureInfo.InvariantCulture, "{0}.0", givenValue) : givenValue;
             }
             else if (edmType == EdmType.Int64)

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <Description>Azure Table Storage Provider to support ASPNET Core Identity</Description>
-    <Copyright>Copyright ©  2021 David Melendez, MIT License</Copyright>
+    <Copyright>Copyright ©  2022 David Melendez, MIT License</Copyright>
     <AssemblyTitle>Azure Table Storage Provider for ASP.NET Identity Core</AssemblyTitle>
     <Authors>David Melendez</Authors>
     <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
@@ -21,13 +21,15 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/dlmelendez/identityazuretable.git</RepositoryUrl>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>6.0</Version>
+    <Version>6.1</Version>
     <PackageProjectUrl>https://dlmelendez.github.io/identityazuretable</PackageProjectUrl>
     <!--<DebugType>Full</DebugType>-->
     <!-- DebugType Full is needed for test code coverage, but .nuget symbols doesn't like it-->
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <NeutralLanguage>en-US</NeutralLanguage>
   </PropertyGroup>
 
   <ItemGroup>
@@ -46,6 +48,10 @@
   </ItemGroup>
   
   <ItemGroup>  
+    <None Include="..\..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>  
     <None Include="projectNugetPic.png" Pack="true" PackagePath="\" />   
   </ItemGroup>
   

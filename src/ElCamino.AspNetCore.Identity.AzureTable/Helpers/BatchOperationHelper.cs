@@ -37,13 +37,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         }
         public virtual void AddEntity<T>(T entity) where T : class, ITableEntity, new() 
         {
-            var current = GetCurrent(entity.PartitionKey);
-            current.Add(new TableTransactionAction(TableTransactionActionType.Add, entity));
+            GetCurrent(entity.PartitionKey).Add(new TableTransactionAction(TableTransactionActionType.Add, entity));
         }
         public virtual void DeleteEntity(string partitionKey, string rowKey, ETag ifMatch = default) 
         {
-            var current = GetCurrent(partitionKey);
-            current.Add(new TableTransactionAction(TableTransactionActionType.Delete, new TableEntity(partitionKey, rowKey),ifMatch));
+            GetCurrent(partitionKey).Add(new TableTransactionAction(TableTransactionActionType.Delete, new TableEntity(partitionKey, rowKey),ifMatch));
         }
 
         public virtual async Task<IEnumerable<Response>> SubmitBatchAsync(CancellationToken cancellationToken = default) 
@@ -68,14 +66,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 
         public virtual void UpdateEntity<T>(T entity, ETag ifMatch, TableUpdateMode mode = TableUpdateMode.Merge) where T : class, ITableEntity, new()
         {
-            var current = GetCurrent(entity.PartitionKey);
-            current.Add(new TableTransactionAction(mode == TableUpdateMode.Merge? TableTransactionActionType.UpdateMerge : TableTransactionActionType.UpdateReplace, entity, ifMatch));
+            GetCurrent(entity.PartitionKey).Add(new TableTransactionAction(mode == TableUpdateMode.Merge? TableTransactionActionType.UpdateMerge : TableTransactionActionType.UpdateReplace, entity, ifMatch));
         }
 
         public virtual void UpsertEntity<T>(T entity, TableUpdateMode mode = TableUpdateMode.Merge) where T : class, ITableEntity, new() 
         {
-            var current = GetCurrent(entity.PartitionKey);
-            current.Add(new TableTransactionAction(mode == TableUpdateMode.Merge ? TableTransactionActionType.UpsertMerge : TableTransactionActionType.UpsertReplace, entity));
+            GetCurrent(entity.PartitionKey).Add(new TableTransactionAction(mode == TableUpdateMode.Merge ? TableTransactionActionType.UpsertMerge : TableTransactionActionType.UpsertReplace, entity));
         }
 
         public void Clear()
