@@ -1,0 +1,51 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>Azure Table Storage odata query building and operators from the older Azure Storage SDKs and some other async, mapping, and batch helpers and/or extensions.</Description>
+    <Copyright>Copyright ©  2022 David Melendez, MIT License</Copyright>
+    <AssemblyTitle>Azure Table Storage Extensions</AssemblyTitle>
+    <Authors>David Melendez</Authors>
+    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+    <LangVersion>10.0</LangVersion>
+    <AssemblyName>ElCamino.Azure.Data.Tables</AssemblyName>
+    <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+    <PackageId>ElCamino.Azure.Data.Tables</PackageId>
+    <PackageTags>ASP.NET;Azure;Table Storage;Azure.Data.Tables</PackageTags>
+    <PackageReleaseNotes>Check https://github.com/dlmelendez/identityazuretable/releases for the latest release information.</PackageReleaseNotes>
+    <PackageIcon>projectNugetPic.png</PackageIcon>
+    <PackageLicenseUrl></PackageLicenseUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/dlmelendez/identityazuretable.git</RepositoryUrl>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Version>6.1</Version>
+    <PackageProjectUrl>https://dlmelendez.github.io/identityazuretable</PackageProjectUrl>
+    <!--<DebugType>Full</DebugType>-->
+    <!-- DebugType Full is needed for test code coverage, but .nuget symbols doesn't like it-->
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Link="README.md">
+      <PackagePath>\</PackagePath>
+      <Pack>True</Pack>
+    </None>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Azure.Data.Tables" Version="12.2.0" />
+  </ItemGroup>
+  
+  <ItemGroup>
+   <None Include="projectNugetPic.png" Pack="true" PackagePath="\" /> 
+  </ItemGroup>
+  
+</Project>

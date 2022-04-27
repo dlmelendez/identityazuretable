@@ -1,11 +1,8 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Diagnostics;
 
-namespace ElCamino.AspNetCore.Identity.AzureTable
+namespace Azure.Data.Tables
 {
     public static class IAsyncEnumerableExtensions
     {
@@ -52,6 +49,28 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             await using var enumerator = asyncEnumerable.GetAsyncEnumerator(cancellationToken);
             return await enumerator.MoveNextAsync().ConfigureAwait(false);
+        }
+
+        public static async IAsyncEnumerable<T> ExecuteQueryAsync<T>(this TableClient ct, TableQuery tq)
+            where T : class, ITableEntity, new()
+        {
+#if DEBUG
+            int iCounter = 0;
+#endif
+
+            AsyncPageable<T> segment = ct.QueryAsync<T>(tq.FilterString, tq.TakeCount, tq.SelectColumns);
+            await foreach (T result in segment.ConfigureAwait(false))
+            {
+#if DEBUG
+                iCounter++;
+#endif
+                yield return result;
+            }
+
+#if DEBUG
+            Debug.WriteLine("ExecuteQueryAsync: (Count): {0}", iCounter);
+            Debug.WriteLine("ExecuteQueryAsync (Query): " + tq.FilterString);
+#endif
         }
     }
 }

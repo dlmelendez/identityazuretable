@@ -1,7 +1,7 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 using System;
-using ElCamino.AspNetCore.Identity.AzureTable.Model;
 using Azure.Data.Tables;
+using ElCamino.AspNetCore.Identity.AzureTable.Model;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable
 {

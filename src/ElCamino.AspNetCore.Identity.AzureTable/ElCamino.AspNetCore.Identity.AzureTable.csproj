@@ -6,7 +6,7 @@
     <AssemblyTitle>Azure Table Storage Provider for ASP.NET Identity Core</AssemblyTitle>
     <Authors>David Melendez</Authors>
     <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
-    <LangVersion>9.0</LangVersion>
+    <LangVersion>10.0</LangVersion>
     <AssemblyName>ElCamino.AspNetCore.Identity.AzureTable</AssemblyName>
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
@@ -57,6 +57,7 @@
   
   <ItemGroup>
     <ProjectReference Include="..\ElCamino.AspNetCore.Identity.AzureTable.Model\ElCamino.AspNetCore.Identity.AzureTable.Model.csproj" />
+    <ProjectReference Include="..\ElCamino.Azure.Data.Tables\ElCamino.Azure.Data.Tables.csproj" />
   </ItemGroup>
 
 
