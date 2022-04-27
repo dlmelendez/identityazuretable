@@ -1,4 +1,6 @@
-﻿using System;
+﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -17,10 +19,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         {
             if (input != null)
             {
-                using (SHA256 sha = SHA256.Create())
-                {
-                    return GetHash(sha, input, Encoding.UTF8, 64);
-                }
+                using SHA256 sha = SHA256.Create();
+                return GetHash(sha, input, Encoding.UTF8, 64);
             }
             return null;
         }

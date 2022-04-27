@@ -20,24 +20,23 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         private static int iUserTotal = 0;
         private static int iUserSuccessConvert = 0;
         private static int iUserFailureConvert = 0;
-        private static object ObjectLock = new object();
-        private static ConcurrentBag<string> userIdFailures = new ConcurrentBag<string>();
+        private static readonly ConcurrentBag<string> userIdFailures = new();
 
-        private readonly static List<string> helpTokens = new List<string>() { "/?", "/help" };
-        private const string previewToken = "/preview:";
-        private const string migrateToken = "/migrate:";
-        private readonly static List<string> validCommands = new List<string>() {
+        private static readonly List<string> helpTokens = new() { "/?", "/help" };
+        private const string PreviewToken = "/preview:";
+        private const string MigrateToken = "/migrate:";
+        private static readonly List<string> validCommands = new() {
             MigrationFactory.Roles,
             MigrationFactory.Users
         };
-        private const string nodeleteToken = "/nodelete";
-        private const string maxdegreesparallelToken = "/maxparallel:";
+        private const string NoDeleteToken = "/nodelete";
+        private const string MaxDegreesParallelToken = "/maxparallel:";
         private static int iMaxdegreesparallel = Environment.ProcessorCount * 2;
         private static string MigrateCommand = string.Empty;
 
-        private const string startPageToken = "/startpage:";
-        private const string finishPageToken = "/finishpage:";
-        private const string pageSizeToken = "/pagesize:";
+        private const string StartPageToken = "/startpage:";
+        private const string FinishPageToken = "/finishpage:";
+        private const string PageSizeToken = "/pagesize:";
 
 
         private static int iStartPage = -1;
@@ -45,7 +44,6 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         private static int iPageSize = 1000;
 
         private static bool migrateOption = false;
-        private static bool deleteOption = false;
 
         public static IConfigurationRoot Configuration { get; private set; }
 
@@ -91,101 +89,98 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
                 string entityRecordName = "Users";
 
-                using (IdentityCloudContext sourceContext = new IdentityCloudContext(sourceConfig))
+                using IdentityCloudContext sourceContext = new IdentityCloudContext(sourceConfig);
+                Console.WriteLine($"Source IndexTable: {sourceConfig.IndexTableName}");
+                Console.WriteLine($"Source UserTable: {sourceConfig.UserTableName}");
+                Console.WriteLine($"Source RoleTable: {sourceConfig.RoleTableName}");
+
+                DateTime startLoad = DateTime.UtcNow;
+                var allDataList = new List<TableEntity>(iPageSize);
+
+                TableQuery tq = migration.GetSourceTableQuery();
+
+                tq.TakeCount = iPageSize;
+                string continueToken = string.Empty;
+
+                int iSkippedUserCount = 0;
+                int iSkippedPageCount = 0;
+                int iPageCounter = 0;
+                while (continueToken != null)
                 {
-                    Console.WriteLine($"Source IndexTable: {sourceConfig.IndexTableName}");
-                    Console.WriteLine($"Source UserTable: {sourceConfig.UserTableName}");
-                    Console.WriteLine($"Source RoleTable: {sourceConfig.RoleTableName}");
+                    DateTime batchStart = DateTime.UtcNow;
 
-                    DateTime startLoad = DateTime.UtcNow;
-                    var allDataList = new List<TableEntity>(iPageSize);
-
-                    TableQuery tq = migration.GetSourceTableQuery();
-
-                    tq.TakeCount = iPageSize;
-                    string continueToken = string.Empty;
-
-                    int iSkippedUserCount = 0;
-                    int iSkippedPageCount = 0;
-                    int iPageCounter = 0;
-                    while (continueToken != null)
+                    TableClient sourceTable = sourceContext.UserTable;
+                    if (MigrateCommand == MigrationFactory.Roles)
                     {
-                        DateTime batchStart = DateTime.UtcNow;
+                        sourceTable = sourceContext.RoleTable;
+                        entityRecordName = "Role and Role Claims";
+                    }
+                    var sourceResults = sourceTable.Query<TableEntity>(tq.FilterString, tq.TakeCount).AsPages(continueToken, tq.TakeCount).FirstOrDefault();
 
-                        TableClient sourceTable = sourceContext.UserTable;
-                        if (MigrateCommand == MigrationFactory.Roles)
+                    continueToken = sourceResults.ContinuationToken;
+
+
+                    int batchCount = sourceResults.Values.Count(migration.UserWhereFilter);
+                    iUserTotal += batchCount;
+                    iPageCounter++;
+
+                    bool includePage = (iStartPage == -1 || iPageCounter >= iStartPage) && (iFinishPage == -1 || iPageCounter <= iFinishPage);
+
+                    if (includePage)
+                    {
+                        if (migrateOption)
                         {
-                            sourceTable = sourceContext.RoleTable;
-                            entityRecordName = "Role and Role Claims";
-                        }
-                        var sourceResults = sourceTable.Query<TableEntity>(tq.FilterString, tq.TakeCount).AsPages(continueToken, tq.TakeCount).FirstOrDefault();
-
-                        continueToken = sourceResults.ContinuationToken;
-
-
-                        int batchCount = sourceResults.Values.Count(migration.UserWhereFilter);
-                        iUserTotal += batchCount;
-                        iPageCounter++;
-
-                        bool includePage = (iStartPage == -1 || iPageCounter >= iStartPage) && (iFinishPage == -1 || iPageCounter <= iFinishPage);
-
-                        if (includePage)
-                        {
-                            if (migrateOption)
+                            migration.ProcessMigrate(targetContext, sourceContext, sourceResults.Values.ToList(), iMaxdegreesparallel,
+                            () =>
                             {
-                                migration.ProcessMigrate(targetContext, sourceContext, sourceResults.Values.ToList(), iMaxdegreesparallel,
-                                () =>
+                                Interlocked.Increment(ref iUserSuccessConvert);
+                                Console.WriteLine($"{entityRecordName}(s) Complete: {iUserSuccessConvert}");
+                            },
+                            (exMessage) =>
+                            {
+                                if (!string.IsNullOrWhiteSpace(exMessage))
                                 {
-                                    Interlocked.Increment(ref iUserSuccessConvert);
-                                    Console.WriteLine($"{entityRecordName}(s) Complete: {iUserSuccessConvert}");
-                                },
-                                (exMessage) =>
-                                {
-                                    if (!string.IsNullOrWhiteSpace(exMessage))
-                                    {
-                                        userIdFailures.Add(exMessage);
-                                    }
-                                    Interlocked.Increment(ref iUserFailureConvert);
-                                });
-                            }
-
-                        }
-                        else
-                        {
-                            iSkippedPageCount++;
-                            iSkippedUserCount += batchCount;
+                                    userIdFailures.Add(exMessage);
+                                }
+                                Interlocked.Increment(ref iUserFailureConvert);
+                            });
                         }
 
-                        Console.WriteLine("Page: {2}{3}, {4} Batch: {1}: {0} seconds", (DateTime.UtcNow - batchStart).TotalSeconds, batchCount, iPageCounter, includePage ? string.Empty : "(Skipped)", entityRecordName);
-
-                        //Are we done yet?
-                        if (iFinishPage > 0 && iPageCounter >= iFinishPage)
-                        {
-                            break;
-                        }
+                    }
+                    else
+                    {
+                        iSkippedPageCount++;
+                        iSkippedUserCount += batchCount;
                     }
 
+                    Console.WriteLine("Page: {2}{3}, {4} Batch: {1}: {0} seconds", (DateTime.UtcNow - batchStart).TotalSeconds, batchCount, iPageCounter, includePage ? string.Empty : "(Skipped)", entityRecordName);
 
-                    Console.WriteLine("");
-                    Console.WriteLine("Elapsed time: {0} seconds", (DateTime.UtcNow - startLoad).TotalSeconds);
-                    Console.WriteLine("Total {2} Skipped: {0}, Total Pages: {1}", iSkippedUserCount, iSkippedPageCount, entityRecordName);
-                    Console.WriteLine("Total {2} To Convert: {0}, Total Pages: {1}", iUserTotal - iSkippedUserCount, iPageCounter - iSkippedPageCount, entityRecordName);
-
-                    Console.WriteLine("");
-                    if (migrateOption)
+                    //Are we done yet?
+                    if (iFinishPage > 0 && iPageCounter >= iFinishPage)
                     {
-                        Console.WriteLine("Total {1} Successfully Converted: {0}", iUserSuccessConvert, entityRecordName);
-                        Console.WriteLine("Total {1} Failed to Convert: {0}", iUserFailureConvert, entityRecordName);
-                        if (iUserFailureConvert > 0)
+                        break;
+                    }
+                }
+
+
+                Console.WriteLine("");
+                Console.WriteLine("Elapsed time: {0} seconds", (DateTime.UtcNow - startLoad).TotalSeconds);
+                Console.WriteLine("Total {2} Skipped: {0}, Total Pages: {1}", iSkippedUserCount, iSkippedPageCount, entityRecordName);
+                Console.WriteLine("Total {2} To Convert: {0}, Total Pages: {1}", iUserTotal - iSkippedUserCount, iPageCounter - iSkippedPageCount, entityRecordName);
+
+                Console.WriteLine("");
+                if (migrateOption)
+                {
+                    Console.WriteLine("Total {1} Successfully Converted: {0}", iUserSuccessConvert, entityRecordName);
+                    Console.WriteLine("Total {1} Failed to Convert: {0}", iUserFailureConvert, entityRecordName);
+                    if (iUserFailureConvert > 0)
+                    {
+                        Console.WriteLine($"{entityRecordName} Ids Failed:");
+                        foreach (string s in userIdFailures)
                         {
-                            Console.WriteLine($"{entityRecordName} Ids Failed:");
-                            foreach (string s in userIdFailures)
-                            {
-                                Console.WriteLine(s);
-                            }
+                            Console.WriteLine(s);
                         }
                     }
-
                 }
             }
 
@@ -208,51 +203,50 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             }
             else
             {
-                List<string> nonHelpTokens = new List<string>() { previewToken, migrateToken, nodeleteToken, maxdegreesparallelToken, startPageToken, finishPageToken, pageSizeToken };
+                List<string> nonHelpTokens = new List<string>() { PreviewToken, MigrateToken, NoDeleteToken, MaxDegreesParallelToken, StartPageToken, FinishPageToken, PageSizeToken };
                 if (!args.All(a => nonHelpTokens.Any(h => a.StartsWith(h, StringComparison.OrdinalIgnoreCase))))
                 {
                     DisplayInvalidArgs(args.Where(a => !nonHelpTokens.Any(h => h.StartsWith(a, StringComparison.OrdinalIgnoreCase))).ToList());
                     return false;
                 }
-                bool isPreview = args.Any(a => a.StartsWith(previewToken, StringComparison.OrdinalIgnoreCase));
-                bool isMigrate = args.Any(a => a.StartsWith(migrateToken, StringComparison.OrdinalIgnoreCase));
+                bool isPreview = args.Any(a => a.StartsWith(PreviewToken, StringComparison.OrdinalIgnoreCase));
+                bool isMigrate = args.Any(a => a.StartsWith(MigrateToken, StringComparison.OrdinalIgnoreCase));
                 if (isPreview && isMigrate)
                 {
-                    DisplayInvalidArgs(new List<string>() { previewToken, migrateToken, "Cannot define /preview and /migrate. Only one can be used." });
+                    DisplayInvalidArgs(new List<string>() { PreviewToken, MigrateToken, "Cannot define /preview and /migrate. Only one can be used." });
                     return false;
                 }
-                bool isNoDelete = args.Any(a => a.Equals(nodeleteToken, StringComparison.OrdinalIgnoreCase));
+                bool isNoDelete = args.Any(a => a.Equals(NoDeleteToken, StringComparison.OrdinalIgnoreCase));
                 if (isNoDelete && !isMigrate)
                 {
-                    DisplayInvalidArgs(new List<string>() { nodeleteToken, "/nodelete must be used with /migrate option." });
+                    DisplayInvalidArgs(new List<string>() { NoDeleteToken, "/nodelete must be used with /migrate option." });
                     return false;
                 }
 
-                if (!ValidateIntToken(maxdegreesparallelToken, ref iMaxdegreesparallel)
-                    || !ValidateIntToken(startPageToken, ref iStartPage)
-                    || !ValidateIntToken(finishPageToken, ref iFinishPage)
-                    || !ValidateIntToken(pageSizeToken, ref iPageSize))
+                if (!ValidateIntToken(MaxDegreesParallelToken, ref iMaxdegreesparallel)
+                    || !ValidateIntToken(StartPageToken, ref iStartPage)
+                    || !ValidateIntToken(FinishPageToken, ref iFinishPage)
+                    || !ValidateIntToken(PageSizeToken, ref iPageSize))
                     return false;
 
                 if (isPreview)
                 {
-                    if(!ValidateCommandToken(previewToken, ref MigrateCommand))
+                    if(!ValidateCommandToken(PreviewToken, ref MigrateCommand))
                         return false;
                 }
 
                 if (isMigrate)
                 {
-                    if (!ValidateCommandToken(migrateToken, ref MigrateCommand))
+                    if (!ValidateCommandToken(MigrateToken, ref MigrateCommand))
                         return false;
                 }
 
                 if (iPageSize > 1000)
                 {
-                    DisplayInvalidArgs(new List<string>() { pageSizeToken, string.Format("{0} must be less than 1000", pageSizeToken) });
+                    DisplayInvalidArgs(new List<string>() { PageSizeToken, string.Format("{0} must be less than 1000", PageSizeToken) });
                     return false;
                 }
                 migrateOption = isMigrate;
-                deleteOption = isMigrate && !isNoDelete;
 
                 return true;
             }
@@ -264,9 +258,8 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             if (!string.IsNullOrWhiteSpace(args))
             {
                 string[] splitArgs = args.Split(":".ToCharArray());
-                int iTempValue = 0;
                 if (splitArgs.Length == 2
-                    && int.TryParse(splitArgs[1], out iTempValue)
+                    && int.TryParse(splitArgs[1], out int iTempValue)
                     && iTempValue > 0)
                 {
                     iTokenValue = iTempValue;

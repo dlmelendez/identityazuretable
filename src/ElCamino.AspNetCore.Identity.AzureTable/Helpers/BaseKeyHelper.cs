@@ -15,7 +15,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 {
     public abstract class BaseKeyHelper : IKeyHelper
     {
-        #region RowConstants
         public virtual string PreFixIdentityUserClaim => TableConstants.RowKeyConstants.PreFixIdentityUserClaim;
 
         public virtual string PreFixIdentityUserClaimUpperBound => TableConstants.RowKeyConstants.PreFixIdentityUserClaimUpperBound;
@@ -61,8 +60,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         public virtual string FormatterIdentityRole => TableConstants.RowKeyConstants.FormatterIdentityRole;
 
         public virtual string FormatterIdentityRoleClaim => TableConstants.RowKeyConstants.FormatterIdentityRoleClaim;
-
-        #endregion
 
         public virtual string GeneratePartitionKeyIndexByLogin(string plainLoginProvider, string plainProviderKey)
         {
@@ -114,7 +111,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         public virtual string GeneratePartitionKeyIdentityRole(string plainRoleName)
         {
             string hash = ConvertKeyToHash(plainRoleName?.ToUpper());
-            return hash.Substring(0, 1);
+            return hash.Substring(startIndex: 0, length: 1);
         }
 
         public virtual string GenerateRowKeyIdentityUserClaim(string claimType, string claimValue)
@@ -150,7 +147,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             return string.Format(FormatterIdentityUserLogin, hash);
         }
 
-        public double KeyVersion => 6.0;
+        public double KeyVersion => 6.1;
 
         public abstract string ConvertKeyToHash(string input);
 

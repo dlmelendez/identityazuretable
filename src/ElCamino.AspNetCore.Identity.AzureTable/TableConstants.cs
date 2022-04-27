@@ -27,7 +27,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
         public static class RowKeyConstants
         {
-            #region Identity User
             public const string PreFixIdentityUserClaim = "C_";
             public const string PreFixIdentityUserClaimUpperBound = "D_";
             public const string PreFixIdentityUserRole = "R_";
@@ -48,16 +47,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             public const string FormatterIdentityUserId = PreFixIdentityUserId + "{0}";
             public const string FormatterIdentityUserName = PreFixIdentityUserName + "{0}";
 
-            #endregion
-
-            #region Identity Role
             public const string PreFixIdentityRole = "R_";
             public const string PreFixIdentityRoleUpperBound = "S_";
             public const string PreFixIdentityRoleClaim = "C_";
             public const string FormatterIdentityRole = PreFixIdentityRole + "{0}";
             public const string FormatterIdentityRoleClaim = PreFixIdentityRoleClaim + "{0}";
-
-            #endregion
         }
     }
 }

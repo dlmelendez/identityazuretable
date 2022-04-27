@@ -15,7 +15,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 {
     public class RolesMigration : IMigration
     {
-        private IKeyHelper _keyHelper;
+        private readonly IKeyHelper _keyHelper;
         public RolesMigration(IKeyHelper keyHelper)
         {
             _keyHelper = keyHelper;

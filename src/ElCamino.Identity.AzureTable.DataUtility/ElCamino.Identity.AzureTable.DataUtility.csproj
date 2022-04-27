@@ -11,7 +11,7 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <EnableDefaultContentItems>false</EnableDefaultContentItems>
-    <Version>6.0</Version>
+    <Version>6.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,6 +23,7 @@
     <Compile Remove="..\ElCamino.AspNetCore.Identity.AzureTable\Constants.cs" />
     <Compile Remove="..\ElCamino.AspNetCore.Identity.AzureTable\Helpers\AzureSdkHelper.cs" />
     <Compile Remove="..\ElCamino.AspNetCore.Identity.AzureTable\Helpers\BaseKeyHelper.cs" />
+    <Compile Remove="..\ElCamino.AspNetCore.Identity.AzureTable\Helpers\BatchOperationHelper.cs" />
     <Compile Remove="..\ElCamino.AspNetCore.Identity.AzureTable\Helpers\DefaultKeyHelper.cs" />
     <Compile Remove="..\ElCamino.AspNetCore.Identity.AzureTable\Helpers\IAsyncEnumerableExtensions.cs" />
     <Compile Remove="..\ElCamino.AspNetCore.Identity.AzureTable\Helpers\SHA256KeyHelper.cs" />

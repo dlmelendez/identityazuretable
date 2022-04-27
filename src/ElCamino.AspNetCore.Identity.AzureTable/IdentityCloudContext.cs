@@ -1,7 +1,7 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 using System;
-using ElCamino.AspNetCore.Identity.AzureTable.Model;
 using Azure.Data.Tables;
+using ElCamino.AspNetCore.Identity.AzureTable.Model;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable
 {
@@ -35,7 +35,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
         ~IdentityCloudContext()
         {
-            this.Dispose(false);
+            Dispose(false);
         }
 
         private string FormatTableNameWithPrefix(string baseTableName)
@@ -85,14 +85,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
         private void ThrowIfDisposed()
         {
-            if (this._disposed)
+            if (_disposed)
             {
                 throw new ObjectDisposedException(base.GetType().Name);
             }
         }
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)

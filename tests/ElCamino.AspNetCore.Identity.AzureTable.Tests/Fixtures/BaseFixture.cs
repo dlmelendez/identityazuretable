@@ -39,17 +39,6 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 
         public RoleManager<TRole> CreateRoleManager()
         {
-            return CreateRoleManager(CreateRoleStore());
-        }
-
-        public RoleManager<TRole> CreateRoleManager(TContext context)
-        {
-            return CreateRoleManager(new RoleStore<TRole>(context, new TKeyHelper()));
-        }
-
-        public RoleManager<TRole> CreateRoleManager(RoleStore<TRole> store)
-        {
-            //return new RoleManager<TRole>(store);
             IServiceCollection services = new ServiceCollection();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             // Add Identity services to the services container.
@@ -141,7 +130,6 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
         where TKeyHelper : IKeyHelper, new()
     {
 
-        #region IDisposable Support
         protected bool disposedValue = false;
 
         protected virtual void Dispose(bool disposing)
@@ -163,8 +151,8 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
         public void Dispose()
         {
             Dispose(true);
+            GC.SuppressFinalize(this);
         }
-        #endregion
 
         public TKeyHelper GetKeyHelper()
         {
@@ -182,7 +170,6 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
             {
                 StorageConnectionString = root["IdentityAzureTable:identityConfiguration:storageConnectionString"],
                 TablePrefix = root["IdentityAzureTable:identityConfiguration:tablePrefix"],
-                LocationMode = root["IdentityAzureTable:identityConfiguration:locationMode"],
                 IndexTableName = root["IdentityAzureTable:identityConfiguration:indexTableName"],
                 UserTableName = root["IdentityAzureTable:identityConfiguration:userTableName"],
                 RoleTableName = root["IdentityAzureTable:identityConfiguration:roleTableName"]
@@ -203,18 +190,18 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 
         public TContext GetContext(IdentityConfiguration config)
         {
-            return Activator.CreateInstance(typeof(TContext), new object[1] {GetConfig()}) as TContext;
+            return Activator.CreateInstance(typeof(TContext), new object[1] {config}) as TContext;
 
         }
 
         public TUserStore CreateUserStore()
         {
-            return CreateUserStore(GetContext(),GetConfig());
+            return CreateUserStore(GetContext());
         }
 
-        public TUserStore CreateUserStore(TContext context,IdentityConfiguration config)
+        public TUserStore CreateUserStore(TContext context)
         {
-            var userStore = Activator.CreateInstance(typeof(TUserStore), new object[3] { context, GetKeyHelper(), config }) as TUserStore;
+            var userStore = Activator.CreateInstance(typeof(TUserStore), new object[2] { context, GetKeyHelper() }) as TUserStore;
 
             return userStore;
         }
@@ -225,7 +212,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
             {
                 options = new IdentityOptions();
             }
-            //return new RoleManager<TRole>(store);
+
             IServiceCollection services = new ServiceCollection();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 

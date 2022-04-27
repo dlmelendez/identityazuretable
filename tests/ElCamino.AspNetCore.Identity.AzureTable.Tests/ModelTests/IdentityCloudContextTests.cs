@@ -12,11 +12,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.ModelTests
 {
     public class IdentityCloudContextTests : IClassFixture<RoleFixture<IdentityUser, IdentityRole, IdentityCloudContext, DefaultKeyHelper>>
     {
-        private readonly ITestOutputHelper output;
-        private RoleFixture<IdentityUser, IdentityRole, IdentityCloudContext, DefaultKeyHelper> roleFixture;
-        public IdentityCloudContextTests(RoleFixture<IdentityUser, IdentityRole, IdentityCloudContext, DefaultKeyHelper> roleFix, ITestOutputHelper output)
+        private readonly RoleFixture<IdentityUser, IdentityRole, IdentityCloudContext, DefaultKeyHelper> roleFixture;
+        public IdentityCloudContextTests(RoleFixture<IdentityUser, IdentityRole, IdentityCloudContext, DefaultKeyHelper> roleFix)
         {
-            this.output = output;
             roleFixture = roleFix;
         }
 

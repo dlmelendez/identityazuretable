@@ -139,6 +139,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             return base.GetUsersByClaim();
         }
 
+        [Fact(DisplayName = "MapEntityTest")]
+        [Trait(UserOnlyStoreTrait, "")]
+        public override void MapEntityTest()
+        {
+            base.MapEntityTest();
+        }
+
         [Fact(DisplayName = "ThrowIfDisposed")]
         [Trait(UserOnlyStoreTrait, "")]
         public override Task ThrowIfDisposed()
@@ -166,11 +173,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         {
             Assert.Throws<ArgumentNullException>(() => 
             {
-                new UserOnlyStore<ApplicationUserV2, IdentityCloudContext>(null, null, null);
+                new UserOnlyStore<ApplicationUserV2, IdentityCloudContext>(null, null);
             });
         }
-
-        #region Properties
 
         [Fact(DisplayName = "AccessFailedCount")]
         [Trait(UserOnlyStoreTraitProperties, "")]
@@ -241,8 +246,5 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         {
             return base.TwoFactorEnabled();
         }
-
-        #endregion
     }
-
 }
