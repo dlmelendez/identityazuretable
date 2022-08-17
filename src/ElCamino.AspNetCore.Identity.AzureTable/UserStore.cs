@@ -114,21 +114,17 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 throw new ArgumentNullException(nameof(user));
             }
 
-            const string roleName = "RoleName";
+            const string roleName = nameof(Model.IdentityUserRole<string>.RoleName);
             string userId = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
             // Changing to a live query to mimic EF UserStore in Identity 3.0
-            TableQuery tq = new TableQuery();
 
-            string rowFilter =
-                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserRole);
-
-            tq.FilterString = TableQuery.CombineFilters(
+            string filterString = TableQuery.CombineFilters(
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, userId),
                 TableOperators.And,
-                rowFilter);
-            tq.SelectColumns = new List<string>() { roleName };
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserRole));
+            var selectColumns = new List<string>() { roleName };
             var userRoles =
-                (await _userTable.ExecuteQueryAsync<TableEntity>(tq).ToListAsync(cancellationToken).ConfigureAwait(false))
+                (await _userTable.QueryAsync<TableEntity>(filter: filterString, select: selectColumns, cancellationToken:cancellationToken).ToListAsync(cancellationToken).ConfigureAwait(false))
                 .Where(w => w.ContainsKey(roleName))
                 .Select(d => d.GetString(roleName))
                 .Where(di => !string.IsNullOrWhiteSpace(di));
@@ -161,11 +157,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                         }
                         iRoleCounter++;
                     }
-                    TableQuery tqRoles = new TableQuery();
-                    tqRoles.FilterString = queryTemp;
-                    tqRoles.SelectColumns = new List<string>() { nameof(Model.IdentityRole.Name) };
                     tasks.Add(
-                        _roleTable.ExecuteQueryAsync<Model.IdentityRole>(tqRoles).ToListAsync(cancellationToken)
+                        _roleTable.QueryAsync<Model.IdentityRole>(filter: queryTemp, select: new List<string>() { nameof(Model.IdentityRole.Name) }, cancellationToken: cancellationToken).ToListAsync(cancellationToken)
                         .ContinueWith((t) => {
                             return t.Result.Where(w => w.Name != null)
                             .Select(d => d.Name)
@@ -203,7 +196,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(roleName));
             }
 
-            if (await RoleExistsAsync(roleName).ConfigureAwait(false))
+            if (await RoleExistsAsync(roleName, cancellationToken).ConfigureAwait(false))
             {
                 string getTableQueryFilterByUserId(string userId)
                 {
@@ -243,21 +236,16 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             string userId = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
             // Changing to a live query to mimic EF UserStore in Identity 3.0
-            TableQuery tq = new TableQuery();
 
-            string rowFilter =
-                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, _keyHelper.GenerateRowKeyIdentityUserRole(roleName));
-
-            tq.FilterString = TableQuery.CombineFilters(
+            string filterString = TableQuery.CombineFilters(
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, userId),
                 TableOperators.And,
-                rowFilter);
-            tq.SelectColumns = new List<string>() { nameof(TableEntity.RowKey) };
-            tq.TakeCount = 1;
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, _keyHelper.GenerateRowKeyIdentityUserRole(roleName)));
+            var selectColumns = new List<string>() { nameof(TableEntity.RowKey) };
             var tasks = new Task<bool>[]
             {
-                _userTable.ExecuteQueryAsync<TableEntity>(tq).AnyAsync(cancellationToken),
-                RoleExistsAsync(roleName)
+                _userTable.QueryAsync<TableEntity>(filter: filterString, maxPerPage:1, select: selectColumns, cancellationToken).AnyAsync(cancellationToken),
+                RoleExistsAsync(roleName, cancellationToken)
             };
 
             await Task.WhenAll(tasks).ConfigureAwait(false);
@@ -265,13 +253,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return tasks.All(t => t.Result);
         }
 
-        public Task<bool> RoleExistsAsync(string roleName)
+        public Task<bool> RoleExistsAsync(string roleName, CancellationToken cancellationToken = default)
         {
-            TableQuery tqRoles = new TableQuery();
-            tqRoles.FilterString = BuildRoleQuery(roleName);
-            tqRoles.SelectColumns = new List<string>() { nameof(Model.IdentityRole.Name) };
-            tqRoles.TakeCount = 1;
-            return _roleTable.ExecuteQueryAsync<TableEntity>(tqRoles).AnyAsync();
+            return _roleTable.QueryAsync<TableEntity>(filter: BuildRoleQuery(roleName), maxPerPage: 1, select: new List<string>() { nameof(Model.IdentityRole.Name) }, cancellationToken: cancellationToken).AnyAsync(cancellationToken);
         }
 
         public virtual async Task RemoveFromRoleAsync(TUser user, string roleName, CancellationToken cancellationToken = default)
@@ -310,7 +294,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             const double pageSize = 50.0;
             int pages = (int)Math.Ceiling(((double)userIds.Count() / pageSize));
-            List<TableQuery> listTqs = new List<TableQuery>(pages);
+            List<string> listTqs = new List<string>(pages);
             IEnumerable<string> tempUserIds = null;
 
             for (int currentPage = 1; currentPage <= pages; currentPage++)
@@ -324,7 +308,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                     tempUserIds = userIds.Take((int)pageSize);
                 }
 
-                TableQuery tq = new TableQuery();
+                string filterString = string.Empty;
                 int i = 0;
                 foreach (var tempUserId in tempUserIds)
                 {
@@ -337,15 +321,18 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
                     if (i > 0)
                     {
-                        tq.FilterString = TableQuery.CombineFilters(tq.FilterString, TableOperators.Or, temp);
+                        filterString = TableQuery.CombineFilters(filterString, TableOperators.Or, temp);
                     }
                     else
                     {
-                        tq.FilterString = temp;
+                        filterString = temp;
                     }
                     i++;
                 }
-                listTqs.Add(tq);
+                if (!string.IsNullOrWhiteSpace(filterString))
+                {
+                    listTqs.Add(filterString);
+                }
 
             }
 
@@ -356,7 +343,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             var tasks = listTqs.Select((q) =>
             {
                 return
-                _userTable.ExecuteQueryAsync<TableEntity>(q).ToListAsync()
+                _userTable.QueryAsync<TableEntity>(filter: q).ToListAsync()
                      .ContinueWith((taskResults) =>
                      {
                          //ContinueWith returns completed task. Calling .Result is safe here.

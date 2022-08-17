@@ -92,11 +92,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             }
             else
             {
-                TableQuery query = new TableQuery();
-                query.SelectColumns = new List<string>() { "Id" };
-                query.FilterString = TableQuery.GenerateFilterCondition("Id", QueryComparisons.Equal, user.Id);
-                query.TakeCount = 1;
-                var results = await store.Context.IndexTable.ExecuteQueryAsync<TableEntity>(query).ToListAsync();
+                var selectColumns = new List<string>() { nameof(IdentityUserIndex.Id) };
+                string filterString = TableQuery.GenerateFilterCondition(nameof(IdentityUserIndex.Id), QueryComparisons.Equal, user.Id);
+                var results = await store.Context.IndexTable.QueryAsync<TableEntity>(filter: filterString, select: selectColumns).ToListAsync();
                 Assert.DoesNotContain(results, (x) => x.RowKey.StartsWith(AzureTable.TableConstants.RowKeyConstants.PreFixIdentityUserEmail)); //, string.Format("Email index not deleted for user {0}", user.Id));
             }
             //Should not find old by old email.
