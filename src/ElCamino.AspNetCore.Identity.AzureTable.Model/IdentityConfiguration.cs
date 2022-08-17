@@ -9,9 +9,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 
         public string StorageConnectionString { get; set; }
 
-        [System.Obsolete("LocationMode has been removed from the Azure.Data.Tables SDK.")]
-        public string LocationMode { get; set; }
-
         public string IndexTableName { get; set; }
 
         public string UserTableName { get; set; }

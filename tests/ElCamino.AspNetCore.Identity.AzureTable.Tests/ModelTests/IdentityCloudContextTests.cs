@@ -31,10 +31,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.ModelTests
             //Coverage for FormatTableNameWithPrefix()
             var tableConfig = roleFixture.GetConfig();
             tableConfig.TablePrefix = string.Empty;
-            new IdentityCloudContext(tableConfig);
+            var tContext = new IdentityCloudContext(tableConfig);
 
             tableConfig.TablePrefix = "a";
-            var tContext = new IdentityCloudContext(tableConfig);
+            tContext = new IdentityCloudContext(tableConfig);
             //Covers Client get
             Assert.NotNull(tContext.Client);
             tContext.Dispose();

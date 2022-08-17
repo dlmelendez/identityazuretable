@@ -17,7 +17,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         public const string RoleAndClaimIndex = "roleandclaimindex";
         public const string Users = "users";
         public const string Roles = "roles";
-        public static IKeyHelper KeyHelper = new DefaultKeyHelper();
+        public static readonly IKeyHelper KeyHelper = new DefaultKeyHelper();
 
         public static IMigration CreateMigration(string migrateCommand)
         {

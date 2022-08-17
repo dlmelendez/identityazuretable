@@ -13,11 +13,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
     {
         public static readonly ETag ETagWildcard =  ETag.All;
 
-        public static class AppSettingsKeys
-        {
-            public const string DefaultStorageConnectionStringKey = "StorageConnectionString";
-        }
-
         public static class TableNames
         {
             public const string RolesTable = "AspNetRoles";

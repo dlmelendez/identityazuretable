@@ -13,6 +13,7 @@ using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 using Azure.Data.Tables;
 using Azure;
 using System.Net;
+using Azure.Data.Tables.Models;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable
 {
@@ -97,7 +98,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             List<Task> tasks = new List<Task>(2)
             {
                 _userTable.AddEntityAsync(item, cancellationToken),
-                _indexTable.UpsertEntityAsync(CreateRoleIndex(userToRole.PartitionKey, roleName), cancellationToken: cancellationToken)
+                _indexTable.UpsertEntityAsync(CreateRoleIndex(userToRole.PartitionKey, roleName), mode: TableUpdateMode.Replace, cancellationToken: cancellationToken)
             };
 
             await Task.WhenAll(tasks).ConfigureAwait(false);
@@ -284,19 +285,19 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
             try
             {
-                var item = await _userTable.GetEntityAsync<TUserRole>(userPartitionKey, _keyHelper.GenerateRowKeyIdentityRole(roleName), cancellationToken: cancellationToken).ConfigureAwait(false);
+                var item = await _userTable.GetEntityOrDefaultAsync<TUserRole>(userPartitionKey, _keyHelper.GenerateRowKeyIdentityRole(roleName), cancellationToken: cancellationToken).ConfigureAwait(false);
 
-                if (item.Value != null)
+                if (item != null)
                 {
                     var deleteRoleIndex = CreateRoleIndex(userPartitionKey, roleName);
                     await Task.WhenAll(
-                       _userTable.DeleteEntityAsync(item.Value.PartitionKey, item.Value.RowKey,  TableConstants.ETagWildcard, cancellationToken),
+                       _userTable.DeleteEntityAsync(item.PartitionKey, item.RowKey,  TableConstants.ETagWildcard, cancellationToken),
                        _indexTable.DeleteEntityAsync(deleteRoleIndex.PartitionKey, deleteRoleIndex.RowKey,  TableConstants.ETagWildcard, cancellationToken)
                     ).ConfigureAwait(false);
                 }
             }
             catch (RequestFailedException rfe)
-            when (rfe.Status == (int)HttpStatusCode.NotFound)
+                when (rfe.ErrorCode == TableErrorCode.ResourceNotFound)
             {
                 //noop - if it isn't found, we can't delete
             }

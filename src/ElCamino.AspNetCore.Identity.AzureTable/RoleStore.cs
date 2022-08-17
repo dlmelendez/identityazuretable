@@ -12,6 +12,7 @@ using ElCamino.AspNetCore.Identity.AzureTable.Model;
 using Azure.Data.Tables;
 using System.Net;
 using Azure;
+using Azure.Data.Tables.Models;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable
 {
@@ -112,16 +113,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
 
-            try
-            {
-                return await _roleTable.GetEntityAsync<TRole>(_keyHelper.ParsePartitionKeyIdentityRoleFromRowKey(roleId),
+                return await _roleTable.GetEntityOrDefaultAsync<TRole>(_keyHelper.ParsePartitionKeyIdentityRoleFromRowKey(roleId),
                     roleId.ToString(), cancellationToken: cancellationToken).ConfigureAwait(false);
-            }
-            catch (RequestFailedException rfe)
-            when (rfe.Status == (int)HttpStatusCode.NotFound)
-            {
-                return default;
-            }
         }
 
         public override async Task<TRole> FindByNameAsync(string roleName, CancellationToken cancellationToken = default)
@@ -129,16 +122,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
            
-            try
-            {
-                return await _roleTable.GetEntityAsync<TRole>(_keyHelper.GeneratePartitionKeyIdentityRole(roleName),
+                return await _roleTable.GetEntityOrDefaultAsync<TRole>(_keyHelper.GeneratePartitionKeyIdentityRole(roleName),
                 _keyHelper.GenerateRowKeyIdentityRole(roleName), cancellationToken: cancellationToken).ConfigureAwait(false);
-            }
-            catch (RequestFailedException rfe)
-            when (rfe.Status == (int)HttpStatusCode.NotFound)
-            {
-                return default;
-            }
         }
        
 

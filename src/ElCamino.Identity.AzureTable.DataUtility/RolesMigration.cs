@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Azure;
 using System.Net;
+using Azure.Data.Tables.Models;
 
 namespace ElCamino.Identity.AzureTable.DataUtility
 {
@@ -56,28 +57,19 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
         private string GetRoleNameBySourceId(string roleRowKey, IdentityCloudContext sourcesContext)
         {
-            try
-            {
-                var tr = sourcesContext.RoleTable.GetEntityAsync<TableEntity>(
-                    _keyHelper.ParsePartitionKeyIdentityRoleFromRowKey(roleRowKey),
-                   roleRowKey, new List<string>() { "Name", "PartitionKey", "RowKey" }).Result;
+            var tr = sourcesContext.RoleTable.GetEntityOrDefaultAsync<TableEntity>(
+                _keyHelper.ParsePartitionKeyIdentityRoleFromRowKey(roleRowKey),
+                roleRowKey, new List<string>() { nameof(IdentityRole.Name), nameof(TableEntity.PartitionKey), nameof(TableEntity.RowKey) }).Result;
 
-                if (tr?.Value != null)
+            if (tr != null)
+            {
+                var role = (TableEntity)tr;
+                if (role.TryGetValue(nameof(IdentityRole.Name), out object nameProperty))
                 {
-                    var role = (TableEntity)tr.Value;
-                    if (role.TryGetValue("Name", out object nameProperty))
-                    {
-                        return nameProperty?.ToString();
-                    }
+                    return nameProperty?.ToString();
                 }
-                return null;
-
             }
-            catch (RequestFailedException rfe)
-            when (rfe.Status == (int)HttpStatusCode.NotFound)
-            {
-                return null;
-            }
+            return null;
         }
 
         private TableEntity ConvertToTargetRoleEntity(TableEntity sourceEntity, IdentityCloudContext sourcesContext)
