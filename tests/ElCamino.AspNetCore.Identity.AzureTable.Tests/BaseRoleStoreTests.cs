@@ -5,15 +5,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
 using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
-using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using Xunit.Abstractions;
-using static Microsoft.AspNetCore.Hosting.Internal.HostingApplication;
 using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
 using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser;
 
