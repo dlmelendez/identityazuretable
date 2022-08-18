@@ -578,15 +578,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 #endif
             IEnumerable<Task> tasks = listTqs.Select((q) =>
             {
-                return _userTable.QueryAsync<TUser>(filter: q, cancellationToken: cancellationToken).ToListAsync(cancellationToken)
-                .ContinueWith((taskResults) =>
-                {
-                    foreach (var s in taskResults.Result)
-                    {
-                        bag.Add(s);
-                    }
-                });
-
+                return _userTable.QueryAsync<TUser>(filter: q, cancellationToken: cancellationToken)
+                    .ForEachAsync((user) => { bag.Add(user); }, cancellationToken);
             });
             await Task.WhenAll(tasks).ConfigureAwait(false);
 #if DEBUG
