@@ -103,6 +103,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         public virtual async Task<IList<string>> GetRolesAsync(TUser user, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            ConcurrentBag<string> bag = new ConcurrentBag<string>();
             ThrowIfDisposed();
             if (user == null) throw new ArgumentNullException(nameof(user));
             if (EqualityComparer<TKey>.Default.Equals(user.Id, default))
@@ -131,7 +132,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 const double pageSize = 10d;
                 double maxPages = Math.Ceiling((double)userRoleTotalCount / pageSize);
 
-                List<Task<List<string>>> tasks = new List<Task<List<string>>>((int)maxPages);
+                List<Task> tasks = new List<Task>((int)maxPages);
 
                 for (int iPageIndex = 0; iPageIndex < maxPages; iPageIndex++)
                 {
@@ -154,22 +155,22 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                         iRoleCounter++;
                     }
                     tasks.Add(
-                        _roleTable.QueryAsync<Model.IdentityRole>(filter: queryTemp, select: new List<string>() { nameof(Model.IdentityRole.Name) }, cancellationToken: cancellationToken).ToListAsync(cancellationToken)
-                        .ContinueWith((t) =>
+                        _roleTable.QueryAsync<Model.IdentityRole>(filter: queryTemp, select: new List<string>() { nameof(Model.IdentityRole.Name) }, cancellationToken: cancellationToken)
+                        .ForEachAsync((t) =>
                         {
-                            return t.Result.Where(w => w.Name != null)
-                            .Select(d => d.Name)
-                            .Where(di => !string.IsNullOrWhiteSpace(di))
-                            .ToList();
-                        })
+                            if (!string.IsNullOrWhiteSpace(t?.Name))
+                            {
+                                bag.Add(t.Name);
+                            }
+                        }, cancellationToken)
                     );
                 }
                 await Task.WhenAll(tasks).ConfigureAwait(false);
-                return tasks.Select(s => s.Result).SelectMany(m => m).ToList() as IList<string>;
             }
 
-            return new List<string>() as IList<string>;
+            return bag.ToList();
         }
+
         public string BuildRoleQuery(string normalizedRoleName)
         {
             string rowFilter =
