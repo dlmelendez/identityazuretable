@@ -1,10 +1,10 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
 using System;
-using Microsoft.AspNetCore.Identity;
-using ElCamino.AspNetCore.Identity.AzureTable.Model;
 using ElCamino.AspNetCore.Identity.AzureTable;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
+using ElCamino.AspNetCore.Identity.AzureTable.Model;
+using Microsoft.AspNetCore.Identity;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -23,8 +23,8 @@ namespace Microsoft.Extensions.DependencyInjection
             IKeyHelper keyHelper = null)
             where TContext : IdentityCloudContext
         {
-                
-            builder.Services.AddSingleton<IKeyHelper>(keyHelper?? new DefaultKeyHelper());
+
+            builder.Services.AddSingleton<IKeyHelper>(keyHelper ?? new DefaultKeyHelper());
 
             builder.Services.AddSingleton<IdentityConfiguration>(new Func<IServiceProvider, IdentityConfiguration>(p => configAction()));
 

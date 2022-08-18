@@ -2,10 +2,6 @@
 
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ElCamino.Identity.AzureTable.DataUtility
 {
@@ -17,12 +13,12 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         public const string RoleAndClaimIndex = "roleandclaimindex";
         public const string Users = "users";
         public const string Roles = "roles";
-        public static IKeyHelper KeyHelper = new DefaultKeyHelper();
+        public static readonly IKeyHelper KeyHelper = new DefaultKeyHelper();
 
         public static IMigration CreateMigration(string migrateCommand)
         {
             string cmd = migrateCommand.ToLower();
-            switch(cmd)
+            switch (cmd)
             {
                 case EmailIndex:
                     return new EmailMigrateIndex(KeyHelper);

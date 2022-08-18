@@ -9,7 +9,7 @@
   },
   "IdentityAzureTable": {
     "identityConfiguration": {
-      "tablePrefix": "av60",
+      "tablePrefix": "av62",
       "indexTableName": "indexes",
       "userTableName": "users",
       "roleTableName": "roles",

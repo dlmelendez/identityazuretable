@@ -27,7 +27,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             _config = config;
             _client = new TableServiceClient(_config.StorageConnectionString);
-           
+
             _indexTable = _client.GetTableClient(FormatTableNameWithPrefix(!string.IsNullOrWhiteSpace(_config.IndexTableName) ? _config.IndexTableName : TableConstants.TableNames.IndexTable));
             _roleTable = _client.GetTableClient(FormatTableNameWithPrefix(!string.IsNullOrWhiteSpace(_config.RoleTableName) ? _config.RoleTableName : TableConstants.TableNames.RolesTable));
             _userTable = _client.GetTableClient(FormatTableNameWithPrefix(!string.IsNullOrWhiteSpace(_config.UserTableName) ? _config.UserTableName : TableConstants.TableNames.UsersTable));
@@ -40,7 +40,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
         private string FormatTableNameWithPrefix(string baseTableName)
         {
-            if(!string.IsNullOrWhiteSpace(_config.TablePrefix))
+            if (!string.IsNullOrWhiteSpace(_config.TablePrefix))
             {
                 return string.Format("{0}{1}", _config.TablePrefix, baseTableName);
             }

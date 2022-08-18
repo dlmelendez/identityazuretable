@@ -1,9 +1,7 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
-using System;
 using ElCamino.AspNetCore.Identity.AzureTable;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
-using ElCamino.AspNetCore.Identity.AzureTable.Tests;
 using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
 using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser<string>;
 using Model = ElCamino.AspNetCore.Identity.AzureTable.Model;
@@ -21,7 +19,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
         {
         }
 
-      
+
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);

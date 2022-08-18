@@ -1,22 +1,12 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
 using Azure;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable
 {
     public static class TableConstants
     {
-        public static readonly ETag ETagWildcard =  ETag.All;
-
-        public static class AppSettingsKeys
-        {
-            public const string DefaultStorageConnectionStringKey = "StorageConnectionString";
-        }
+        public static readonly ETag ETagWildcard = ETag.All;
 
         public static class TableNames
         {

@@ -1,14 +1,10 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
-using Microsoft.AspNetCore.Identity;
 
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
@@ -147,7 +143,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             return string.Format(FormatterIdentityUserLogin, hash);
         }
 
-        public double KeyVersion => 6.1;
+        public double KeyVersion => 6.2;
 
         public abstract string ConvertKeyToHash(string input);
 
@@ -160,7 +156,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             // Create a new StringBuilder to collect the bytes 
             // and create a string.
             StringBuilder sBuilder = new StringBuilder(hashHexLength);
-            
+
             // Loop through each byte of the hashed data  
             // and format each one as a hexadecimal string. 
             for (int i = 0; i < data.Length; i++)

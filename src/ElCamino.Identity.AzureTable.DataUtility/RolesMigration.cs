@@ -1,15 +1,11 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
-using ElCamino.AspNetCore.Identity.AzureTable;
-using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
-using ElCamino.AspNetCore.Identity.AzureTable.Model;
-using Azure.Data.Tables;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Azure;
-using System.Net;
+using Azure.Data.Tables;
+using ElCamino.AspNetCore.Identity.AzureTable;
+using ElCamino.AspNetCore.Identity.AzureTable.Model;
 
 namespace ElCamino.Identity.AzureTable.DataUtility
 {
@@ -39,7 +35,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 try
                 {
                     targetContext.RoleTable.UpsertEntity(ConvertToTargetRoleEntity(dte, sourceContext), TableUpdateMode.Replace);
-                   
+
                     updateComplete?.Invoke();
                 }
                 catch (AggregateException exagg)
@@ -56,28 +52,19 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
         private string GetRoleNameBySourceId(string roleRowKey, IdentityCloudContext sourcesContext)
         {
-            try
-            {
-                var tr = sourcesContext.RoleTable.GetEntityAsync<TableEntity>(
-                    _keyHelper.ParsePartitionKeyIdentityRoleFromRowKey(roleRowKey),
-                   roleRowKey, new List<string>() { "Name", "PartitionKey", "RowKey" }).Result;
+            var tr = sourcesContext.RoleTable.GetEntityOrDefaultAsync<TableEntity>(
+                _keyHelper.ParsePartitionKeyIdentityRoleFromRowKey(roleRowKey),
+                roleRowKey, new List<string>() { nameof(IdentityRole.Name), nameof(TableEntity.PartitionKey), nameof(TableEntity.RowKey) }).Result;
 
-                if (tr?.Value != null)
+            if (tr != null)
+            {
+                var role = (TableEntity)tr;
+                if (role.TryGetValue(nameof(IdentityRole.Name), out object nameProperty))
                 {
-                    var role = (TableEntity)tr.Value;
-                    if (role.TryGetValue("Name", out object nameProperty))
-                    {
-                        return nameProperty?.ToString();
-                    }
+                    return nameProperty?.ToString();
                 }
-                return null;
-
             }
-            catch (RequestFailedException rfe)
-            when (rfe.Status == (int)HttpStatusCode.NotFound)
-            {
-                return null;
-            }
+            return null;
         }
 
         private TableEntity ConvertToTargetRoleEntity(TableEntity sourceEntity, IdentityCloudContext sourcesContext)
@@ -97,7 +84,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
                 targetEntity = new TableEntity(sourceEntity);
                 targetEntity.ResetKeys(_keyHelper.GenerateRowKeyIdentityRole(roleName),
-                    _keyHelper.GenerateRowKeyIdentityRoleClaim(claimType, claimValue),  TableConstants.ETagWildcard);
+                    _keyHelper.GenerateRowKeyIdentityRoleClaim(claimType, claimValue), TableConstants.ETagWildcard);
                 targetEntity["KeyVersion"] = _keyHelper.KeyVersion;
             }
             else if (sourceEntity.RowKey.StartsWith(_keyHelper.PreFixIdentityRole))
@@ -105,8 +92,8 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 sourceEntity.TryGetValue("Name", out object roleNameProperty);
                 string roleName = roleNameProperty.ToString();
 
-                targetEntity = new TableEntity( sourceEntity);
-                targetEntity.ResetKeys(_keyHelper.GeneratePartitionKeyIdentityRole(roleName), _keyHelper.GenerateRowKeyIdentityRole(roleName),  TableConstants.ETagWildcard);
+                targetEntity = new TableEntity(sourceEntity);
+                targetEntity.ResetKeys(_keyHelper.GeneratePartitionKeyIdentityRole(roleName), _keyHelper.GenerateRowKeyIdentityRole(roleName), TableConstants.ETagWildcard);
                 targetEntity["KeyVersion"] = _keyHelper.KeyVersion;
 
             }

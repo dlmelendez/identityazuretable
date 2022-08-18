@@ -8,10 +8,10 @@ using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {
-    public class RoleStoreTests : BaseRoleStoreTests<DefaultKeyHelper>
+    public class RoleStoreSHA256Tests : BaseRoleStoreTests<SHA256KeyHelper>
     {
-        public const string TestTrait = "IdentityCore.Azure.RoleStore";
-        public RoleStoreTests(RoleFixture<Model.IdentityUser, IdentityRole, IdentityCloudContext, DefaultKeyHelper> roleFix, ITestOutputHelper output)
+        public const string TestTrait = "IdentityCore.Azure.RoleStore.SHA256";
+        public RoleStoreSHA256Tests(RoleFixture<Model.IdentityUser, IdentityRole, IdentityCloudContext, SHA256KeyHelper> roleFix, ITestOutputHelper output)
             : base(roleFix, output)
         {
         }

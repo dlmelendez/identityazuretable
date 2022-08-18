@@ -3,22 +3,17 @@
 using System;
 using ElCamino.AspNetCore.Identity.AzureTable;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
-using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser<string>;
-using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
-
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-
-using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.DataProtection;
+using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
+using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser<string>;
 using Model = ElCamino.AspNetCore.Identity.AzureTable.Model;
-using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 
 namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 {
-    public class BaseFixture<TUser, TRole, TContext, TUserStore, TKeyHelper> 
+    public class BaseFixture<TUser, TRole, TContext, TUserStore, TKeyHelper>
         : BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore, TKeyHelper>
         where TUser : IdentityUser, new()
         where TRole : IdentityRole, new()
@@ -55,12 +50,12 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 
             id.AddRoles<IdentityRole>();
 
-            
+
             id = id.AddAzureTableStores<TContext>(new Func<IdentityConfiguration>(() =>
             {
                 return GetConfig();
             }), GetKeyHelper());
-           
+
 
             id.CreateAzureTablesIfNotExists<TContext>();
             id.Services.AddDataProtection();
@@ -178,11 +173,6 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
             return idconfig;
         }
 
-        protected bool IsV2()
-        {
-            return new TUser() is Model.IdentityUser;
-        }
-
         public TContext GetContext()
         {
             return GetContext(GetConfig());
@@ -190,7 +180,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 
         public TContext GetContext(IdentityConfiguration config)
         {
-            return Activator.CreateInstance(typeof(TContext), new object[1] {config}) as TContext;
+            return Activator.CreateInstance(typeof(TContext), new object[1] { config }) as TContext;
 
         }
 
@@ -224,15 +214,15 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
                 config.Lockout.MaxFailedAccessAttempts = options.Lockout.MaxFailedAccessAttempts;
             });
 
-            
+
             id = id.AddAzureTableStores<TContext>(new Func<IdentityConfiguration>(() =>
             {
                 return GetConfig();
             }), GetKeyHelper());
-            
+
             id.Services.AddDataProtection();
             id.AddDefaultTokenProviders();
-            
+
             id.AddSignInManager();
 
             services.AddLogging();

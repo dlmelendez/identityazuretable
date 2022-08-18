@@ -15,9 +15,6 @@
 // </copyright>
 // -----------------------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
 
@@ -28,8 +25,9 @@ namespace Azure.Data.Tables
     /// </summary>
     public class TableQuery
     {
+
         public int? TakeCount { get; set; }
-        
+
         public string FilterString { get; set; }
 
         public List<string> SelectColumns { get; set; } = null;
@@ -43,7 +41,7 @@ namespace Azure.Data.Tables
         /// <returns>A string containing the formatted filter condition.</returns>
         public static string GenerateFilterCondition(string propertyName, string operation, string givenValue)
         {
-            givenValue ??= string.Empty; 
+            givenValue ??= string.Empty;
             return GenerateFilterCondition(propertyName, operation, givenValue, EdmType.String);
         }
 

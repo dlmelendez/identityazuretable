@@ -1,12 +1,9 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 using System;
-using System.Resources;
-using ElCamino.AspNetCore.Identity.AzureTable.Model;
-using Xunit;
-using ElCamino.AspNetCore.Identity.AzureTable;
-using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
-using Xunit.Abstractions;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
+using ElCamino.AspNetCore.Identity.AzureTable.Model;
+using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
+using Xunit;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.ModelTests
 {
@@ -31,10 +28,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.ModelTests
             //Coverage for FormatTableNameWithPrefix()
             var tableConfig = roleFixture.GetConfig();
             tableConfig.TablePrefix = string.Empty;
-            new IdentityCloudContext(tableConfig);
+            var tContext = new IdentityCloudContext(tableConfig);
 
             tableConfig.TablePrefix = "a";
-            var tContext = new IdentityCloudContext(tableConfig);
+            tContext = new IdentityCloudContext(tableConfig);
             //Covers Client get
             Assert.NotNull(tContext.Client);
             tContext.Dispose();

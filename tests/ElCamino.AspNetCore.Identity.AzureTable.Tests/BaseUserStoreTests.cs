@@ -1,25 +1,21 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Security.Claims;
 using System.Linq;
+using System.Reflection;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+using Azure.Data.Tables;
+using ElCamino.AspNetCore.Identity.AzureTable.Model;
+using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
+using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
+using Microsoft.AspNetCore.Identity;
 using Xunit;
 using Xunit.Abstractions;
-using ElCamino.AspNetCore.Identity.AzureTable;
-using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser<string>;
 using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
-using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
-using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
-using Microsoft.AspNetCore.Identity;
-using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
-using ElCamino.AspNetCore.Identity.AzureTable.Model;
-using Azure.Data.Tables;
-using System.Reflection;
+using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser<string>;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {
@@ -34,7 +30,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         protected new BaseFixture<TUser, TRole, TContext, TUserStore, TKeyHelper> userFixture;
 
         public BaseUserStoreTests(BaseFixture<TUser, TRole, TContext, TUserStore, TKeyHelper> userFix, ITestOutputHelper output)
-            :base(userFix, output)
+            : base(userFix, output)
         {
             userFixture = userFix;
 
@@ -133,7 +129,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         }
 
         protected override async Task<T> CreateTestUserAsync<T>(bool createPassword = true, bool createEmail = true,
-            string emailAddress = null) 
+            string emailAddress = null)
         {
             string strValidConnection = userFixture.GetConfig().StorageConnectionString;
 

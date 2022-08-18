@@ -1,12 +1,7 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 {
@@ -29,6 +24,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         {
             return string.Format(FormatterIdentityUserId, plainUserId);
         }
-       
+
     }
 }

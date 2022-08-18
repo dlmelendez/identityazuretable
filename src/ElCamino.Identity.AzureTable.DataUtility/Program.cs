@@ -1,17 +1,16 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
-using ElCamino.AspNetCore.Identity.AzureTable;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using ElCamino.AspNetCore.Identity.AzureTable.Model;
-using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
-using System.Threading;
 using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Azure.Data.Tables;
+using ElCamino.AspNetCore.Identity.AzureTable;
+using ElCamino.AspNetCore.Identity.AzureTable.Model;
+using Microsoft.Extensions.Configuration;
 
 namespace ElCamino.Identity.AzureTable.DataUtility
 {
@@ -231,7 +230,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
                 if (isPreview)
                 {
-                    if(!ValidateCommandToken(PreviewToken, ref MigrateCommand))
+                    if (!ValidateCommandToken(PreviewToken, ref MigrateCommand))
                         return false;
                 }
 
@@ -280,13 +279,13 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             {
                 string[] splitArgs = args.Split(":".ToCharArray());
                 if (splitArgs.Length == 2
-                    && validCommands.Any(v=> v.Equals(splitArgs[1].ToLower())))
+                    && validCommands.Any(v => v.Equals(splitArgs[1].ToLower())))
                 {
                     commandValue = splitArgs[1];
                 }
                 else
                 {
-                    DisplayInvalidArgs(new List<string>() { args, string.Format("{0} must be followed by a valid command arg {1}", token, string.Join(",", validCommands.ToArray()))});
+                    DisplayInvalidArgs(new List<string>() { args, string.Format("{0} must be followed by a valid command arg {1}", token, string.Join(",", validCommands.ToArray())) });
                     return false;
                 }
             }
