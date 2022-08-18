@@ -22,7 +22,7 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/dlmelendez/identityazuretable.git</RepositoryUrl>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>6.2</Version>
+    <Version>6.1</Version>
     <PackageProjectUrl>https://dlmelendez.github.io/identityazuretable</PackageProjectUrl>
     <!--<DebugType>Full</DebugType>-->
     <!-- DebugType Full is needed for test code coverage, but .nuget symbols doesn't like it-->
