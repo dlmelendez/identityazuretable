@@ -41,7 +41,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="Azure.Data.Tables" Version="12.2.0" />
+    <PackageReference Include="Azure.Data.Tables" Version="12.6.1" />
   </ItemGroup>
   
   <ItemGroup>
