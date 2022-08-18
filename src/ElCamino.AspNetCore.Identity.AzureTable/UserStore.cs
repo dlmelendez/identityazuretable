@@ -212,7 +212,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 }
 
 
-                return (await GetUsersAggregateByIndexQueryAsync(GetUserByRoleQuery(roleName), (userId) => {
+                return (await GetUsersByIndexQueryAsync(GetUserByRoleIndexQuery(roleName), (userId) => {
                     return GetUserAggregateQueryAsync(userId, setFilterByUserId: getTableQueryFilterByUserId, whereClaim: null, whereRole: (ur) =>
                     {
                         return ur.RowKey == _keyHelper.GenerateRowKeyIdentityUserRole(roleName);
@@ -445,7 +445,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             List<Task> tasks = new List<Task>(50);
             string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
-            var userRows = await GetUserAggregateQueryAsync(userPartitionKey).ToListAsync(cancellationToken).ConfigureAwait(false);
+            var userRows = await GetUserAggregateQueryAsync(userPartitionKey, cancellationToken).ToListAsync(cancellationToken).ConfigureAwait(false);
             tasks.Add(DeleteAllUserRows(userPartitionKey, userRows));
 
             var deleteUserNameIndex = CreateUserNameIndex(userPartitionKey, user.UserName);
