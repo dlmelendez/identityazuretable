@@ -44,7 +44,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
         protected TableClient _userTable;
         protected TableClient _indexTable;
-        protected IKeyHelper _keyHelper;
+        protected readonly IKeyHelper _keyHelper;
 
         private readonly string FilterString;
         private static readonly List<string> IndexUserIdSelectColumns = new() { nameof(IdentityUserIndex.Id) };
