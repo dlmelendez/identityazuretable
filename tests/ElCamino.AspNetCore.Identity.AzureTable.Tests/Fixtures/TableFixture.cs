@@ -14,10 +14,11 @@ using Model = ElCamino.AspNetCore.Identity.AzureTable.Model;
 
 namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 {
-    public class TableFixture
+    public class TableFixture : IDisposable
     {
         private readonly IConfiguration _configuration;
         private readonly TableServiceClient _tableServiceClient;
+        private bool disposedValue;
 
         public TableServiceClient TableService => _tableServiceClient;
 
@@ -29,6 +30,28 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
             _configuration = configuration.Build();
 
             _tableServiceClient = new TableServiceClient(_configuration["IdentityAzureTable:identityConfiguration:storageConnectionString"]);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects)
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

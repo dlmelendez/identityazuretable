@@ -20,7 +20,7 @@ namespace Azure.Data.Tables
         /// <exception cref="RequestFailedException"></exception>
         public static async Task<T> AddEntityWithHeaderValuesAsync<T>(this TableClient table, T entity, CancellationToken cancellationToken = default) where T : class, ITableEntity, new()
         {
-            var response = await table.AddEntityAsync(entity, cancellationToken);
+            var response = await table.AddEntityAsync(entity, cancellationToken).ConfigureAwait(false);
             entity.ETag = response.Headers.ETag.GetValueOrDefault();
             entity.Timestamp = response.Headers.Date;
             return entity;
@@ -39,7 +39,7 @@ namespace Azure.Data.Tables
         /// <exception cref="RequestFailedException"></exception>
         public static async Task<T> UpdateEntityWithHeaderValuesAsync<T>(this TableClient table, T entity, ETag ifMatch, TableUpdateMode mode = TableUpdateMode.Replace, CancellationToken cancellationToken = default) where T : class, ITableEntity, new()
         {
-            var response = await table.UpdateEntityAsync(entity, ifMatch, mode, cancellationToken);
+            var response = await table.UpdateEntityAsync(entity, ifMatch, mode, cancellationToken).ConfigureAwait(false);
             entity.ETag = response.Headers.ETag.GetValueOrDefault();
             entity.Timestamp = response.Headers.Date;
             return entity;
@@ -57,7 +57,7 @@ namespace Azure.Data.Tables
         /// <exception cref="RequestFailedException"></exception>
         public static async Task<T> UpsertEntityWithHeaderValuesAsync<T>(this TableClient table, T entity, TableUpdateMode mode = TableUpdateMode.Replace, CancellationToken cancellationToken = default) where T : class, ITableEntity, new()
         {
-            var response = await table.UpsertEntityAsync(entity, mode, cancellationToken);
+            var response = await table.UpsertEntityAsync(entity, mode, cancellationToken).ConfigureAwait(false);
             entity.ETag = response.Headers.ETag.GetValueOrDefault();
             entity.Timestamp = response.Headers.Date;
             return entity;

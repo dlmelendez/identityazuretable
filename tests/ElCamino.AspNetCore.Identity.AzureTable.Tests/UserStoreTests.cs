@@ -287,14 +287,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             var userStore = GetImmutableUserIdStore();
 
             var user = GenTestUser();
-            await userStore.CreateAsync(user);
+            await userStore.CreateAsync(user).ConfigureAwait(false);
 
             var idBefore = user.Id;
             var pkBefore = user.PartitionKey;
             var rkBefore = user.RowKey;
 
             user.UserName += "changed";
-            await userStore.UpdateAsync(user);
+            await userStore.UpdateAsync(user).ConfigureAwait(false);
 
             Assert.Equal(idBefore, user.Id);
             Assert.Equal(pkBefore, user.PartitionKey);

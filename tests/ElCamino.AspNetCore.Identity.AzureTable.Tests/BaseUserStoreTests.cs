@@ -40,22 +40,22 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         {
             using (var rstore = userFixture.CreateRoleStore())
             {
-                var userRole = await rstore.FindByNameAsync(roleName);
+                var userRole = await rstore.FindByNameAsync(roleName).ConfigureAwait(false);
 
                 if (userRole == null)
                 {
                     var r = (TRole)Activator.CreateInstance(typeof(TRole), new object[1] { roleName });
 
-                    await rstore.CreateAsync(r);
+                    await rstore.CreateAsync(r).ConfigureAwait(false);
                 }
             }
 
             using var store = userFixture.CreateUserStore();
             using var manager = userFixture.CreateUserManager();
-            var userRoleResult = await manager.AddToRoleAsync(user, roleName);
+            var userRoleResult = await manager.AddToRoleAsync(user, roleName).ConfigureAwait(false);
             Assert.True(userRoleResult.Succeeded, string.Concat(userRoleResult.Errors));
 
-            var roles2Result = await manager.IsInRoleAsync(user, roleName);
+            var roles2Result = await manager.IsInRoleAsync(user, roleName).ConfigureAwait(false);
             Assert.True(roles2Result, "Role not found");
         }
 
@@ -66,20 +66,20 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             using (RoleStore<TRole> rstore = userFixture.CreateRoleStore())
             {
                 var r = (TRole)Activator.CreateInstance(typeof(TRole), new object[1] { roleName });
-                await rstore.CreateAsync(r);
-                await rstore.FindByNameAsync(roleName);
+                await rstore.CreateAsync(r).ConfigureAwait(false);
+                await rstore.FindByNameAsync(roleName).ConfigureAwait(false);
             }
 
             using var store = userFixture.CreateUserStore();
             using var manager = userFixture.CreateUserManager();
-            var user = await CreateTestUserLiteAsync();
+            var user = await CreateTestUserLiteAsync().ConfigureAwait(false);
             WriteLineObject(user);
-            var userRole = await manager.AddToRoleAsync(user, roleName);
+            var userRole = await manager.AddToRoleAsync(user, roleName).ConfigureAwait(false);
             Assert.True(userRole.Succeeded, string.Concat(userRole.Errors));
 
             var sw = new Stopwatch();
             sw.Start();
-            var roles = await manager.GetRolesAsync(user);
+            var roles = await manager.GetRolesAsync(user).ConfigureAwait(false);
             sw.Stop();
             var getout = string.Format("{0} ms", sw.Elapsed.TotalMilliseconds);
             Debug.WriteLine(getout);
@@ -87,45 +87,45 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             Assert.True(roles.Contains(roleName), "Role not found");
 
             sw.Start();
-            var roles2 = await manager.IsInRoleAsync(user, roleName);
+            var roles2 = await manager.IsInRoleAsync(user, roleName).ConfigureAwait(false);
             sw.Stop();
             var isInout = string.Format("{0} ms", sw.Elapsed.TotalMilliseconds);
             Debug.WriteLine(isInout);
             _output.WriteLine(isInout);
             Assert.True(roles2, "Role not found");
 
-            var userRemoveResult = await manager.RemoveFromRoleAsync(user, roleName);
-            var rolesResult2 = await manager.GetRolesAsync(user);
+            var userRemoveResult = await manager.RemoveFromRoleAsync(user, roleName).ConfigureAwait(false);
+            var rolesResult2 = await manager.GetRolesAsync(user).ConfigureAwait(false);
             Assert.False(rolesResult2.Contains(roleName), "Role not removed.");
 
-            await Assert.ThrowsAsync<ArgumentNullException>(() => store.AddToRoleAsync(null, roleName));
-            await Assert.ThrowsAsync<ArgumentException>(() => store.AddToRoleAsync(user, null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.AddToRoleAsync(null, roleName)).ConfigureAwait(false);
+            await Assert.ThrowsAsync<ArgumentException>(() => store.AddToRoleAsync(user, null)).ConfigureAwait(false);
             // TODO: check
-            // await Assert.ThrowsAsync<ArgumentException>(() => store.AddToRoleAsync(user, Guid.NewGuid().ToString()));
-            await Assert.ThrowsAsync<ArgumentNullException>(() => store.RemoveFromRoleAsync(null, roleName));
-            await Assert.ThrowsAsync<ArgumentException>(() => store.RemoveFromRoleAsync(user, null));
-            await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetRolesAsync(null));
+            // await Assert.ThrowsAsync<ArgumentException>(() => store.AddToRoleAsync(user, Guid.NewGuid().ToString())).ConfigureAwait(false);
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.RemoveFromRoleAsync(null, roleName)).ConfigureAwait(false);
+            await Assert.ThrowsAsync<ArgumentException>(() => store.RemoveFromRoleAsync(user, null)).ConfigureAwait(false);
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetRolesAsync(null)).ConfigureAwait(false);
         }
 
         public virtual async Task IsUserInRole()
         {
             using var store = userFixture.CreateUserStore();
             using var manager = userFixture.CreateUserManager();
-            var user = await CreateUserAsync<TUser>();
+            var user = await CreateUserAsync<TUser>().ConfigureAwait(false);
             WriteLineObject(user);
             string roleName = string.Format("{0}_{1}", Constants.AccountRoles.AccountTestUserRole, Guid.NewGuid().ToString("N"));
 
-            await AddUserRoleAsyncHelper(user, roleName);
+            await AddUserRoleAsyncHelper(user, roleName).ConfigureAwait(false);
 
             var sw = new Stopwatch();
             sw.Start();
-            var result = await manager.IsInRoleAsync(user, roleName);
+            var result = await manager.IsInRoleAsync(user, roleName).ConfigureAwait(false);
             sw.Stop();
             _output.WriteLine("IsInRoleAsync: {0} seconds", sw.Elapsed.TotalSeconds);
             Assert.True(result, "Role not found");
 
-            await Assert.ThrowsAsync<ArgumentNullException>(() => store.IsInRoleAsync(null, roleName));
-            await Assert.ThrowsAsync<ArgumentException>(() => store.IsInRoleAsync(user, null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.IsInRoleAsync(null, roleName)).ConfigureAwait(false);
+            await Assert.ThrowsAsync<ArgumentException>(() => store.IsInRoleAsync(user, null)).ConfigureAwait(false);
         }
 
         protected override async Task<T> CreateTestUserAsync<T>(bool createPassword = true, bool createEmail = true,
@@ -149,23 +149,23 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             }
             var createUserResult = await (createPassword ?
                 manager.CreateAsync(user, DefaultUserPassword) :
-                manager.CreateAsync(user));
+                manager.CreateAsync(user)).ConfigureAwait(false);
             Assert.True(createUserResult.Succeeded, string.Concat(createUserResult.Errors));
 
             for (int i = 0; i < 2; i++)
             {
-                await AddUserClaimHelper(user, GenAdminClaim());
-                await AddUserLoginAsyncHelper(user, GenGoogleLogin());
-                await AddUserRoleAsyncHelper(user, string.Format("{0}_{1}", Constants.AccountRoles.AccountTestUserRole, Guid.NewGuid().ToString("N")));
+                await AddUserClaimHelper(user, GenAdminClaim()).ConfigureAwait(false);
+                await AddUserLoginAsyncHelper(user, GenGoogleLogin()).ConfigureAwait(false);
+                await AddUserRoleAsyncHelper(user, string.Format("{0}_{1}", Constants.AccountRoles.AccountTestUserRole, Guid.NewGuid().ToString("N"))).ConfigureAwait(false);
                 await manager.SetAuthenticationTokenAsync(user,
                     Constants.LoginProviders.GoogleProvider.LoginProvider,
                     string.Format("TokenName{0}", Guid.NewGuid().ToString()),
-                    Guid.NewGuid().ToString());
+                    Guid.NewGuid().ToString()).ConfigureAwait(false);
             }
 
-            await Assert.ThrowsAsync<ArgumentNullException>(() => store.CreateAsync(null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.CreateAsync(null)).ConfigureAwait(false);
 
-            var getUserResult = await manager.FindByIdAsync(user.Id);
+            var getUserResult = await manager.FindByIdAsync(user.Id).ConfigureAwait(false);
             return getUserResult as T;
         }
 
@@ -175,45 +175,45 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             using var manager = userFixture.CreateUserManager();
             var user = GenTestUser();
 
-            var userCreationResult = await manager.CreateAsync(user, DefaultUserPassword);
+            var userCreationResult = await manager.CreateAsync(user, DefaultUserPassword).ConfigureAwait(false);
             Assert.True(userCreationResult.Succeeded, string.Concat(userCreationResult.Errors));
 
             for (int i = 0; i < 20; i++)
             {
-                await store.AddClaimAsync(user, GenAdminClaim());
-                await store.AddLoginAsync(user, GenGoogleLogin());
-                await AddUserRoleAsyncHelper(user, string.Format("{0}_{1}", Constants.AccountRoles.AccountTestUserRole, Guid.NewGuid().ToString("N")));
+                await store.AddClaimAsync(user, GenAdminClaim()).ConfigureAwait(false);
+                await store.AddLoginAsync(user, GenGoogleLogin()).ConfigureAwait(false);
+                await AddUserRoleAsyncHelper(user, string.Format("{0}_{1}", Constants.AccountRoles.AccountTestUserRole, Guid.NewGuid().ToString("N"))).ConfigureAwait(false);
                 await store.SetTokenAsync(user,
                     Constants.LoginProviders.GoogleProvider.LoginProvider,
                     string.Format("TokenName{0}", Guid.NewGuid().ToString()),
-                    Guid.NewGuid().ToString(), new CancellationToken());
+                    Guid.NewGuid().ToString(), new CancellationToken()).ConfigureAwait(false);
 
             }
 
-            user = await manager.FindByIdAsync(user.Id);
+            user = await manager.FindByIdAsync(user.Id).ConfigureAwait(false);
             WriteLineObject(user);
 
             var sw = new Stopwatch();
             sw.Start();
-            var userDelitionResult = await manager.DeleteAsync(user);
+            var userDelitionResult = await manager.DeleteAsync(user).ConfigureAwait(false);
             sw.Stop();
             Assert.True(userDelitionResult.Succeeded, string.Concat(userCreationResult.Errors));
             _output.WriteLine("DeleteAsync: {0} seconds", sw.Elapsed.TotalSeconds);
 
-            await Task.Delay(2000);
+            await Task.Delay(2000).ConfigureAwait(false);
 
-            var user2 = await manager.FindByIdAsync(user.Id);
+            var user2 = await manager.FindByIdAsync(user.Id).ConfigureAwait(false);
             Assert.Null(user2);
 
-            await Assert.ThrowsAsync<ArgumentNullException>(() => store.DeleteAsync(null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.DeleteAsync(null)).ConfigureAwait(false);
         }
 
         public virtual async Task AddUserRole()
         {
             string strUserRole = string.Format("{0}_{1}", Constants.AccountRoles.AccountTestUserRole, Guid.NewGuid().ToString("N"));
-            var user = await CreateUserAsync<TUser>();
+            var user = await CreateUserAsync<TUser>().ConfigureAwait(false);
             WriteLineObject<TUser>(user);
-            await AddUserRoleAsyncHelper(user, strUserRole);
+            await AddUserRoleAsyncHelper(user, strUserRole).ConfigureAwait(false);
         }
 
         public virtual async Task GetUsersByRole()
@@ -230,10 +230,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                 var sw = new Stopwatch();
                 _output.WriteLine("CreateTestUserLite()");
                 sw.Start();
-                tempUser = await CreateTestUserLiteAsync(true, true);
+                tempUser = await CreateTestUserLiteAsync(true, true).ConfigureAwait(false);
                 sw.Stop();
                 _output.WriteLine("CreateTestUserLite(): {0} seconds", sw.Elapsed.TotalSeconds);
-                await AddUserRoleAsyncHelper(tempUser, strUserRole);
+                await AddUserRoleAsyncHelper(tempUser, strUserRole).ConfigureAwait(false);
             }
             sw2.Stop();
             _output.WriteLine("GenerateUsers(): {0} user count", userCount);
@@ -241,21 +241,21 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
             sw2.Reset();
             sw2.Start();
-            var users = await manager.GetUsersInRoleAsync(strUserRole);
+            var users = await manager.GetUsersInRoleAsync(strUserRole).ConfigureAwait(false);
             _output.WriteLine("GetUsersInRoleAsync(): {0} seconds", sw2.Elapsed.TotalSeconds);
             Assert.Equal(userCount, users.Count);
 
-            users = await manager.GetUsersInRoleAsync(Guid.NewGuid().ToString());
+            users = await manager.GetUsersInRoleAsync(Guid.NewGuid().ToString()).ConfigureAwait(false);
             Assert.Equal(0, users.Count);
 
-            await Assert.ThrowsAsync<ArgumentException>(() => manager.GetUsersInRoleAsync(string.Empty));
+            await Assert.ThrowsAsync<ArgumentException>(() => manager.GetUsersInRoleAsync(string.Empty)).ConfigureAwait(false);
         }
 
         public override async Task ChangeUserName()
         {
             using var store = userFixture.CreateUserStore();
             using var manager = userFixture.CreateUserManager();
-            var firstUser = await CreateTestUserAsync<TUser>();
+            var firstUser = await CreateTestUserAsync<TUser>().ConfigureAwait(false);
             _output.WriteLine("{0}", "Original User");
             WriteLineObject(firstUser);
             string originalPlainUserName = firstUser.UserName;
@@ -263,11 +263,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             string userNameChange = Guid.NewGuid().ToString("N");
 
             const int count = 2;
-            var firstUserRoles = await manager.GetRolesAsync(firstUser);
+            var firstUserRoles = await manager.GetRolesAsync(firstUser).ConfigureAwait(false);
             Assert.True(firstUserRoles.Count == count);
-            var firstUserClaims = await manager.GetClaimsAsync(firstUser);
+            var firstUserClaims = await manager.GetClaimsAsync(firstUser).ConfigureAwait(false);
             Assert.True(firstUserClaims.Count == count);
-            var firstUserLogins = await manager.GetLoginsAsync(firstUser);
+            var firstUserLogins = await manager.GetLoginsAsync(firstUser).ConfigureAwait(false);
             Assert.True(firstUserLogins.Count == count);
 
             string tokenValue = Guid.NewGuid().ToString();
@@ -276,17 +276,17 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             await manager.SetAuthenticationTokenAsync(firstUser,
                 Constants.LoginProviders.GoogleProvider.LoginProvider,
                 tokenName,
-                tokenValue);
+                tokenValue).ConfigureAwait(false);
 
             var sw = new Stopwatch();
             sw.Start();
-            var userUpdate = await manager.SetUserNameAsync(firstUser, userNameChange);
+            var userUpdate = await manager.SetUserNameAsync(firstUser, userNameChange).ConfigureAwait(false);
             sw.Stop();
             _output.WriteLine("UpdateAsync(ChangeUserName): {0} seconds", sw.Elapsed.TotalSeconds);
             Assert.True(userUpdate.Succeeded, string.Concat(userUpdate.Errors));
 
-            await Task.Delay(200);
-            var userChangedResult = await manager.FindByNameAsync(userNameChange);
+            await Task.Delay(200).ConfigureAwait(false);
+            var userChangedResult = await manager.FindByNameAsync(userNameChange).ConfigureAwait(false);
             var changedUser = userChangedResult;
             _output.WriteLine("{0}", "Changed User");
             WriteLineObject<IdentityUser>(changedUser);
@@ -294,11 +294,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             Assert.NotNull(changedUser);
             Assert.False(originalPlainUserName.Equals(changedUser.UserName, StringComparison.OrdinalIgnoreCase), "UserName property not updated.");
 
-            var changedUserRoles = await manager.GetRolesAsync(changedUser);
+            var changedUserRoles = await manager.GetRolesAsync(changedUser).ConfigureAwait(false);
             Assert.True(changedUserRoles.Count == count);
-            var changedUserClaims = await manager.GetClaimsAsync(changedUser);
+            var changedUserClaims = await manager.GetClaimsAsync(changedUser).ConfigureAwait(false);
             Assert.True(changedUserClaims.Count == count);
-            var changedUserLogins = await manager.GetLoginsAsync(changedUser);
+            var changedUserLogins = await manager.GetLoginsAsync(changedUser).ConfigureAwait(false);
             Assert.True(changedUserLogins.Count == count);
 
             Assert.Equal<int>(firstUserRoles.Count, changedUserRoles.Count);
@@ -311,23 +311,23 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             Assert.Equal(originalUserId, changedUser.Id);
 
             //Check email
-            var findEmailResult = await manager.FindByEmailAsync(changedUser.Email);
+            var findEmailResult = await manager.FindByEmailAsync(changedUser.Email).ConfigureAwait(false);
             Assert.NotNull(findEmailResult);
 
             //Check the old username is should be the same and still work now.
-            var oldUser = await manager.FindByIdAsync(originalUserId);
+            var oldUser = await manager.FindByIdAsync(originalUserId).ConfigureAwait(false);
             Assert.NotNull(oldUser);
 
 
             //Query for the old username, should be null
-            var oldUserNameResult = await manager.FindByNameAsync(originalPlainUserName);
+            var oldUserNameResult = await manager.FindByNameAsync(originalPlainUserName).ConfigureAwait(false);
             Assert.Null(oldUserNameResult);
 
 
             //Check logins
             foreach (var log in changedUserLogins)
             {
-                var findLoginResult = await manager.FindByLoginAsync(log.LoginProvider, log.ProviderKey);
+                var findLoginResult = await manager.FindByLoginAsync(log.LoginProvider, log.ProviderKey).ConfigureAwait(false);
                 Assert.NotNull(findLoginResult);
                 Assert.Equal(originalUserId, findLoginResult.Id.ToString());
             }
@@ -335,22 +335,22 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             //Check role indexes
             foreach (var cRole in changedUserRoles)
             {
-                var findUsersInRole = await manager.GetUsersInRoleAsync(cRole);
+                var findUsersInRole = await manager.GetUsersInRoleAsync(cRole).ConfigureAwait(false);
                 Assert.Contains(findUsersInRole, fr => fr.Id == changedUser.Id);
             }
 
             //Check claims indexes
             foreach (var cClaim in changedUserClaims)
             {
-                var findUsersInClaim = await manager.GetUsersForClaimAsync(cClaim);
+                var findUsersInClaim = await manager.GetUsersForClaimAsync(cClaim).ConfigureAwait(false);
                 Assert.Contains(findUsersInClaim, fr => fr.Id == changedUser.Id);
             }
 
             //Check token
-            string changedUserTokenValue = await manager.GetAuthenticationTokenAsync(changedUser, Constants.LoginProviders.GoogleProvider.LoginProvider, tokenName);
+            string changedUserTokenValue = await manager.GetAuthenticationTokenAsync(changedUser, Constants.LoginProviders.GoogleProvider.LoginProvider, tokenName).ConfigureAwait(false);
             Assert.True(changedUserTokenValue == tokenValue);
 
-            await Assert.ThrowsAsync<ArgumentNullException>(() => store.UpdateAsync(null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.UpdateAsync(null)).ConfigureAwait(false);
         }
 
 
@@ -472,11 +472,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             using var manager = userFixture.CreateUserManager();
             var user = GenTestUser();
             var user2 = GenTestUser();
-            var result = await manager.CreateAsync(user);
+            var result = await manager.CreateAsync(user).ConfigureAwait(false);
             Assert.True(result.Succeeded, string.Concat(result.Errors.Select(e => e.Code)));
 
             user2.UserName = user.UserName;
-            var result2 = await manager.CreateAsync(user2);
+            var result2 = await manager.CreateAsync(user2).ConfigureAwait(false);
             Assert.False(result2.Succeeded);
             Assert.True(new IdentityErrorDescriber().DuplicateUserName(user.UserName).Code
                 == result2.Errors.First().Code);
@@ -490,11 +490,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             using var manager = userFixture.CreateUserManager(options);
             var user = GenTestUser();
             var user2 = GenTestUser();
-            var result1 = await manager.CreateAsync(user);
+            var result1 = await manager.CreateAsync(user).ConfigureAwait(false);
             Assert.True(result1.Succeeded, string.Concat(result1.Errors.Select(e => e.Code)));
 
             user2.Email = user.Email;
-            var result2 = await manager.CreateAsync(user2);
+            var result2 = await manager.CreateAsync(user2).ConfigureAwait(false);
 
             Assert.False(result2.Succeeded);
             Assert.True(new IdentityErrorDescriber().DuplicateEmail(user.Email).Code
@@ -503,7 +503,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
         public virtual async Task CreateUserTest()
         {
-            WriteLineObject(await CreateTestUserAsync<TUser>());
+            WriteLineObject(await CreateTestUserAsync<TUser>().ConfigureAwait(false));
         }
 
         public virtual void MapEntityTest()
@@ -577,22 +577,22 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             }
             var createUserResult = await (createPassword ?
                 manager.CreateAsync(user, DefaultUserPassword) :
-                manager.CreateAsync(user));
+                manager.CreateAsync(user)).ConfigureAwait(false);
             Assert.True(createUserResult.Succeeded, string.Concat(createUserResult.Errors));
 
             for (int i = 0; i < 2; i++)
             {
-                await AddUserClaimHelper(user, GenAdminClaim());
-                await AddUserLoginAsyncHelper(user, GenGoogleLogin());
+                await AddUserClaimHelper(user, GenAdminClaim()).ConfigureAwait(false);
+                await AddUserLoginAsyncHelper(user, GenGoogleLogin()).ConfigureAwait(false);
                 await manager.SetAuthenticationTokenAsync(user,
                     Constants.LoginProviders.GoogleProvider.LoginProvider,
                     string.Format("TokenName{0}", Guid.NewGuid().ToString()),
-                    Guid.NewGuid().ToString());
+                    Guid.NewGuid().ToString()).ConfigureAwait(false);
             }
 
-            await Assert.ThrowsAsync<ArgumentNullException>(() => store.CreateAsync(null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.CreateAsync(null)).ConfigureAwait(false);
 
-            var getUserResult = await manager.FindByIdAsync(user.Id);
+            var getUserResult = await manager.FindByIdAsync(user.Id).ConfigureAwait(false);
             return getUserResult as T;
         }
 
@@ -614,8 +614,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                 }
             }
             var taskUser = createPassword ?
-                await manager.CreateAsync(user, DefaultUserPassword) :
-                await manager.CreateAsync(user);
+                await manager.CreateAsync(user, DefaultUserPassword).ConfigureAwait(false) :
+                await manager.CreateAsync(user).ConfigureAwait(false);
             Assert.True(taskUser.Succeeded, string.Concat(taskUser.Errors));
 
 
@@ -628,36 +628,36 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             using var manager = userFixture.CreateUserManager();
             var user = GenTestUser();
 
-            var userCreationResult = await manager.CreateAsync(user, DefaultUserPassword);
+            var userCreationResult = await manager.CreateAsync(user, DefaultUserPassword).ConfigureAwait(false);
             Assert.True(userCreationResult.Succeeded, string.Concat(userCreationResult.Errors));
 
             for (int i = 0; i < 20; i++)
             {
-                await store.AddClaimAsync(user, GenAdminClaim());
-                await store.AddLoginAsync(user, GenGoogleLogin());
+                await store.AddClaimAsync(user, GenAdminClaim()).ConfigureAwait(false);
+                await store.AddLoginAsync(user, GenGoogleLogin()).ConfigureAwait(false);
                 await store.SetTokenAsync(user,
                     Constants.LoginProviders.GoogleProvider.LoginProvider,
                     string.Format("TokenName{0}", Guid.NewGuid().ToString()),
-                    Guid.NewGuid().ToString(), new CancellationToken());
+                    Guid.NewGuid().ToString(), new CancellationToken()).ConfigureAwait(false);
 
             }
 
-            user = await manager.FindByIdAsync(user.Id);
+            user = await manager.FindByIdAsync(user.Id).ConfigureAwait(false);
             WriteLineObject(user);
 
             var sw = new Stopwatch();
             sw.Start();
-            var userDelitionResult = await manager.DeleteAsync(user);
+            var userDelitionResult = await manager.DeleteAsync(user).ConfigureAwait(false);
             sw.Stop();
             Assert.True(userDelitionResult.Succeeded, string.Concat(userCreationResult.Errors));
             _output.WriteLine("DeleteAsync: {0} seconds", sw.Elapsed.TotalSeconds);
 
-            await Task.Delay(2000);
+            await Task.Delay(2000).ConfigureAwait(false);
 
-            var user2 = await manager.FindByIdAsync(user.Id);
+            var user2 = await manager.FindByIdAsync(user.Id).ConfigureAwait(false);
             Assert.Null(user2);
 
-            await Assert.ThrowsAsync<ArgumentNullException>(() => store.DeleteAsync(null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.DeleteAsync(null)).ConfigureAwait(false);
         }
 
         public virtual async Task UpdateApplicationUser()
@@ -666,13 +666,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             using var manager = userFixture.CreateUserManager();
             var user = GetTestAppUser();
             WriteLineObject<TUser>(user);
-            var taskUser = await manager.CreateAsync(user, DefaultUserPassword);
+            var taskUser = await manager.CreateAsync(user, DefaultUserPassword).ConfigureAwait(false);
             Assert.True(taskUser.Succeeded, string.Concat(taskUser.Errors));
 
             string oFirstName = user.FirstName;
             string oLastName = user.LastName;
 
-            var taskFind1 = await manager.FindByNameAsync(user.UserName);
+            var taskFind1 = await manager.FindByNameAsync(user.UserName).ConfigureAwait(false);
             Assert.Equal(oFirstName, taskFind1.FirstName);
             Assert.Equal(oLastName, taskFind1.LastName);
 
@@ -682,10 +682,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             user.FirstName = cFirstName;
             user.LastName = cLastName;
 
-            var taskUserUpdate = await manager.UpdateAsync(user);
+            var taskUserUpdate = await manager.UpdateAsync(user).ConfigureAwait(false);
             Assert.True(taskUserUpdate.Succeeded, string.Concat(taskUserUpdate.Errors));
 
-            var taskFind = await manager.FindByNameAsync(user.UserName);
+            var taskFind = await manager.FindByNameAsync(user.UserName).ConfigureAwait(false);
             Assert.Equal(cFirstName, taskFind.FirstName);
             Assert.Equal(cLastName, taskFind.LastName);
         }
@@ -696,20 +696,20 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             using var manager = userFixture.CreateUserManager();
             var user = GenTestUser();
             WriteLineObject<IdentityUser>(user);
-            var creationResult = await manager.CreateAsync(user, DefaultUserPassword);
+            var creationResult = await manager.CreateAsync(user, DefaultUserPassword).ConfigureAwait(false);
             Assert.True(creationResult.Succeeded, string.Concat(creationResult.Errors));
 
-            var updationResult = await manager.UpdateAsync(user);
+            var updationResult = await manager.UpdateAsync(user).ConfigureAwait(false);
             Assert.True(updationResult.Succeeded, string.Concat(updationResult.Errors));
 
-            await Assert.ThrowsAsync<ArgumentNullException>(() => store.UpdateAsync(null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.UpdateAsync(null)).ConfigureAwait(false);
         }
 
         public virtual async Task ChangeUserName()
         {
             using var store = userFixture.CreateUserStore();
             using var manager = userFixture.CreateUserManager();
-            var firstUser = await CreateTestUserAsync<TUser>();
+            var firstUser = await CreateTestUserAsync<TUser>().ConfigureAwait(false);
             _output.WriteLine("{0}", "Original User");
             WriteLineObject(firstUser);
             string originalPlainUserName = firstUser.UserName;
@@ -717,9 +717,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             string userNameChange = Guid.NewGuid().ToString("N");
 
             const int count = 2;
-            var firstUserClaims = await manager.GetClaimsAsync(firstUser);
+            var firstUserClaims = await manager.GetClaimsAsync(firstUser).ConfigureAwait(false);
             Assert.True(firstUserClaims.Count == count);
-            var firstUserLogins = await manager.GetLoginsAsync(firstUser);
+            var firstUserLogins = await manager.GetLoginsAsync(firstUser).ConfigureAwait(false);
             Assert.True(firstUserLogins.Count == count);
 
             string tokenValue = Guid.NewGuid().ToString();
@@ -728,17 +728,17 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             await manager.SetAuthenticationTokenAsync(firstUser,
                 Constants.LoginProviders.GoogleProvider.LoginProvider,
                 tokenName,
-                tokenValue);
+                tokenValue).ConfigureAwait(false);
 
             var sw = new Stopwatch();
             sw.Start();
-            var userUpdate = await manager.SetUserNameAsync(firstUser, userNameChange);
+            var userUpdate = await manager.SetUserNameAsync(firstUser, userNameChange).ConfigureAwait(false);
             sw.Stop();
             _output.WriteLine("UpdateAsync(ChangeUserName): {0} seconds", sw.Elapsed.TotalSeconds);
             Assert.True(userUpdate.Succeeded, string.Concat(userUpdate.Errors));
 
-            await Task.Delay(200);
-            var userChangedResult = await manager.FindByNameAsync(userNameChange);
+            await Task.Delay(200).ConfigureAwait(false);
+            var userChangedResult = await manager.FindByNameAsync(userNameChange).ConfigureAwait(false);
             var changedUser = userChangedResult;
             _output.WriteLine("{0}", "Changed User");
             WriteLineObject<IdentityUser>(changedUser);
@@ -746,9 +746,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             Assert.NotNull(changedUser);
             Assert.False(originalPlainUserName.Equals(changedUser.UserName, StringComparison.OrdinalIgnoreCase), "UserName property not updated.");
 
-            var changedUserClaims = await manager.GetClaimsAsync(changedUser);
+            var changedUserClaims = await manager.GetClaimsAsync(changedUser).ConfigureAwait(false);
             Assert.True(changedUserClaims.Count == count);
-            var changedUserLogins = await manager.GetLoginsAsync(changedUser);
+            var changedUserLogins = await manager.GetLoginsAsync(changedUser).ConfigureAwait(false);
             Assert.True(changedUserLogins.Count == count);
 
 
@@ -760,11 +760,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             Assert.Equal(originalUserId, changedUser.Id);
 
             //Check email
-            var findEmailResult = await manager.FindByEmailAsync(changedUser.Email);
+            var findEmailResult = await manager.FindByEmailAsync(changedUser.Email).ConfigureAwait(false);
             Assert.NotNull(findEmailResult);
 
             //Check the old username is should be the same and still work now.
-            var oldUser = await manager.FindByIdAsync(originalUserId);
+            var oldUser = await manager.FindByIdAsync(originalUserId).ConfigureAwait(false);
             Assert.NotNull(oldUser);
 
 
@@ -772,7 +772,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             //Check logins
             foreach (var log in changedUserLogins)
             {
-                var findLoginResult = await manager.FindByLoginAsync(log.LoginProvider, log.ProviderKey);
+                var findLoginResult = await manager.FindByLoginAsync(log.LoginProvider, log.ProviderKey).ConfigureAwait(false);
                 Assert.NotNull(findLoginResult);
                 Assert.Equal(originalUserId, findLoginResult.Id.ToString());
             }
@@ -781,27 +781,27 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             //Check claims indexes
             foreach (var cClaim in changedUserClaims)
             {
-                var findUsersInClaim = await manager.GetUsersForClaimAsync(cClaim);
+                var findUsersInClaim = await manager.GetUsersForClaimAsync(cClaim).ConfigureAwait(false);
                 Assert.Contains(findUsersInClaim, fr => fr.Id == changedUser.Id);
             }
 
             //Check token
-            string changedUserTokenValue = await manager.GetAuthenticationTokenAsync(changedUser, Constants.LoginProviders.GoogleProvider.LoginProvider, tokenName);
+            string changedUserTokenValue = await manager.GetAuthenticationTokenAsync(changedUser, Constants.LoginProviders.GoogleProvider.LoginProvider, tokenName).ConfigureAwait(false);
             Assert.True(changedUserTokenValue == tokenValue);
 
-            await Assert.ThrowsAsync<ArgumentNullException>(() => store.UpdateAsync(null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.UpdateAsync(null)).ConfigureAwait(false);
         }
 
         public virtual async Task FindUserByEmail()
         {
             using var store = userFixture.CreateUserStore();
             using var manager = userFixture.CreateUserManager();
-            var user = await CreateUserAsync<TUser>();
+            var user = await CreateUserAsync<TUser>().ConfigureAwait(false);
             WriteLineObject<TUser>(user);
 
             var sw = new Stopwatch();
             sw.Start();
-            var findUserResult = await manager.FindByEmailAsync(user.Email);
+            var findUserResult = await manager.FindByEmailAsync(user.Email).ConfigureAwait(false);
             sw.Stop();
             _output.WriteLine("FindByEmailAsync: {0} seconds", sw.Elapsed.TotalSeconds);
 
@@ -817,13 +817,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             int createdCount = 51;
             for (int i = 0; i < createdCount; i++)
             {
-                await CreateTestUserLiteAsync(true, true, strEmail);
+                await CreateTestUserLiteAsync(true, true, strEmail).ConfigureAwait(false);
             }
 
             _output.WriteLine("FindAllByEmailAsync: {0}", strEmail);
             var sw = new Stopwatch();
             sw.Start();
-            var allResult = await store.FindAllByEmailAsync(strEmail);
+            var allResult = await store.FindAllByEmailAsync(strEmail).ConfigureAwait(false);
             sw.Stop();
             _output.WriteLine($"{nameof(store.FindAllByEmailAsync)}: {sw.Elapsed.Milliseconds} ms");
             _output.WriteLine("Users Found: {0}", allResult.Count());
@@ -834,15 +834,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             //Change email and check results
             string strEmailChanged = Guid.NewGuid().ToString() + "@live.com";
             var userToChange = listCreated.Last();
-            await manager.SetEmailAsync(userToChange, strEmailChanged);
-            var changedResult = await manager.FindByEmailAsync(strEmailChanged);
+            await manager.SetEmailAsync(userToChange, strEmailChanged).ConfigureAwait(false);
+            var changedResult = await manager.FindByEmailAsync(strEmailChanged).ConfigureAwait(false);
             Assert.Equal(userToChange.Id, changedResult.Id);
             Assert.NotEqual<string>(strEmail, changedResult.Email);
 
             //Make sure changed user doesn't show up in previous query
             sw.Reset();
             sw.Start();
-            allResult = await store.FindAllByEmailAsync(strEmail);
+            allResult = await store.FindAllByEmailAsync(strEmail).ConfigureAwait(false);
             sw.Stop();
             _output.WriteLine($"{nameof(store.FindAllByEmailAsync)}: {sw.Elapsed.Milliseconds} ms");
             _output.WriteLine("Users Found: {0}", allResult.Count());
@@ -853,10 +853,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         {
             using var store = userFixture.CreateUserStore();
             using var manager = userFixture.CreateUserManager();
-            var user = await CreateUserAsync<TUser>();
+            var user = await CreateUserAsync<TUser>().ConfigureAwait(false);
             var sw = new Stopwatch();
             sw.Start();
-            var result = await manager.FindByIdAsync(user.Id);
+            var result = await manager.FindByIdAsync(user.Id).ConfigureAwait(false);
             sw.Stop();
             _output.WriteLine($"{nameof(manager.FindByIdAsync)}: {sw.Elapsed.TotalSeconds} seconds");
 
@@ -867,11 +867,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         {
             using var store = userFixture.CreateUserStore();
             using var manager = userFixture.CreateUserManager();
-            var user = await CreateUserAsync<TUser>();
+            var user = await CreateUserAsync<TUser>().ConfigureAwait(false);
             WriteLineObject<IdentityUser>(user);
             var sw = new Stopwatch();
             sw.Start();
-            var result = await manager.FindByNameAsync(user.UserName);
+            var result = await manager.FindByNameAsync(user.UserName).ConfigureAwait(false);
             sw.Stop();
             _output.WriteLine($"{nameof(manager.FindByNameAsync)}: {sw.Elapsed.TotalSeconds} seconds");
 
@@ -888,19 +888,19 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         public virtual async Task AddUserLogin()
         {
             using var manager = userFixture.CreateUserManager();
-            var user = await CreateTestUserLiteAsync(createPassword: false);
+            var user = await CreateTestUserLiteAsync(createPassword: false).ConfigureAwait(false);
             WriteLineObject(user);
             var loginInfo = GenGoogleLogin();
-            await AddUserLoginAsyncHelper(user, loginInfo);
+            await AddUserLoginAsyncHelper(user, loginInfo).ConfigureAwait(false);
 
-            var loginsResult = await manager.GetLoginsAsync(user);
+            var loginsResult = await manager.GetLoginsAsync(user).ConfigureAwait(false);
             Assert.Contains(loginsResult,
                 (log) => log.LoginProvider == loginInfo.LoginProvider
                     && log.ProviderKey == loginInfo.ProviderKey); //, "LoginInfo not found: GetLoginsAsync");
 
             var sw = new Stopwatch();
             sw.Start();
-            var loginResult2 = await manager.FindByLoginAsync(loginsResult.First().LoginProvider, loginsResult.First().ProviderKey);
+            var loginResult2 = await manager.FindByLoginAsync(loginsResult.First().LoginProvider, loginsResult.First().ProviderKey).ConfigureAwait(false);
             sw.Stop();
             _output.WriteLine(string.Format($"{nameof(manager.FindByLoginAsync)}: {sw.Elapsed.TotalSeconds} seconds"));
             Assert.Equal(user.Id, loginResult2.Id);
@@ -910,7 +910,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         {
             using var store = userFixture.CreateUserStore();
             using var manager = userFixture.CreateUserManager();
-            var loginResult = await manager.AddLoginAsync(user, loginInfo);
+            var loginResult = await manager.AddLoginAsync(user, loginInfo).ConfigureAwait(false);
             Assert.True(loginResult.Succeeded, string.Concat(loginResult.Errors));
         }
 
@@ -920,7 +920,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             using var manager = userFixture.CreateUserManager();
             var user = GenTestUser();
             WriteLineObject<IdentityUser>(user);
-            var userResult = await manager.CreateAsync(user, DefaultUserPassword);
+            var userResult = await manager.CreateAsync(user, DefaultUserPassword).ConfigureAwait(false);
             Assert.True(userResult.Succeeded, string.Concat(userResult.Errors));
 
             string tokenValue = Guid.NewGuid().ToString();
@@ -930,31 +930,31 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             await manager.SetAuthenticationTokenAsync(user,
                 Constants.LoginProviders.GoogleProvider.LoginProvider,
                 tokenName,
-                tokenValue);
+                tokenValue).ConfigureAwait(false);
 
             string getTokenValue = await manager.GetAuthenticationTokenAsync(user,
                 Constants.LoginProviders.GoogleProvider.LoginProvider,
-                tokenName);
+                tokenName).ConfigureAwait(false);
             Assert.NotNull(tokenName);
             Assert.Equal(getTokenValue, tokenValue);
 
             await manager.SetAuthenticationTokenAsync(user,
                 Constants.LoginProviders.GoogleProvider.LoginProvider,
                 tokenName2,
-                tokenValue);
+                tokenValue).ConfigureAwait(false);
 
             await manager.RemoveAuthenticationTokenAsync(user,
                 Constants.LoginProviders.GoogleProvider.LoginProvider,
-                tokenName);
+                tokenName).ConfigureAwait(false);
 
             getTokenValue = await manager.GetAuthenticationTokenAsync(user,
                 Constants.LoginProviders.GoogleProvider.LoginProvider,
-                tokenName);
+                tokenName).ConfigureAwait(false);
             Assert.Null(getTokenValue);
 
             getTokenValue = await manager.GetAuthenticationTokenAsync(user,
                 Constants.LoginProviders.GoogleProvider.LoginProvider,
-                tokenName2);
+                tokenName2).ConfigureAwait(false);
             Assert.NotNull(getTokenValue);
             Assert.Equal(getTokenValue, tokenValue);
         }
@@ -965,40 +965,40 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             using var manager = userFixture.CreateUserManager();
             var user = GenTestUser();
             WriteLineObject<IdentityUser>(user);
-            var userResult = await manager.CreateAsync(user, DefaultUserPassword);
+            var userResult = await manager.CreateAsync(user, DefaultUserPassword).ConfigureAwait(false);
             Assert.True(userResult.Succeeded, string.Concat(userResult.Errors));
 
             var loginInfo = GenGoogleLogin();
-            var addLoginResult = await manager.AddLoginAsync(user, loginInfo);
+            var addLoginResult = await manager.AddLoginAsync(user, loginInfo).ConfigureAwait(false);
             Assert.True(addLoginResult.Succeeded, string.Concat(addLoginResult.Errors));
 
-            var getLoginResult = await manager.GetLoginsAsync(user);
+            var getLoginResult = await manager.GetLoginsAsync(user).ConfigureAwait(false);
             Assert.Contains(getLoginResult,
                 (log) => log.LoginProvider == loginInfo.LoginProvider
                     && log.ProviderKey == loginInfo.ProviderKey); //, "LoginInfo not found: GetLoginsAsync");
 
-            var getLoginResult2 = await manager.FindByLoginAsync(getLoginResult.First().LoginProvider, getLoginResult.First().ProviderKey);
+            var getLoginResult2 = await manager.FindByLoginAsync(getLoginResult.First().LoginProvider, getLoginResult.First().ProviderKey).ConfigureAwait(false);
             Assert.NotNull(getLoginResult2);
 
-            var userRemoveLoginResultNeg1 = await manager.RemoveLoginAsync(user, string.Empty, loginInfo.ProviderKey);
-            var userRemoveLoginResultNeg2 = await manager.RemoveLoginAsync(user, loginInfo.LoginProvider, string.Empty);
-            var userRemoveLoginResult = await manager.RemoveLoginAsync(user, loginInfo.LoginProvider, loginInfo.ProviderKey);
+            var userRemoveLoginResultNeg1 = await manager.RemoveLoginAsync(user, string.Empty, loginInfo.ProviderKey).ConfigureAwait(false);
+            var userRemoveLoginResultNeg2 = await manager.RemoveLoginAsync(user, loginInfo.LoginProvider, string.Empty).ConfigureAwait(false);
+            var userRemoveLoginResult = await manager.RemoveLoginAsync(user, loginInfo.LoginProvider, loginInfo.ProviderKey).ConfigureAwait(false);
             Assert.True(userRemoveLoginResult.Succeeded, string.Concat(userRemoveLoginResult.Errors));
 
-            var loginGetResult3 = await manager.GetLoginsAsync(user);
+            var loginGetResult3 = await manager.GetLoginsAsync(user).ConfigureAwait(false);
             Assert.DoesNotContain(loginGetResult3, (log) => true);// , "LoginInfo not removed");
 
             //Negative cases
-            var loginFindNeg = await manager.FindByLoginAsync("asdfasdf", "http://4343443dfaksjfaf");
+            var loginFindNeg = await manager.FindByLoginAsync("asdfasdf", "http://4343443dfaksjfaf").ConfigureAwait(false);
             Assert.Null(loginFindNeg);
 
-            await Assert.ThrowsAsync<ArgumentNullException>(() => store.AddLoginAsync(null, loginInfo));
-            await Assert.ThrowsAsync<ArgumentNullException>(() => store.AddLoginAsync(user, null));
-            await Assert.ThrowsAsync<ArgumentNullException>(() => store.RemoveLoginAsync(null, loginInfo.ProviderKey, loginInfo.LoginProvider));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.AddLoginAsync(null, loginInfo)).ConfigureAwait(false);
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.AddLoginAsync(user, null)).ConfigureAwait(false);
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.RemoveLoginAsync(null, loginInfo.ProviderKey, loginInfo.LoginProvider)).ConfigureAwait(false);
             // TODO: check why null login provider is accepted
-            // await Assert.ThrowsAsync<ArgumentNullException>(() => store.RemoveLoginAsync(user, null, null));
-            // await Assert.ThrowsAsync<ArgumentNullException>(() => store.FindByLoginAsync(null, null));
-            await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetLoginsAsync(null));
+            // await Assert.ThrowsAsync<ArgumentNullException>(() => store.RemoveLoginAsync(user, null, null)).ConfigureAwait(false);
+            // await Assert.ThrowsAsync<ArgumentNullException>(() => store.FindByLoginAsync(null, null)).ConfigureAwait(false);
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetLoginsAsync(null)).ConfigureAwait(false);
         }
 
         //public virtual async Task GenerateUsers()
@@ -1014,7 +1014,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         //                var sw = new Stopwatch();
         //                output.WriteLine("CreateTestUserLite()");
         //                sw.Start();
-        //                await CreateTestUserLiteAsync(true, true);
+        //                await CreateTestUserLiteAsync(true, true).ConfigureAwait(false);
         //                sw.Stop();
         //                output.WriteLine("CreateTestUserLite(): {0} seconds", sw.Elapsed.TotalSeconds);
         //            }
@@ -1028,15 +1028,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         {
             using var manager = userFixture.CreateUserManager();
 
-            var user = await CreateTestUserLiteAsync();
+            var user = await CreateTestUserLiteAsync().ConfigureAwait(false);
             WriteLineObject<TUser>(user);
             var c1 = GenUserClaim();
             var c2 = GenUserClaimEmptyType();
 
-            await AddUserClaimHelper(user, c1);
-            await AddUserClaimHelper(user, c2);
+            await AddUserClaimHelper(user, c1).ConfigureAwait(false);
+            await AddUserClaimHelper(user, c2).ConfigureAwait(false);
 
-            var claims = await manager.GetClaimsAsync(user);
+            var claims = await manager.GetClaimsAsync(user).ConfigureAwait(false);
             Assert.Contains(claims, (c) => c.Value == c1.Value && c.ValueType == c1.ValueType); //, "Claim not found");
             Assert.Contains(claims, (c) => c.Value == c2.Value && c.ValueType == c2.ValueType); //, "Claim not found");
         }
@@ -1044,7 +1044,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         protected async Task AddUserClaimHelper(TUser user, Claim claim)
         {
             using var manager = userFixture.CreateUserManager();
-            var userClaim = await manager.AddClaimAsync(user, claim);
+            var userClaim = await manager.AddClaimAsync(user, claim).ConfigureAwait(false);
             Assert.True(userClaim.Succeeded, string.Concat(userClaim.Errors.Select(e => e.Code)));
         }
 
@@ -1060,8 +1060,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                 TUser tempUser = null;
                 for (int i = 0; i < userCount; i++)
                 {
-                    tempUser = await CreateTestUserLiteAsync(true, true);
-                    await store.AddClaimAsync(tempUser, claim);
+                    tempUser = await CreateTestUserLiteAsync(true, true).ConfigureAwait(false);
+                    await store.AddClaimAsync(tempUser, claim).ConfigureAwait(false);
                 }
                 sw.Stop();
                 _output.WriteLine("GenerateUsers(): {0} user count", userCount);
@@ -1069,80 +1069,80 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
                 sw.Reset();
                 sw.Start();
-                var users = await manager.GetUsersForClaimAsync(claim);
+                var users = await manager.GetUsersForClaimAsync(claim).ConfigureAwait(false);
                 sw.Stop();
                 _output.WriteLine($"{nameof(manager.GetUsersForClaimAsync)}: {sw.Elapsed.TotalSeconds} seconds");
                 _output.WriteLine($"{nameof(manager.GetUsersForClaimAsync)}: {users.Count} user count");
                 Assert.Equal(userCount, users.Count);
             }
 
-            await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetUsersForClaimAsync(null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetUsersForClaimAsync(null)).ConfigureAwait(false);
         }
 
         public virtual async Task AddRemoveUserClaim()
         {
             using var store = userFixture.CreateUserStore();
             using var manager = userFixture.CreateUserManager();
-            var user = await CreateTestUserLiteAsync();
+            var user = await CreateTestUserLiteAsync().ConfigureAwait(false);
             WriteLineObject<TUser>(user);
             Claim claim = GenAdminClaim();
-            var addClaimResult = await manager.AddClaimAsync(user, claim);
+            var addClaimResult = await manager.AddClaimAsync(user, claim).ConfigureAwait(false);
             Assert.True(addClaimResult.Succeeded, string.Concat(addClaimResult.Errors));
 
-            var claims = await manager.GetClaimsAsync(user);
+            var claims = await manager.GetClaimsAsync(user).ConfigureAwait(false);
             Assert.Contains(claims, (c) => c.Value == claim.Value && c.Type == claim.Type); //, "Claim not found");
 
-            var userRemoveClaimResult = await manager.RemoveClaimAsync(user, claim);
+            var userRemoveClaimResult = await manager.RemoveClaimAsync(user, claim).ConfigureAwait(false);
             Assert.True(userRemoveClaimResult.Succeeded, string.Concat(userRemoveClaimResult.Errors));
 
-            var claims2 = await manager.GetClaimsAsync(user);
+            var claims2 = await manager.GetClaimsAsync(user).ConfigureAwait(false);
             Assert.DoesNotContain(claims2, (c) => c.Value == claim.Value && c.Type == claim.Type); //, "Claim not removed");
 
             //adding test for removing an empty claim
             Claim claimEmpty = GenAdminClaimEmptyValue();
-            var addClaimResult2 = await manager.AddClaimAsync(user, claimEmpty);
-            var removeClaimResult2 = await manager.RemoveClaimAsync(user, claimEmpty);
+            var addClaimResult2 = await manager.AddClaimAsync(user, claimEmpty).ConfigureAwait(false);
+            var removeClaimResult2 = await manager.RemoveClaimAsync(user, claimEmpty).ConfigureAwait(false);
             Assert.True(addClaimResult2.Succeeded, string.Concat(addClaimResult2.Errors));
             Assert.True(removeClaimResult2.Succeeded, string.Concat(removeClaimResult2.Errors));
 
-            await Assert.ThrowsAsync<ArgumentNullException>(() => store.AddClaimAsync(null, claim));
-            await Assert.ThrowsAsync<ArgumentNullException>(() => store.AddClaimAsync(user, null));
-            await Assert.ThrowsAsync<ArgumentNullException>(() => store.RemoveClaimAsync(null, claim));
-            await Assert.ThrowsAsync<ArgumentNullException>(() => store.RemoveClaimAsync(user, null));
-            await store.RemoveClaimAsync(user, new Claim(string.Empty, Guid.NewGuid().ToString()));
-            await Assert.ThrowsAsync<ArgumentNullException>(() => store.RemoveClaimAsync(user, new Claim(claim.Type, null)));
-            await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetClaimsAsync(null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.AddClaimAsync(null, claim)).ConfigureAwait(false);
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.AddClaimAsync(user, null)).ConfigureAwait(false);
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.RemoveClaimAsync(null, claim)).ConfigureAwait(false);
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.RemoveClaimAsync(user, null)).ConfigureAwait(false);
+            await store.RemoveClaimAsync(user, new Claim(string.Empty, Guid.NewGuid().ToString())).ConfigureAwait(false);
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.RemoveClaimAsync(user, new Claim(claim.Type, null))).ConfigureAwait(false);
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetClaimsAsync(null)).ConfigureAwait(false);
         }
 
         public virtual async Task AddReplaceRemoveUserClaim()
         {
             using var store = userFixture.CreateUserStore();
             using var manager = userFixture.CreateUserManager();
-            var user = await CreateTestUserLiteAsync(createPassword: true, createEmail: true);
+            var user = await CreateTestUserLiteAsync(createPassword: true, createEmail: true).ConfigureAwait(false);
             WriteLineObject<TUser>(user);
             Claim claim = GenAdminClaim();
-            await store.AddClaimAsync(user, claim);
+            await store.AddClaimAsync(user, claim).ConfigureAwait(false);
 
 
-            var claims = await manager.GetClaimsAsync(user);
+            var claims = await manager.GetClaimsAsync(user).ConfigureAwait(false);
             Assert.Contains(claims, (c) => c.Value == claim.Value && c.Type == claim.Type); //, "Claim not found");
 
 
             Claim nClaim = new Claim(claim.Type, "new claim value here");
-            var userReplaceClaimResult = await manager.ReplaceClaimAsync(user, claim, nClaim);
+            var userReplaceClaimResult = await manager.ReplaceClaimAsync(user, claim, nClaim).ConfigureAwait(false);
             Assert.True(userReplaceClaimResult.Succeeded, string.Concat(userReplaceClaimResult.Errors));
 
-            var claims2 = await manager.GetClaimsAsync(user);
+            var claims2 = await manager.GetClaimsAsync(user).ConfigureAwait(false);
             Assert.DoesNotContain(claims2, (c) => c.Value == claim.Value && c.Type == claim.Type); //, "Claim not replaced, old claim found");
             Assert.Contains(claims2, (c) => c.Value == nClaim.Value && c.Type == nClaim.Type); //, "Claim not replaced, new claim not found.");
 
 
-            await Assert.ThrowsAsync<ArgumentNullException>(() => store.ReplaceClaimAsync(null, claim, nClaim));
-            await Assert.ThrowsAsync<ArgumentNullException>(() => store.ReplaceClaimAsync(user, null, nClaim));
-            await Assert.ThrowsAsync<ArgumentNullException>(() => store.ReplaceClaimAsync(user, claim, null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.ReplaceClaimAsync(null, claim, nClaim)).ConfigureAwait(false);
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.ReplaceClaimAsync(user, null, nClaim)).ConfigureAwait(false);
+            await Assert.ThrowsAsync<ArgumentNullException>(() => store.ReplaceClaimAsync(user, claim, null)).ConfigureAwait(false);
 
-            await store.RemoveClaimAsync(user, nClaim);
-            claims2 = await manager.GetClaimsAsync(user);
+            await store.RemoveClaimAsync(user, nClaim).ConfigureAwait(false);
+            claims2 = await manager.GetClaimsAsync(user).ConfigureAwait(false);
             Assert.DoesNotContain(claims2, (c) => c.Value == nClaim.Value && c.Type == nClaim.Type); //, "Claim not removed, new claim found.");
         }
 
@@ -1151,9 +1151,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             var userStore = userFixture.CreateUserStore();
 
             var user = GenTestUser();
-            _ = await userFixture.CreateUserManager().CreateAsync(user);
+            _ = await userFixture.CreateUserManager().CreateAsync(user).ConfigureAwait(false);
 
-            var userFound = await userStore.FindByNameAsync(user.UserName);
+            var userFound = await userStore.FindByNameAsync(user.UserName).ConfigureAwait(false);
 
 
             Assert.NotNull(user);
@@ -1167,9 +1167,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             var userStore = userFixture.CreateUserStore();
 
             var user = GenTestUser();
-            _ = await userFixture.CreateUserManager().CreateAsync(user);
+            _ = await userFixture.CreateUserManager().CreateAsync(user).ConfigureAwait(false);
 
-            var userFound = await userStore.FindByIdAsync(user.Id);
+            var userFound = await userStore.FindByIdAsync(user.Id).ConfigureAwait(false);
 
             Assert.NotNull(user);
             Assert.Equal(user.Id, userFound.Id);
@@ -1183,7 +1183,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             store.Dispose();
             GC.Collect();
 
-            await Assert.ThrowsAsync<ObjectDisposedException>(() => store.DeleteAsync(null));
+            await Assert.ThrowsAsync<ObjectDisposedException>(() => store.DeleteAsync(null)).ConfigureAwait(false);
         }
     }
 
