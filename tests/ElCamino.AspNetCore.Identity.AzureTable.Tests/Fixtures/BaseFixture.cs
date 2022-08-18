@@ -173,11 +173,6 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
             return idconfig;
         }
 
-        protected bool IsV2()
-        {
-            return new TUser() is Model.IdentityUser;
-        }
-
         public TContext GetContext()
         {
             return GetContext(GetConfig());
