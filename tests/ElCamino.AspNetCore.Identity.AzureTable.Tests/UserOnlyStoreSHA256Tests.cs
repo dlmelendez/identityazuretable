@@ -12,7 +12,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {
     public class UserOnlyStoreSHA256Tests : BaseUserStoreTests<ApplicationUserV2, IdentityCloudContext, UserOnlyStore<ApplicationUserV2, IdentityCloudContext>, SHA256KeyHelper>
     {
-        public const string UserOnlyStoreTrait = "IdentityCore.Azure.UserOnlyStore";
+        public const string UserOnlyStoreTrait = "IdentityCore.Azure.UserOnlyStore.SHA256";
         public const string UserOnlyStoreTraitProperties = UserOnlyStoreTrait + ".Properties";
 
         public UserOnlyStoreSHA256Tests(UserFixture<ApplicationUserV2, IdentityCloudContext, UserOnlyStore<ApplicationUserV2, IdentityCloudContext>, SHA256KeyHelper> userFix, ITestOutputHelper output) :

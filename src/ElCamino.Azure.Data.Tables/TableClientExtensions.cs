@@ -12,6 +12,7 @@ namespace Azure.Data.Tables
         /// <param name="entity"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>Entity with the etag and timestamp values set from response header values.</returns>
+        /// <exception cref="RequestFailedException"></exception>
         public static async Task<T> AddEntityWithHeaderValuesAsync<T>(this TableClient table, T entity, CancellationToken cancellationToken = default) where T : class, ITableEntity, new()
         {
             var response = await table.AddEntityAsync(entity, cancellationToken);
@@ -30,6 +31,7 @@ namespace Azure.Data.Tables
         /// <param name="mode"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>Entity with the etag and timestamp values set from response header values.</returns>
+        /// <exception cref="RequestFailedException"></exception>
         public static async Task<T> UpdateEntityWithHeaderValuesAsync<T>(this TableClient table, T entity, ETag ifMatch, TableUpdateMode mode = TableUpdateMode.Replace, CancellationToken cancellationToken = default) where T : class, ITableEntity, new()
         {
             var response = await table.UpdateEntityAsync(entity, ifMatch, mode, cancellationToken);
@@ -47,6 +49,7 @@ namespace Azure.Data.Tables
         /// <param name="mode"></param>
         /// <param name="cancellationToken"></param>
         /// <returns>Entity with the etag and timestamp values set from response header values.</returns>
+        /// <exception cref="RequestFailedException"></exception>
         public static async Task<T> UpsertEntityWithHeaderValuesAsync<T>(this TableClient table, T entity, TableUpdateMode mode = TableUpdateMode.Replace, CancellationToken cancellationToken = default) where T : class, ITableEntity, new()
         {
             var response = await table.UpsertEntityAsync(entity, mode, cancellationToken);
@@ -68,6 +71,7 @@ namespace Azure.Data.Tables
         /// <param name="cancellationToken"></param>
         /// <returns>Found entity or default value of the entity type</returns>
         /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="RequestFailedException"></exception>
         public static async Task<T> GetEntityOrDefaultAsync<T>(
             this TableClient table,
             string partitionKey,
