@@ -10,6 +10,8 @@ namespace Azure.Data.Tables
     /// </summary>
     public class BatchOperationHelper
     {
+        public const int MaxEntitiesPerBatch = 100;
+
         private readonly Dictionary<string, List<TableTransactionAction>> _batches = new();
 
         private readonly TableClient _table;
@@ -38,17 +40,27 @@ namespace Azure.Data.Tables
         public virtual async Task<IEnumerable<Response>> SubmitBatchAsync(CancellationToken cancellationToken = default)
         {
             ConcurrentBag<Response> bag = new ConcurrentBag<Response>();
-            List<Task> batches = new List<Task>(_batches.Count);
+            List<Task> batches = new List<Task>();
             foreach (KeyValuePair<string, List<TableTransactionAction>> kv in _batches)
             {
-                batches.Add(_table.SubmitTransactionAsync(kv.Value, cancellationToken)
-                    .ContinueWith((result) =>
-                    {
-                        foreach (var r in result.Result.Value)
+                int total = kv.Value.Count;
+                int skip = 0;
+                int take = total > MaxEntitiesPerBatch ? MaxEntitiesPerBatch : total;
+
+                while (take > 0)
+                {
+                    batches.Add(_table.SubmitTransactionAsync(kv.Value.Skip(skip).Take(take), cancellationToken)
+                        .ContinueWith((result) =>
                         {
-                            bag.Add(r);
-                        }
-                    }, cancellationToken));
+                            foreach (var r in result.Result.Value)
+                            {
+                                bag.Add(r);
+                            }
+                        }, cancellationToken));
+
+                    skip += take;
+                    take = (total - skip) > MaxEntitiesPerBatch ? MaxEntitiesPerBatch : (total - skip);
+                }
             }
             await Task.WhenAll(batches).ConfigureAwait(false);
             Clear();

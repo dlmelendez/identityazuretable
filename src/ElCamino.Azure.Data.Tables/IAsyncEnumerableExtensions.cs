@@ -1,7 +1,5 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
-using System.Diagnostics;
-
 namespace Azure.Data.Tables
 {
     public static class IAsyncEnumerableExtensions
@@ -51,26 +49,17 @@ namespace Azure.Data.Tables
             return await enumerator.MoveNextAsync().ConfigureAwait(false);
         }
 
-        public static async IAsyncEnumerable<T> ExecuteQueryAsync<T>(this TableClient ct, TableQuery tq)
-            where T : class, ITableEntity, new()
+        public static async Task<int> CountAsync<T>(
+            this IAsyncEnumerable<T> asyncEnumerable,
+            CancellationToken cancellationToken = default)
         {
-#if DEBUG
-            int iCounter = 0;
-#endif
-
-            AsyncPageable<T> segment = ct.QueryAsync<T>(tq.FilterString, tq.TakeCount, tq.SelectColumns);
-            await foreach (T result in segment.ConfigureAwait(false))
+            await using var enumerator = asyncEnumerable.GetAsyncEnumerator(cancellationToken);
+            int counter = 0;
+            while (await enumerator.MoveNextAsync().ConfigureAwait(false))
             {
-#if DEBUG
-                iCounter++;
-#endif
-                yield return result;
+                counter++;
             }
-
-#if DEBUG
-            Debug.WriteLine("ExecuteQueryAsync: (Count): {0}", iCounter);
-            Debug.WriteLine("ExecuteQueryAsync (Query): " + tq.FilterString);
-#endif
+            return counter;
         }
     }
 }

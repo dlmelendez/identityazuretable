@@ -26,16 +26,6 @@ namespace Azure.Data.Tables
     public class TableQuery
     {
 
-        /* Unmerged change from project 'ElCamino.Azure.Data.Tables (net6.0)'
-        Before:
-                public int? TakeCount { get; set; }
-
-                public string FilterString { get; set; }
-        After:
-                public int? TakeCount { get; set; }
-
-                public string FilterString { get; set; }
-        */
         public int? TakeCount { get; set; }
 
         public string FilterString { get; set; }

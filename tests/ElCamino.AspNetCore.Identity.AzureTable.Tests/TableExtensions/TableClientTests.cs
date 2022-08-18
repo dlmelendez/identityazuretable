@@ -114,5 +114,85 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.TableExtensions
             Assert.Equal(propertyName, getEntity.GetString(propertyName));
 
         }
+
+        [Fact]
+        public async Task ExecuteTableQueryTakeCount()
+        {
+            //Create Table
+            await SetupTableAsync();
+            //Setup Entity
+            string partitionKey = "b-" + Guid.NewGuid().ToString("N");
+            _output.WriteLine("PartitionKey {0}", partitionKey);
+
+            string filterByPartitionKey = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, partitionKey);
+            int count = await _tableClient.QueryAsync<TableEntity>(filter: filterByPartitionKey).CountAsync();
+            const int maxTestEntities = 1001;
+            _output.WriteLine("Entities found {0}", count);
+
+            BatchOperationHelper batch = new BatchOperationHelper(_tableClient);
+
+            if (count < maxTestEntities)
+            {                
+                for (int i = 0; i < (maxTestEntities - count); i++)
+                {
+                    string rowKey = "b-" + Guid.NewGuid().ToString("N");
+                    TableEntity entity = new TableEntity(partitionKey, rowKey);
+                    batch.UpsertEntity(entity, TableUpdateMode.Replace);
+                }
+                await batch.SubmitBatchAsync();
+                count = await _tableClient.QueryAsync<TableEntity>(filter: filterByPartitionKey).CountAsync();
+                _output.WriteLine("Entities found after batch create {0}", count);
+            }
+            Assert.True(count >= maxTestEntities);
+
+            //Execute Query Take 1
+            TableQuery tq = new TableQuery();
+            tq.FilterString = filterByPartitionKey;
+            tq.TakeCount = 1;
+            var take = await _tableClient.ExecuteQueryAsync<TableEntity>(tq).ToListAsync();
+            Assert.Equal(tq.TakeCount.Value, take.Count);
+            _output.WriteLine($"Expected:{tq.TakeCount.Value} Actual:{take.Count}");
+
+            //Execute Query Take 0
+            tq.TakeCount = 0;
+            take = await _tableClient.ExecuteQueryAsync<TableEntity>(tq).ToListAsync();
+            Assert.Equal(tq.TakeCount.Value, take.Count);
+            _output.WriteLine($"Expected:{tq.TakeCount.Value} Actual:{take.Count}");
+
+            //Execute Query Take null
+            tq.TakeCount = null;
+            take = await _tableClient.ExecuteQueryAsync<TableEntity>(tq).ToListAsync();
+            Assert.Equal(count, take.Count);
+            _output.WriteLine($"Expected:{count} Actual:{take.Count}");
+
+            //Execute Query Take 100
+            tq.TakeCount = 100;
+            take = await _tableClient.ExecuteQueryAsync<TableEntity>(tq).ToListAsync();
+            Assert.Equal(tq.TakeCount.Value, take.Count);
+            _output.WriteLine($"Expected:{tq.TakeCount.Value} Actual:{take.Count}");
+
+            //Execute Query Take 1000
+            tq.TakeCount = 1000;
+            take = await _tableClient.ExecuteQueryAsync<TableEntity>(tq).ToListAsync();
+            Assert.Equal(tq.TakeCount.Value, take.Count);
+            _output.WriteLine($"Expected:{tq.TakeCount.Value} Actual:{take.Count}");
+
+            //Execute Query Take 1001
+            tq.TakeCount = 1001;
+            take = await _tableClient.ExecuteQueryAsync<TableEntity>(tq).ToListAsync();
+            Assert.Equal(tq.TakeCount.Value, take.Count);
+            _output.WriteLine($"Expected:{tq.TakeCount.Value} Actual:{take.Count}");
+
+            foreach (TableEntity te in take)
+            {
+                batch.DeleteEntity(te.PartitionKey, te.RowKey, te.ETag);
+            }
+            await batch.SubmitBatchAsync();
+            count = await _tableClient.QueryAsync<TableEntity>(filter: filterByPartitionKey).CountAsync();
+            _output.WriteLine("Entities found after batch delete {0}", count);
+            Assert.Equal(0, count);
+
+        }
+
     }
 }
