@@ -209,14 +209,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 }
 
 
-                return (await GetUsersByIndexQueryAsync(GetUserByRoleIndexQuery(roleName), (userId) =>
+                return (await GetUsersByIndexQueryAsync(GetUserByRoleIndexQuery(roleName), (userId, cancellationToken) =>
                 {
                     return GetUserAggregateQueryAsync(userId, setFilterByUserId: getTableQueryFilterByUserId, whereClaim: null, whereRole: (ur) =>
                     {
                         return ur.RowKey == _keyHelper.GenerateRowKeyIdentityUserRole(roleName);
-                    });
+                    }, cancellationToken: cancellationToken);
 
-                }).ConfigureAwait(false)).ToList();
+                }, cancellationToken).ConfigureAwait(false)).ToList();
             }
 
             return new List<TUser>();
@@ -288,7 +288,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         protected async Task<IEnumerable<TUser>> GetUserAggregateQueryAsync(IEnumerable<string> userIds,
         Func<string, string> setFilterByUserId = null,
         Func<TUserRole, bool> whereRole = null,
-        Func<TUserClaim, bool> whereClaim = null)
+        Func<TUserClaim, bool> whereClaim = null,
+        CancellationToken cancellationToken = default)
         {
             const double pageSize = 50.0;
             int pages = (int)Math.Ceiling(((double)userIds.Count() / pageSize));
@@ -341,7 +342,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             var tasks = listTqs.Select((q) =>
             {
                 return
-                _userTable.QueryAsync<TableEntity>(filter: q).ToListAsync()
+                _userTable.QueryAsync<TableEntity>(filter: q, cancellationToken: cancellationToken).ToListAsync(cancellationToken)
                      .ContinueWith((taskResults) =>
                      {
                          //ContinueWith returns completed task. Calling .Result is safe here.

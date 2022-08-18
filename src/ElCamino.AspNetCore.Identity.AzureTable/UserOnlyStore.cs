@@ -303,6 +303,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
         public async Task<IEnumerable<TUser>> FindAllByEmailAsync(string plainEmail, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
             IEnumerable<TUser> users = await GetUsersByIndexQueryAsync(FindByEmailIndexQuery(plainEmail), GetUserQueryAsync, cancellationToken).ConfigureAwait(false);
             return users.Where(user => _keyHelper.GenerateRowKeyUserEmail(plainEmail) == _keyHelper.GenerateRowKeyUserEmail(user.Email));
@@ -419,6 +420,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
         protected virtual async Task<TUser> GetUserAsync(string userId, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             return await _userTable.GetEntityOrDefaultAsync<TUser>(partitionKey: userId, rowKey: userId, cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
@@ -429,6 +431,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         /// <returns></returns>
         protected IAsyncEnumerable<TableEntity> GetUserAggregateQueryAsync(string userIdPartitionKey, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             string filterString = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, userIdPartitionKey);
 
             return _userTable.QueryAsync<TableEntity>(filter: filterString, cancellationToken: cancellationToken);
@@ -436,8 +440,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
         protected async Task<IEnumerable<TUser>> GetUserAggregateQueryAsync(IEnumerable<string> userIds,
                 Func<string, string> setFilterByUserId = null,
-                Func<TUserClaim, bool> whereClaim = null)
+                Func<TUserClaim, bool> whereClaim = null,
+                CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             const double pageSize = 50.0;
             int pages = (int)Math.Ceiling(((double)userIds.Count() / pageSize));
             List<string> listTqs = new List<string>(pages);
@@ -488,7 +495,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 #endif
             var tasks = listTqs.Select((q) =>
             {
-                return _userTable.QueryAsync<TableEntity>(filter: q).ToListAsync()
+                return _userTable.QueryAsync<TableEntity>(filter: q, cancellationToken:cancellationToken).ToListAsync(cancellationToken)
                      .ContinueWith((taskResults) =>
                      {
                          //ContinueWith returns completed task. Calling .Result is safe here.
@@ -520,8 +527,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return bag;
         }
 
-        protected virtual async Task<IEnumerable<TUser>> GetUserQueryAsync(IEnumerable<string> userIds)
+        protected virtual async Task<IEnumerable<TUser>> GetUserQueryAsync(IEnumerable<string> userIds, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             const double pageSize = 50.0;
             int pages = (int)Math.Ceiling(((double)userIds.Count() / pageSize));
             List<string> listTqs = new List<string>(pages);
@@ -569,7 +578,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 #endif
             IEnumerable<Task> tasks = listTqs.Select((q) =>
             {
-                return _userTable.QueryAsync<TUser>(filter: q).ToListAsync()
+                return _userTable.QueryAsync<TUser>(filter: q, cancellationToken: cancellationToken).ToListAsync(cancellationToken)
                 .ContinueWith((taskResults) =>
                 {
                     foreach (var s in taskResults.Result)
@@ -634,6 +643,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
         protected virtual async Task<TUser> GetUserFromIndexQueryAsync(string indexQuery, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var user = await _indexTable.QueryAsync<IdentityUserIndex>(filter: indexQuery, maxPerPage: 1, select: IndexUserIdSelectColumns, cancellationToken).FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
             if (user != null)
             {
@@ -644,8 +655,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return default;
         }
 
-        protected async Task<IEnumerable<TUser>> GetUsersByIndexQueryAsync(string indexQuery, Func<IEnumerable<string>, Task<IEnumerable<TUser>>> getUserFunc, CancellationToken cancellationToken = default)
+        protected async Task<IEnumerable<TUser>> GetUsersByIndexQueryAsync(string indexQuery, Func<IEnumerable<string>, CancellationToken, Task<IEnumerable<TUser>>> getUserFunc, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
 #if DEBUG
             DateTime startIndex = DateTime.UtcNow;
 #endif
@@ -654,16 +666,16 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             const int takeCount = 30;
             const int taskMax = 10;
             List<Task> taskBatch = new List<Task>(taskMax);
-            async Task getUsers(IEnumerable<string> ids)
+            async Task getUsers(IEnumerable<string> ids, CancellationToken ct)
             {
-                lUsers.Add((await getUserFunc(ids).ConfigureAwait(false)));
+                lUsers.Add((await getUserFunc(ids, ct).ConfigureAwait(false)));
             }
             while (token != null)
             {
                 IAsyncEnumerable<Page<IdentityUserIndex>> pages = _indexTable.QueryAsync<IdentityUserIndex>(indexQuery, takeCount, IndexUserIdSelectColumns, cancellationToken).AsPages(continuationToken: token);
                 Page<IdentityUserIndex> page = await pages.FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
                 var tempUserIds = page.Values.Select(u => u.Id).Distinct();
-                taskBatch.Add(getUsers(tempUserIds));
+                taskBatch.Add(getUsers(tempUserIds, cancellationToken));
                 if (taskBatch.Count % taskMax == 0)
                 {
                     await Task.WhenAll(taskBatch).ConfigureAwait(false);
@@ -1021,14 +1033,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 return tqFilter;
             }
 
-            return (await GetUsersByIndexQueryAsync(GetUserByClaimIndexQuery(claim), (userId) =>
+            return (await GetUsersByIndexQueryAsync(GetUserByClaimIndexQuery(claim), (userId, ct) =>
             {
                 return GetUserAggregateQueryAsync(userId, setFilterByUserId: getTableQueryFilterByUserId, whereClaim: (uc) =>
                 {
                     return uc.RowKey == _keyHelper.GenerateRowKeyIdentityUserClaim(claim.Type, claim.Value);
-                });
+                }, cancellationToken);
 
-            }).ConfigureAwait(false)).ToList();
+            }, cancellationToken).ConfigureAwait(false)).ToList();
         }
 
         /// <summary>
@@ -1067,14 +1079,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return _userTable.UpsertEntityAsync(token, TableUpdateMode.Replace);
         }
 
-
         protected override Task RemoveUserTokenAsync(TUserToken token)
         {
             return _userTable.DeleteEntityAsync(token.PartitionKey, token.RowKey, TableConstants.ETagWildcard);
         }
-
-
-
     }
-
 }
