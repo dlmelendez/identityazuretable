@@ -251,7 +251,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             string rowKey = _keyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey);
 
-            return await _userTable.GetEntityOrDefaultAsync<TUserLogin>(userId, rowKey);
+            return await _userTable.GetEntityOrDefaultAsync<TUserLogin>(userId, rowKey).ConfigureAwait(false);
         }
 
         protected override async Task<TUserLogin> FindUserLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken)
