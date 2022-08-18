@@ -1,6 +1,5 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
-using System;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
 using Xunit;

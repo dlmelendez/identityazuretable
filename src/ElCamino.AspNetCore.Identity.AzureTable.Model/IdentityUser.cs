@@ -1,13 +1,11 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
+
+using System;
+using System.Runtime.Serialization;
 using Azure;
 using Azure.Data.Tables;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 {
@@ -48,7 +46,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 
         public double KeyVersion { get; set; }
 
-        
+
 
         public override string UserName
         {
@@ -81,7 +79,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         {
             get
             {
-                if(LockoutEndDateUtc.HasValue)
+                if (LockoutEndDateUtc.HasValue)
                 {
                     return new DateTimeOffset?(new DateTimeOffset(LockoutEndDateUtc.Value));
                 }
@@ -90,7 +88,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
             }
             set
             {
-                if(value.HasValue)
+                if (value.HasValue)
                 {
                     LockoutEndDateUtc = value.Value.UtcDateTime;
                 }
@@ -109,5 +107,5 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 
     }
 
-    
+
 }

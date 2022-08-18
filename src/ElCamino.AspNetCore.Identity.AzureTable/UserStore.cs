@@ -4,16 +4,12 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Security.Claims;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
-using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
-using Azure.Data.Tables;
 using Azure;
-using System.Net;
+using Azure.Data.Tables;
 using Azure.Data.Tables.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable
 {
@@ -55,14 +51,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
     {
         protected TableClient _roleTable;
 
-        public UserStore(TContext context, Model.IKeyHelper keyHelper) : base(context, keyHelper) 
+        public UserStore(TContext context, Model.IKeyHelper keyHelper) : base(context, keyHelper)
         {
             _roleTable = context.RoleTable;
         }
 
         public override Task CreateTablesIfNotExistsAsync()
         {
-            Task[] tasks = 
+            Task[] tasks =
                 new Task[]
                 {
                     base.CreateTablesIfNotExistsAsync(),
@@ -124,7 +120,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserRole));
             var selectColumns = new List<string>() { roleName };
             var userRoles =
-                (await _userTable.QueryAsync<TableEntity>(filter: filterString, select: selectColumns, cancellationToken:cancellationToken).ToListAsync(cancellationToken).ConfigureAwait(false))
+                (await _userTable.QueryAsync<TableEntity>(filter: filterString, select: selectColumns, cancellationToken: cancellationToken).ToListAsync(cancellationToken).ConfigureAwait(false))
                 .Where(w => w.ContainsKey(roleName))
                 .Select(d => d.GetString(roleName))
                 .Where(di => !string.IsNullOrWhiteSpace(di));
@@ -159,7 +155,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                     }
                     tasks.Add(
                         _roleTable.QueryAsync<Model.IdentityRole>(filter: queryTemp, select: new List<string>() { nameof(Model.IdentityRole.Name) }, cancellationToken: cancellationToken).ToListAsync(cancellationToken)
-                        .ContinueWith((t) => {
+                        .ContinueWith((t) =>
+                        {
                             return t.Result.Where(w => w.Name != null)
                             .Select(d => d.Name)
                             .Where(di => !string.IsNullOrWhiteSpace(di))
@@ -212,7 +209,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 }
 
 
-                return (await GetUsersByIndexQueryAsync(GetUserByRoleIndexQuery(roleName), (userId) => {
+                return (await GetUsersByIndexQueryAsync(GetUserByRoleIndexQuery(roleName), (userId) =>
+                {
                     return GetUserAggregateQueryAsync(userId, setFilterByUserId: getTableQueryFilterByUserId, whereClaim: null, whereRole: (ur) =>
                     {
                         return ur.RowKey == _keyHelper.GenerateRowKeyIdentityUserRole(roleName);
@@ -275,8 +273,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 {
                     var deleteRoleIndex = CreateRoleIndex(userPartitionKey, roleName);
                     await Task.WhenAll(
-                       _userTable.DeleteEntityAsync(item.PartitionKey, item.RowKey,  TableConstants.ETagWildcard, cancellationToken),
-                       _indexTable.DeleteEntityAsync(deleteRoleIndex.PartitionKey, deleteRoleIndex.RowKey,  TableConstants.ETagWildcard, cancellationToken)
+                       _userTable.DeleteEntityAsync(item.PartitionKey, item.RowKey, TableConstants.ETagWildcard, cancellationToken),
+                       _indexTable.DeleteEntityAsync(deleteRoleIndex.PartitionKey, deleteRoleIndex.RowKey, TableConstants.ETagWildcard, cancellationToken)
                     ).ConfigureAwait(false);
                 }
             }
@@ -387,7 +385,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             IEnumerable<TUserClaim> Claims,
             IEnumerable<TUserLogin> Logins,
             IEnumerable<TUserToken> Tokens)
-        MapUserAggregate(string userId, 
+        MapUserAggregate(string userId,
             IEnumerable<TableEntity> userResults)
         {
 
@@ -449,7 +447,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             tasks.Add(DeleteAllUserRows(userPartitionKey, userRows));
 
             var deleteUserNameIndex = CreateUserNameIndex(userPartitionKey, user.UserName);
-            tasks.Add(_indexTable.DeleteEntityAsync(deleteUserNameIndex.PartitionKey, deleteUserNameIndex.RowKey,  TableConstants.ETagWildcard, cancellationToken: cancellationToken));
+            tasks.Add(_indexTable.DeleteEntityAsync(deleteUserNameIndex.PartitionKey, deleteUserNameIndex.RowKey, TableConstants.ETagWildcard, cancellationToken: cancellationToken));
 
             var userAgg = MapUserAggregate(userPartitionKey, userRows);
 
@@ -458,25 +456,25 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             foreach (var userLogin in userAgg.Logins)
             {
                 var deleteIndex = CreateLoginIndex(userPartitionKey, userLogin.LoginProvider, userLogin.ProviderKey);
-                tasks.Add(_indexTable.DeleteEntityAsync(deleteIndex.PartitionKey, deleteIndex.RowKey,  TableConstants.ETagWildcard, cancellationToken: cancellationToken));
+                tasks.Add(_indexTable.DeleteEntityAsync(deleteIndex.PartitionKey, deleteIndex.RowKey, TableConstants.ETagWildcard, cancellationToken: cancellationToken));
             }
 
             foreach (var userRole in userAgg.Roles)
             {
                 var deleteIndex = CreateRoleIndex(userPartitionKey, userRole.RoleName);
-                tasks.Add(_indexTable.DeleteEntityAsync(deleteIndex.PartitionKey, deleteIndex.RowKey,  TableConstants.ETagWildcard, cancellationToken: cancellationToken));
+                tasks.Add(_indexTable.DeleteEntityAsync(deleteIndex.PartitionKey, deleteIndex.RowKey, TableConstants.ETagWildcard, cancellationToken: cancellationToken));
             }
 
             foreach (var userClaim in userAgg.Claims)
             {
                 var deleteIndex = CreateClaimIndex(userPartitionKey, userClaim.ClaimType, userClaim.ClaimValue);
-                tasks.Add(_indexTable.DeleteEntityAsync(deleteIndex.PartitionKey, deleteIndex.RowKey,  TableConstants.ETagWildcard, cancellationToken: cancellationToken));
+                tasks.Add(_indexTable.DeleteEntityAsync(deleteIndex.PartitionKey, deleteIndex.RowKey, TableConstants.ETagWildcard, cancellationToken: cancellationToken));
             }
 
             if (!string.IsNullOrWhiteSpace(user.Email))
             {
                 var deleteIndex = CreateEmailIndex(userPartitionKey, user.Email);
-                tasks.Add(_indexTable.DeleteEntityAsync(deleteIndex.PartitionKey, deleteIndex.RowKey,  TableConstants.ETagWildcard, cancellationToken: cancellationToken));
+                tasks.Add(_indexTable.DeleteEntityAsync(deleteIndex.PartitionKey, deleteIndex.RowKey, TableConstants.ETagWildcard, cancellationToken: cancellationToken));
             }
 
             try

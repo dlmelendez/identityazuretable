@@ -1,11 +1,9 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Identity;
 using System;
-using Azure.Data.Tables;
-using Azure;
 using System.Runtime.Serialization;
+using Azure;
+using Azure.Data.Tables;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 {
@@ -62,7 +60,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         public string PartitionKey { get; set; }
         public string RowKey { get; set; }
         public DateTimeOffset? Timestamp { get; set; }
-        public ETag ETag { get; set; } =  ETag.All;
+        public ETag ETag { get; set; } = ETag.All;
 
         public IdentityRole() : base()
         {
@@ -72,6 +70,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         public override TKey Id { get; set; }
 
 
-        
+
     }
 }

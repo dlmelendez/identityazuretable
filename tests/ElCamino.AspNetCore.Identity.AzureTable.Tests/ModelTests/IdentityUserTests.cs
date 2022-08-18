@@ -1,7 +1,7 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 using System;
-using Xunit;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
+using Xunit;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.ModelTests
 {

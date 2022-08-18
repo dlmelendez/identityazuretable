@@ -1,22 +1,12 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Security.Claims;
-using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
+using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
+using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
 using Xunit;
 using Xunit.Abstractions;
-using ElCamino.AspNetCore.Identity.AzureTable;
-using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser<string>;
-using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
-using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
-using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
-using Microsoft.AspNetCore.Identity;
-using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {
@@ -26,7 +16,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         public const string UserOnlyStoreTraitProperties = UserOnlyStoreTrait + ".Properties";
 
         public UserOnlyStoreTests(UserFixture<ApplicationUserV2, IdentityCloudContext, UserOnlyStore<ApplicationUserV2, IdentityCloudContext>, DefaultKeyHelper> userFix, ITestOutputHelper output) :
-            base(userFix, output) {  }
+            base(userFix, output)
+        { }
         [Fact(DisplayName = "AddRemoveUserClaim")]
         [Trait(UserOnlyStoreTrait, "")]
         public override Task AddRemoveUserClaim()
@@ -171,7 +162,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         [Trait(UserOnlyStoreTrait, "")]
         public override void UserStoreCtors()
         {
-            Assert.Throws<ArgumentNullException>(() => 
+            Assert.Throws<ArgumentNullException>(() =>
             {
                 new UserOnlyStore<ApplicationUserV2, IdentityCloudContext>(null, null);
             });

@@ -1,12 +1,9 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
-using ElCamino.AspNetCore.Identity.AzureTable;
-using Azure.Data.Tables;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
+using Azure.Data.Tables;
+using ElCamino.AspNetCore.Identity.AzureTable;
 
 namespace ElCamino.Identity.AzureTable.DataUtility
 {

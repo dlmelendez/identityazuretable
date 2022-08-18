@@ -1,16 +1,11 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
-using ElCamino.AspNetCore.Identity.AzureTable;
-using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
-using ElCamino.AspNetCore.Identity.AzureTable.Model;
-using Azure.Data.Tables;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Azure;
-using System.Net;
-using Azure.Data.Tables.Models;
+using Azure.Data.Tables;
+using ElCamino.AspNetCore.Identity.AzureTable;
+using ElCamino.AspNetCore.Identity.AzureTable.Model;
 
 namespace ElCamino.Identity.AzureTable.DataUtility
 {
@@ -40,7 +35,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 try
                 {
                     targetContext.RoleTable.UpsertEntity(ConvertToTargetRoleEntity(dte, sourceContext), TableUpdateMode.Replace);
-                   
+
                     updateComplete?.Invoke();
                 }
                 catch (AggregateException exagg)
@@ -89,7 +84,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
                 targetEntity = new TableEntity(sourceEntity);
                 targetEntity.ResetKeys(_keyHelper.GenerateRowKeyIdentityRole(roleName),
-                    _keyHelper.GenerateRowKeyIdentityRoleClaim(claimType, claimValue),  TableConstants.ETagWildcard);
+                    _keyHelper.GenerateRowKeyIdentityRoleClaim(claimType, claimValue), TableConstants.ETagWildcard);
                 targetEntity["KeyVersion"] = _keyHelper.KeyVersion;
             }
             else if (sourceEntity.RowKey.StartsWith(_keyHelper.PreFixIdentityRole))
@@ -97,8 +92,8 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 sourceEntity.TryGetValue("Name", out object roleNameProperty);
                 string roleName = roleNameProperty.ToString();
 
-                targetEntity = new TableEntity( sourceEntity);
-                targetEntity.ResetKeys(_keyHelper.GeneratePartitionKeyIdentityRole(roleName), _keyHelper.GenerateRowKeyIdentityRole(roleName),  TableConstants.ETagWildcard);
+                targetEntity = new TableEntity(sourceEntity);
+                targetEntity.ResetKeys(_keyHelper.GeneratePartitionKeyIdentityRole(roleName), _keyHelper.GenerateRowKeyIdentityRole(roleName), TableConstants.ETagWildcard);
                 targetEntity["KeyVersion"] = _keyHelper.KeyVersion;
 
             }

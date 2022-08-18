@@ -1,14 +1,8 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ElCamino.AspNetCore.Identity.AzureTable;
-using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
-using Microsoft.AspNetCore.Identity;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
+using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
 
 namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 {
@@ -23,7 +17,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
         {
         }
 
-       
+
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);

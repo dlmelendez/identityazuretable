@@ -1,7 +1,5 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
-using Microsoft.AspNetCore.Identity;
-
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 {
     public interface IKeyHelper

@@ -7,7 +7,7 @@ namespace Azure.Data.Tables
     public static class IAsyncEnumerableExtensions
     {
         public static async Task<T> FirstOrDefaultAsync<T>(
-            this IAsyncEnumerable<T> asyncEnumerable, 
+            this IAsyncEnumerable<T> asyncEnumerable,
             CancellationToken cancellationToken = default)
         {
             await using var enumerator = asyncEnumerable.GetAsyncEnumerator(cancellationToken);
@@ -19,7 +19,7 @@ namespace Azure.Data.Tables
         }
 
         public static async Task<List<T>> ToListAsync<T>(
-            this IAsyncEnumerable<T> asyncEnumerable, 
+            this IAsyncEnumerable<T> asyncEnumerable,
             CancellationToken cancellationToken = default)
         {
             await using var enumerator = asyncEnumerable.GetAsyncEnumerator(cancellationToken);

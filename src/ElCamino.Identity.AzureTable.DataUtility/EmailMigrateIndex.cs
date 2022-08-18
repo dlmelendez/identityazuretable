@@ -1,13 +1,12 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
-using ElCamino.AspNetCore.Identity.AzureTable;
-using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
-using ElCamino.AspNetCore.Identity.AzureTable.Model;
-using Azure.Data.Tables;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Azure.Data.Tables;
+using ElCamino.AspNetCore.Identity.AzureTable;
+using ElCamino.AspNetCore.Identity.AzureTable.Model;
 
 namespace ElCamino.Identity.AzureTable.DataUtility
 {
@@ -43,7 +42,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
         public void ProcessMigrate(IdentityCloudContext targetContext,
             IdentityCloudContext sourceContext,
-            IList<TableEntity> userResults, 
+            IList<TableEntity> userResults,
             int maxDegreesParallel,
             Action updateComplete = null,
             Action<string> updateError = null)
@@ -61,7 +60,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 try
                 {
                     IdentityUserIndex index = CreateEmailIndex(userId.UserId, userId.Email);
-                    var r = targetContext.IndexTable.UpsertEntity<IdentityUserIndex>(index, mode:TableUpdateMode.Replace);
+                    var r = targetContext.IndexTable.UpsertEntity<IdentityUserIndex>(index, mode: TableUpdateMode.Replace);
                     updateComplete?.Invoke();
                 }
                 catch (Exception ex)
@@ -87,7 +86,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 PartitionKey = _keyHelper.GenerateRowKeyUserEmail(email),
                 RowKey = userid,
                 KeyVersion = _keyHelper.KeyVersion,
-                ETag =  TableConstants.ETagWildcard
+                ETag = TableConstants.ETagWildcard
             };
         }
 

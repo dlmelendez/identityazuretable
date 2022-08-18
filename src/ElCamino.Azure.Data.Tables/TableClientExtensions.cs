@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
 namespace Azure.Data.Tables
 {
@@ -73,7 +69,7 @@ namespace Azure.Data.Tables
         /// <returns>Found entity or default value of the entity type</returns>
         /// <exception cref="ArgumentNullException"></exception>
         public static async Task<T> GetEntityOrDefaultAsync<T>(
-            this TableClient table, 
+            this TableClient table,
             string partitionKey,
             string rowKey,
             IEnumerable<string> select = null,
@@ -86,9 +82,9 @@ namespace Azure.Data.Tables
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, partitionKey),
                 TableOperators.And,
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, rowKey));
-            
-            var page = await table.QueryAsync<T>(filter:filterString, maxPerPage:1, select:select, cancellationToken)
-                        .AsPages(continuationToken: null, pageSizeHint:1).FirstOrDefaultAsync().ConfigureAwait(false);
+
+            var page = await table.QueryAsync<T>(filter: filterString, maxPerPage: 1, select: select, cancellationToken)
+                        .AsPages(continuationToken: null, pageSizeHint: 1).FirstOrDefaultAsync().ConfigureAwait(false);
             return page?.Values.FirstOrDefault();
         }
     }

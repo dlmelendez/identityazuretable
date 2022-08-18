@@ -4,15 +4,15 @@ using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
+using ElCamino.AspNetCore.Identity.AzureTable.Model;
+using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using Xunit.Abstractions;
-using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
-using ElCamino.AspNetCore.Identity.AzureTable.Model;
-using Microsoft.AspNetCore.Identity;
-using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser;
 using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
-using Microsoft.Extensions.DependencyInjection;
-using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
+using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {
@@ -76,7 +76,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             _output.WriteLine("CreateRoleAsync: {0} seconds", sw.Elapsed.TotalSeconds);
 
             await AddRoleClaimAsyncHelper(role, GenRoleClaim());
-        } 
+        }
 
         private async Task AddRoleClaimAsyncHelper(IdentityRole role, Claim claim)
         {

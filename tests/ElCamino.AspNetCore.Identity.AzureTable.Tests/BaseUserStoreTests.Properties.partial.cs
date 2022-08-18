@@ -3,16 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Azure.Data.Tables;
+using ElCamino.AspNetCore.Identity.AzureTable.Model;
+using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
+using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
 using Microsoft.AspNetCore.Identity;
 using Xunit;
-using ElCamino.AspNetCore.Identity.AzureTable;
-using ElCamino.AspNetCore.Identity.AzureTable.Model;
-using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
-using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
-using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser<string>;
 using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
-using Azure.Data.Tables;
-using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
+using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser<string>;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {

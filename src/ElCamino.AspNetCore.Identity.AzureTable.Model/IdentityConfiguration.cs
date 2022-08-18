@@ -14,6 +14,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         public string UserTableName { get; set; }
 
         public string RoleTableName { get; set; }
-       
+
     }
 }

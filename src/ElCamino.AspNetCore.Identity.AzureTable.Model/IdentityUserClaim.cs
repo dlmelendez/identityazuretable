@@ -1,11 +1,7 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
+using System;
 using Azure;
 using Azure.Data.Tables;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 {
@@ -34,10 +30,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 
         public double KeyVersion { get; set; }
 
-        
+
     }
 
-    public class IdentityUserClaim<TKey> : Microsoft.AspNetCore.Identity.IdentityUserClaim<TKey>,  
+    public class IdentityUserClaim<TKey> : Microsoft.AspNetCore.Identity.IdentityUserClaim<TKey>,
         ITableEntity
         where TKey : IEquatable<TKey>
     {

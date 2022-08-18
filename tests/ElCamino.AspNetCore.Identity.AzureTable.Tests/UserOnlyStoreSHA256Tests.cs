@@ -1,22 +1,12 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Security.Claims;
-using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
+using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
+using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
 using Xunit;
 using Xunit.Abstractions;
-using ElCamino.AspNetCore.Identity.AzureTable;
-using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser<string>;
-using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
-using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
-using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
-using Microsoft.AspNetCore.Identity;
-using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {

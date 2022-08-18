@@ -1,13 +1,12 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
-using ElCamino.AspNetCore.Identity.AzureTable;
-using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
-using ElCamino.AspNetCore.Identity.AzureTable.Model;
-using Azure.Data.Tables;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Azure.Data.Tables;
+using ElCamino.AspNetCore.Identity.AzureTable;
+using ElCamino.AspNetCore.Identity.AzureTable.Model;
 
 namespace ElCamino.Identity.AzureTable.DataUtility
 {
@@ -87,7 +86,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 PartitionKey = _keyHelper.GeneratePartitionKeyIndexByLogin(loginProvider, providerKey),
                 RowKey = _keyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey),
                 KeyVersion = _keyHelper.KeyVersion,
-                ETag =  TableConstants.ETagWildcard
+                ETag = TableConstants.ETagWildcard
             };
 
         }

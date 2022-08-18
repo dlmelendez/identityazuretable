@@ -27,7 +27,7 @@ namespace Azure.Data.Tables
         Boolean,
         DateTime,
         Double,
-        Guid,        
+        Guid,
         Int32,
         Int64,
         String
