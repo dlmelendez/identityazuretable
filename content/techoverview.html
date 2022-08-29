@@ -1,6 +1,7 @@
 ﻿<h2>ElCamino.AspNetCore.Identity.AzureTable &lt;= 1.7</h2>
 <h3>High Level Dependencies</h3>
-<img src="images/AzureIdentityTableDependency.png" alt="AzureIdentityTableDependency.png" title="AzureIdentityTableDependency.png"><br>
+<img src="images/AzureIdentityTableDependency.png" alt="AzureIdentityTableDependency.png" title="AzureIdentityTableDependency.png">
+<br>
 ElCamino.AspNet.Identity.AzureTable.dll acts as the data access layer under the Microsoft.AspNet.Identity.Core.dll classes UserManager and RoleManager by implementing the necessary interfaces on the UserStore and RoleStore respectively. These classes consume
  the <a href="https://github.com/dlmelendez/identityazuretable/tree/master/src/ElCamino.AspNetCore.Identity.AzureTable/IdentityCloudContext.cs">
     IdentityCloudContext
@@ -15,8 +16,10 @@ The IdentityCloudContext default constructor will look for the IdentityConfigura
  or the new IdentityCloudContext(IdentityConfiguration config) overload. The new IdentityConfiguration class is Json serializable for ease of loading/saving these settings.
 <br>
 <b>New in 1.2.9.0</b> - use the new TablePrefix property to set a naming prefix for the azure tables that are using in the storage account. This enables multi-tenant support per storage account via configuration option for table name prefixing. e.g. Table prefix
- &#39;My&#39; uses tables, MyAspNetIndex, MyAspNetRoles, MyAspNetUsers. This is an optional field, can be set to string.empty or left unset.<br>
-Example of using the new configuration section:<br>
+ &#39;My&#39; uses tables, MyAspNetIndex, MyAspNetRoles, MyAspNetUsers. This is an optional field, can be set to string.empty or left unset.
+<br>
+Example of using the new configuration section:
+<br>
 <div style="color:Black; background-color:White">
 <pre>
     <span style="color:Blue">&lt;</span><span style="color:#A31515">configSections</span><span style="color:Blue">&gt;</span>
@@ -28,8 +31,10 @@ Example of using the new configuration section:<br>
 </div>
 <br>
 <b>Note: the following appSettings configuration option has been deprecated in 1.2.9.0.</b>
-<del>A custom AppSettings key can be passed in the overloaded constructor IdentityCloudContext(string appSettingsKey). If the appSettingsKey is not found, the literal string will be assumed to be the connection string.</del><br>
-For example, the default local connection string to the Azure Storage Emulator.<br>
+<del>A custom AppSettings key can be passed in the overloaded constructor IdentityCloudContext(string appSettingsKey). If the appSettingsKey is not found, the literal string will be assumed to be the connection string.</del>
+<br>
+For example, the default local connection string to the Azure Storage Emulator.
+<br>
 <div style="color:Black; background-color:White">
 <pre>
 <span style="color:Blue">&lt;</span><span style="color:#A31515">configuration</span><span style="color:Blue">&gt;</span>
@@ -145,13 +150,13 @@ The AspNetUsers table is designed to keep all of the user&#39;s data in a single
 <br>
 AspNetRoles table also uses a composite of the RoleName for the partition and row keys making it possible query the table by its primary key optimizing performance.
 <h3>Testing </h3>
-A full suite of unit tests against this assembly <a href="https://github.com/dlmelendez/identityazuretable/blob/master/tests/ElCamino.AspNet.Identity.AzureTable.Tests/ElCamino.AspNet.Identity.AzureTable.Tests.csproj">
+A full suite of integration tests against this assembly <a href="https://github.com/dlmelendez/identityazuretable/blob/master/tests/ElCamino.AspNet.Identity.AzureTable.Tests/ElCamino.AspNet.Identity.AzureTable.Tests.csproj">
     ElCamino.AspNet.Identity.AzureTable.Tests.csproj
 </a>
 <h3>Release Management</h3>
 <ul>
     <li>
-        Full suite of unit tests against this assembly at 100% pass rate against the Azure Local Emulator and against a live Azure Storage account. 100% pass rate is required before release. The tests are at about 99% code coverage currently and will work to keep
+        Full suite of integration tests against this assembly at 100% pass rate against the Azure Local Emulator and against a live Azure Storage account. 100% pass rate is required before release. The tests are at about 99% code coverage currently and will work to keep
         the up.
     </li>
     <li>

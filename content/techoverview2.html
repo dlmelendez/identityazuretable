@@ -164,13 +164,13 @@ The IdentityCloudContext default constructor will look for the IdentityConfigura
 <br>
     AspNetRoles table also uses a composite of the RoleName for the partition and row keys making it possible query the table by its primary key optimizing performance.
 <h3>Testing </h3>
-    A full suite of unit tests against this assembly <a href="https://github.com/dlmelendez/identityazuretable/blob/master/tests/ElCamino.AspNetCore.Identity.AzureTable.Tests/ElCamino.AspNetCore.Identity.AzureTable.Tests.csproj">
+    A full suite of integration tests against this assembly <a href="https://github.com/dlmelendez/identityazuretable/blob/master/tests/ElCamino.AspNetCore.Identity.AzureTable.Tests/ElCamino.AspNetCore.Identity.AzureTable.Tests.csproj">
     ElCamino.AspNetCore.Identity.AzureTable.Tests.csproj
 </a>
 <h3>Release Management</h3>
 <ul>
     <li>
-        Full suite of unit tests against this assembly at 100% pass rate against the Azure Local Emulator and against a live Azure Storage account. 100% pass rate is required before release. The tests are at about 90% code coverage currently and will work to keep
+        Full suite of integration tests against this assembly at 100% pass rate against the Azure Local Emulator and against a live Azure Storage account. 100% pass rate is required before release. The tests are at about 90% code coverage currently and will work to keep
         the up.
     </li>
     <li>

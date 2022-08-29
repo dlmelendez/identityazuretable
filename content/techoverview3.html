@@ -2,11 +2,11 @@
 <h3>High Level Dependencies</h3>
 <img src="images/AzureIdentityTableDependency2.png" alt="AzureIdentityTableDependency2.png" title="Azure Identity Dependendencies">
 <br>
-ElCamino.AspNetCore.Identity.AzureTable.dll acts as the data access layer under the Microsoft.AspNetCore.Identity.dll classes UserManager and RoleManager by implementing the necessary interfaces on the UserStoreV2 and RoleStore respectively. These classes consume
+ElCamino.AspNetCore.Identity.AzureTable.dll acts as the data access layer under the Microsoft.AspNetCore.Identity.dll classes UserManager and RoleManager by implementing the necessary interfaces on the UserStore and RoleStore respectively. These classes consume
  the <a href="https://github.com/dlmelendez/identityazuretable/tree/master/src/ElCamino.AspNetCore.Identity.AzureTable/IdentityCloudContext.cs">
     IdentityCloudContext
 </a> and the other Identity Model classes described below to persist the user and role information according to the business logic dictated by the respective UserManager and RoleManager classes.
-<h3>UserStoreV2 and RoleStore Classes</h3>
+<h3>UserStore and RoleStore Classes</h3>
 <img src="images/IdentityUserStoreRoleStore2.png" alt="IdentityUserStoreRoleStore2.png" title="IdentityUserStoreRoleStore2.png">
 <h3>IdentityCloudContext and Connections</h3>
 <a href="https://github.com/dlmelendez/identityazuretable/tree/master/src/ElCamino.AspNetCore.Identity.AzureTable/IdentityCloudContext.cs">IdentityCloudContext</a> that enables access to the Azure Table storage service and exposes the tables.
@@ -25,7 +25,6 @@ The IdentityCloudContext default constructor will look for the IdentityConfigura
         "IdentityConfiguration": {
             "TablePrefix": <span style="color:#A31515">"mvc6"</span>
             "StorageConnectionString": <span style="color:#A31515">"UseDevelopmentStorage=true;"</span>
-            "LocationMode": <span style="color:#A31515">"PrimaryOnly"</span>
             "IndexTableName": <span style="color:#A31515">"AspNetIndex"</span>
             "RoleTableName": <span style="color:#A31515">"AspNetRoles"</span>
             "UserTableName": <span style="color:#A31515">"AspNetUsers"</span>
@@ -52,7 +51,7 @@ The IdentityCloudContext default constructor will look for the IdentityConfigura
         </tr>
         <tr>
             <td>
-                <a href="https://github.com/dlmelendez/identityazuretable/tree/master/src/ElCamino.AspNetCore.Identity.AzureTable/Model/IdentityUser.cs">IdentityUserV2</a>
+                <a href="https://github.com/dlmelendez/identityazuretable/tree/master/src/ElCamino.AspNetCore.Identity.AzureTable/Model/IdentityUser.cs">IdentityUser</a>
             </td>
             <td>Hashed(UserId) </td>
             <td>Hashed(UserId) </td>
@@ -172,18 +171,18 @@ The IdentityCloudContext default constructor will look for the IdentityConfigura
 <h3>Performance </h3>
     The AspNetUsers table is designed to keep all of the user&#39;s data in a single table and in a table partition for each user. This results in a single query using the user&#39;s id (partition key) to get all of the data in a single query when the user&#39;s
     id is known. The user&#39;s id is an &#39;Hashed&#39; version of the UserId guid. When the user id is not known, the AspNetIndex
-    table is queried first either by user&#39;s email UserStoreV2.FindByEmailAsync(), user&#39;s username UserStoreV2.FindByUserNameAsync() or external login information UserStoreV2.FindAsync() to get the user&#39;s id to then query by user id for the complete user information. The AspNextIndex is always queried by partition
+    table is queried first either by user&#39;s email UserStore.FindByEmailAsync(), user&#39;s username UserStore.FindByUserNameAsync() or external login information UserStore.FindAsync() to get the user&#39;s id to then query by user id for the complete user information. The AspNextIndex is always queried by partition
     and rowkey making that query extremely fast. See above for the details of the AspNetIndex partition and rowkey strategy. In addition, Roles and Claims mapping to users are also indexed for use by GetUsersInRoleAsync() and GetUsersForClaimAsync(), respectively.
 <br>
     AspNetRoles table also uses a composite of the RoleName for the partition and row keys making it possible query the table by its primary key optimizing performance.
 <h3>Testing </h3>
-    A full suite of unit tests against this assembly <a href="https://github.com/dlmelendez/identityazuretable/blob/master/tests/ElCamino.AspNetCore.Identity.AzureTable.Tests/ElCamino.AspNetCore.Identity.AzureTable.Tests.csproj">
+    A full suite of integration tests against this assembly <a href="https://github.com/dlmelendez/identityazuretable/blob/master/tests/ElCamino.AspNetCore.Identity.AzureTable.Tests/ElCamino.AspNetCore.Identity.AzureTable.Tests.csproj">
     ElCamino.AspNetCore.Identity.AzureTable.Tests.csproj
 </a>
 <h3>Release Management</h3>
 <ul>
     <li>
-        Full suite of unit tests against this assembly at 100% pass rate against the Azure Local Emulator and against a live Azure Storage account. 100% pass rate is required before release.
+        Full suite of integration tests against this assembly at 100% pass rate against the Azure Local Emulator and against a live Azure Storage account. 100% pass rate is required before release.
     </li>
     <li>
         Releases available on NuGet..
