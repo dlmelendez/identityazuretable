@@ -3,11 +3,11 @@
   <PropertyGroup>
     <Description>Testing</Description>
     <Authors>David Melendez</Authors>
-    <TargetFrameworks>net6.0</TargetFrameworks>
-    <LangVersion>9.0</LangVersion>
+    <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+    <LangVersion>10.0</LangVersion>
     <AssemblyName>ElCamino.AspNetCore.Identity.AzureTable.Tests</AssemblyName>
     <IsPackable>false</IsPackable>
-    <Version>6.2</Version>
+    <Version>7.0</Version>
     <DebugType>Full</DebugType>
 
   </PropertyGroup>
