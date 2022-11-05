@@ -4,53 +4,52 @@ var app = angular.module("myApp", ["ngRoute", "projectControllers"]);
 app.config(function ($routeProvider) {
     $routeProvider
         .when("/", {
-            templateUrl: "content/index.html"
+            templateUrl: "content/moved.html"
         })
         .when("/gettingstarted", {
-            templateUrl: "content/gettingstarted.html"
+            templateUrl: "content/moved.html"
         })
         .when("/walkthrough-menu", {
-            templateUrl: "content/walkthrough-menu.html"
+            templateUrl: "content/moved.html"
         })
         .when("/walkthrough", {
-            templateUrl: "content/walkthrough.html"
+            templateUrl: "content/moved.html"
         })
         .when("/walkthroughcore", {
-            templateUrl: "content/walkthroughcore.html"
+            templateUrl: "content/moved.html"
         })
         .when("/walkthroughcore2", {
-            templateUrl: "content/walkthroughcore2.html"
+            templateUrl: "content/moved.html"
         })
         .when("/walkthroughcore3", {
-            templateUrl: "content/walkthroughcore3.html"
+            templateUrl: "content/moved.html"
         })
         .when("/walkthroughcore4", {
-            templateUrl: "content/walkthroughcore4.html"
+            templateUrl: "content/moved.html"
         })
         .when("/walkthroughcore5", {
-            templateUrl: "content/walkthroughcore5.html"
+            templateUrl: "content/moved.html"
         })
         .when("/ragrs", {
-            templateUrl: "content/ragrs.html"
+            templateUrl: "content/moved.html"
         })
         .when("/techoverview-menu", {
-            templateUrl: "content/techoverview-menu.html"
+            templateUrl: "content/moved.html"
         })
         .when("/techoverview", {
-            templateUrl: "content/techoverview.html"
+            templateUrl: "content/moved.html"
         })
         .when("/techoverview2", {
-            templateUrl: "content/techoverview2.html"
+            templateUrl: "content/moved.html"
         })
         .when("/techoverview3", {
-            templateUrl: "content/techoverview3.html"
+            templateUrl: "content/moved.html"
         })
         .when("/migration", {
-            templateUrl: "content/migration.html",
-            controller: "migrationDetails"
+            templateUrl: "content/moved.html"
         })
         .otherwise({
-            templateUrl: "content/index.html"
+            templateUrl: "content/moved.html"
         });
 
 
