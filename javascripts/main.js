@@ -4,53 +4,52 @@ var app = angular.module("myApp", ["ngRoute", "projectControllers"]);
 app.config(function ($routeProvider) {
     $routeProvider
     .when("/", {
-        templateUrl: "content/index.html"
+        resolveRedirectTo: () => "https://elcamino.cloud/projects/docs/identityazuretable/"
     })
     .when("/gettingstarted", {
-        templateUrl: "content/gettingstarted.html"
+        resolveRedirectTo: () => "https://elcamino.cloud/projects/docs/identityazuretable/gettingstarted.html"
     })
     .when("/walkthrough-menu", {
-        templateUrl: "content/walkthrough-menu.html"
+        resolveRedirectTo: () => "https://elcamino.cloud/projects/docs/identityazuretable/walkthrough/index.html"
     })
     .when("/walkthrough", {
-        templateUrl: "content/walkthrough.html"
+        resolveRedirectTo: () => "https://elcamino.cloud/projects/docs/identityazuretable/walkthrough/walkthrough.html"
     })
     .when("/walkthroughcore", {
-        templateUrl: "content/walkthroughcore.html"
+        resolveRedirectTo: () => "https://elcamino.cloud/projects/docs/identityazuretable/walkthrough/walkthroughcore.html"
     })
     .when("/walkthroughcore2", {
-        templateUrl: "content/walkthroughcore2.html"
+        resolveRedirectTo: () => "https://elcamino.cloud/projects/docs/identityazuretable/walkthrough/walkthroughcore2.html"
     })
     .when("/walkthroughcore3", {
-        templateUrl: "content/walkthroughcore3.html"
+        resolveRedirectTo: () => "https://elcamino.cloud/projects/docs/identityazuretable/walkthrough/walkthroughcore3.html"
     })
     .when("/walkthroughcore4", {
-        templateUrl: "content/walkthroughcore4.html"
+        resolveRedirectTo: () => "https://elcamino.cloud/projects/docs/identityazuretable/walkthrough/walkthroughcore4.html"
     })
     .when("/walkthroughcore5", {
-        templateUrl: "content/walkthroughcore5.html"
+        resolveRedirectTo: () => "https://elcamino.cloud/projects/docs/identityazuretable/walkthrough/walkthroughcore5.html"
     })
     .when("/ragrs", {
-        templateUrl: "content/ragrs.html"
+        resolveRedirectTo: () => "https://elcamino.cloud/projects/docs/identityazuretable/ragrs.html"
     })
     .when("/techoverview-menu", {
-        templateUrl: "content/techoverview-menu.html"
+        resolveRedirectTo: () => "https://elcamino.cloud/projects/docs/identityazuretable/techoverview/index.html"
     })
     .when("/techoverview", {
-        templateUrl: "content/techoverview.html"
+        resolveRedirectTo: () => "https://elcamino.cloud/projects/docs/identityazuretable/techoverview/techoverview.html"
     })
     .when("/techoverview2", {
-        templateUrl: "content/techoverview2.html"
+        resolveRedirectTo: () => "https://elcamino.cloud/projects/docs/identityazuretable/techoverview/techoverview2.html"
     })
     .when("/techoverview3", {
-        templateUrl: "content/techoverview3.html"
+        resolveRedirectTo: () => "https://elcamino.cloud/projects/docs/identityazuretable/techoverview/techoverview3.html"
     })
     .when("/migration", {
-        templateUrl: "content/migration.html",
-        controller: "migrationDetails"
+        resolveRedirectTo: () => "https://elcamino.cloud/projects/docs/identityazuretable/migration.html"
     })
     .otherwise({
-        templateUrl : "content/index.html"
+        resolveRedirectTo: () => "https://elcamino.cloud/projects/docs/identityazuretable/"
     });
 
    
