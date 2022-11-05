@@ -151,6 +151,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         {
             // Convert the input string to a byte array and compute the hash. 
             byte[] data = shaHash.ComputeHash(encoding.GetBytes(input));
+#if NET6_0_OR_GREATER
+            return Convert.ToHexString(data).ToLowerInvariant();
+#else
             Debug.WriteLine(string.Format("Key Size before hash: {0} bytes", encoding.GetBytes(input).Length));
 
             // Create a new StringBuilder to collect the bytes 
@@ -167,6 +170,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 
             // Return the hexadecimal string. 
             return sBuilder.ToString();
+#endif
         }
     }
 }
