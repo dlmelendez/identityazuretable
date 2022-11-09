@@ -147,13 +147,18 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 
         public abstract string ConvertKeyToHash(string input);
 
+        /// <summary>
+        /// Left only for backwards compat for older frameworks.
+        /// </summary>
+        /// <param name="shaHash"></param>
+        /// <param name="input"></param>
+        /// <param name="encoding"></param>
+        /// <param name="hashHexLength"></param>
+        /// <returns></returns>
         protected virtual string GetHash(HashAlgorithm shaHash, string input, Encoding encoding, int hashHexLength)
         {
             // Convert the input string to a byte array and compute the hash. 
             byte[] data = shaHash.ComputeHash(encoding.GetBytes(input));
-#if NET6_0_OR_GREATER
-            return Convert.ToHexString(data).ToLowerInvariant();
-#else
             Debug.WriteLine(string.Format("Key Size before hash: {0} bytes", encoding.GetBytes(input).Length));
 
             // Create a new StringBuilder to collect the bytes 
@@ -170,7 +175,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 
             // Return the hexadecimal string. 
             return sBuilder.ToString();
-#endif
         }
+
+#if NET6_0_OR_GREATER
+        protected static string FormatHashedData(byte[] hashedData)
+        {
+            // Convert the input string to a byte array and compute the hash. 
+            return Convert.ToHexString(hashedData).ToLowerInvariant();
+        }
+#endif
+
     }
 }

@@ -11,24 +11,30 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
     /// </summary>
     public class SHA256KeyHelper : BaseKeyHelper
     {
-        public override string ConvertKeyToHash(string input)
+
+#if NET6_0_OR_GREATER
+        public sealed override string ConvertKeyToHash(string input)
         {
             if (input != null)
             {
-                var encoding = Encoding.UTF8;
-#if NET6_0_OR_GREATER
-                // We can elide the SHA256 allocation if this isn't a derived type
-                if (GetType() == typeof(SHA256KeyHelper))
-                {
-                    byte[] data = SHA256.HashData(encoding.GetBytes(input));
-                    return Convert.ToHexString(data).ToLowerInvariant();
-                }
-#endif
-                using SHA256 sha = SHA256.Create();
-                return GetHash(sha, input, encoding, 64);
+                byte[] data = SHA256.HashData(Encoding.UTF8.GetBytes(input));
+                return FormatHashedData(data);
             }
             return null;
         }
+
+#else
+
+        public sealed override string ConvertKeyToHash(string input)
+        {
+            if (input != null)
+            {
+                using SHA256 sha = SHA256.Create();
+                return GetHash(sha, input, Encoding.UTF8, 64);
+            }
+            return null;
+        }
+#endif
 
         public override string GenerateRowKeyUserId(string plainUserId)
         {
