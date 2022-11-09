@@ -1,4 +1,6 @@
-﻿using System;
+﻿// MIT License Copyright 2022 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
@@ -6,7 +8,6 @@ using System.Text;
 using System.Threading.Tasks;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 
-// MIT License Copyright 2022 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.Fakes
 {
     internal class HashTestKeyHelperFake : BaseKeyHelper
