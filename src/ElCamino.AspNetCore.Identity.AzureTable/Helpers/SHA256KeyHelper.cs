@@ -1,5 +1,6 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
+using System;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -10,7 +11,21 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
     /// </summary>
     public class SHA256KeyHelper : BaseKeyHelper
     {
-        public override string ConvertKeyToHash(string input)
+
+#if NET6_0_OR_GREATER
+        public sealed override string ConvertKeyToHash(string input)
+        {
+            if (input != null)
+            {
+                byte[] data = SHA256.HashData(Encoding.UTF8.GetBytes(input));
+                return FormatHashedData(data);
+            }
+            return null;
+        }
+
+#else
+
+        public sealed override string ConvertKeyToHash(string input)
         {
             if (input != null)
             {
@@ -19,6 +34,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             }
             return null;
         }
+#endif
 
         public override string GenerateRowKeyUserId(string plainUserId)
         {

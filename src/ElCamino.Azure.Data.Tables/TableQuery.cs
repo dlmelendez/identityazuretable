@@ -69,7 +69,11 @@ namespace Azure.Data.Tables
             string operation,
             byte[] givenValue)
         {
+            string hash;
 
+#if NET6_0_OR_GREATER
+            hash = Convert.ToHexString(givenValue).ToLowerInvariant();
+#else
             StringBuilder sb = new StringBuilder();
 
             foreach (byte b in givenValue)
@@ -77,7 +81,10 @@ namespace Azure.Data.Tables
                 sb.AppendFormat("{0:x2}", b);
             }
 
-            return GenerateFilterCondition(propertyName, operation, sb.ToString(), EdmType.Binary);
+            hash = sb.ToString();
+#endif
+
+            return GenerateFilterCondition(propertyName, operation, hash, EdmType.Binary);
         }
 
         /// <summary>

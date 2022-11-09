@@ -248,9 +248,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             Assert.Equal(role.Name, result1.SingleOrDefault().Name);
         }
 
-        private void WriteLineObject<t>(t obj) where t : class
+        private void WriteLineObject<T>(T obj) where T : class
         {
-            _output.WriteLine(typeof(t).Name);
+            _output.WriteLine(typeof(T).Name);
             string strLine = obj == null ? "Null" : Newtonsoft.Json.JsonConvert.SerializeObject(obj, Newtonsoft.Json.Formatting.Indented);
             _output.WriteLine("{0}", strLine);
         }

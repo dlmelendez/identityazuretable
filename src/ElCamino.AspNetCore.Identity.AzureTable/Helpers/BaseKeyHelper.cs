@@ -143,10 +143,18 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             return string.Format(FormatterIdentityUserLogin, hash);
         }
 
-        public double KeyVersion => 6.2;
+        public double KeyVersion => 7.0;
 
         public abstract string ConvertKeyToHash(string input);
 
+        /// <summary>
+        /// Left only for backwards compat for older frameworks.
+        /// </summary>
+        /// <param name="shaHash"></param>
+        /// <param name="input"></param>
+        /// <param name="encoding"></param>
+        /// <param name="hashHexLength"></param>
+        /// <returns></returns>
         protected virtual string GetHash(HashAlgorithm shaHash, string input, Encoding encoding, int hashHexLength)
         {
             // Convert the input string to a byte array and compute the hash. 
@@ -168,5 +176,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             // Return the hexadecimal string. 
             return sBuilder.ToString();
         }
+
+#if NET6_0_OR_GREATER
+        protected static string FormatHashedData(byte[] hashedData)
+        {
+            // Convert the input string to a byte array and compute the hash. 
+            return Convert.ToHexString(hashedData).ToLowerInvariant();
+        }
+#endif
+
     }
 }

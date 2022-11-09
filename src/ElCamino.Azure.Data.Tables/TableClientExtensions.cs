@@ -93,8 +93,8 @@ namespace Azure.Data.Tables
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, rowKey));
 
             var page = await table.QueryAsync<T>(filter: filterString, maxPerPage: 1, select: select, cancellationToken)
-                        .AsPages(continuationToken: null, pageSizeHint: 1).FirstOrDefaultAsync().ConfigureAwait(false);
-            return page?.Values.FirstOrDefault();
+                        .AsPages(continuationToken: null, pageSizeHint: 1).FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+            return page?.Values.Count > 0 ? page.Values[0] : null;
         }
 
         /// <summary>

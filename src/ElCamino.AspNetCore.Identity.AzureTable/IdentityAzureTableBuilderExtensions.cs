@@ -12,21 +12,37 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         /// <summary>
         /// Use this to load and configure the Identity Azure Tables into the aspnet identity pipeline.
-        /// Note: <see cref="IdentityBuilder.AddRoles{TRole}"/> prior to calling this methiod in the pipeline if you need Roles functionality, otherwise the RoleStore will not be loaded.
+        /// Note: <see cref="IdentityBuilder.AddRoles{TRole}"/> prior to calling this method in the pipeline if you need Roles functionality, otherwise the RoleStore will not be loaded.
         /// </summary>
         /// <typeparam name="TContext">Use or extend <see cref="IdentityCloudContext"/></typeparam>
         /// <param name="builder"><see cref="IdentityBuilder"/> aspnet identity pipeline</param>
         /// <param name="configAction"><see cref="IdentityConfiguration"/></param>
-        /// <param name="keyHelper">Use <see cref="DefaultKeyHelper"/> that uses SHA1,  <see cref="SHA256KeyHelper"/> or a custom keyhelper that implements <see cref="IKeyHelper"/> </param>
+        /// <param name="keyHelper">Use <see cref="DefaultKeyHelper"/> that uses SHA1, <see cref="SHA256KeyHelper"/> or a custom keyhelper that implements <see cref="IKeyHelper"/> </param>
         /// <returns><see cref="IdentityBuilder"/></returns>
         public static IdentityBuilder AddAzureTableStores<TContext>(this IdentityBuilder builder, Func<IdentityConfiguration> configAction,
+            IKeyHelper keyHelper = null)
+            where TContext : IdentityCloudContext
+        {
+            return builder.AddAzureTableStores<TContext>(_ => configAction(), keyHelper);
+        }
+
+        /// <summary>
+        /// Use this to load and configure the Identity Azure Tables into the aspnet identity pipeline.
+        /// Note: <see cref="IdentityBuilder.AddRoles{TRole}"/> prior to calling this method in the pipeline if you need Roles functionality, otherwise the RoleStore will not be loaded.
+        /// </summary>
+        /// <typeparam name="TContext">Use or extend <see cref="IdentityCloudContext"/></typeparam>
+        /// <param name="builder"><see cref="IdentityBuilder"/> aspnet identity pipeline</param>
+        /// <param name="configAction"><see cref="IdentityConfiguration"/></param>
+        /// <param name="keyHelper">Use <see cref="DefaultKeyHelper"/> that uses SHA1, <see cref="SHA256KeyHelper"/> or a custom keyhelper that implements <see cref="IKeyHelper"/> </param>
+        /// <returns><see cref="IdentityBuilder"/></returns>
+        public static IdentityBuilder AddAzureTableStores<TContext>(this IdentityBuilder builder, Func<IServiceProvider, IdentityConfiguration> configAction,
             IKeyHelper keyHelper = null)
             where TContext : IdentityCloudContext
         {
 
             builder.Services.AddSingleton<IKeyHelper>(keyHelper ?? new DefaultKeyHelper());
 
-            builder.Services.AddSingleton<IdentityConfiguration>(new Func<IServiceProvider, IdentityConfiguration>(p => configAction()));
+            builder.Services.AddSingleton<IdentityConfiguration>(configAction);
 
             Type contextType = typeof(TContext);
             builder.Services.AddSingleton(contextType, contextType);
