@@ -17,9 +17,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 {
     public class KeyHelperTests
     {
-        private DefaultKeyHelper _defaultKeyHelper = new DefaultKeyHelper();
-        private SHA256KeyHelper _sha256KeyHelper = new SHA256KeyHelper();
-        private HashTestKeyHelperFake _fakeKeyHelper = new HashTestKeyHelperFake();
+        private readonly DefaultKeyHelper _defaultKeyHelper = new();
+        private readonly SHA256KeyHelper _sha256KeyHelper = new();
+        private readonly HashTestKeyHelperFake _fakeKeyHelper = new();
         protected readonly ITestOutputHelper _output;
 
         public KeyHelperTests(ITestOutputHelper output) 
