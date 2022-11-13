@@ -388,7 +388,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 //1.7 Claim rowkey migration 
                 if (_keyHelper.GenerateRowKeyIdentityUserClaim(tclaim.ClaimType, tclaim.ClaimValue) == tclaim.RowKey)
                 {
-                    rClaims.Add(new Claim(tclaim.ClaimType, tclaim.ClaimValue));
+                    rClaims.Add(tclaim.ToClaim());
                 }
             }
 
