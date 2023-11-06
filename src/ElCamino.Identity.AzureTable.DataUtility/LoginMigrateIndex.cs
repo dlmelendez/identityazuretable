@@ -37,16 +37,16 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
         public bool UserWhereFilter(TableEntity d)
         {
-            return !string.IsNullOrWhiteSpace(d["LoginProvider"].ToString())
-                && !string.IsNullOrWhiteSpace(d["ProviderKey"].ToString());
+            return !string.IsNullOrWhiteSpace(d["LoginProvider"]?.ToString())
+                && !string.IsNullOrWhiteSpace(d["ProviderKey"]?.ToString());
         }
 
         public void ProcessMigrate(IdentityCloudContext targetContext,
             IdentityCloudContext sourceContext,
             IList<TableEntity> sourceUserResults,
             int maxDegreesParallel,
-            Action updateComplete = null,
-            Action<string> updateError = null)
+            Action? updateComplete = null,
+            Action<string>? updateError = null)
         {
             var userIds = sourceUserResults
                 .Where(UserWhereFilter)
@@ -65,7 +65,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 //Add the email index
                 try
                 {
-                    IdentityUserIndex index = CreateLoginIndex(userId.UserId, userId.LoginProvider, userId.ProviderKey);
+                    IdentityUserIndex index = CreateLoginIndex(userId.UserId, userId.LoginProvider!, userId.ProviderKey!);
                     var r = targetContext.IndexTable.UpsertEntity(index, TableUpdateMode.Replace);
                     updateComplete?.Invoke();
                 }

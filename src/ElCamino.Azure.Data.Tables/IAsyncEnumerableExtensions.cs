@@ -4,7 +4,7 @@ namespace Azure.Data.Tables
 {
     public static class IAsyncEnumerableExtensions
     {
-        public static async Task<T> FirstOrDefaultAsync<T>(
+        public static async Task<T?> FirstOrDefaultAsync<T>(
             this IAsyncEnumerable<T> asyncEnumerable,
             CancellationToken cancellationToken = default)
         {

@@ -27,7 +27,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             return tq;
         }
 
-        public void ProcessMigrate(IdentityCloudContext targetContext, IdentityCloudContext sourceContext, IList<TableEntity> sourceUserKeysResults, int maxDegreesParallel, Action updateComplete = null, Action<string> updateError = null)
+        public void ProcessMigrate(IdentityCloudContext targetContext, IdentityCloudContext sourceContext, IList<TableEntity> sourceUserKeysResults, int maxDegreesParallel, Action? updateComplete = null, Action<string>? updateError = null)
         {
 
             var result2 = Parallel.ForEach(sourceUserKeysResults, new ParallelOptions() { MaxDegreeOfParallelism = maxDegreesParallel }, (dte) =>
@@ -50,7 +50,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             });
         }
 
-        private string GetRoleNameBySourceId(string roleRowKey, IdentityCloudContext sourcesContext)
+        private string? GetRoleNameBySourceId(string roleRowKey, IdentityCloudContext sourcesContext)
         {
             var tr = sourcesContext.RoleTable.GetEntityOrDefaultAsync<TableEntity>(
                 _keyHelper.ParsePartitionKeyIdentityRoleFromRowKey(roleRowKey),
@@ -67,20 +67,20 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             return null;
         }
 
-        private TableEntity ConvertToTargetRoleEntity(TableEntity sourceEntity, IdentityCloudContext sourcesContext)
+        private TableEntity? ConvertToTargetRoleEntity(TableEntity sourceEntity, IdentityCloudContext sourcesContext)
         {
-            TableEntity targetEntity = null;
+            TableEntity? targetEntity = null;
             //RoleClaim record
             if (sourceEntity.PartitionKey.StartsWith(_keyHelper.PreFixIdentityRole)
                 && sourceEntity.RowKey.StartsWith(_keyHelper.PreFixIdentityRoleClaim))
             {
                 sourceEntity.TryGetValue("ClaimType", out object claimTypeProperty);
-                string claimType = claimTypeProperty.ToString();
+                string? claimType = claimTypeProperty?.ToString();
 
                 sourceEntity.TryGetValue("ClaimValue", out object claimValueProperty);
-                string claimValue = claimValueProperty.ToString();
+                string? claimValue = claimValueProperty?.ToString();
 
-                string roleName = GetRoleNameBySourceId(sourceEntity.PartitionKey, sourcesContext);
+                string? roleName = GetRoleNameBySourceId(sourceEntity.PartitionKey, sourcesContext);
 
                 targetEntity = new TableEntity(sourceEntity);
                 targetEntity.ResetKeys(_keyHelper.GenerateRowKeyIdentityRole(roleName),
@@ -90,7 +90,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             else if (sourceEntity.RowKey.StartsWith(_keyHelper.PreFixIdentityRole))
             {
                 sourceEntity.TryGetValue("Name", out object roleNameProperty);
-                string roleName = roleNameProperty.ToString();
+                string? roleName = roleNameProperty?.ToString();
 
                 targetEntity = new TableEntity(sourceEntity);
                 targetEntity.ResetKeys(_keyHelper.GeneratePartitionKeyIdentityRole(roleName), _keyHelper.GenerateRowKeyIdentityRole(roleName), TableConstants.ETagWildcard);

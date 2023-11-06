@@ -1,5 +1,6 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
+using System;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
 
@@ -35,7 +36,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 default:
                     break;
             }
-            return null;
+            throw new ArgumentException($"Invalid Migration Command: {migrateCommand}", nameof(migrateCommand));
         }
     }
 }

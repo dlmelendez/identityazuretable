@@ -17,10 +17,16 @@ namespace Azure.Data.Tables
         /// <returns><seealso cref="PropertyInfo[]"/></returns>
         private static PropertyInfo[] GetProperties(Type type)
         {
-            return TypeProperties.GetOrAdd(type.FullName,
-                (name) => type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty)
-                .Where(w => w.GetCustomAttribute(typeof(IgnoreDataMemberAttribute)) == null)
-                .ToArray());
+            if (type.FullName is not null)
+            {
+                return TypeProperties.GetOrAdd(type.FullName,
+                    (name) => type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty)
+                    .Where(w => w.GetCustomAttribute(typeof(IgnoreDataMemberAttribute)) == null)
+                    .ToArray());
+            }
+            return type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty)
+                    .Where(w => w.GetCustomAttribute(typeof(IgnoreDataMemberAttribute)) == null)
+                    .ToArray();
         }
 
         public static T MapTableEntity<T>(this TableEntity dte) where T : ITableEntity, new()

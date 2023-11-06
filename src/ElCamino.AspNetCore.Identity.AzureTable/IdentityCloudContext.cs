@@ -5,18 +5,19 @@ using ElCamino.AspNetCore.Identity.AzureTable.Model;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable
 {
-    public class IdentityCloudContext : IDisposable
+    public class IdentityCloudContext
     {
-        protected TableServiceClient _client = null;
-        protected bool _disposed = false;
-        protected IdentityConfiguration _config = null;
+        protected TableServiceClient _client;
+        protected IdentityConfiguration _config;
         protected TableClient _roleTable;
         protected TableClient _indexTable;
         protected TableClient _userTable;
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public IdentityCloudContext(IdentityConfiguration config)
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         {
-            if (config == null)
+            if (config is null)
             {
                 throw new ArgumentNullException(nameof(config));
             }
@@ -28,84 +29,26 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             _config = config;
             _client = new TableServiceClient(_config.StorageConnectionString);
 
-            _indexTable = _client.GetTableClient(FormatTableNameWithPrefix(!string.IsNullOrWhiteSpace(_config.IndexTableName) ? _config.IndexTableName : TableConstants.TableNames.IndexTable));
-            _roleTable = _client.GetTableClient(FormatTableNameWithPrefix(!string.IsNullOrWhiteSpace(_config.RoleTableName) ? _config.RoleTableName : TableConstants.TableNames.RolesTable));
-            _userTable = _client.GetTableClient(FormatTableNameWithPrefix(!string.IsNullOrWhiteSpace(_config.UserTableName) ? _config.UserTableName : TableConstants.TableNames.UsersTable));
-        }
-
-        ~IdentityCloudContext()
-        {
-            Dispose(false);
+            _indexTable = _client.GetTableClient(FormatTableNameWithPrefix(!string.IsNullOrWhiteSpace(_config?.IndexTableName) ? _config!.IndexTableName! : TableConstants.TableNames.IndexTable));
+            _roleTable = _client.GetTableClient(FormatTableNameWithPrefix(!string.IsNullOrWhiteSpace(_config?.RoleTableName) ? _config!.RoleTableName! : TableConstants.TableNames.RolesTable));
+            _userTable = _client.GetTableClient(FormatTableNameWithPrefix(!string.IsNullOrWhiteSpace(_config?.UserTableName) ? _config!.UserTableName! : TableConstants.TableNames.UsersTable));
         }
 
         private string FormatTableNameWithPrefix(string baseTableName)
         {
-            if (!string.IsNullOrWhiteSpace(_config.TablePrefix))
+            if (!string.IsNullOrWhiteSpace(_config?.TablePrefix))
             {
-                return string.Format("{0}{1}", _config.TablePrefix, baseTableName);
+                return string.Format("{0}{1}", _config!.TablePrefix, baseTableName);
             }
             return baseTableName;
         }
 
-        public TableClient RoleTable
-        {
-            get
-            {
-                ThrowIfDisposed();
-                return _roleTable;
-            }
-        }
+        public TableClient RoleTable => _roleTable;
 
-        public TableClient UserTable
-        {
-            get
-            {
-                ThrowIfDisposed();
-                return _userTable;
-            }
-        }
+        public TableClient UserTable => _userTable;
 
-        public TableClient IndexTable
-        {
-            get
-            {
-                ThrowIfDisposed();
-                return _indexTable;
-            }
-        }
+        public TableClient IndexTable => _indexTable;
 
-        public TableServiceClient Client
-        {
-            get
-            {
-                ThrowIfDisposed();
-                return _client;
-            }
-        }
-
-        private void ThrowIfDisposed()
-        {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(base.GetType().Name);
-            }
-        }
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposed && disposing)
-            {
-                _client = null;
-                _indexTable = null;
-                _roleTable = null;
-                _userTable = null;
-                _disposed = true;
-            }
-        }
+        public TableServiceClient Client => _client;
     }
 }

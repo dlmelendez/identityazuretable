@@ -37,8 +37,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         ITableEntity
         where TKey : IEquatable<TKey>
     {
-        public string PartitionKey { get; set; }
-        public string RowKey { get; set; }
+        public string PartitionKey { get; set; } = string.Empty;
+        public string RowKey { get; set; } = string.Empty;
         public DateTimeOffset? Timestamp { get; set; }
         public ETag ETag { get; set; } = ETag.All;
 

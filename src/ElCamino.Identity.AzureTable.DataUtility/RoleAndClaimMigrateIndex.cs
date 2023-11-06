@@ -43,7 +43,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             return tq;
         }
 
-        public void ProcessMigrate(IdentityCloudContext targetContext, IdentityCloudContext sourceContext, IList<TableEntity> sourceUserResults, int maxDegreesParallel, Action updateComplete = null, Action<string> updateError = null)
+        public void ProcessMigrate(IdentityCloudContext targetContext, IdentityCloudContext sourceContext, IList<TableEntity> sourceUserResults, int maxDegreesParallel, Action? updateComplete = null, Action<string>? updateError = null)
         {
             var rolesAndClaims = sourceUserResults
                             .Where(UserWhereFilter);

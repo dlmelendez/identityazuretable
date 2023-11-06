@@ -57,8 +57,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         where TKey : IEquatable<TKey>
         where TUserRole : IdentityUserRole<TKey>
     {
-        public string PartitionKey { get; set; }
-        public string RowKey { get; set; }
+        public string PartitionKey { get; set; } = string.Empty;
+        public string RowKey { get; set; } = string.Empty;
         public DateTimeOffset? Timestamp { get; set; }
         public ETag ETag { get; set; } = ETag.All;
 
@@ -67,7 +67,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         }
 
         [IgnoreDataMember]
-        public override TKey Id { get; set; }
+        public override TKey Id 
+        {
+            get { return base.Id; }
+            set { base.Id = value; }
+        }
 
 
 

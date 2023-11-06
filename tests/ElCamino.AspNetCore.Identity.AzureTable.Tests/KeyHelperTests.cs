@@ -68,5 +68,27 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             _output.WriteLine($"returned {sw.Elapsed.TotalMilliseconds} ms: {returned}");
             Assert.Equal(expected, returned, StringComparer.InvariantCulture);
         }
+
+        [Theory]
+        [InlineData("HashTestKeyHelperFake _fakeKeyHelper = new HashTestKeyHelperFake();")]
+        [InlineData("thisIs Some Test Text123323 for Hashing")]
+        [InlineData(null)]
+        public void GenerateRowKeyUserId(string textToHash)
+        {
+            _output.WriteLine($"plain text: {textToHash}");
+            var sw = new Stopwatch();
+            sw.Start();
+            string returned = _defaultKeyHelper.GenerateRowKeyUserId(textToHash);
+            sw.Stop();
+            _output.WriteLine($"returned {sw.Elapsed.TotalMilliseconds} ms: {returned}");
+            Assert.StartsWith(TableConstants.RowKeyConstants.PreFixIdentityUserId, returned, StringComparison.InvariantCulture);
+
+            sw.Reset();
+            sw.Start();
+            returned = _sha256KeyHelper.GenerateRowKeyUserId(textToHash);
+            sw.Stop();
+            _output.WriteLine($"returned {sw.Elapsed.TotalMilliseconds} ms: {returned}");
+            Assert.StartsWith(TableConstants.RowKeyConstants.PreFixIdentityUserId, returned, StringComparison.InvariantCulture);
+        }
     }
 }

@@ -68,10 +68,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 
         public override UserManager<TUser> CreateUserManager(IdentityOptions options = null)
         {
-            if (options == null)
-            {
-                options = new IdentityOptions();
-            }
+            options ??= new IdentityOptions();
             //return new RoleManager<TRole>(store);
             IServiceCollection services = new ServiceCollection();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -198,10 +195,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 
         public virtual UserManager<TUser> CreateUserManager(IdentityOptions options = null)
         {
-            if (options == null)
-            {
-                options = new IdentityOptions();
-            }
+            options ??= new IdentityOptions();
 
             IServiceCollection services = new ServiceCollection();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();

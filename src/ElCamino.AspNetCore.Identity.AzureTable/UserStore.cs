@@ -67,7 +67,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return Task.WhenAll(tasks);
         }
 
-        public virtual async Task AddToRoleAsync(TUser user, string roleName, CancellationToken cancellationToken = default)
+        public virtual async Task AddToRoleAsync(TUser user, string? roleName, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -105,8 +105,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             cancellationToken.ThrowIfCancellationRequested();
             ConcurrentBag<string> bag = new ConcurrentBag<string>();
             ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
-            if (EqualityComparer<TKey>.Default.Equals(user.Id, default))
+            if (user is null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            if (EqualityComparer<TKey?>.Default.Equals(user!.Id, default))
             {
                 throw new ArgumentNullException(nameof(user));
             }
@@ -160,7 +164,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                         {
                             if (!string.IsNullOrWhiteSpace(t?.Name))
                             {
-                                bag.Add(t.Name);
+                                bag.Add(t!.Name!);
                             }
                         }, cancellationToken)
                     );
@@ -185,7 +189,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 rowFilter);
         }
 
-        public virtual async Task<IList<TUser>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken = default)
+        public virtual async Task<IList<TUser>> GetUsersInRoleAsync(string? roleName, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -194,9 +198,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(roleName));
             }
 
-            if (await RoleExistsAsync(roleName, cancellationToken).ConfigureAwait(false))
+            if (await RoleExistsAsync(roleName!, cancellationToken).ConfigureAwait(false))
             {
-                string getTableQueryFilterByUserId(string userId)
+                string getTableQueryFilterByUserId(string? userId)
                 {
                     string rowFilter = TableQuery.CombineFilters(
                         TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, userId),
@@ -210,7 +214,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 }
 
 
-                return (await GetUsersByIndexQueryAsync(GetUserByRoleIndexQuery(roleName), (userId, cancellationToken) =>
+                return (await GetUsersByIndexQueryAsync(GetUserByRoleIndexQuery(roleName!), (userId, cancellationToken) =>
                 {
                     return GetUserAggregateQueryAsync(userId, setFilterByUserId: getTableQueryFilterByUserId, whereClaim: null, whereRole: (ur) =>
                     {
@@ -223,7 +227,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return new List<TUser>();
         }
 
-        public virtual async Task<bool> IsInRoleAsync(TUser user, string roleName, CancellationToken cancellationToken = default)
+        public virtual async Task<bool> IsInRoleAsync(TUser user, string? roleName, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -244,7 +248,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             var tasks = new Task<bool>[]
             {
                 _userTable.QueryAsync<TableEntity>(filter: filterString, maxPerPage:1, select: selectColumns, cancellationToken).AnyAsync(cancellationToken),
-                RoleExistsAsync(roleName, cancellationToken)
+                RoleExistsAsync(roleName!, cancellationToken)
             };
 
             await Task.WhenAll(tasks).ConfigureAwait(false);
@@ -257,7 +261,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return _roleTable.QueryAsync<TableEntity>(filter: BuildRoleQuery(roleName), maxPerPage: 1, select: new List<string>() { nameof(Model.IdentityRole.Name) }, cancellationToken: cancellationToken).AnyAsync(cancellationToken);
         }
 
-        public virtual async Task RemoveFromRoleAsync(TUser user, string roleName, CancellationToken cancellationToken = default)
+        public virtual async Task RemoveFromRoleAsync(TUser user, string? roleName, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -287,15 +291,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         }
 
         protected async Task<IEnumerable<TUser>> GetUserAggregateQueryAsync(IEnumerable<string> userIds,
-        Func<string, string> setFilterByUserId = null,
-        Func<TUserRole, bool> whereRole = null,
-        Func<TUserClaim, bool> whereClaim = null,
+        Func<string, string>? setFilterByUserId = null,
+        Func<TUserRole, bool>? whereRole = null,
+        Func<TUserClaim, bool>? whereClaim = null,
         CancellationToken cancellationToken = default)
         {
             const double pageSize = 50.0;
             int pages = (int)Math.Ceiling(((double)userIds.Count() / pageSize));
             List<string> listTqs = new List<string>(pages);
-            IEnumerable<string> tempUserIds = null;
+            IEnumerable<string> tempUserIds = Enumerable.Empty<string>();
 
             for (int currentPage = 1; currentPage <= pages; currentPage++)
             {
@@ -366,7 +370,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                                      addUser = false;
                                  }
                              }
-                             if (addUser)
+                             if (userAgg.User is not null && addUser)
                              {
                                  bag.Add(userAgg.User);
                              }
@@ -382,16 +386,16 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return bag;
         }
 
-        protected new (TUser User,
+        protected new (TUser? User,
             IEnumerable<TUserRole> Roles,
             IEnumerable<TUserClaim> Claims,
             IEnumerable<TUserLogin> Logins,
             IEnumerable<TUserToken> Tokens)
-        MapUserAggregate(string userId,
+        MapUserAggregate(string? userId,
             IEnumerable<TableEntity> userResults)
         {
 
-            TUser user = default;
+            TUser? user = default;
             IEnumerable<TUserRole> roles = Enumerable.Empty<TUserRole>();
             IEnumerable<TUserClaim> claims = Enumerable.Empty<TUserClaim>();
             IEnumerable<TUserLogin> logins = Enumerable.Empty<TUserLogin>();
@@ -473,9 +477,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 tasks.Add(_indexTable.DeleteEntityAsync(deleteIndex.PartitionKey, deleteIndex.RowKey, TableConstants.ETagWildcard, cancellationToken: cancellationToken));
             }
 
-            if (!string.IsNullOrWhiteSpace(user.Email))
+            if (!string.IsNullOrWhiteSpace(user?.Email))
             {
-                var deleteIndex = CreateEmailIndex(userPartitionKey, user.Email);
+                var deleteIndex = CreateEmailIndex(userPartitionKey, user!.Email!);
                 tasks.Add(_indexTable.DeleteEntityAsync(deleteIndex.PartitionKey, deleteIndex.RowKey, TableConstants.ETagWildcard, cancellationToken: cancellationToken));
             }
 
@@ -489,15 +493,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 aggex.Flatten();
                 return IdentityResult.Failed(new IdentityError() { Code = "003", Description = "Delete user failed." });
             }
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (!_disposed && disposing)
-            {
-                _roleTable = null;
-            }
-            base.Dispose(disposing);
         }
     }
 

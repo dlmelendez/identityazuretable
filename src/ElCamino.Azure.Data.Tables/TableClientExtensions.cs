@@ -77,11 +77,11 @@ namespace Azure.Data.Tables
         /// <returns>Found entity or default value of the entity type</returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="RequestFailedException"></exception>
-        public static async Task<T> GetEntityOrDefaultAsync<T>(
+        public static async Task<T?> GetEntityOrDefaultAsync<T>(
             this TableClient table,
             string partitionKey,
             string rowKey,
-            IEnumerable<string> select = null,
+            IEnumerable<string>? select = null,
             CancellationToken cancellationToken = default) where T : class, ITableEntity, new()
         {
             partitionKey = partitionKey ?? throw new ArgumentNullException(nameof(partitionKey));
@@ -133,13 +133,16 @@ namespace Azure.Data.Tables
                         .AsPages(pageSizeHint: tq.TakeCount.Value)
                         .FirstOrDefaultAsync(cancellationToken)
                         .ConfigureAwait(false);
-                    foreach (T result in segment.Values)
+                    if (segment is not null)
                     {
-                        iCounter++;
-                        yield return result;
-                        if (iCounter >= tq.TakeCount.Value)
+                        foreach (T result in segment.Values)
                         {
-                            break;
+                            iCounter++;
+                            yield return result;
+                            if (iCounter >= tq.TakeCount.Value)
+                            {
+                                break;
+                            }
                         }
                     }
                 }

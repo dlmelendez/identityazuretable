@@ -20,7 +20,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="keyHelper">Use <see cref="DefaultKeyHelper"/> that uses SHA1, <see cref="SHA256KeyHelper"/> or a custom keyhelper that implements <see cref="IKeyHelper"/> </param>
         /// <returns><see cref="IdentityBuilder"/></returns>
         public static IdentityBuilder AddAzureTableStores<TContext>(this IdentityBuilder builder, Func<IdentityConfiguration> configAction,
-            IKeyHelper keyHelper = null)
+            IKeyHelper? keyHelper = null)
             where TContext : IdentityCloudContext
         {
             return builder.AddAzureTableStores<TContext>(_ => configAction(), keyHelper);
@@ -36,7 +36,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="keyHelper">Use <see cref="DefaultKeyHelper"/> that uses SHA1, <see cref="SHA256KeyHelper"/> or a custom keyhelper that implements <see cref="IKeyHelper"/> </param>
         /// <returns><see cref="IdentityBuilder"/></returns>
         public static IdentityBuilder AddAzureTableStores<TContext>(this IdentityBuilder builder, Func<IServiceProvider, IdentityConfiguration> configAction,
-            IKeyHelper keyHelper = null)
+            IKeyHelper? keyHelper = null)
             where TContext : IdentityCloudContext
         {
 
