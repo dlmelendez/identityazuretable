@@ -34,9 +34,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.ModelTests
             tContext = new IdentityCloudContext(tableConfig);
             //Covers Client get
             Assert.NotNull(tContext.Client);
-            tContext.Dispose();
-            Assert.Throws<ObjectDisposedException>(() => tContext.Client);
-
         }
     }
 

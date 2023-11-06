@@ -60,13 +60,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         public virtual string GeneratePartitionKeyIndexByLogin(string plainLoginProvider, string plainProviderKey)
         {
             string strTemp = string.Format("{0}_{1}", plainLoginProvider?.ToUpper(), plainProviderKey?.ToUpper());
-            string hash = ConvertKeyToHash(strTemp);
+            string? hash = ConvertKeyToHash(strTemp);
             return string.Format(FormatterIdentityUserLogin, hash);
         }
 
-        public virtual string GenerateRowKeyUserEmail(string plainEmail)
+        public virtual string GenerateRowKeyUserEmail(string? plainEmail)
         {
-            string hash = ConvertKeyToHash(plainEmail?.ToUpper());
+            string? hash = ConvertKeyToHash(plainEmail?.ToUpper());
             return string.Format(FormatterIdentityUserEmail, hash);
         }
 
@@ -75,59 +75,59 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             return Guid.NewGuid().ToString("N");
         }
 
-        public virtual string GenerateRowKeyUserId(string plainUserId)
+        public virtual string GenerateRowKeyUserId(string? plainUserId)
         {
-            string hash = ConvertKeyToHash(plainUserId?.ToUpper());
+            string? hash = ConvertKeyToHash(plainUserId?.ToUpper());
             return string.Format(FormatterIdentityUserId, hash);
         }
 
-        public virtual string GenerateRowKeyUserName(string plainUserName)
+        public virtual string GenerateRowKeyUserName(string? plainUserName)
         {
             return GeneratePartitionKeyUserName(plainUserName);
         }
 
-        public virtual string GeneratePartitionKeyUserName(string plainUserName)
+        public virtual string GeneratePartitionKeyUserName(string? plainUserName)
         {
-            string hash = ConvertKeyToHash(plainUserName?.ToUpper());
+            string? hash = ConvertKeyToHash(plainUserName?.ToUpper());
             return string.Format(FormatterIdentityUserName, hash);
         }
 
-        public virtual string GenerateRowKeyIdentityUserRole(string plainRoleName)
+        public virtual string GenerateRowKeyIdentityUserRole(string? plainRoleName)
         {
-            string hash = ConvertKeyToHash(plainRoleName?.ToUpper());
+            string? hash = ConvertKeyToHash(plainRoleName?.ToUpper());
             return string.Format(FormatterIdentityUserRole, hash);
         }
 
-        public virtual string GenerateRowKeyIdentityRole(string plainRoleName)
+        public virtual string GenerateRowKeyIdentityRole(string? plainRoleName)
         {
-            string hash = ConvertKeyToHash(plainRoleName?.ToUpper());
+            string? hash = ConvertKeyToHash(plainRoleName?.ToUpper());
             return string.Format(FormatterIdentityRole, hash);
         }
 
-        public virtual string GeneratePartitionKeyIdentityRole(string plainRoleName)
+        public virtual string GeneratePartitionKeyIdentityRole(string? plainRoleName)
         {
-            string hash = ConvertKeyToHash(plainRoleName?.ToUpper());
-            return hash.Substring(startIndex: 0, length: 1);
+            string? hash = ConvertKeyToHash(plainRoleName?.ToUpper());
+            return hash?.Substring(startIndex: 0, length: 1)??string.Empty;
         }
 
-        public virtual string GenerateRowKeyIdentityUserClaim(string claimType, string claimValue)
+        public virtual string GenerateRowKeyIdentityUserClaim(string? claimType, string? claimValue)
         {
             string strTemp = string.Format("{0}_{1}", claimType?.ToUpper(), claimValue?.ToUpper());
-            string hash = ConvertKeyToHash(strTemp);
+            string? hash = ConvertKeyToHash(strTemp);
             return string.Format(FormatterIdentityUserClaim, hash);
         }
 
-        public virtual string GenerateRowKeyIdentityRoleClaim(string claimType, string claimValue)
+        public virtual string GenerateRowKeyIdentityRoleClaim(string? claimType, string? claimValue)
         {
             string strTemp = string.Format("{0}_{1}", claimType?.ToUpper(), claimValue?.ToUpper());
-            string hash = ConvertKeyToHash(strTemp);
+            string? hash = ConvertKeyToHash(strTemp);
             return string.Format(FormatterIdentityRoleClaim, hash);
         }
 
-        public virtual string GenerateRowKeyIdentityUserToken(string loginProvider, string name)
+        public virtual string GenerateRowKeyIdentityUserToken(string? loginProvider, string? name)
         {
             string strTemp = string.Format("{0}_{1}", loginProvider?.ToUpper(), name?.ToUpper());
-            string hash = ConvertKeyToHash(strTemp);
+            string? hash = ConvertKeyToHash(strTemp);
             return string.Format(FormatterIdentityUserToken, hash);
         }
 
@@ -136,16 +136,16 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             return rowKey.Substring(PreFixIdentityRole.Length, 1);
         }
 
-        public virtual string GenerateRowKeyIdentityUserLogin(string loginProvider, string providerKey)
+        public virtual string GenerateRowKeyIdentityUserLogin(string? loginProvider, string? providerKey)
         {
             string strTemp = string.Format("{0}_{1}", loginProvider?.ToUpper(), providerKey?.ToUpper());
-            string hash = ConvertKeyToHash(strTemp);
+            string? hash = ConvertKeyToHash(strTemp);
             return string.Format(FormatterIdentityUserLogin, hash);
         }
 
-        public double KeyVersion => 7.0;
+        public double KeyVersion => 8.0;
 
-        public abstract string ConvertKeyToHash(string input);
+        public abstract string? ConvertKeyToHash(string? input);
 
         /// <summary>
         /// Left only for backwards compat for older frameworks.

@@ -13,7 +13,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
     {
 
 #if NET6_0_OR_GREATER
-        public sealed override string ConvertKeyToHash(string input)
+        public sealed override string? ConvertKeyToHash(string? input)
         {
             if (input != null)
             {
@@ -25,7 +25,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 
 #else
 
-        public sealed override string ConvertKeyToHash(string input)
+        public sealed override string? ConvertKeyToHash(string? input)
         {
             if (input != null)
             {
@@ -36,7 +36,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         }
 #endif
 
-        public override string GenerateRowKeyUserId(string plainUserId)
+        public override string GenerateRowKeyUserId(string? plainUserId)
         {
             return string.Format(FormatterIdentityUserId, plainUserId);
         }

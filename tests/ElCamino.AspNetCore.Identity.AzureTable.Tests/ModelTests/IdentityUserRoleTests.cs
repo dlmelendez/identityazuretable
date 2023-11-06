@@ -14,11 +14,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.ModelTests
         {
             var ur = new IdentityUserRole();
             ur.GenerateKeys(new DefaultKeyHelper());
-            Assert.Equal(ur.PartitionKey, ur.UserId);
+            Assert.Null(ur.UserId);
+            Assert.Equal(string.Empty, ur.PartitionKey);
 
             var ur2 = new IdentityUserRole();
             ur2.GenerateKeys(new SHA256KeyHelper());
-            Assert.Equal(ur2.PartitionKey, ur2.UserId);
+            Assert.Null(ur2.UserId);
+            Assert.Equal(string.Empty, ur2.PartitionKey);
         }
     }
 }

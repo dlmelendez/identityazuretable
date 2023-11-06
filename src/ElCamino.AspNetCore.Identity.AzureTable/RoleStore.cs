@@ -44,14 +44,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         where TKey : IEquatable<TKey>
     {
         private bool _disposed;
-        private TableClient _roleTable;
+        private readonly TableClient _roleTable;
+        private readonly TContext _context;
         private readonly IdentityErrorDescriber _errorDescriber = new();
-        protected IKeyHelper _keyHelper;
+        protected readonly IKeyHelper _keyHelper;
         private readonly string FilterString;
 
         public RoleStore(TContext context, IKeyHelper keyHelper) : base(new IdentityErrorDescriber())
         {
-            Context = context ?? throw new ArgumentNullException(nameof(context));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _roleTable = context.RoleTable;
             _keyHelper = keyHelper;
 
@@ -68,8 +69,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            if (role == null) throw new ArgumentNullException(nameof(role));
-
+#if NET6_0_OR_GREATER
+            ArgumentNullException.ThrowIfNull(role);
+#else
+            if (role is null) throw new ArgumentNullException(nameof(role));
+#endif
             ((Model.IGenerateKeys)role).GenerateKeys(_keyHelper);
 
             // Execute the insert operation.
@@ -81,8 +85,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            if (role == null) throw new ArgumentNullException(nameof(role));
-
+#if NET6_0_OR_GREATER
+            ArgumentNullException.ThrowIfNull(role);
+#else
+            if (role is null) throw new ArgumentNullException(nameof(role));
+#endif
             // Execute the insert operation.
             _ = await _roleTable.DeleteEntityAsync(role.PartitionKey, role.RowKey, TableConstants.ETagWildcard, cancellationToken: cancellationToken).ConfigureAwait(false);
             return IdentityResult.Success;
@@ -98,22 +105,20 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             if (!_disposed && disposing)
             {
-                _roleTable = null;
-                Context = null;
                 _disposed = true;
             }
         }
 
-        public override async Task<TRole> FindByIdAsync(string roleId, CancellationToken cancellationToken = default)
+        public override async Task<TRole?> FindByIdAsync(string roleId, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
 
-            return await _roleTable.GetEntityOrDefaultAsync<TRole>(_keyHelper.ParsePartitionKeyIdentityRoleFromRowKey(roleId),
+            return await _roleTable!.GetEntityOrDefaultAsync<TRole>(_keyHelper.ParsePartitionKeyIdentityRoleFromRowKey(roleId),
                 roleId.ToString(), cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
-        public override async Task<TRole> FindByNameAsync(string roleName, CancellationToken cancellationToken = default)
+        public override async Task<TRole?> FindByNameAsync(string roleName, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -127,13 +132,16 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            if (role == null)
+#if NET6_0_OR_GREATER
+            ArgumentNullException.ThrowIfNull(role);
+#else
+            if (role is null)
             {
                 throw new ArgumentNullException(nameof(role));
             }
-
-            Model.IGenerateKeys g = role as Model.IGenerateKeys;
-            if (!g.PeekRowKey(_keyHelper).Equals(role.RowKey, StringComparison.Ordinal))
+#endif
+            Model.IGenerateKeys? g = role as Model.IGenerateKeys;
+            if (g is not null && !g.PeekRowKey(_keyHelper).Equals(role.RowKey, StringComparison.Ordinal))
             {
                 BatchOperationHelper bHelper = new BatchOperationHelper(_roleTable);
                 TableEntity dRole = new TableEntity(role.PartitionKey, role.RowKey);
@@ -165,11 +173,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            if (role == null)
+#if NET6_0_OR_GREATER
+            ArgumentNullException.ThrowIfNull(role);
+#else
+            if (role is null)
             {
                 throw new ArgumentNullException(nameof(role));
             }
-            string partitionFilter = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, role.Id.ToString());
+#endif
+            string partitionFilter = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, role.Id.ToString() ?? string.Empty);
 
             string rowFilter1 = TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserToken);
             string rowFilter2 = TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.LessThan, _keyHelper.PreFixIdentityUserId);
@@ -188,15 +200,20 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            if (role == null)
+#if NET6_0_OR_GREATER
+            ArgumentNullException.ThrowIfNull(role);
+            ArgumentNullException.ThrowIfNull(claim);
+#else
+
+            if (role is null)
             {
                 throw new ArgumentNullException(nameof(role));
             }
-            if (claim == null)
+            if (claim is null)
             {
                 throw new ArgumentNullException(nameof(claim));
             }
-
+#endif
             TRoleClaim item = Activator.CreateInstance<TRoleClaim>();
             item.RoleId = role.Id;
             item.ClaimType = claim.Type;
@@ -210,15 +227,19 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            if (role == null)
+#if NET6_0_OR_GREATER
+            ArgumentNullException.ThrowIfNull(role);
+            ArgumentNullException.ThrowIfNull(claim);
+#else
+            if (role is null)
             {
                 throw new ArgumentNullException(nameof(role));
             }
-            if (claim == null)
+            if (claim is null)
             {
                 throw new ArgumentNullException(nameof(claim));
             }
-
+#endif
             if (string.IsNullOrWhiteSpace(claim.Type))
             {
                 throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(claim));
@@ -234,7 +255,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             _ = await _roleTable.DeleteEntityAsync(item.PartitionKey, item.RowKey, TableConstants.ETagWildcard, cancellationToken).ConfigureAwait(false);
         }
 
-        public TContext Context { get; private set; }
+        public TContext Context => _context;
 
         /// <summary>
         /// Queries will be slow unless they include Partition and/or Row keys

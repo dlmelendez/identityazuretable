@@ -84,10 +84,12 @@ namespace Azure.Data.Tables
 
         private List<TableTransactionAction> GetCurrent(string partitionKey)
         {
-            if (!_batches.ContainsKey(partitionKey))
+            if (_batches.TryGetValue(partitionKey, out var tableTransactionActions))
             {
-                _batches.Add(partitionKey, new List<TableTransactionAction>());
+                return tableTransactionActions;
             }
+
+            _batches.Add(partitionKey, new List<TableTransactionAction>());
 
             return _batches[partitionKey];
         }

@@ -32,29 +32,29 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 
         string GeneratePartitionKeyIndexByLogin(string plainLoginProvider, string plainProviderKey);
 
-        string GenerateRowKeyUserEmail(string plainEmail);
+        string GenerateRowKeyUserEmail(string? plainEmail);
 
         string GenerateUserId();
 
-        string GenerateRowKeyUserName(string plainUserName);
+        string GenerateRowKeyUserName(string? plainUserName);
 
-        string GeneratePartitionKeyUserName(string plainUserName);
+        string GeneratePartitionKeyUserName(string? plainUserName);
 
-        string GenerateRowKeyUserId(string plainUserId);
+        string GenerateRowKeyUserId(string? plainUserId);
 
-        string GenerateRowKeyIdentityUserRole(string plainRoleName);
+        string GenerateRowKeyIdentityUserRole(string? plainRoleName);
 
-        string GenerateRowKeyIdentityRole(string plainRoleName);
+        string GenerateRowKeyIdentityRole(string? plainRoleName);
 
-        string GeneratePartitionKeyIdentityRole(string plainRoleName);
+        string GeneratePartitionKeyIdentityRole(string? plainRoleName);
 
-        string GenerateRowKeyIdentityUserClaim(string claimType, string claimValue);
+        string GenerateRowKeyIdentityUserClaim(string? claimType, string? claimValue);
 
-        string GenerateRowKeyIdentityRoleClaim(string claimType, string claimValue);
+        string GenerateRowKeyIdentityRoleClaim(string? claimType, string? claimValue);
 
-        string GenerateRowKeyIdentityUserToken(string loginProvider, string tokenName);
+        string GenerateRowKeyIdentityUserToken(string? loginProvider, string? tokenName);
 
-        string GenerateRowKeyIdentityUserLogin(string loginProvider, string providerKey);
+        string GenerateRowKeyIdentityUserLogin(string? loginProvider, string? providerKey);
 
         string ParsePartitionKeyIdentityRoleFromRowKey(string rowKey);
 

@@ -25,12 +25,14 @@ namespace Azure.Data.Tables
     /// </summary>
     public class TableQuery
     {
+        public const string OdataTrue = "true";
+        public const string OdataFalse = "false";
 
         public int? TakeCount { get; set; }
 
-        public string FilterString { get; set; }
+        public string? FilterString { get; set; }
 
-        public List<string> SelectColumns { get; set; } = null;
+        public List<string>? SelectColumns { get; set; } = null;
 
         /// <summary>
         /// Generates a property filter condition string for the string value.
@@ -39,7 +41,7 @@ namespace Azure.Data.Tables
         /// <param name="operation">A string containing the comparison operator to use.</param>
         /// <param name="givenValue">A string containing the value to compare with the property.</param>
         /// <returns>A string containing the formatted filter condition.</returns>
-        public static string GenerateFilterCondition(string propertyName, string operation, string givenValue)
+        public static string GenerateFilterCondition(string propertyName, string operation, string? givenValue)
         {
             givenValue ??= string.Empty;
             return GenerateFilterCondition(propertyName, operation, givenValue, EdmType.String);
@@ -54,7 +56,30 @@ namespace Azure.Data.Tables
         /// <returns>A string containing the formatted filter condition.</returns>
         public static string GenerateFilterConditionForBool(string propertyName, string operation, bool givenValue)
         {
-            return GenerateFilterCondition(propertyName, operation, givenValue ? "true" : "false", EdmType.Boolean);
+            return GenerateFilterCondition(propertyName, operation, givenValue ? OdataTrue : OdataFalse, EdmType.Boolean);
+        }
+
+        /// <summary>
+        /// Generates a property filter condition string for a null boolean value.
+        /// </summary>
+        /// <param name="propertyName">A string containing the name of the property to compare.</param>
+        /// <param name="operation">A string containing the comparison operator to use. <seealso cref="QueryComparisons.Equal"/> or <seealso cref="QueryComparisons.NotEqual"/></param>
+        /// <returns>A string containing the formatted filter condition.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public static string GenerateFilterConditionForBoolNull(string propertyName, string operation)
+        {
+            string validBoolean = $"({GenerateFilterConditionForBool(propertyName, QueryComparisons.Equal, true)} {TableOperators.Or} {GenerateFilterConditionForBool(propertyName, QueryComparisons.Equal, false)})";
+            switch (operation)
+            {
+                case QueryComparisons.Equal: //isNull
+                    return $"not {validBoolean}";
+                case QueryComparisons.NotEqual: //notNull
+                    return validBoolean;
+                default:
+                    break;
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(operation), $"{operation ?? string.Empty} is not supported. Only {QueryComparisons.Equal} and {QueryComparisons.NotEqual} operators are supported.");
         }
 
         /// <summary>
@@ -145,6 +170,29 @@ namespace Azure.Data.Tables
         public static string GenerateFilterConditionForGuid(string propertyName, string operation, Guid givenValue)
         {
             return GenerateFilterCondition(propertyName, operation, givenValue.ToString(), EdmType.Guid);
+        }
+
+        /// <summary>
+        /// Generates a property filter condition string for a null string value.
+        /// </summary>
+        /// <param name="propertyName">A string containing the name of the property to compare.</param>
+        /// <param name="operation">A string containing the comparison operator to use. <seealso cref="QueryComparisons.Equal"/> or <seealso cref="QueryComparisons.NotEqual"/></param>
+        /// <returns>A string containing the formatted filter condition.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public static string GenerateFilterConditionForStringNull(string propertyName, string operation)
+        {
+            string validString = $"{propertyName} {QueryComparisons.GreaterThan} ''";
+            switch (operation)
+            {
+                case QueryComparisons.Equal: //isNull
+                    return $"not ({validString})";
+                case QueryComparisons.NotEqual: //notNull
+                    return validString;
+                default:
+                    break;
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(operation), $"{operation ?? string.Empty} is not supported. Only {QueryComparisons.Equal} and {QueryComparisons.NotEqual} operators are supported.");
         }
 
         /// <summary>
