@@ -836,6 +836,33 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             user!.Email = email;
         }
 
+        /// <summary>
+        /// Tracking with issue #104
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="loginProvider"></param>
+        /// <param name="name"></param>
+        /// <param name="value"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public override async Task SetTokenAsync(TUser user, string loginProvider, string name, string? value, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+#if NET6_0_OR_GREATER
+            ArgumentNullException.ThrowIfNull(user);
+#else
+            if (user is null) throw new ArgumentNullException(nameof(user));
+#endif
+
+            var token = await FindTokenAsync(user, loginProvider, name, cancellationToken);
+
+            token ??= CreateUserToken(user, loginProvider, name, value);
+
+            await AddUserTokenAsync(token);
+        }
+
         //Fixes deletes for non-unique emails for users.
         protected async Task DeleteEmailIndexAsync(string userId, string plainEmail)
         {
