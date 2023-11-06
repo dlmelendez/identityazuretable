@@ -7,7 +7,7 @@
     <LangVersion>11.0</LangVersion>
     <AssemblyName>ElCamino.AspNetCore.Identity.AzureTable.Tests</AssemblyName>
     <IsPackable>false</IsPackable>
-    <Version>8.0</Version>
+    <Version>7.1</Version>
     <Nullable>disable</Nullable>
     <DebugType>Full</DebugType>
 
