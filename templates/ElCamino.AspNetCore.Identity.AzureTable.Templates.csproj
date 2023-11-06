@@ -8,7 +8,7 @@
     <PackageId>ElCamino.AspNetCore.Identity.AzureTable.Templates</PackageId>
     <Description>ASP.NET Core Web Template Pack for ElCamino Identity Azure Table Storage</Description>
     <PackageTags>ASP.NET;Identity Core;Azure;Table Storage;MVC;UserStore;RoleStore;UserManager;multi-tenant;RA-GRS;geo-redundant;Microsoft.AspNetCore.Identity</PackageTags>
-    <Copyright>Copyright ©  2022 David Melendez, MIT License</Copyright>
+    <Copyright>Copyright ©  2023 David Melendez, MIT License</Copyright>
     <PackageIcon>projectNugetPic.png</PackageIcon>
     <PackageType>Template</PackageType>
     <IncludeContentInPack>true</IncludeContentInPack>
@@ -19,7 +19,7 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/dlmelendez/identityazuretable.git</RepositoryUrl>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>7.0</Version>
+    <Version>7.1</Version>
     <PackageProjectUrl>https://dlmelendez.github.io/identityazuretable</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
