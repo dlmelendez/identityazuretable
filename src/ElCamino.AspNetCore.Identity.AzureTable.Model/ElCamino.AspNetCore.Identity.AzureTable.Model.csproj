@@ -34,7 +34,7 @@
 
   <ItemGroup>
     <PackageReference Include="Azure.Data.Tables" Version="12.8.1" />
-    <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="8.0.0-rc.2.23480.2" />
   </ItemGroup>
   <ItemGroup>
     <None Include="projectNugetPic.png" Pack="true" PackagePath="\" />

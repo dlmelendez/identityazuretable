@@ -49,7 +49,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         public override string Name { get => base.Name; set => base.Name = value; }
 
         [IgnoreDataMember]
-        public override string Value { get => base.Value; set => base.Value = value; }
+        public override string? Value { get => base.Value; set => base.Value = value; }
 
         //These properties are more descriptive fields in storage, also allows for backcompat
         /// <summary>
@@ -60,7 +60,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// <summary>
         /// Gets or sets the token value.
         /// </summary>
-        public virtual string TokenValue { get => base.Value; set => base.Value = value; }
+        public virtual string? TokenValue { get => base.Value; set => base.Value = value; }
 
     }
 

@@ -17,7 +17,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             IdentityCloudContext sourceContext,
             IList<TableEntity> sourceUserResults,
             int maxDegreesParallel,
-            Action updateComplete = null,
-            Action<string> updateError = null);
+            Action? updateComplete = null,
+            Action<string>? updateError = null);
     }
 }

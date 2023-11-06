@@ -48,14 +48,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 
 
 
-        public override string UserName
+        public override string? UserName
         {
             get => base.UserName;
             set
             {
                 if (!string.IsNullOrWhiteSpace(value))
                 {
-                    base.UserName = value.Trim();
+                    base.UserName = value!.Trim();
                 }
             }
         }

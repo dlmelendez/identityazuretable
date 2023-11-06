@@ -192,7 +192,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return
 
                 (await _roleTable.QueryAsync<TRoleClaim>(filter, cancellationToken: cancellationToken).ToListAsync(cancellationToken).ConfigureAwait(false))
-                .Select(w => new Claim(w.ClaimType, w.ClaimValue))
+                .Select(w => new Claim(w.ClaimType ?? string.Empty, w.ClaimValue ?? string.Empty))
                 .ToList() as IList<Claim>;
         }
 

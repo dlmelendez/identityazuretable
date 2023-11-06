@@ -59,6 +59,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         [IgnoreDataMember]
         public override TKey RoleId { get => base.RoleId; set => base.RoleId = value; }
 
-        public string RoleName { get; set; } = string.Empty;
+        public string? RoleName { get; set; }
     }
 }

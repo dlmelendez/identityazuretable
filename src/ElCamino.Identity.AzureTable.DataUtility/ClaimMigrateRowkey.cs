@@ -36,8 +36,8 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
         public bool UserWhereFilter(TableEntity d)
         {
-            string claimType = d["ClaimType"]?.ToString();
-            string claimValue = d["ClaimValue"]?.ToString();
+            string? claimType = d["ClaimType"]?.ToString();
+            string? claimValue = d["ClaimValue"]?.ToString();
 
             if (!string.IsNullOrWhiteSpace(claimType))
             {
@@ -51,8 +51,8 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             IdentityCloudContext sourceContext,
             IList<TableEntity> claimResults,
             int maxDegreesParallel,
-            Action updateComplete = null,
-            Action<string> updateError = null)
+            Action? updateComplete = null,
+            Action<string>? updateError = null)
         {
             const string KeyVersion = "KeyVersion";
 

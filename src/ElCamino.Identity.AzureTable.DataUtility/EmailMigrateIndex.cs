@@ -44,8 +44,8 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             IdentityCloudContext sourceContext,
             IList<TableEntity> userResults,
             int maxDegreesParallel,
-            Action updateComplete = null,
-            Action<string> updateError = null)
+            Action? updateComplete = null,
+            Action<string>? updateError = null)
         {
             var userIds = userResults
                 .Where(UserWhereFilter)
@@ -59,7 +59,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 //Add the email index
                 try
                 {
-                    IdentityUserIndex index = CreateEmailIndex(userId.UserId, userId.Email);
+                    IdentityUserIndex index = CreateEmailIndex(userId.UserId, userId!.Email!);
                     var r = targetContext.IndexTable.UpsertEntity<IdentityUserIndex>(index, mode: TableUpdateMode.Replace);
                     updateComplete?.Invoke();
                 }
