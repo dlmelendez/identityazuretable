@@ -12,7 +12,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 
         public sealed override string? ConvertKeyToHash(string? input)
         {
-            if (input != null)
+            if (input is not null)
             {
                 byte[] data = SHA1.HashData(Encoding.Unicode.GetBytes(input));
                 return FormatHashedData(data);
@@ -22,7 +22,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 #else
         public sealed override string? ConvertKeyToHash(string? input)
         {
-            if (input != null)
+            if (input is not null)
             {
                 using SHA1 sha = SHA1.Create();
                 return GetHash(sha, input, Encoding.Unicode, 40);

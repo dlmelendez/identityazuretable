@@ -77,7 +77,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
+            if (user is null) throw new ArgumentNullException(nameof(user));
             if (string.IsNullOrWhiteSpace(roleName))
             {
                 throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(roleName));
@@ -237,7 +237,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
+            if (user is null) throw new ArgumentNullException(nameof(user));
             if (string.IsNullOrWhiteSpace(roleName))
             {
                 throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(roleName));
@@ -271,7 +271,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
+            if (user is null) throw new ArgumentNullException(nameof(user));
             if (string.IsNullOrWhiteSpace(roleName))
                 throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(roleName));
 
@@ -280,7 +280,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             {
                 var item = await _userTable.GetEntityOrDefaultAsync<TUserRole>(userPartitionKey, _keyHelper.GenerateRowKeyIdentityRole(roleName), cancellationToken: cancellationToken).ConfigureAwait(false);
 
-                if (item != null)
+                if (item is not null)
                 {
                     var deleteRoleIndex = CreateRoleIndex(userPartitionKey, roleName);
                     await Task.WhenAll(
@@ -324,7 +324,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 {
 
                     string temp = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, tempUserId);
-                    if (setFilterByUserId != null)
+                    if (setFilterByUserId is not null)
                     {
                         temp = setFilterByUserId(tempUserId);
                     }
@@ -362,14 +362,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                          {
                              var userAgg = MapUserAggregate(s.Key, s);
                              bool addUser = true;
-                             if (whereClaim != null)
+                             if (whereClaim is not null)
                              {
                                  if (!userAgg.Claims.Any(whereClaim))
                                  {
                                      addUser = false;
                                  }
                              }
-                             if (whereRole != null)
+                             if (whereRole is not null)
                              {
                                  if (!userAgg.Roles.Any(whereRole))
                                  {
@@ -409,7 +409,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             var vUser = userResults.Where(u => u.RowKey.Equals(userId) && u.PartitionKey.Equals(userId)).SingleOrDefault();
 
-            if (vUser != null)
+            if (vUser is not null)
             {
                 //User
                 user = vUser.MapTableEntity<TUser>();
@@ -451,7 +451,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            if (user == null) throw new ArgumentNullException(nameof(user));
+            if (user is null) throw new ArgumentNullException(nameof(user));
 
             List<Task> tasks = new List<Task>(50);
             string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
