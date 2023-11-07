@@ -14,7 +14,9 @@ using Microsoft.AspNetCore.Identity;
 namespace ElCamino.AspNetCore.Identity.AzureTable
 {
     public class UserStore<TUser, TContext> : UserStore<TUser, Model.IdentityRole, string, Model.IdentityUserLogin, Model.IdentityUserRole, Model.IdentityUserClaim, Model.IdentityUserToken, TContext>
+#pragma warning disable CS8613 // Nullability of reference types in return type doesn't match implicitly implemented member.
        , IUserStore<TUser>
+#pragma warning restore CS8613 // Nullability of reference types in return type doesn't match implicitly implemented member.
        where TUser : Model.IdentityUser<string>, new()
        where TContext : IdentityCloudContext
     {
@@ -28,7 +30,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
     /// <typeparam name="TRole"></typeparam>
     /// <typeparam name="TContext"></typeparam>
     public class UserStore<TUser, TRole, TContext> : UserStore<TUser, TRole, string, Model.IdentityUserLogin, Model.IdentityUserRole, Model.IdentityUserClaim, Model.IdentityUserToken, TContext>
+#pragma warning disable CS8613 // Nullability of reference types in return type doesn't match implicitly implemented member.
         , IUserStore<TUser>
+#pragma warning restore CS8613 // Nullability of reference types in return type doesn't match implicitly implemented member.
         where TUser : Model.IdentityUser<string>, new()
         where TRole : Model.IdentityRole<string, Model.IdentityUserRole>, new()
         where TContext : IdentityCloudContext
@@ -38,7 +42,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
     public class UserStore<TUser, TRole, TKey, TUserLogin, TUserRole, TUserClaim, TUserToken, TContext> :
         UserOnlyStore<TUser, TContext, TKey, TUserClaim, TUserLogin, TUserToken>
+#pragma warning disable CS8613 // Nullability of reference types in return type doesn't match implicitly implemented member.
         , IUserRoleStore<TUser>
+#pragma warning restore CS8613 // Nullability of reference types in return type doesn't match implicitly implemented member.
         , IDisposable
         where TUser : Model.IdentityUser<TKey>, new()
         where TRole : Model.IdentityRole<TKey, TUserRole>, new()

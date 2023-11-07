@@ -226,7 +226,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
         }
 
+#pragma warning disable CS8609 // Nullability of reference types in return type doesn't match overridden member.
         protected override Task<TUserLogin?> FindUserLoginAsync(TKey userId, string loginProvider, string providerKey, CancellationToken cancellationToken)
+#pragma warning restore CS8609 // Nullability of reference types in return type doesn't match overridden member.
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -244,7 +246,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return default;
         }
 
+#pragma warning disable CS8609 // Nullability of reference types in return type doesn't match overridden member.
         protected override async Task<TUserLogin?> FindUserLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken)
+#pragma warning restore CS8609 // Nullability of reference types in return type doesn't match overridden member.
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -271,7 +275,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         /// <param name="providerKey"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
+#pragma warning disable CS8609 // Nullability of reference types in return type doesn't match overridden member.
         public override Task<TUser?> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken = default)
+#pragma warning restore CS8609 // Nullability of reference types in return type doesn't match overridden member.
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -282,7 +288,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return GetUserFromIndexQueryAsync(GetUserIdByIndexQuery(partitionKey, rowKey), cancellationToken);
         }
 
+#pragma warning disable CS8609 // Nullability of reference types in return type doesn't match overridden member.
         public override Task<TUser?> FindByEmailAsync(string plainEmail, CancellationToken cancellationToken = default)
+#pragma warning restore CS8609 // Nullability of reference types in return type doesn't match overridden member.
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -299,7 +307,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return users.Where(user => _keyHelper.GenerateRowKeyUserEmail(plainEmail) == _keyHelper.GenerateRowKeyUserEmail(user.Email));
         }
 
+#pragma warning disable CS8609 // Nullability of reference types in return type doesn't match overridden member.
         protected override Task<TUser?> FindUserAsync(TKey userId, CancellationToken cancellationToken)
+#pragma warning restore CS8609 // Nullability of reference types in return type doesn't match overridden member.
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -331,14 +341,18 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, partitionKey);
         }
 
+#pragma warning disable CS8609 // Nullability of reference types in return type doesn't match overridden member.
         public override Task<TUser?> FindByIdAsync(string userId, CancellationToken cancellationToken = default)
+#pragma warning restore CS8609 // Nullability of reference types in return type doesn't match overridden member.
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
             return GetUserAsync(_keyHelper.GenerateRowKeyUserId(userId), cancellationToken);
         }
 
+#pragma warning disable CS8609 // Nullability of reference types in return type doesn't match overridden member.
         public override async Task<TUser?> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken = default)
+#pragma warning restore CS8609 // Nullability of reference types in return type doesn't match overridden member.
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -1077,7 +1091,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return Task.FromResult(user.Id is not null ? user.Id.ToString()??string.Empty : string.Empty);
         }
 
+#pragma warning disable CS8609 // Nullability of reference types in return type doesn't match overridden member.
         protected override async Task<TUserToken?> FindTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken)
+#pragma warning restore CS8609 // Nullability of reference types in return type doesn't match overridden member.
         {
             return await _userTable.GetEntityOrDefaultAsync<TUserToken>(_keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)),
                     _keyHelper.GenerateRowKeyIdentityUserToken(loginProvider, name), cancellationToken: cancellationToken).ConfigureAwait(false);

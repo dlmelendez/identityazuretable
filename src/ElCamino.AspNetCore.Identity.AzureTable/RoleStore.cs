@@ -109,7 +109,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
         }
 
+#pragma warning disable CS8609 // Nullability of reference types in return type doesn't match overridden member.
         public override async Task<TRole?> FindByIdAsync(string roleId, CancellationToken cancellationToken = default)
+#pragma warning restore CS8609 // Nullability of reference types in return type doesn't match overridden member.
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -118,7 +120,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 roleId.ToString(), cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
+#pragma warning disable CS8609 // Nullability of reference types in return type doesn't match overridden member.
         public override async Task<TRole?> FindByNameAsync(string roleName, CancellationToken cancellationToken = default)
+#pragma warning restore CS8609 // Nullability of reference types in return type doesn't match overridden member.
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
