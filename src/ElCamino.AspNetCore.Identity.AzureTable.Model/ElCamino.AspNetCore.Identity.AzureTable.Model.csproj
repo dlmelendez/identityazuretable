@@ -5,7 +5,7 @@
     <Copyright>Copyright ©  2023 David Melendez, MIT License</Copyright>
     <AssemblyTitle>Azure Table Storage Provider for ASP.NET Identity Core Models</AssemblyTitle>
     <Authors>David Melendez</Authors>
-    <TargetFrameworks>netstandard2.0;net6.0;net7.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
     <LangVersion>11.0</LangVersion>
     <AssemblyName>ElCamino.AspNetCore.Identity.AzureTable.Model</AssemblyName>
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
@@ -22,7 +22,7 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/dlmelendez/identityazuretable.git</RepositoryUrl>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>7.1</Version>
+    <Version>8.0</Version>
     <Nullable>enable</Nullable>
     <PackageProjectUrl>https://dlmelendez.github.io/identityazuretable</PackageProjectUrl>
     <!--<DebugType>Full</DebugType>-->
@@ -35,12 +35,8 @@
   <ItemGroup>
     <PackageReference Include="Azure.Data.Tables" Version="12.8.1" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net7.0' ">
-    <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="7.0.13" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' != 'net7.0' ">
-    <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="6.0.24" />
+  <ItemGroup >
+    <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="8.0.0-rc.2.23480.2" />
   </ItemGroup>
 
   <ItemGroup>

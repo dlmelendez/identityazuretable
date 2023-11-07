@@ -246,7 +246,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             Assert.Equal(userCount, users.Count);
 
             users = await manager.GetUsersInRoleAsync(Guid.NewGuid().ToString()).ConfigureAwait(false);
-            Assert.Equal(0, users.Count);
+            Assert.Empty(users);
 
             await Assert.ThrowsAsync<ArgumentException>(() => manager.GetUsersInRoleAsync(string.Empty)).ConfigureAwait(false);
         }

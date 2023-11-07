@@ -143,7 +143,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             return string.Format(FormatterIdentityUserLogin, hash);
         }
 
-        public double KeyVersion => 7.1;
+        public double KeyVersion => 8.0;
 
         public abstract string? ConvertKeyToHash(string? input);
 
