@@ -2,11 +2,10 @@
 using System;
 using System.Threading.Tasks;
 using Azure.Data.Tables;
-using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.TableExtensions
+namespace ElCamino.Azure.Data.Tables.Tests
 {
     public class TableClientTests : IClassFixture<TableFixture>
     {
@@ -39,30 +38,30 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.TableExtensions
             //Create Table
             await SetupTableAsync();
             //Setup Entity
-            string key = "a-" + Guid.NewGuid().ToString("N");
+            var key = "a-" + Guid.NewGuid().ToString("N");
             _output.WriteLine("PartitionKey {0}", key);
             _output.WriteLine("RowKey {0}", key);
-            TableEntity entity = new TableEntity(key, key);
+            var entity = new TableEntity(key, key);
             Assert.Equal(default, entity.ETag);
             Assert.Equal(default, entity.Timestamp);
 
             //Execute Upsert
-            var addedEntity = await _tableClient.AddEntityWithHeaderValuesAsync<TableEntity>(entity);
+            var addedEntity = await _tableClient.AddEntityWithHeaderValuesAsync(entity);
 
             //Assert
             Assert.NotEqual(default, addedEntity.ETag);
             Assert.NotEqual(default, addedEntity.Timestamp);
 
             //Modify update
-            string propertyName = "newProperty";
-            TableEntity updateEntity = new TableEntity(key, key)
+            var propertyName = "newProperty";
+            var updateEntity = new TableEntity(key, key)
             {
                 { propertyName, propertyName }
             };
 
             await Task.Delay(1000); //wait 1 second for timestamp 
 
-            var updatedEntity = await _tableClient.UpdateEntityWithHeaderValuesAsync<TableEntity>(updateEntity, addedEntity.ETag);
+            var updatedEntity = await _tableClient.UpdateEntityWithHeaderValuesAsync(updateEntity, addedEntity.ETag);
             //Assert
             Assert.NotEqual(default, updatedEntity.ETag);
             Assert.NotEqual(default, updatedEntity.Timestamp);
@@ -83,30 +82,30 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.TableExtensions
             //Create Table
             await SetupTableAsync();
             //Setup Entity
-            string key = "a-" + Guid.NewGuid().ToString("N");
+            var key = "a-" + Guid.NewGuid().ToString("N");
             _output.WriteLine("PartitionKey {0}", key);
             _output.WriteLine("RowKey {0}", key);
-            TableEntity entity = new TableEntity(key, key);
+            var entity = new TableEntity(key, key);
             Assert.Equal(default, entity.ETag);
             Assert.Equal(default, entity.Timestamp);
 
             //Execute Upsert
-            var addedEntity = await _tableClient.UpsertEntityWithHeaderValuesAsync<TableEntity>(entity);
+            var addedEntity = await _tableClient.UpsertEntityWithHeaderValuesAsync(entity);
 
             //Assert
             Assert.NotEqual(default, addedEntity.ETag);
             Assert.NotEqual(default, addedEntity.Timestamp);
 
             //Modify update
-            string propertyName = "newProperty";
-            TableEntity updateEntity = new TableEntity(key, key)
+            var propertyName = "newProperty";
+            var updateEntity = new TableEntity(key, key)
             {
                 { propertyName, propertyName }
             };
 
             await Task.Delay(1000); //wait 1 second for timestamp 
 
-            var updatedEntity = await _tableClient.UpsertEntityWithHeaderValuesAsync<TableEntity>(updateEntity);
+            var updatedEntity = await _tableClient.UpsertEntityWithHeaderValuesAsync(updateEntity);
             //Assert
             Assert.NotEqual(default, updatedEntity.ETag);
             Assert.NotEqual(default, updatedEntity.Timestamp);
@@ -127,22 +126,22 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.TableExtensions
             //Create Table
             await SetupTableAsync();
             //Setup Entity
-            string partitionKey = "b-" + Guid.NewGuid().ToString("N");
+            var partitionKey = "b-" + Guid.NewGuid().ToString("N");
             _output.WriteLine("PartitionKey {0}", partitionKey);
 
-            string filterByPartitionKey = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, partitionKey);
-            int count = await _tableClient.QueryAsync<TableEntity>(filter: filterByPartitionKey).CountAsync();
+            var filterByPartitionKey = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, partitionKey);
+            var count = await _tableClient.QueryAsync<TableEntity>(filter: filterByPartitionKey).CountAsync();
             const int maxTestEntities = 1001;
             _output.WriteLine("Entities found {0}", count);
 
-            BatchOperationHelper batch = new BatchOperationHelper(_tableClient);
+            var batch = new BatchOperationHelper(_tableClient);
 
             if (count < maxTestEntities)
-            {                
-                for (int i = 0; i < (maxTestEntities - count); i++)
+            {
+                for (var i = 0; i < maxTestEntities - count; i++)
                 {
-                    string rowKey = "b-" + Guid.NewGuid().ToString("N");
-                    TableEntity entity = new TableEntity(partitionKey, rowKey);
+                    var rowKey = "b-" + Guid.NewGuid().ToString("N");
+                    var entity = new TableEntity(partitionKey, rowKey);
                     batch.UpsertEntity(entity, TableUpdateMode.Replace);
                 }
                 await batch.SubmitBatchAsync();
@@ -152,7 +151,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.TableExtensions
             Assert.True(count >= maxTestEntities);
 
             //Execute Query Take 1
-            TableQuery tq = new TableQuery();
+            var tq = new TableQuery();
             tq.FilterString = filterByPartitionKey;
             tq.TakeCount = 1;
             var take = await _tableClient.ExecuteQueryAsync<TableEntity>(tq).ToListAsync();
@@ -189,7 +188,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.TableExtensions
             Assert.Equal(tq.TakeCount.Value, take.Count);
             _output.WriteLine($"Expected:{tq.TakeCount.Value} Actual:{take.Count}");
 
-            foreach (TableEntity te in take)
+            foreach (var te in take)
             {
                 batch.DeleteEntity(te.PartitionKey, te.RowKey, te.ETag);
             }

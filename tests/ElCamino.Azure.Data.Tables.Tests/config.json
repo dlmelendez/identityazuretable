@@ -1,0 +1,20 @@
+{
+  "AppSettings": {
+    "SiteTitle": "SampleMvc2"
+  },
+  "Data": {
+    "DefaultConnection": {
+      "ConnectionString": "Server=(localdb)\\mssqllocaldb;Database=aspnet5-SampleMvc2-444042c2-53c3-4c2b-ae65-5c753b0d2e4a;Trusted_Connection=True;MultipleActiveResultSets=true"
+    }
+  },
+  "IdentityAzureTable": {
+    "identityConfiguration": {
+      "tablePrefix": "av62",
+      "indexTableName": "indexes",
+      "userTableName": "users",
+      "roleTableName": "roles",
+      "storageConnectionString": "UseDevelopmentStorage=true;",
+      "locationMode": "PrimaryOnly"
+    }
+  }
+}

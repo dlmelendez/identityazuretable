@@ -2,17 +2,11 @@
 
 using System;
 using Azure.Data.Tables;
-using ElCamino.AspNetCore.Identity.AzureTable;
-using ElCamino.AspNetCore.Identity.AzureTable.Model;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
-using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser<string>;
-using Model = ElCamino.AspNetCore.Identity.AzureTable.Model;
 
-namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
+
+namespace ElCamino.Azure.Data.Tables.Tests
 {
     public class TableFixture : IDisposable
     {
