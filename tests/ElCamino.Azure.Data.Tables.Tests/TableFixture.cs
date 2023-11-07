@@ -23,7 +23,7 @@ namespace ElCamino.Azure.Data.Tables.Tests
 
             _configuration = configuration.Build();
 
-            _tableServiceClient = new TableServiceClient(_configuration["IdentityAzureTable:identityConfiguration:storageConnectionString"]);
+            _tableServiceClient = new TableServiceClient(_configuration["ElCamino:storageConnectionString"]);
         }
 
         protected virtual void Dispose(bool disposing)
