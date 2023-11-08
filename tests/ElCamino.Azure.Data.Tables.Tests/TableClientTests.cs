@@ -7,30 +7,20 @@ using Xunit.Abstractions;
 
 namespace ElCamino.Azure.Data.Tables.Tests
 {
-    public class TableClientTests : IClassFixture<TableFixture>
+    public class TableClientTests : BaseTest
     {
-        private readonly ITestOutputHelper _output;
-        private readonly TableFixture _tableFixture;
-        private readonly TableServiceClient _tableServiceClient;
-        private readonly string _tableName = "aatabletests";
-        private readonly TableClient _tableClient;
 
-        public TableClientTests(TableFixture tableFixture, ITestOutputHelper output)
-        {
-            _output = output;
-            _tableFixture = tableFixture;
-            _tableServiceClient = _tableFixture.TableService;
-            _tableClient = _tableServiceClient.GetTableClient(_tableName);
-        }
-
+        public TableClientTests(TableFixture tableFixture, ITestOutputHelper output) :
+            base(tableFixture, output)
+        { }
 
         private async Task SetupTableAsync()
         {
             //Setup Create table
             await _tableClient.CreateIfNotExistsAsync();
-            _output.WriteLine("Table created {0}", _tableName);
+            _output.WriteLine("Table created {0}", TableName);
 
-        }
+        }        
 
         [Fact]
         public async Task AddUpdateGetEntityWithHeaderValues()
