@@ -63,7 +63,7 @@ namespace Azure.Data.Tables
         /// Generates a property filter condition string for a null boolean value.
         /// </summary>
         /// <param name="propertyName">A string containing the name of the property to compare.</param>
-        /// <param name="operation">A string containing the comparison operator to use. <seealso cref="QueryComparisons.Equal"/> or <seealso cref="QueryComparisons.NotEqual"/></param>
+        /// <param name="operation">A string containing the comparison operator to use.  <seealso cref="QueryComparisons.Equal"/> Is Null or <seealso cref="QueryComparisons.NotEqual"/> Not Null</param>
         /// <returns>A string containing the formatted filter condition.</returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         public static string GenerateFilterConditionForBoolNull(string propertyName, string operation)
@@ -176,7 +176,7 @@ namespace Azure.Data.Tables
         /// Generates a property filter condition string for a null string value.
         /// </summary>
         /// <param name="propertyName">A string containing the name of the property to compare.</param>
-        /// <param name="operation">A string containing the comparison operator to use. <seealso cref="QueryComparisons.Equal"/> or <seealso cref="QueryComparisons.NotEqual"/></param>
+        /// <param name="operation">A string containing the comparison operator to use. <seealso cref="QueryComparisons.Equal"/> Is Null or <seealso cref="QueryComparisons.NotEqual"/> Not Null</param>
         /// <returns>A string containing the formatted filter condition.</returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         public static string GenerateFilterConditionForStringNull(string propertyName, string operation)
