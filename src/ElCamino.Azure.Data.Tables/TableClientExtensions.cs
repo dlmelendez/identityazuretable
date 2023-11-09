@@ -5,8 +5,14 @@ using System.Runtime.CompilerServices;
 
 namespace Azure.Data.Tables
 {
+    /// <summary>
+    /// Extensions for the <seealso cref="TableClient"/>
+    /// </summary>
     public static class TableClientExtensions
     {
+        /// <summary>
+        /// Default Max Table Results Per Page
+        /// </summary>
         public const int MaxEntitiesPerPage = 1000;
 
         /// <summary>

@@ -25,13 +25,22 @@ namespace Azure.Data.Tables
     /// </summary>
     public class TableQuery
     {
-        public const string OdataTrue = "true";
-        public const string OdataFalse = "false";
+        private const string OdataTrue = "true";
+        private const string OdataFalse = "false";
 
+        /// <summary>
+        /// Max take count for a given query
+        /// </summary>
         public int? TakeCount { get; set; }
 
+        /// <summary>
+        /// Defines Odata query string
+        /// </summary>
         public string? FilterString { get; set; }
 
+        /// <summary>
+        /// If defined, only returns the given column names in the query. null value returns all columns.
+        /// </summary>
         public List<string>? SelectColumns { get; set; } = null;
 
         /// <summary>
