@@ -7,8 +7,10 @@ using Azure.Data.Tables;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 {
+    /// <inheritdoc/>
     public class IdentityUserRole : IdentityUserRole<string>, IGenerateKeys
     {
+        /// <inheritdoc/>
         public IdentityUserRole() { }
 
         /// <summary>
@@ -31,8 +33,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
             return keyHelper.GenerateRowKeyIdentityUserRole(RoleName);
         }
 
+        /// <inheritdoc/>
         public double KeyVersion { get; set; }
 
+        /// <inheritdoc/>
         public string Id
         {
             get
@@ -47,18 +51,30 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 
     }
 
+    /// <inheritdoc/>
     public class IdentityUserRole<TKey> : Microsoft.AspNetCore.Identity.IdentityUserRole<TKey>
         , ITableEntity
         where TKey : IEquatable<TKey>
     {
+        /// <inheritdoc/>
         public string PartitionKey { get; set; } = string.Empty;
+
+        /// <inheritdoc/>
         public string RowKey { get; set; } = string.Empty;
+
+        /// <inheritdoc/>
         public DateTimeOffset? Timestamp { get; set; }
+
+        /// <inheritdoc/>
         public ETag ETag { get; set; } = ETag.All;
 
+        /// <inheritdoc/>
         [IgnoreDataMember]
         public override TKey RoleId { get => base.RoleId; set => base.RoleId = value; }
 
+        /// <summary>
+        /// Role Name
+        /// </summary>
         public string? RoleName { get; set; }
     }
 }
