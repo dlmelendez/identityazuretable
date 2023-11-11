@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable
 {
+    /// <inheritdoc/>
     public class UserStore<TUser, TContext> : UserStore<TUser, Model.IdentityRole, string, Model.IdentityUserLogin, Model.IdentityUserRole, Model.IdentityUserClaim, Model.IdentityUserToken, TContext>
 #pragma warning disable CS8613 // Nullability of reference types in return type doesn't match implicitly implemented member.
        , IUserStore<TUser>
@@ -20,6 +21,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
        where TUser : Model.IdentityUser<string>, new()
        where TContext : IdentityCloudContext
     {
+        /// <inheritdoc/>
         public UserStore(TContext context, Model.IKeyHelper keyHelper) : base(context, keyHelper) { }
     }
     /// <summary>
@@ -37,9 +39,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         where TRole : Model.IdentityRole<string, Model.IdentityUserRole>, new()
         where TContext : IdentityCloudContext
     {
+        /// <inheritdoc/>
         public UserStore(TContext context, Model.IKeyHelper keyHelper) : base(context, keyHelper) { }
     }
 
+    /// <inheritdoc/>
     public class UserStore<TUser, TRole, TKey, TUserLogin, TUserRole, TUserClaim, TUserToken, TContext> :
         UserOnlyStore<TUser, TContext, TKey, TUserClaim, TUserLogin, TUserToken>
 #pragma warning disable CS8613 // Nullability of reference types in return type doesn't match implicitly implemented member.
@@ -55,13 +59,21 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         where TUserToken : Model.IdentityUserToken<TKey>, new()
         where TContext : IdentityCloudContext
     {
+        /// <summary>
+        /// Access to the Role Table
+        /// </summary>
         protected TableClient _roleTable;
 
+        /// <inheritdoc/>
         public UserStore(TContext context, Model.IKeyHelper keyHelper) : base(context, keyHelper)
         {
             _roleTable = context.RoleTable;
         }
 
+        /// <summary>
+        /// Create user and role tables
+        /// </summary>
+        /// <returns></returns>
         public override Task CreateTablesIfNotExistsAsync()
         {
             Task[] tasks =
@@ -73,6 +85,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return Task.WhenAll(tasks);
         }
 
+        /// <inheritdoc/>
         public virtual async Task AddToRoleAsync(TUser user, string? roleName, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -106,6 +119,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             await Task.WhenAll(tasks).ConfigureAwait(false);
         }
 
+        /// <inheritdoc/>
         public virtual async Task<IList<string>> GetRolesAsync(TUser user, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -181,6 +195,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return bag.ToList();
         }
 
+        /// <summary>
+        /// Builds Odata role query
+        /// </summary>
+        /// <param name="normalizedRoleName"></param>
+        /// <returns></returns>
         public string BuildRoleQuery(string normalizedRoleName)
         {
             string rowFilter =
@@ -195,6 +214,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 rowFilter);
         }
 
+        /// <inheritdoc/>
         public virtual async Task<IList<TUser>> GetUsersInRoleAsync(string? roleName, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -233,6 +253,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return new List<TUser>();
         }
 
+        /// <inheritdoc/>
         public virtual async Task<bool> IsInRoleAsync(TUser user, string? roleName, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -262,11 +283,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return tasks.All(t => t.Result);
         }
 
+        /// <inheritdoc/>
         public Task<bool> RoleExistsAsync(string roleName, CancellationToken cancellationToken = default)
         {
             return _roleTable.QueryAsync<TableEntity>(filter: BuildRoleQuery(roleName), maxPerPage: 1, select: new List<string>() { nameof(Model.IdentityRole.Name) }, cancellationToken: cancellationToken).AnyAsync(cancellationToken);
         }
 
+        /// <inheritdoc/>
         public virtual async Task RemoveFromRoleAsync(TUser user, string? roleName, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -296,6 +319,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
         }
 
+        /// <summary>
+        /// Executes a user aggregate query, that can filter by userid, roles and/or claims
+        /// </summary>
+        /// <param name="userIds"></param>
+        /// <param name="setFilterByUserId"></param>
+        /// <param name="whereRole"></param>
+        /// <param name="whereClaim"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         protected async Task<IEnumerable<TUser>> GetUserAggregateQueryAsync(IEnumerable<string> userIds,
         Func<string, string>? setFilterByUserId = null,
         Func<TUserRole, bool>? whereRole = null,
@@ -392,6 +424,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return bag;
         }
 
+        /// <summary>
+        /// Maps table entities to strongly typed identity entities by userid
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="userResults"></param>
+        /// <returns></returns>
         protected new (TUser? User,
             IEnumerable<TUserRole> Roles,
             IEnumerable<TUserClaim> Claims,
@@ -447,6 +485,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return (user, roles, claims, logins, tokens);
         }
 
+        /// <inheritdoc/>
         public override async Task<IdentityResult> DeleteAsync(TUser user, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();

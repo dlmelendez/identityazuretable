@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
+    /// <summary>
+    /// IdentityBuilder extensions for di
+    /// </summary>
     public static class IdentityAzureTableBuilderExtensions
     {
         /// <summary>

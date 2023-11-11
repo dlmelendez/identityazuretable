@@ -6,10 +6,13 @@ using System.Text;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 {
+    /// <summary>
+    /// Default Key Helpers users SHA1
+    /// </summary>
     public class DefaultKeyHelper : BaseKeyHelper
     {
 #if NET6_0_OR_GREATER
-
+        /// <inheritdoc/>
         public sealed override string? ConvertKeyToHash(string? input)
         {
             if (input is not null)
@@ -20,6 +23,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             return null;
         }
 #else
+        /// <inheritdoc/>
         public sealed override string? ConvertKeyToHash(string? input)
         {
             if (input is not null)

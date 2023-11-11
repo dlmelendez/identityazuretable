@@ -31,6 +31,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <NeutralLanguage>en-US</NeutralLanguage>
     <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
