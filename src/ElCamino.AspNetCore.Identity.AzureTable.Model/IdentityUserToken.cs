@@ -8,8 +8,10 @@ using Azure.Data.Tables;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 {
+    /// <inheritdoc/>
     public class IdentityUserToken : IdentityUserToken<string>, IGenerateKeys
     {
+        /// <inheritdoc/>
         public IdentityUserToken() { }
 
 
@@ -23,6 +25,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
             KeyVersion = keyHelper.KeyVersion;
         }
 
+        /// <inheritdoc/>
         public double KeyVersion { get; set; }
 
         /// <summary>
@@ -36,18 +39,28 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 
     }
 
+    /// <inheritdoc/>
     public class IdentityUserToken<TKey> : Microsoft.AspNetCore.Identity.IdentityUserToken<TKey>
         , ITableEntity
         where TKey : IEquatable<TKey>
     {
+        /// <inheritdoc/>
         public string PartitionKey { get; set; } = string.Empty;
+
+        /// <inheritdoc/>
         public string RowKey { get; set; } = string.Empty;
+
+        /// <inheritdoc/>
         public DateTimeOffset? Timestamp { get; set; }
+
+        /// <inheritdoc/>
         public ETag ETag { get; set; } = ETag.All;
 
+        /// <inheritdoc/>
         [IgnoreDataMember]
         public override string Name { get => base.Name; set => base.Name = value; }
 
+        /// <inheritdoc/>
         [IgnoreDataMember]
         public override string? Value { get => base.Value; set => base.Value = value; }
 

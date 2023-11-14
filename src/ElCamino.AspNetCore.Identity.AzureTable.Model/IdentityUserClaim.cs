@@ -5,8 +5,10 @@ using Azure.Data.Tables;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 {
+    /// <inheritdoc/>
     public class IdentityUserClaim : IdentityUserClaim<string>, IGenerateKeys
     {
+        /// <inheritdoc/>
         public IdentityUserClaim() { }
 
         /// <summary>
@@ -28,18 +30,26 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
             return keyHelper.GenerateRowKeyIdentityUserClaim(ClaimType, ClaimValue);
         }
 
+        /// <inheritdoc/>
         public double KeyVersion { get; set; }
-
 
     }
 
+    /// <inheritdoc/>
     public class IdentityUserClaim<TKey> : Microsoft.AspNetCore.Identity.IdentityUserClaim<TKey>,
         ITableEntity
         where TKey : IEquatable<TKey>
     {
+        /// <inheritdoc/>
         public string PartitionKey { get; set; } = string.Empty;
+
+        /// <inheritdoc/>
         public string RowKey { get; set; } = string.Empty;
+
+        /// <inheritdoc/>
         public DateTimeOffset? Timestamp { get; set; }
+
+        /// <inheritdoc/>
         public ETag ETag { get; set; } = ETag.All;
 
     }

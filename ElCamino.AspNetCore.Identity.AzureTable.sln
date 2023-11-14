@@ -21,7 +21,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElCamino.AspNetCore.Identit
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElCamino.AspNetCore.Identity.AzureTable.Model", "src\ElCamino.AspNetCore.Identity.AzureTable.Model\ElCamino.AspNetCore.Identity.AzureTable.Model.csproj", "{C90FB0E3-5BE2-41E7-9DA3-9083C7700F91}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElCamino.Azure.Data.Tables", "src\ElCamino.Azure.Data.Tables\ElCamino.Azure.Data.Tables.csproj", "{DAF57676-8534-4A62-BC7B-317753F2A275}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElCamino.Azure.Data.Tables", "src\ElCamino.Azure.Data.Tables\ElCamino.Azure.Data.Tables.csproj", "{DAF57676-8534-4A62-BC7B-317753F2A275}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElCamino.Azure.Data.Tables.Tests", "tests\ElCamino.Azure.Data.Tables.Tests\ElCamino.Azure.Data.Tables.Tests.csproj", "{7A71EC75-781D-42AB-BDF0-C2B6D4EF2B10}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -66,6 +68,12 @@ Global
 		{DAF57676-8534-4A62-BC7B-317753F2A275}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DAF57676-8534-4A62-BC7B-317753F2A275}.Signed|Any CPU.ActiveCfg = Debug|Any CPU
 		{DAF57676-8534-4A62-BC7B-317753F2A275}.Signed|Any CPU.Build.0 = Debug|Any CPU
+		{7A71EC75-781D-42AB-BDF0-C2B6D4EF2B10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A71EC75-781D-42AB-BDF0-C2B6D4EF2B10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A71EC75-781D-42AB-BDF0-C2B6D4EF2B10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A71EC75-781D-42AB-BDF0-C2B6D4EF2B10}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A71EC75-781D-42AB-BDF0-C2B6D4EF2B10}.Signed|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A71EC75-781D-42AB-BDF0-C2B6D4EF2B10}.Signed|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

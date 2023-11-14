@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
+    /// <summary>
+    /// IdentityBuilder extensions for di
+    /// </summary>
     public static class IdentityAzureTableBuilderExtensions
     {
         /// <summary>
@@ -47,14 +50,14 @@ namespace Microsoft.Extensions.DependencyInjection
             Type contextType = typeof(TContext);
             builder.Services.AddSingleton(contextType, contextType);
 
-            Type userStoreType = builder.RoleType != null ? typeof(UserStore<,,>).MakeGenericType(builder.UserType, builder.RoleType, contextType)
+            Type userStoreType = builder.RoleType is not null ? typeof(UserStore<,,>).MakeGenericType(builder.UserType, builder.RoleType, contextType)
                 : typeof(UserOnlyStore<,>).MakeGenericType(builder.UserType, contextType);
 
             builder.Services.AddScoped(
                 typeof(IUserStore<>).MakeGenericType(builder.UserType),
                 userStoreType);
 
-            if (builder.RoleType != null)
+            if (builder.RoleType is not null)
             {
                 Type roleStoreType = typeof(RoleStore<,>).MakeGenericType(builder.RoleType, contextType);
 

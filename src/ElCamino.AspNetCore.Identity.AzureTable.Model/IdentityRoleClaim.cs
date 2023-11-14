@@ -9,8 +9,10 @@ using Azure.Data.Tables;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 {
+    /// <inheritdoc/>
     public class IdentityRoleClaim : IdentityRoleClaim<string>, IGenerateKeys
     {
+        /// <inheritdoc/>
         public IdentityRoleClaim() { }
 
         /// <summary>
@@ -32,8 +34,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
             return keyHelper.GenerateRowKeyIdentityRoleClaim(ClaimType, ClaimValue);
         }
 
+        /// <inheritdoc/>
         public double KeyVersion { get; set; }
 
+        /// <inheritdoc/>
         [IgnoreDataMember]
         public override string RoleId
         {
@@ -48,12 +52,20 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         }
     }
 
+    /// <inheritdoc/>
     public class IdentityRoleClaim<TKey> : Microsoft.AspNetCore.Identity.IdentityRoleClaim<TKey>, ITableEntity
         where TKey : IEquatable<TKey>
     {
+        /// <inheritdoc/>
         public string PartitionKey { get; set; } = string.Empty;
+
+        /// <inheritdoc/>
         public string RowKey { get; set; } = string.Empty;
+
+        /// <inheritdoc/>
         public DateTimeOffset? Timestamp { get; set; }
+
+        /// <inheritdoc/>
         public ETag ETag { get; set; } = ETag.All;
 
     }

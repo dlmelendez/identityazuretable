@@ -6,6 +6,9 @@ using Azure.Data.Tables;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 {
+    /// <summary>
+    /// Index Entity
+    /// </summary>
     public class IdentityUserIndex : ITableEntity
     {
         /// <summary>
@@ -13,10 +16,21 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// </summary>
         public string Id { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Key Version
+        /// </summary>
         public double KeyVersion { get; set; }
+
+        /// <inheritdoc/>
         public string PartitionKey { get; set; } = string.Empty;
+
+        /// <inheritdoc/>
         public string RowKey { get; set; } = string.Empty;
+
+        /// <inheritdoc/>
         public DateTimeOffset? Timestamp { get; set; }
+
+        /// <inheritdoc/>
         public ETag ETag { get; set; } = ETag.All;
     }
 }

@@ -13,9 +13,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
     {
 
 #if NET6_0_OR_GREATER
+        /// <inheritdoc/>
         public sealed override string? ConvertKeyToHash(string? input)
         {
-            if (input != null)
+            if (input is not null)
             {
                 byte[] data = SHA256.HashData(Encoding.UTF8.GetBytes(input));
                 return FormatHashedData(data);
@@ -24,10 +25,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         }
 
 #else
-
+        /// <inheritdoc/>
         public sealed override string? ConvertKeyToHash(string? input)
         {
-            if (input != null)
+            if (input is not null)
             {
                 using SHA256 sha = SHA256.Create();
                 return GetHash(sha, input, Encoding.UTF8, 64);
@@ -35,7 +36,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             return null;
         }
 #endif
-
+        /// <inheritdoc/>
         public override string GenerateRowKeyUserId(string? plainUserId)
         {
             return string.Format(FormatterIdentityUserId, plainUserId);

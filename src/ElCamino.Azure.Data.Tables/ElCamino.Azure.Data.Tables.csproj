@@ -5,7 +5,7 @@
     <Copyright>Copyright ©  2023 David Melendez, MIT License</Copyright>
     <AssemblyTitle>Azure Table Storage Extensions</AssemblyTitle>
     <Authors>David Melendez</Authors>
-    <TargetFrameworks>netstandard2.0;net6.0;net7.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net6.0;net8.0</TargetFrameworks>
     <LangVersion>11.0</LangVersion>
     <AssemblyName>ElCamino.Azure.Data.Tables</AssemblyName>
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
@@ -20,7 +20,7 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/dlmelendez/identityazuretable.git</RepositoryUrl>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>7.1</Version>
+    <Version>8.0</Version>
     <PackageProjectUrl>https://dlmelendez.github.io/identityazuretable</PackageProjectUrl>
     <!--<DebugType>Full</DebugType>-->
     <!-- DebugType Full is needed for test code coverage, but .nuget symbols doesn't like it-->
@@ -31,6 +31,7 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

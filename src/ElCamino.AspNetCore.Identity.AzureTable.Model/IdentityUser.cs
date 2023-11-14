@@ -9,10 +9,13 @@ using Azure.Data.Tables;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 {
+    /// <inheritdoc/>
     public class IdentityUser : IdentityUser<string>, IGenerateKeys
     {
+        /// <inheritdoc/>
         public IdentityUser() : base() { }
 
+        /// <inheritdoc/>
         public IdentityUser(string userName)
             : this()
         {
@@ -44,10 +47,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
             return keyHelper.GenerateRowKeyUserId(Id);
         }
 
+        /// <inheritdoc/>
         public double KeyVersion { get; set; }
 
 
-
+        /// <inheritdoc/>
         public override string? UserName
         {
             get => base.UserName;
@@ -61,14 +65,18 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         }
     }
 
+    /// <inheritdoc/>
     public class IdentityUser<TKey> : Microsoft.AspNetCore.Identity.IdentityUser<TKey>, ITableEntity
         where TKey : IEquatable<TKey>
     {
+        /// <inheritdoc/>
         public IdentityUser()
         {
         }
 
-
+        /// <summary>
+        /// Stores the LockoutEnd
+        /// </summary>
         public virtual DateTime? LockoutEndDateUtc { get; set; }
 
         /// <summary>
@@ -99,10 +107,16 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
             }
         }
 
-
+        /// <inheritdoc/>
         public string PartitionKey { get; set; } = string.Empty;
+
+        /// <inheritdoc/>
         public string RowKey { get; set; } = string.Empty;
+
+        /// <inheritdoc/>
         public DateTimeOffset? Timestamp { get; set; }
+
+        /// <inheritdoc/>
         public ETag ETag { get; set; } = ETag.All;
 
     }

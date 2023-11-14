@@ -12,29 +12,35 @@ using Microsoft.AspNetCore.Identity;
 
 namespace ElCamino.AspNetCore.Identity.AzureTable
 {
+    /// <inheritdoc/>
     public class RoleStore<TRole> : RoleStore<TRole, IdentityCloudContext>
     where TRole : Model.IdentityRole, new()
     {
 
+        /// <inheritdoc/>
         public RoleStore(IdentityCloudContext context, IKeyHelper keyHelper)
             : base(context, keyHelper)
         {
         }
     }
 
+    /// <inheritdoc/>
     public class RoleStore<TRole, TContext> : RoleStore<TRole, string, Model.IdentityUserRole, Model.IdentityRoleClaim, TContext>
         where TRole : Model.IdentityRole, new()
         where TContext : IdentityCloudContext
     {
+        /// <inheritdoc/>
         public RoleStore(TContext context, IKeyHelper keyHelper) : base(context, keyHelper) { }
 
         //Fixing code analysis issue CA1063
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
         }
     }
 
+    /// <inheritdoc/>
     public class RoleStore<TRole, TKey, TUserRole, TRoleClaim, TContext> :
         RoleStoreBase<TRole, TKey, TUserRole, TRoleClaim>
         where TRole : Model.IdentityRole<TKey, TUserRole>, new()
@@ -47,9 +53,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         private readonly TableClient _roleTable;
         private readonly TContext _context;
         private readonly IdentityErrorDescriber _errorDescriber = new();
+        /// <summary>
+        /// Key Helper
+        /// </summary>
         protected readonly IKeyHelper _keyHelper;
         private readonly string FilterString;
 
+        /// <inheritdoc/>
         public RoleStore(TContext context, IKeyHelper keyHelper) : base(new IdentityErrorDescriber())
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
@@ -63,8 +73,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
         }
 
+        /// <summary>
+        /// Create table is not exists
+        /// </summary>
+        /// <returns>Task</returns>
         public Task CreateTableIfNotExistsAsync() => Context.RoleTable.CreateIfNotExistsAsync();
 
+        /// <inheritdoc/>
         public override async Task<IdentityResult> CreateAsync(TRole role, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -81,6 +96,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return IdentityResult.Success;
         }
 
+        /// <inheritdoc/>
         public override async Task<IdentityResult> DeleteAsync(TRole role, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -95,12 +111,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return IdentityResult.Success;
         }
 
+        /// <inheritdoc/>
         public new void Dispose()
         {
             base.Dispose();
             Dispose(true);
         }
 
+        /// <inheritdoc/>
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposed && disposing)
@@ -109,7 +127,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
         }
 
+#pragma warning disable CS8609 // Nullability of reference types in return type doesn't match overridden member.
+        /// <inheritdoc/>
         public override async Task<TRole?> FindByIdAsync(string roleId, CancellationToken cancellationToken = default)
+#pragma warning restore CS8609 // Nullability of reference types in return type doesn't match overridden member.
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -118,7 +139,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 roleId.ToString(), cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
+#pragma warning disable CS8609 // Nullability of reference types in return type doesn't match overridden member.
+        /// <inheritdoc/>
         public override async Task<TRole?> FindByNameAsync(string roleName, CancellationToken cancellationToken = default)
+#pragma warning restore CS8609 // Nullability of reference types in return type doesn't match overridden member.
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -127,7 +151,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             _keyHelper.GenerateRowKeyIdentityRole(roleName), cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
-
+        /// <inheritdoc/>
         public override async Task<IdentityResult> UpdateAsync(TRole role, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -168,7 +192,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return IdentityResult.Failed(_errorDescriber.InvalidRoleName(role.Name));
         }
 
-
+        /// <inheritdoc/>
         public override async Task<IList<Claim>> GetClaimsAsync(TRole role, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -196,6 +220,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 .ToList() as IList<Claim>;
         }
 
+        /// <inheritdoc/>
         public override async Task AddClaimAsync(TRole role, Claim claim, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -223,6 +248,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             _ = await _roleTable.AddEntityAsync(item, cancellationToken).ConfigureAwait(false);
         }
 
+        /// <inheritdoc/>
         public override async Task RemoveClaimAsync(TRole role, Claim claim, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -255,6 +281,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             _ = await _roleTable.DeleteEntityAsync(item.PartitionKey, item.RowKey, TableConstants.ETagWildcard, cancellationToken).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Table Storage context access
+        /// </summary>
         public TContext Context => _context;
 
         /// <summary>

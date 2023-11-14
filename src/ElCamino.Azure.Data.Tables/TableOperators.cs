@@ -22,6 +22,10 @@ namespace Azure.Data.Tables
     /// </summary>
     public static class TableOperators
     {
+        /// <summary>
+        /// Represents the And operator.
+        /// </summary>
+
         public const string And = "and";
 
         /// <summary>

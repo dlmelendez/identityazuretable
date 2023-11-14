@@ -25,13 +25,22 @@ namespace Azure.Data.Tables
     /// </summary>
     public class TableQuery
     {
-        public const string OdataTrue = "true";
-        public const string OdataFalse = "false";
+        private const string OdataTrue = "true";
+        private const string OdataFalse = "false";
 
+        /// <summary>
+        /// Max take count for a given query
+        /// </summary>
         public int? TakeCount { get; set; }
 
+        /// <summary>
+        /// Defines Odata query string
+        /// </summary>
         public string? FilterString { get; set; }
 
+        /// <summary>
+        /// If defined, only returns the given column names in the query. null value returns all columns.
+        /// </summary>
         public List<string>? SelectColumns { get; set; } = null;
 
         /// <summary>
@@ -63,7 +72,7 @@ namespace Azure.Data.Tables
         /// Generates a property filter condition string for a null boolean value.
         /// </summary>
         /// <param name="propertyName">A string containing the name of the property to compare.</param>
-        /// <param name="operation">A string containing the comparison operator to use. <seealso cref="QueryComparisons.Equal"/> or <seealso cref="QueryComparisons.NotEqual"/></param>
+        /// <param name="operation">A string containing the comparison operator to use.  <seealso cref="QueryComparisons.Equal"/> Is Null or <seealso cref="QueryComparisons.NotEqual"/> Not Null</param>
         /// <returns>A string containing the formatted filter condition.</returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         public static string GenerateFilterConditionForBoolNull(string propertyName, string operation)
@@ -176,7 +185,7 @@ namespace Azure.Data.Tables
         /// Generates a property filter condition string for a null string value.
         /// </summary>
         /// <param name="propertyName">A string containing the name of the property to compare.</param>
-        /// <param name="operation">A string containing the comparison operator to use. <seealso cref="QueryComparisons.Equal"/> or <seealso cref="QueryComparisons.NotEqual"/></param>
+        /// <param name="operation">A string containing the comparison operator to use. <seealso cref="QueryComparisons.Equal"/> Is Null or <seealso cref="QueryComparisons.NotEqual"/> Not Null</param>
         /// <returns>A string containing the formatted filter condition.</returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         public static string GenerateFilterConditionForStringNull(string propertyName, string operation)
@@ -212,9 +221,7 @@ namespace Azure.Data.Tables
             }
             else if (edmType == EdmType.Double)
             {
-#pragma warning disable IDE0059 // Unnecessary assignment of a value
-                bool isInteger = int.TryParse(givenValue, out int parsedInt);
-#pragma warning restore IDE0059 // Unnecessary assignment of a value
+                bool isInteger = int.TryParse(givenValue, out _);
                 valueOperand = isInteger ? string.Format(CultureInfo.InvariantCulture, "{0}.0", givenValue) : givenValue;
             }
             else if (edmType == EdmType.Int64)
