@@ -15,7 +15,7 @@ steps:
 - task: PowerShell@2
   inputs:
     targetType: 'inline'
-    script: '(Get-Content .\tests\ElCamino.AspNetCore.Identity.AzureTable.Tests\config.json) | Foreach-Object { $_ -replace 'UseDevelopmentStorage=true;', '$(StorageConnection)'} | Set-Content .\tests\ElCamino.AspNetCore.Identity.AzureTable.Tests\config.json'
+    script: (Get-Content .\tests\ElCamino.AspNetCore.Identity.AzureTable.Tests\config.json) | Foreach-Object { $_ -replace 'UseDevelopmentStorage=true;', '$(StorageConnection)'} | Set-Content .\tests\ElCamino.AspNetCore.Identity.AzureTable.Tests\config.json
 
 - task: UseDotNet@2
   displayName: 'Use .Net Core sdk 6.x'
