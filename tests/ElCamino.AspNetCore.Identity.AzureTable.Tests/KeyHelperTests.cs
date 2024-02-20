@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 using ElCamino.AspNetCore.Identity.AzureTable.Tests.Fakes;
 using Microsoft.VisualStudio.TestPlatform.Utilities;
-using NuGet.Frameworks;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;
