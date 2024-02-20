@@ -8,7 +8,7 @@
     <TargetFrameworks>netstandard2.0;net6.0;net8.0</TargetFrameworks>
     <LangVersion>12.0</LangVersion>
     <AssemblyName>ElCamino.AspNetCore.Identity.AzureTable</AssemblyName>
-    <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>../../tools/key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <PackageId>ElCamino.AspNetCore.Identity.AzureTable</PackageId>
