@@ -2,11 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <LangVersion>11.0</LangVersion>
+    <LangVersion>12.0</LangVersion>
     <AssemblyName>ElCamino.Identity.AzureTable.DataUtility</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>ElCamino.Identity.AzureTable.DataUtility</PackageId>
-    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
@@ -14,7 +13,6 @@
     <Version>8.0</Version>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Remove="..\ElCamino.AspNetCore.Identity.AzureTable\IdentityAzureTableBuilderExtensions.cs" />
     <Compile Include="..\ElCamino.AspNetCore.Identity.AzureTable\*.cs;..\ElCamino.AspNetCore.Identity.AzureTable\Configuration\*.cs;..\ElCamino.AspNetCore.Identity.AzureTable\Helpers\*.cs;..\ElCamino.AspNetCore.Identity.AzureTable\Model\*.cs" Exclude="..\ElCamino.AspNetCore.Identity.AzureTable\IdentityAzureTableBuilderExtensions.cs;bin\**;obj\**;**\*.xproj;packages\**" />

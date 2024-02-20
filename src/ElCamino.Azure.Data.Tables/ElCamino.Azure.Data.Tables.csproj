@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <Description>Azure Table Storage odata query building and operators from the older Azure Storage SDKs and some other async, mapping, and batch helpers and/or extensions.</Description>
-    <Copyright>Copyright ©  2023 David Melendez, MIT License</Copyright>
+    <Copyright>Copyright ©  David Melendez, MIT License</Copyright>
     <AssemblyTitle>Azure Table Storage Extensions</AssemblyTitle>
     <Authors>David Melendez</Authors>
     <TargetFrameworks>netstandard2.0;net6.0;net8.0</TargetFrameworks>
-    <LangVersion>11.0</LangVersion>
+    <LangVersion>12.0</LangVersion>
     <AssemblyName>ElCamino.Azure.Data.Tables</AssemblyName>
     <AssemblyOriginatorKeyFile>../../tools/Key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
