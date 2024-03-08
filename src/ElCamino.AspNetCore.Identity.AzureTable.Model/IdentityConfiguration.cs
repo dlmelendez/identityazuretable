@@ -1,6 +1,9 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
 
+using System;
+using Azure.Core;
+
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 {
     /// <summary>
@@ -32,6 +35,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// Optional, default value is AspNetRoles
         /// </summary>
         public string? RoleTableName { get; set; }
+
+        public Uri? StorageConnectionUri { get; set; }
+        public TokenCredential? TokenCredential { get; set; }
 
     }
 }
