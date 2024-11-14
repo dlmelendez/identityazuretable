@@ -20,7 +20,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.ModelTests
         [Trait("IdentityCore.Azure.Model", "")]
         public void IdentityCloudContextCtors()
         {
-            Assert.Throws<ArgumentNullException>(() => new IdentityCloudContext(null));
+            Assert.Throws<ArgumentNullException>(() => new IdentityCloudContext(null, null));
             var locConfig = roleFixture.GetConfig();
             //LocationMode is deprecated
             //locConfig.LocationMode = "invalidMode";
@@ -33,7 +33,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.ModelTests
             var tContext = new IdentityCloudContext(tableConfig, client);
 
             tableConfig.TablePrefix = "a";
-            tContext = new IdentityCloudContext(tableConfig);
+            tContext = new IdentityCloudContext(tableConfig, client);
             //Covers Client get
             Assert.NotNull(tContext.Client);
         }

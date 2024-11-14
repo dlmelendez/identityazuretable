@@ -59,14 +59,14 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
             IdentityConfiguration sourceConfig = new IdentityConfiguration();
             sourceConfig.TablePrefix = Configuration.GetSection("source:IdentityConfiguration:TablePrefix")?.Value;
-            sourceConfig.StorageConnectionString = Configuration.GetSection("source:IdentityConfiguration:StorageConnectionString")?.Value;
+            string sourceStorageConnectionString = Configuration.GetSection("source:IdentityConfiguration:StorageConnectionString")?.Value ?? string.Empty;
             sourceConfig.UserTableName = Configuration.GetSection("source:IdentityConfiguration:UserTableName")?.Value ?? string.Empty;
             sourceConfig.IndexTableName = Configuration.GetSection("source:IdentityConfiguration:IndexTableName")?.Value ?? string.Empty;
             sourceConfig.RoleTableName = Configuration.GetSection("source:IdentityConfiguration:RoleTableName")?.Value ?? string.Empty;
 
             IdentityConfiguration targetConfig = new IdentityConfiguration();
             targetConfig.TablePrefix = Configuration.GetSection("target:IdentityConfiguration:TablePrefix")?.Value;
-            targetConfig.StorageConnectionString = Configuration.GetSection("target:IdentityConfiguration:StorageConnectionString")?.Value;
+            string targetStorageConnectionString = Configuration.GetSection("target:IdentityConfiguration:StorageConnectionString")?.Value ?? string.Empty;
             targetConfig.UserTableName = Configuration.GetSection("target:IdentityConfiguration:UserTableName")?.Value ?? string.Empty;
             targetConfig.IndexTableName = Configuration.GetSection("target:IdentityConfiguration:IndexTableName")?.Value ?? string.Empty;
             targetConfig.RoleTableName = Configuration.GetSection("target:IdentityConfiguration:RoleTableName")?.Value ?? string.Empty;
@@ -77,7 +77,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             Console.WriteLine("MigrateCommand: {0}", MigrateCommand);
 
             var migration = MigrationFactory.CreateMigration(MigrateCommand);
-            IdentityCloudContext targetContext = new IdentityCloudContext(targetConfig);
+            IdentityCloudContext targetContext = new IdentityCloudContext(targetConfig, new TableServiceClient(targetStorageConnectionString));
             
             Task.WhenAll(targetContext.IndexTable.CreateIfNotExistsAsync(),
                         targetContext.UserTable.CreateIfNotExistsAsync(),
@@ -88,7 +88,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
             string entityRecordName = "Users";
 
-            IdentityCloudContext sourceContext = new IdentityCloudContext(sourceConfig);
+            IdentityCloudContext sourceContext = new IdentityCloudContext(sourceConfig, new TableServiceClient(sourceStorageConnectionString));
             Console.WriteLine($"Source IndexTable: {sourceConfig.IndexTableName}");
             Console.WriteLine($"Source UserTable: {sourceConfig.UserTableName}");
             Console.WriteLine($"Source RoleTable: {sourceConfig.RoleTableName}");

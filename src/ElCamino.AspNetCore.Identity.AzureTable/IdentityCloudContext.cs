@@ -16,27 +16,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         private readonly TableClient _userTable;
 
         /// <summary>
-        /// Uses <see cref="IdentityConfiguration"/> to configure identity table storage access
-        /// </summary>
-        /// <param name="config">Accepts <see cref="IdentityConfiguration"/></param>
-        public IdentityCloudContext(IdentityConfiguration config)
-        {
-#if NET6_0_OR_GREATER
-            ArgumentNullException.ThrowIfNull(config, nameof(config));
-#else
-            if (config is null)
-            {
-                throw new ArgumentNullException(nameof(config));
-            }
-#endif
-
-            _client = new TableServiceClient(config.StorageConnectionString);
-            _indexTable = _client.GetTableClient(FormatTableNameWithPrefix(config!.TablePrefix, !string.IsNullOrWhiteSpace(config!.IndexTableName) ? config!.IndexTableName! : TableConstants.TableNames.IndexTable));
-            _roleTable = _client.GetTableClient(FormatTableNameWithPrefix(config!.TablePrefix, !string.IsNullOrWhiteSpace(config!.RoleTableName) ? config!.RoleTableName! : TableConstants.TableNames.RolesTable));
-            _userTable = _client.GetTableClient(FormatTableNameWithPrefix(config!.TablePrefix, !string.IsNullOrWhiteSpace(config!.UserTableName) ? config!.UserTableName! : TableConstants.TableNames.UsersTable));
-        }
-
-        /// <summary>
         /// Uses <see cref="IdentityConfiguration"/> and <see cref="TableServiceClient"/> to configure identity table storage access
         /// </summary>
         /// <param name="config">Accepts <see cref="IdentityConfiguration"/></param>

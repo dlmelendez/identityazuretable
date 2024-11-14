@@ -33,15 +33,11 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns><see cref="IdentityBuilder"/></returns>
         public static IdentityBuilder AddAzureTableStores<TContext>(this IdentityBuilder builder, 
             Func<IdentityConfiguration> configAction,
-            Func<TableServiceClient>? tableServiceClientAction = null,
+            Func<TableServiceClient> tableServiceClientAction,
             IKeyHelper? keyHelper = null)
             where TContext : IdentityCloudContext
         {
-            if (tableServiceClientAction is not null)
-            {
-                return builder.AddAzureTableStores<TContext>(_ => configAction(), _ => tableServiceClientAction(), keyHelper);
-            }
-            return builder.AddAzureTableStores<TContext>(_ => configAction(), null, keyHelper);
+             return builder.AddAzureTableStores<TContext>(_ => configAction(), _ => tableServiceClientAction(), keyHelper);
         }
 
         /// <summary>
@@ -56,30 +52,30 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns><see cref="IdentityBuilder"/></returns>
         public static IdentityBuilder AddAzureTableStores<TContext>(this IdentityBuilder builder,
             Func<IServiceProvider, IdentityConfiguration> configAction,
-            Func<IServiceProvider, TableServiceClient>? tableServiceClientAction = null,
+            Func<IServiceProvider, TableServiceClient> tableServiceClientAction,
             IKeyHelper? keyHelper = null)
             where TContext : IdentityCloudContext
         {
-
+#if NET6_0_OR_GREATER
+            ArgumentNullException.ThrowIfNull(configAction, nameof(configAction));
+            ArgumentNullException.ThrowIfNull(tableServiceClientAction, nameof(tableServiceClientAction));
+#else
+            _ = configAction ?? throw new ArgumentNullException(nameof(configAction));
+            _ = tableServiceClientAction ?? throw new ArgumentNullException(nameof(tableServiceClientAction));
+#endif
             builder.Services.AddSingleton<IKeyHelper>(keyHelper ?? new DefaultKeyHelper());
 
             builder.Services.AddSingleton<IdentityConfiguration>(configAction);
                 
             Type contextType = typeof(TContext);
 
-            if (tableServiceClientAction is not null)
-            {
-                builder.Services.AddKeyedSingleton<TableServiceClient>(IdentityAzureTableServiceClientKey, (sp, o) => tableServiceClientAction(sp));
-                builder.Services.AddSingleton(contextType, sp => 
-                { 
-                    return Activator.CreateInstance(contextType, [sp.GetRequiredService<IdentityConfiguration>(), sp.GetRequiredKeyedService<TableServiceClient>(IdentityAzureTableServiceClientKey)]) as TContext
-                        ?? throw new InvalidOperationException($"Unable to create instance of {contextType.FullName}. Must have a constructor that accepts {nameof(IdentityConfiguration)}, {nameof(TableServiceClient)}");
-                });
-            }
-            else
-            {
-                builder.Services.AddSingleton(contextType, contextType);
-            }
+            builder.Services.AddKeyedSingleton<TableServiceClient>(IdentityAzureTableServiceClientKey, (sp, o) => tableServiceClientAction(sp));
+            builder.Services.AddSingleton(contextType, sp => 
+            { 
+                return Activator.CreateInstance(contextType, [sp.GetRequiredService<IdentityConfiguration>(), sp.GetRequiredKeyedService<TableServiceClient>(IdentityAzureTableServiceClientKey)]) as TContext
+                    ?? throw new InvalidOperationException($"Unable to create instance of {contextType.FullName}. Must have a constructor that accepts {nameof(IdentityConfiguration)}, {nameof(TableServiceClient)}");
+            });
+
 
             Type userStoreType = builder.RoleType is not null ? typeof(UserStore<,,>).MakeGenericType(builder.UserType, builder.RoleType, contextType)
                 : typeof(UserOnlyStore<,>).MakeGenericType(builder.UserType, contextType);

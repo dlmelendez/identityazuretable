@@ -160,7 +160,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.Fixtures
 
             var idconfig = new IdentityConfiguration()
             {
-                StorageConnectionString = root["IdentityAzureTable:identityConfiguration:storageConnectionString"],
                 TablePrefix = root["IdentityAzureTable:identityConfiguration:tablePrefix"],
                 IndexTableName = root["IdentityAzureTable:identityConfiguration:indexTableName"],
                 UserTableName = root["IdentityAzureTable:identityConfiguration:userTableName"],
