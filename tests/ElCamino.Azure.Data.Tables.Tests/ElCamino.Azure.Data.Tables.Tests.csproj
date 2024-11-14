@@ -3,11 +3,11 @@
   <PropertyGroup>
     <Description>Testing</Description>
     <Authors>David Melendez</Authors>
-    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
-    <LangVersion>11.0</LangVersion>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <LangVersion>13.0</LangVersion>
     <AssemblyName>ElCamino.Azure.Data.Tables.Tests</AssemblyName>
     <IsPackable>false</IsPackable>
-    <Version>8.0</Version>
+    <Version>9.0</Version>
     <Nullable>disable</Nullable>
     <DebugType>Full</DebugType>
 
