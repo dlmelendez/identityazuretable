@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Azure.Data.Tables;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
-using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
+using ElCamino.AspNetCore.Identity.AzureTable.Tests.Fixtures;
 using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
 using Microsoft.AspNetCore.Identity;
 using Xunit;
@@ -44,7 +44,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
                 if (userRole == null)
                 {
-                    var r = (TRole)Activator.CreateInstance(typeof(TRole), new object[1] { roleName });
+                    var r = (TRole)Activator.CreateInstance(typeof(TRole), [roleName]);
 
                     await rstore.CreateAsync(r).ConfigureAwait(false);
                 }
@@ -65,7 +65,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
             using (RoleStore<TRole> rstore = userFixture.CreateRoleStore())
             {
-                var r = (TRole)Activator.CreateInstance(typeof(TRole), new object[1] { roleName });
+                var r = (TRole)Activator.CreateInstance(typeof(TRole), [roleName]);
                 await rstore.CreateAsync(r).ConfigureAwait(false);
                 await rstore.FindByNameAsync(roleName).ConfigureAwait(false);
             }
@@ -131,7 +131,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         protected override async Task<T> CreateTestUserAsync<T>(bool createPassword = true, bool createEmail = true,
             string emailAddress = null)
         {
-            string strValidConnection = userFixture.GetConfig().StorageConnectionString;
+            string strValidConnection = userFixture.GetConfig().connectionString;
 
             using var store = userFixture.CreateUserStore();
             using var manager = userFixture.CreateUserManager();
@@ -559,7 +559,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         protected virtual async Task<T> CreateTestUserAsync<T>(bool createPassword = true, bool createEmail = true,
             string emailAddress = null) where T : Model.IdentityUser<string>, new()
         {
-            string strValidConnection = userFixture.GetConfig().StorageConnectionString;
+            string strValidConnection = userFixture.GetConfig().connectionString;
 
             using var store = userFixture.CreateUserStore();
             using var manager = userFixture.CreateUserManager();

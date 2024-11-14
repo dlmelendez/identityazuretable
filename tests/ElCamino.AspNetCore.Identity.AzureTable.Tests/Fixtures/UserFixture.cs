@@ -2,6 +2,7 @@
 
 using ElCamino.AspNetCore.Identity.AzureTable;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
+using ElCamino.AspNetCore.Identity.AzureTable.Tests.Fixtures;
 using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
 using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser<string>;
 using Model = ElCamino.AspNetCore.Identity.AzureTable.Model;

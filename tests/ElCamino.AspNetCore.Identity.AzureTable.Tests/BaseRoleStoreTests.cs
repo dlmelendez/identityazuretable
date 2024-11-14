@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Azure.Data.Tables;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
 using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
 using Microsoft.AspNetCore.Identity;
@@ -110,10 +111,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             ServiceCollection services = new ServiceCollection();
             // Adding coverage for CreateAzureTablesIfNotExists();
             services.AddIdentityCore<IdentityUser>()
-                .AddAzureTableStores<IdentityCloudContext>(new Func<IdentityConfiguration>(() =>
-                {
-                    return roleFixture.GetConfig();
-                }), roleFixture.GetKeyHelper())
+                .AddAzureTableStores<IdentityCloudContext>(() => roleFixture.GetConfig().config 
+                , () => new TableServiceClient(roleFixture.GetConfig().connectionString)
+                , roleFixture.GetKeyHelper())
                 .CreateAzureTablesIfNotExists<IdentityCloudContext>();
 
         }
