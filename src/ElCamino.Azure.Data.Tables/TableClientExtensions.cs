@@ -93,7 +93,7 @@ namespace Azure.Data.Tables
             partitionKey = partitionKey ?? throw new ArgumentNullException(nameof(partitionKey));
             rowKey = rowKey ?? throw new ArgumentNullException(nameof(rowKey));
 
-            string filterString = TableQuery.CombineFilters(
+            var filterString = TableQuery.CombineFilters(
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, partitionKey),
                 TableOperators.And,
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, rowKey));

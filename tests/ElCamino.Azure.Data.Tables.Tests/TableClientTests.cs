@@ -1,5 +1,6 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Azure.Data.Tables;
 using Xunit;
@@ -113,6 +114,8 @@ namespace ElCamino.Azure.Data.Tables.Tests
         [Fact]
         public async Task ExecuteTableQueryTakeCount()
         {
+            var sw = new Stopwatch();
+
             //Create Table
             await SetupTableAsync();
             //Setup Entity
@@ -134,7 +137,11 @@ namespace ElCamino.Azure.Data.Tables.Tests
                     var entity = new TableEntity(partitionKey, rowKey);
                     batch.UpsertEntity(entity, TableUpdateMode.Replace);
                 }
+                sw.Start();
                 await batch.SubmitBatchAsync();
+                sw.Stop();
+                _output.WriteLine($"{nameof(batch.SubmitBatchAsync)}: {sw.Elapsed.Milliseconds} ms");
+
                 count = await _tableClient.QueryAsync<TableEntity>(filter: filterByPartitionKey).CountAsync();
                 _output.WriteLine("Entities found after batch create {0}", count);
             }
