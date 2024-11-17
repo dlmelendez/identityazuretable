@@ -77,7 +77,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             _output.WriteLine($"plain text: {textToHash}");
             var sw = new Stopwatch();
             sw.Start();
-            string returned = _defaultKeyHelper.GenerateRowKeyUserId(textToHash);
+            var returned = _defaultKeyHelper.GenerateRowKeyUserId(textToHash);
             sw.Stop();
             _output.WriteLine($"returned {sw.Elapsed.TotalMilliseconds} ms: {returned}");
             Assert.StartsWith(TableConstants.RowKeyConstants.PreFixIdentityUserId, returned, StringComparison.InvariantCulture);
@@ -94,7 +94,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             }
             sw.Stop();
             _output.WriteLine($"returned {sw.Elapsed.TotalMilliseconds} ms: {returned}");
-            if (returned is not null)
+            if (!returned.IsEmpty)
             {
                 Assert.StartsWith(TableConstants.RowKeyConstants.PreFixIdentityUserId, returned, StringComparison.InvariantCulture);
             }

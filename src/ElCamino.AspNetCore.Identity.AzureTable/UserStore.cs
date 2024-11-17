@@ -95,7 +95,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
 
             TUserRole userToRole = new TUserRole();
-            userToRole.PartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
+            userToRole.PartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)).ToString();
             userToRole.RoleId = roleT.Id;
             userToRole.RoleName = roleT.Name;
             userToRole.UserId = user.Id;
@@ -126,7 +126,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
 
             const string roleName = nameof(Model.IdentityUserRole<string>.RoleName);
-            string userId = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
+            var userId = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
             // Changing to a live query to mimic EF UserStore in Identity 3.0
 
             var filterString = TableQuery.CombineFilters(
@@ -254,7 +254,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(roleName));
             }
 
-            string userId = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
+            var userId = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
             // Changing to a live query to mimic EF UserStore in Identity 3.0
 
             var filterString = TableQuery.CombineFilters(
@@ -288,7 +288,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             if (string.IsNullOrWhiteSpace(roleName))
                 throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(roleName));
 
-            string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
+            string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)).ToString();
             try
             {
                 var item = await _userTable.GetEntityOrDefaultAsync<TUserRole>(userPartitionKey, _keyHelper.GenerateRowKeyIdentityRole(roleName), cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -483,9 +483,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             ArgumentNullException.ThrowIfNull(user);
 
             List<Task> tasks = new List<Task>(50);
-            string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
-            var userRows = await GetUserAggregateQueryAsync(userPartitionKey, cancellationToken).ToListAsync(cancellationToken).ConfigureAwait(false);
-            tasks.Add(DeleteAllUserRows(userPartitionKey, userRows));
+            string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)).ToString();
+            var userRows = await GetUserAggregateQueryAsync(userPartitionKey.ToString(), cancellationToken).ToListAsync(cancellationToken).ConfigureAwait(false);
+            tasks.Add(DeleteAllUserRowsAsync(userPartitionKey, userRows));
 
             var deleteUserNameIndex = CreateUserNameIndex(userPartitionKey, user.UserName);
             tasks.Add(_indexTable.DeleteEntityAsync(deleteUserNameIndex.PartitionKey, deleteUserNameIndex.RowKey, TableConstants.ETagWildcard, cancellationToken: cancellationToken));

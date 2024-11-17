@@ -44,7 +44,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// <returns></returns>
         public string PeekRowKey(IKeyHelper keyHelper)
         {
-            return keyHelper.GenerateRowKeyUserId(Id);
+            return keyHelper.GenerateRowKeyUserId(Id).ToString();
         }
 
         /// <inheritdoc/>

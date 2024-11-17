@@ -103,7 +103,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         }
 
         /// <inheritdoc/>
-        public virtual string GenerateRowKeyUserId(string? plainUserId)
+        public virtual ReadOnlySpan<char> GenerateRowKeyUserId(string? plainUserId)
         {
             var hash = ConvertKeyToHash(plainUserId?.ToUpper());
             return string.Format(FormatterIdentityUserId, hash.ToString());

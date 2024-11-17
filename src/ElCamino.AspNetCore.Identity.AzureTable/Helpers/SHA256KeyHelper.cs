@@ -23,11 +23,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         }
 
         /// <inheritdoc/>
-        public override string GenerateRowKeyUserId(string? plainUserId)
+        public override ReadOnlySpan<char> GenerateRowKeyUserId(string? plainUserId)
         {
             ArgumentNullException.ThrowIfNull(plainUserId);
             return string.Format(FormatterIdentityUserId, plainUserId);
         }
-
     }
 }

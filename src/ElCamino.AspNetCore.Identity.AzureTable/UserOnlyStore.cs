@@ -120,7 +120,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             BatchOperationHelper bHelper = new BatchOperationHelper(_userTable);
 
             List<Task> tasks = [];
-            string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
+            var userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
             foreach (Claim c in claims)
             {
                 bHelper.AddEntity(CreateUserClaim(user, c));
@@ -157,7 +157,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             TUserLogin item = CreateUserLogin(user, login);
 
-            Model.IdentityUserIndex index = CreateLoginIndex(_keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)), item.LoginProvider, item.ProviderKey);
+            Model.IdentityUserIndex index = CreateLoginIndex(_keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)).ToString(), item.LoginProvider, item.ProviderKey);
 
             return Task.WhenAll(_userTable.AddEntityAsync(item, cancellationToken: cancellationToken)
                 , _indexTable.UpsertEntityAsync(index, mode: TableUpdateMode.Replace, cancellationToken: cancellationToken));
@@ -174,7 +174,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             try
             {
-                string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
+                var userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
                 List<Task> tasks = new List<Task>(3)
                 {
                     _userTable.AddEntityAsync(user, cancellationToken)
@@ -209,15 +209,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             ArgumentNullException.ThrowIfNull(user);
 
             List<Task> tasks = new List<Task>(50);
-            string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
+            string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)).ToString();
             var userRows = await GetUserAggregateQueryAsync(userPartitionKey, cancellationToken).ToListAsync(cancellationToken).ConfigureAwait(false);
 
-            tasks.Add(DeleteAllUserRows(userPartitionKey, userRows));
+            tasks.Add(DeleteAllUserRowsAsync(userPartitionKey, userRows));
 
             var deleteUserIndex = CreateUserNameIndex(userPartitionKey, user.UserName);
             tasks.Add(_indexTable.DeleteEntityAsync(deleteUserIndex.PartitionKey, deleteUserIndex.RowKey, TableConstants.ETagWildcard, cancellationToken));
 
-            var userAgg = MapUserAggregate(userPartitionKey, userRows);
+            var userAgg = MapUserAggregate(userPartitionKey.ToString(), userRows);
 
             //Don't use the BatchHelper for login index table, partition keys are likely not the same
             //since they are based on logonprovider and providerkey
@@ -396,7 +396,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            return GetUserAsync(_keyHelper.GenerateRowKeyUserId(userId), cancellationToken);
+            return GetUserAsync(_keyHelper.GenerateRowKeyUserId(userId).ToString(), cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -418,7 +418,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         /// <inheritdoc/>
         protected async Task<TUserClaim?> GetUserClaimAsync(TUser user, Claim claim)
         {
-            return await _userTable.GetEntityOrDefaultAsync<TUserClaim>(_keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)),
+            return await _userTable.GetEntityOrDefaultAsync<TUserClaim>(_keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)).ToString(),
                 _keyHelper.GenerateRowKeyIdentityUserClaim(claim.Type, claim.Value)).ConfigureAwait(false);
         }
 
@@ -679,9 +679,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
 
             TUser? user = default;
-            IEnumerable<TUserClaim> claims = [];
-            IEnumerable<TUserLogin> logins = [];
-            IEnumerable<TUserToken> tokens = [];
 
             var vUser = userResults.Where(u => u.RowKey.Equals(userId) && u.PartitionKey.Equals(userId)).SingleOrDefault();
 
@@ -691,14 +688,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 user = vUser.MapTableEntity<TUser>();
 
                 //Claims
-                claims = userResults.Where(u => u.RowKey.StartsWith(_keyHelper.PreFixIdentityUserClaim)
+                IEnumerable<TUserClaim> claims = userResults.Where(u => u.RowKey.StartsWith(_keyHelper.PreFixIdentityUserClaim)
                      && u.PartitionKey.Equals(userId))
                     .Select((log) =>
                     {
                         return log.MapTableEntity<TUserClaim>();
                     });
                 //Logins
-                logins = userResults.Where(u => u.RowKey.StartsWith(_keyHelper.PreFixIdentityUserLogin)
+                IEnumerable<TUserLogin> logins = userResults.Where(u => u.RowKey.StartsWith(_keyHelper.PreFixIdentityUserLogin)
                     && u.PartitionKey.Equals(userId))
                     .Select((log) =>
                     {
@@ -706,14 +703,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                     });
 
                 //Tokens
-                tokens = userResults.Where(u => u.RowKey.StartsWith(_keyHelper.PreFixIdentityUserToken)
+                IEnumerable<TUserToken> tokens = userResults.Where(u => u.RowKey.StartsWith(_keyHelper.PreFixIdentityUserToken)
                      && u.PartitionKey.Equals(userId))
                     .Select((log) =>
                     {
                         return log.MapTableEntity<TUserToken>();
                     });
+                return (user, claims, logins, tokens);
             }
-            return (user, claims, logins, tokens);
+            return (user, Enumerable.Empty<TUserClaim>(), Enumerable.Empty<TUserLogin>(), Enumerable.Empty<TUserToken>());
         }
 
         /// <summary>
@@ -825,7 +823,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             TUserClaim? local = await GetUserClaimAsync(user, claim).ConfigureAwait(false);
             List<Task> tasks = new List<Task>(3);
-            string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
+            var userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
             if (local is not null)
             {
                 TUserClaim deleteClaim = CreateUserClaim(user, claim);
@@ -853,7 +851,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             // Claim ctor doesn't allow Claim.Value to be null. Need to allow string.empty.
             List<Task> tasks = [];
-            string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
+            string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)).ToString();
             BatchOperationHelper bHelper = new BatchOperationHelper(_userTable);
             var userClaims = await GetClaimsAsync(user, cancellationToken).ConfigureAwait(false);
             foreach (Claim claim in claims)
@@ -878,7 +876,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             TUserClaim uc = base.CreateUserClaim(user, claim);
             ((IGenerateKeys)uc).GenerateKeys(_keyHelper);
-            uc.PartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
+            uc.PartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)).ToString();
             uc.UserId = user.Id;
             uc.ETag = TableConstants.ETagWildcard;
             return uc;
@@ -889,7 +887,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             TUserLogin ul = base.CreateUserLogin(user, login);
             ((IGenerateKeys)ul).GenerateKeys(_keyHelper);
-            ul.PartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
+            ul.PartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)).ToString();
             ul.UserId = user.Id;
             ul.ETag = TableConstants.ETagWildcard;
             return ul;
@@ -901,7 +899,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
             ArgumentNullException.ThrowIfNull(user);
-            string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
+            string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)).ToString();
             TUserLogin? item = await FindUserLoginAsync(userPartitionKey, loginProvider, providerKey).ConfigureAwait(false);
 
             if (item is not null)
@@ -939,7 +937,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             //The UserManager calls UpdateAsync which will generate the new email index record
             if (!string.IsNullOrWhiteSpace(user?.Email) && user!.Email != email)
             {
-                await DeleteEmailIndexAsync(_keyHelper.GenerateRowKeyUserId(ConvertIdToString(user!.Id)), user!.Email!).ConfigureAwait(false);
+                await DeleteEmailIndexAsync(_keyHelper.GenerateRowKeyUserId(ConvertIdToString(user!.Id)).ToString(), user!.Email!).ConfigureAwait(false);
             }
             user!.Email = email;
         }
@@ -1004,8 +1002,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             if (!string.IsNullOrWhiteSpace(userName) &&
                 !string.IsNullOrWhiteSpace(userId))
             {
-                string userPartitionKey = _keyHelper.GenerateRowKeyUserId(userId);
-                var result = await _indexTable.GetEntityOrDefaultAsync<IdentityUserIndex>(_keyHelper.GenerateRowKeyUserName(userName).ToString(), userPartitionKey).ConfigureAwait(false);
+                var userPartitionKey = _keyHelper.GenerateRowKeyUserId(userId);
+                var result = await _indexTable.GetEntityOrDefaultAsync<IdentityUserIndex>(_keyHelper.GenerateRowKeyUserName(userName).ToString(), userPartitionKey.ToString()).ConfigureAwait(false);
                 if (result is not null)
                 {
                     _ = await _indexTable.DeleteEntityAsync(result.PartitionKey, result.RowKey, TableConstants.ETagWildcard).ConfigureAwait(false);
@@ -1019,7 +1017,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         /// <param name="userId">UserId in PartitionKey format</param>
         /// <param name="userRows"></param>
         /// <returns></returns>
-        protected Task DeleteAllUserRows(string userId, IEnumerable<TableEntity> userRows)
+        protected Task DeleteAllUserRowsAsync(string userId, IEnumerable<TableEntity> userRows)
         {
             var deleteBatchHelper = new BatchOperationHelper(_userTable);
             foreach (TableEntity delUserRow in userRows)
@@ -1039,7 +1037,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
             ArgumentNullException.ThrowIfNull(user);
-            string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
+            var userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
             List<Task> tasks = new List<Task>(3)
             {
                 _userTable.UpdateEntityAsync(user, TableConstants.ETagWildcard, mode: TableUpdateMode.Replace, cancellationToken),
@@ -1078,13 +1076,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         /// <param name="claimType"></param>
         /// <param name="claimValue"></param>
         /// <returns></returns>
-        protected Model.IdentityUserIndex CreateClaimIndex(string userPartitionKey, string? claimType, string? claimValue)
+        protected Model.IdentityUserIndex CreateClaimIndex(ReadOnlySpan<char> userPartitionKey, string? claimType, string? claimValue)
         {
             return new Model.IdentityUserIndex()
             {
-                Id = userPartitionKey,
+                Id = userPartitionKey.ToString(),
                 PartitionKey = _keyHelper.GenerateRowKeyIdentityUserClaim(claimType, claimValue),
-                RowKey = userPartitionKey,
+                RowKey = userPartitionKey.ToString(),
                 KeyVersion = _keyHelper.KeyVersion,
                 ETag = TableConstants.ETagWildcard
             };
@@ -1115,13 +1113,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         /// <param name="userid">Formatted UserId from the KeyHelper or IdentityUser.Id.ToString()</param>
         /// <param name="email">Plain email address.</param>
         /// <returns></returns>
-        protected Model.IdentityUserIndex CreateEmailIndex(string userid, string email)
+        protected Model.IdentityUserIndex CreateEmailIndex(ReadOnlySpan<char> userid, string email)
         {
             return new Model.IdentityUserIndex()
             {
-                Id = userid,
+                Id = userid.ToString(),
                 PartitionKey = _keyHelper.GenerateRowKeyUserEmail(email).ToString(),
-                RowKey = userid,
+                RowKey = userid.ToString(),
                 KeyVersion = _keyHelper.KeyVersion,
                 ETag = TableConstants.ETagWildcard
             };
@@ -1133,13 +1131,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         /// <param name="userPartitionKey"></param>
         /// <param name="userName"></param>
         /// <returns></returns>
-        protected Model.IdentityUserIndex CreateUserNameIndex(string userPartitionKey, string? userName)
+        protected Model.IdentityUserIndex CreateUserNameIndex(ReadOnlySpan<char> userPartitionKey, string? userName)
         {
             return new Model.IdentityUserIndex()
             {
-                Id = userPartitionKey,
+                Id = userPartitionKey.ToString(),
                 PartitionKey = _keyHelper.GenerateRowKeyUserName(userName).ToString(),
-                RowKey = userPartitionKey,
+                RowKey = userPartitionKey.ToString(),
                 KeyVersion = _keyHelper.KeyVersion,
                 ETag = TableConstants.ETagWildcard
             };
@@ -1214,7 +1212,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         /// <inheritdoc/>
         protected override async Task<TUserToken?> FindTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken)
         {
-            return await _userTable.GetEntityOrDefaultAsync<TUserToken>(_keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)),
+            return await _userTable.GetEntityOrDefaultAsync<TUserToken>(_keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)).ToString(),
                     _keyHelper.GenerateRowKeyIdentityUserToken(loginProvider, name), cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
@@ -1230,7 +1228,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             TUserToken item = base.CreateUserToken(user, loginProvider, name, value);
             ((Model.IGenerateKeys)item).GenerateKeys(_keyHelper);
-            item.PartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
+            item.PartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)).ToString();
             item.UserId = user.Id;
             item.ETag = TableConstants.ETagWildcard;
             return item;
