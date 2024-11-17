@@ -143,9 +143,9 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                         sourceEntity.TryGetValue("ClaimValue", out object claimValueProperty);
                         string? claimValue = claimValueProperty?.ToString();
 
-                        string targetUserRowKey = _keyHelper.GenerateRowKeyIdentityUserClaim(claimType, claimValue);
+                        var targetUserRowKey = _keyHelper.GenerateRowKeyIdentityUserClaim(claimType, claimValue);
                         TableEntity tgtDte = new TableEntity(sourceEntity);
-                        tgtDte.ResetKeys(targetUserPartitionKey.ToString(), targetUserRowKey, TableConstants.ETagWildcard);
+                        tgtDte.ResetKeys(targetUserPartitionKey.ToString(), targetUserRowKey.ToString(), TableConstants.ETagWildcard);
                         tgtDte["UserId"] = userId;
                         tgtDte["KeyVersion"] = _keyHelper.KeyVersion;
                         targetUserEntities.Add(tgtDte);
@@ -154,7 +154,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                         IdentityUserIndex claimIndex = new IdentityUserIndex()
                         {
                             Id = targetUserPartitionKey.ToString(),
-                            PartitionKey = targetUserRowKey,
+                            PartitionKey = targetUserRowKey.ToString(),
                             RowKey = targetUserPartitionKey.ToString(),
                             KeyVersion = _keyHelper.KeyVersion,
                             ETag = TableConstants.ETagWildcard

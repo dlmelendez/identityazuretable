@@ -419,7 +419,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         protected async Task<TUserClaim?> GetUserClaimAsync(TUser user, Claim claim)
         {
             return await _userTable.GetEntityOrDefaultAsync<TUserClaim>(_keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)).ToString(),
-                _keyHelper.GenerateRowKeyIdentityUserClaim(claim.Type, claim.Value)).ConfigureAwait(false);
+                _keyHelper.GenerateRowKeyIdentityUserClaim(claim.Type, claim.Value).ToString()).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
@@ -1081,7 +1081,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return new Model.IdentityUserIndex()
             {
                 Id = userPartitionKey.ToString(),
-                PartitionKey = _keyHelper.GenerateRowKeyIdentityUserClaim(claimType, claimValue),
+                PartitionKey = _keyHelper.GenerateRowKeyIdentityUserClaim(claimType, claimValue).ToString(),
                 RowKey = userPartitionKey.ToString(),
                 KeyVersion = _keyHelper.KeyVersion,
                 ETag = TableConstants.ETagWildcard

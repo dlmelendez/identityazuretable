@@ -193,7 +193,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// <param name="claimType"></param>
         /// <param name="claimValue"></param>
         /// <returns></returns>
-        string GenerateRowKeyIdentityUserClaim(string? claimType, string? claimValue);
+        ReadOnlySpan<char> GenerateRowKeyIdentityUserClaim(string? claimType, string? claimValue);
 
         /// <summary>
         /// Generate key for RowKeyIdentityRoleClaim
