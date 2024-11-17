@@ -41,7 +41,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
             if (!string.IsNullOrWhiteSpace(claimType))
             {
-                return (d.RowKey != _keyHelper.GenerateRowKeyIdentityUserClaim(claimType, claimValue ?? string.Empty));
+                return (!d.RowKey.AsSpan().Equals(_keyHelper.GenerateRowKeyIdentityUserClaim(claimType, claimValue), StringComparison.OrdinalIgnoreCase));
             }
 
             return false;

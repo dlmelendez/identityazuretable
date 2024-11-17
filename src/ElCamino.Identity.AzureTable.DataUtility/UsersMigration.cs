@@ -234,9 +234,9 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                         if (!string.IsNullOrWhiteSpace(loginProvider) 
                             && !string.IsNullOrWhiteSpace(tokenName))
                         {
-                            string targetUserRowKey = _keyHelper.GenerateRowKeyIdentityUserToken(loginProvider, tokenName);
+                            var targetUserRowKey = _keyHelper.GenerateRowKeyIdentityUserToken(loginProvider, tokenName);
                             TableEntity tgtDte = new TableEntity(sourceEntity);
-                            tgtDte.ResetKeys(targetUserPartitionKey.ToString(), targetUserRowKey, TableConstants.ETagWildcard);
+                            tgtDte.ResetKeys(targetUserPartitionKey.ToString(), targetUserRowKey.ToString(), TableConstants.ETagWildcard);
                             tgtDte["UserId"] = userId;
                             tgtDte["KeyVersion"] = _keyHelper.KeyVersion;
                             targetUserEntities.Add(tgtDte);

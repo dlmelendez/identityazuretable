@@ -209,7 +209,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// <param name="loginProvider"></param>
         /// <param name="tokenName"></param>
         /// <returns></returns>
-        string GenerateRowKeyIdentityUserToken(string? loginProvider, string? tokenName);
+        ReadOnlySpan<char> GenerateRowKeyIdentityUserToken(string? loginProvider, string? tokenName);
 
         /// <summary>
         /// Generate key for RowKeyIdentityUserLogin

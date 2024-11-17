@@ -164,7 +164,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         }
 
         /// <inheritdoc/>
-        public virtual string GenerateRowKeyIdentityUserToken(string? loginProvider, string? name)
+        public virtual ReadOnlySpan<char> GenerateRowKeyIdentityUserToken(string? loginProvider, string? name)
         {
             var strTemp = string.Format("{0}_{1}", loginProvider?.ToUpper(), name?.ToUpper()).AsSpan();
             var hash = ConvertKeyToHash(strTemp);

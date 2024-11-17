@@ -440,7 +440,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             await foreach (var tclaim in _userTable.QueryAsync<TUserClaim>(filter: filterString.ToString(), cancellationToken: cancellationToken).ConfigureAwait(false))
             {
                 //1.7 Claim rowkey migration 
-                if (_keyHelper.GenerateRowKeyIdentityUserClaim(tclaim.ClaimType, tclaim.ClaimValue) == tclaim.RowKey)
+                if (_keyHelper.GenerateRowKeyIdentityUserClaim(tclaim.ClaimType, tclaim.ClaimValue).Equals(tclaim.RowKey.AsSpan(), StringComparison.OrdinalIgnoreCase))
                 {
                     rClaims.Add(tclaim.ToClaim());
                 }
@@ -1188,7 +1188,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             {
                 return GetUserAggregateQueryAsync(userId, setFilterByUserId: getTableQueryFilterByUserId, whereClaim: (uc) =>
                 {
-                    return uc.RowKey == _keyHelper.GenerateRowKeyIdentityUserClaim(claim.Type, claim.Value);
+                    return uc.RowKey.AsSpan().Equals(_keyHelper.GenerateRowKeyIdentityUserClaim(claim.Type, claim.Value), StringComparison.OrdinalIgnoreCase);
                 }, cancellationToken);
 
             }, cancellationToken).ConfigureAwait(false)).ToList();
@@ -1213,7 +1213,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         protected override async Task<TUserToken?> FindTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken)
         {
             return await _userTable.GetEntityOrDefaultAsync<TUserToken>(_keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)).ToString(),
-                    _keyHelper.GenerateRowKeyIdentityUserToken(loginProvider, name), cancellationToken: cancellationToken).ConfigureAwait(false);
+                    _keyHelper.GenerateRowKeyIdentityUserToken(loginProvider, name).ToString(), cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
