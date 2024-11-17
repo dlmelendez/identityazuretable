@@ -110,7 +110,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         }
 
         /// <inheritdoc/>
-        public virtual string GenerateRowKeyUserName(string? plainUserName)
+        public virtual ReadOnlySpan<char> GenerateRowKeyUserName(string? plainUserName)
         {
             return GeneratePartitionKeyUserName(plainUserName);
         }

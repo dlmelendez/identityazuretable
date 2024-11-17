@@ -106,11 +106,11 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
                         //UserName index
                         tgtDte.TryGetValue("UserName", out object userNameProperty);
-                        string userNameKey = _keyHelper.GenerateRowKeyUserName(userNameProperty.ToString());
+                        var userNameKey = _keyHelper.GenerateRowKeyUserName(userNameProperty.ToString());
                         IdentityUserIndex userNameIndex = new IdentityUserIndex()
                         {
                             Id = targetUserPartitionKey,
-                            PartitionKey = userNameKey,
+                            PartitionKey = userNameKey.ToString(),
                             RowKey = targetUserPartitionKey,
                             KeyVersion = _keyHelper.KeyVersion,
                             ETag = TableConstants.ETagWildcard

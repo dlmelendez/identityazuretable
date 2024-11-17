@@ -1005,7 +1005,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 !string.IsNullOrWhiteSpace(userId))
             {
                 string userPartitionKey = _keyHelper.GenerateRowKeyUserId(userId);
-                var result = await _indexTable.GetEntityOrDefaultAsync<IdentityUserIndex>(_keyHelper.GenerateRowKeyUserName(userName), userPartitionKey).ConfigureAwait(false);
+                var result = await _indexTable.GetEntityOrDefaultAsync<IdentityUserIndex>(_keyHelper.GenerateRowKeyUserName(userName).ToString(), userPartitionKey).ConfigureAwait(false);
                 if (result is not null)
                 {
                     _ = await _indexTable.DeleteEntityAsync(result.PartitionKey, result.RowKey, TableConstants.ETagWildcard).ConfigureAwait(false);
@@ -1138,7 +1138,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return new Model.IdentityUserIndex()
             {
                 Id = userPartitionKey,
-                PartitionKey = _keyHelper.GenerateRowKeyUserName(userName),
+                PartitionKey = _keyHelper.GenerateRowKeyUserName(userName).ToString(),
                 RowKey = userPartitionKey,
                 KeyVersion = _keyHelper.KeyVersion,
                 ETag = TableConstants.ETagWildcard
