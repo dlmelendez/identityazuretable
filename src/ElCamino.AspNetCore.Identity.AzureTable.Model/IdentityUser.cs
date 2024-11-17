@@ -30,7 +30,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         {
             if (string.IsNullOrWhiteSpace(Id))
             {
-                Id = keyHelper.GenerateUserId();
+                Id = keyHelper.GenerateUserId().ToString();
             }
             RowKey = PeekRowKey(keyHelper);
             PartitionKey = RowKey;

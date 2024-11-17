@@ -46,7 +46,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 try
                 {
                     var sourceUserEntities = GetUserEntitiesBySourceId(dte.PartitionKey, sourceContext);
-                    string targetUserId = _keyHelper.GenerateUserId();
+                    string targetUserId = _keyHelper.GenerateUserId().ToString();
                     var targetEntities = ConvertToTargetUserEntities(targetUserId, sourceUserEntities);
                     List<Task> mainTasks = new List<Task>(2);
                     List<Task> indexTasks = new List<Task>(100);

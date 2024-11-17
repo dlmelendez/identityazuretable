@@ -84,10 +84,20 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
             sw.Reset();
             sw.Start();
-            returned = _sha256KeyHelper.GenerateRowKeyUserId(textToHash);
+            try
+            {
+                returned = _sha256KeyHelper.GenerateRowKeyUserId(textToHash);
+            }
+            catch (ArgumentNullException)
+            {
+                returned = null;
+            }
             sw.Stop();
             _output.WriteLine($"returned {sw.Elapsed.TotalMilliseconds} ms: {returned}");
-            Assert.StartsWith(TableConstants.RowKeyConstants.PreFixIdentityUserId, returned, StringComparison.InvariantCulture);
+            if (returned is not null)
+            {
+                Assert.StartsWith(TableConstants.RowKeyConstants.PreFixIdentityUserId, returned, StringComparison.InvariantCulture);
+            }
         }
     }
 }

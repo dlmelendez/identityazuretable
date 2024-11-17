@@ -143,7 +143,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// Generate key for UserId
         /// </summary>
         /// <returns></returns>
-        string GenerateUserId();
+        ReadOnlySpan<char> GenerateUserId();
 
         /// <summary>
         /// Generate key for RowKeyUserName

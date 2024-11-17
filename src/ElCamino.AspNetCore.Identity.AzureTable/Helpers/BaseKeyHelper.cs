@@ -97,7 +97,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         }
 
         /// <inheritdoc/>
-        public virtual string GenerateUserId()
+        public virtual ReadOnlySpan<char> GenerateUserId()
         {
             return Guid.NewGuid().ToString("N");
         }
