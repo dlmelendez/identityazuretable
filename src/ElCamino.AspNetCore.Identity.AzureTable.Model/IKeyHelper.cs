@@ -217,7 +217,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// <param name="loginProvider"></param>
         /// <param name="providerKey"></param>
         /// <returns></returns>
-        string GenerateRowKeyIdentityUserLogin(string? loginProvider, string? providerKey);
+        ReadOnlySpan<char> GenerateRowKeyIdentityUserLogin(string? loginProvider, string? providerKey);
 
         /// <summary>
         /// Parse PartitionKey From RowKey for IdentityRole

@@ -172,9 +172,9 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                         sourceEntity.TryGetValue("ProviderKey", out object providerKeyProperty);
                         string? providerKey = providerKeyProperty?.ToString();
 
-                        string targetUserRowKey = _keyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey);
+                        var targetUserRowKey = _keyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey);
                         TableEntity tgtDte = new TableEntity(sourceEntity);
-                        tgtDte.ResetKeys(targetUserPartitionKey.ToString(), targetUserRowKey, TableConstants.ETagWildcard);
+                        tgtDte.ResetKeys(targetUserPartitionKey.ToString(), targetUserRowKey.ToString(), TableConstants.ETagWildcard);
                         tgtDte["UserId"] = userId;
                         tgtDte["KeyVersion"] = _keyHelper.KeyVersion;
                         targetUserEntities.Add(tgtDte);
@@ -187,7 +187,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                             {
                                 Id = targetUserPartitionKey.ToString(),
                                 PartitionKey = _keyHelper.GeneratePartitionKeyIndexByLogin(loginProvider, providerKey).ToString(),
-                                RowKey = _keyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey),
+                                RowKey = _keyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey).ToString(),
                                 KeyVersion = _keyHelper.KeyVersion,
                                 ETag = TableConstants.ETagWildcard
                             };

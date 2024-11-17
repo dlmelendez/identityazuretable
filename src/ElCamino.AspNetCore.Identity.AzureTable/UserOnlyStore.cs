@@ -264,9 +264,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             if (userId is not null)
             {
-                string rowKey = _keyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey);
+                var rowKey = _keyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey);
 
-                return await _userTable.GetEntityOrDefaultAsync<TUserLogin>(userId!, rowKey).ConfigureAwait(false);
+                return await _userTable.GetEntityOrDefaultAsync<TUserLogin>(userId!, rowKey.ToString()).ConfigureAwait(false);
             }
             return default;
         }
@@ -277,16 +277,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
 
-            string rowKey = _keyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey);
+            var rowKey = _keyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey);
             var partitionKey = _keyHelper.GeneratePartitionKeyIndexByLogin(loginProvider, providerKey);
 
-            IdentityUserIndex? indexInfo = await _indexTable.GetEntityOrDefaultAsync<IdentityUserIndex>(partitionKey.ToString(), rowKey, IndexUserIdSelectColumns, cancellationToken)
+            IdentityUserIndex? indexInfo = await _indexTable.GetEntityOrDefaultAsync<IdentityUserIndex>(partitionKey.ToString(), rowKey.ToString(), IndexUserIdSelectColumns, cancellationToken)
                 .ConfigureAwait(false);
 
             if (indexInfo is not null && indexInfo.Id is not null)
             {
-                string userId = indexInfo.Id;
-                return await FindUserLoginAsync(userId, loginProvider, providerKey).ConfigureAwait(false);
+                return await FindUserLoginAsync(indexInfo.Id, loginProvider, providerKey).ConfigureAwait(false);
             }
 
             return null;
@@ -304,10 +303,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
 
-            string rowKey = _keyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey);
+            var rowKey = _keyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey);
             var partitionKey = _keyHelper.GeneratePartitionKeyIndexByLogin(loginProvider, providerKey);
 
-            return GetUserFromIndexQueryAsync(GetUserIdByIndexQuery(partitionKey.ToString(), rowKey).ToString(), cancellationToken);
+            return GetUserFromIndexQueryAsync(GetUserIdByIndexQuery(partitionKey.ToString(), rowKey.ToString()).ToString(), cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -1156,7 +1155,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             {
                 Id = userPartitionKey,
                 PartitionKey = _keyHelper.GeneratePartitionKeyIndexByLogin(loginProvider, providerKey).ToString(),
-                RowKey = _keyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey),
+                RowKey = _keyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey).ToString(),
                 KeyVersion = _keyHelper.KeyVersion,
                 ETag = TableConstants.ETagWildcard
             };

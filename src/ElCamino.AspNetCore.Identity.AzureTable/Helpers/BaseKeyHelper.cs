@@ -178,7 +178,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         }
 
         /// <inheritdoc/>
-        public virtual string GenerateRowKeyIdentityUserLogin(string? loginProvider, string? providerKey)
+        public virtual ReadOnlySpan<char> GenerateRowKeyIdentityUserLogin(string? loginProvider, string? providerKey)
         {
             var strTemp = string.Format("{0}_{1}", loginProvider?.ToUpper(), providerKey?.ToUpper()).AsSpan();
             var hash = ConvertKeyToHash(strTemp);
