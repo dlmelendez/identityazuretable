@@ -116,7 +116,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         }
 
         /// <inheritdoc/>
-        public virtual string GeneratePartitionKeyUserName(string? plainUserName)
+        public virtual ReadOnlySpan<char> GeneratePartitionKeyUserName(string? plainUserName)
         {
             var hash = ConvertKeyToHash(plainUserName?.ToUpper());
             return string.Format(FormatterIdentityUserName, hash.ToString());
