@@ -178,7 +178,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// </summary>
         /// <param name="plainRoleName"></param>
         /// <returns></returns>
-        string GenerateRowKeyIdentityRole(string? plainRoleName);
+        ReadOnlySpan<char> GenerateRowKeyIdentityRole(string? plainRoleName);
 
         /// <summary>
         /// Generate key for PartitionKeyIdentityRole
@@ -201,7 +201,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// <param name="claimType"></param>
         /// <param name="claimValue"></param>
         /// <returns></returns>
-        string GenerateRowKeyIdentityRoleClaim(string? claimType, string? claimValue);
+        ReadOnlySpan<char> GenerateRowKeyIdentityRoleClaim(string? claimType, string? claimValue);
 
         /// <summary>
         /// Generate key for RowKeyIdentityUserToken

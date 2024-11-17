@@ -83,8 +83,8 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 string? roleName = GetRoleNameBySourceId(sourceEntity.PartitionKey, sourcesContext);
 
                 targetEntity = new TableEntity(sourceEntity);
-                targetEntity.ResetKeys(_keyHelper.GenerateRowKeyIdentityRole(roleName),
-                    _keyHelper.GenerateRowKeyIdentityRoleClaim(claimType, claimValue), TableConstants.ETagWildcard);
+                targetEntity.ResetKeys(_keyHelper.GenerateRowKeyIdentityRole(roleName).ToString(),
+                    _keyHelper.GenerateRowKeyIdentityRoleClaim(claimType, claimValue).ToString(), TableConstants.ETagWildcard);
                 targetEntity["KeyVersion"] = _keyHelper.KeyVersion;
             }
             else if (sourceEntity.RowKey.StartsWith(_keyHelper.PreFixIdentityRole))
@@ -93,7 +93,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 string? roleName = roleNameProperty?.ToString();
 
                 targetEntity = new TableEntity(sourceEntity);
-                targetEntity.ResetKeys(_keyHelper.GeneratePartitionKeyIdentityRole(roleName), _keyHelper.GenerateRowKeyIdentityRole(roleName), TableConstants.ETagWildcard);
+                targetEntity.ResetKeys(_keyHelper.GeneratePartitionKeyIdentityRole(roleName), _keyHelper.GenerateRowKeyIdentityRole(roleName).ToString(), TableConstants.ETagWildcard);
                 targetEntity["KeyVersion"] = _keyHelper.KeyVersion;
 
             }

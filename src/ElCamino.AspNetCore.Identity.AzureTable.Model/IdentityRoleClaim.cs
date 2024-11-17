@@ -31,7 +31,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// <returns></returns>
         public string PeekRowKey(IKeyHelper keyHelper)
         {
-            return keyHelper.GenerateRowKeyIdentityRoleClaim(ClaimType, ClaimValue);
+            return keyHelper.GenerateRowKeyIdentityRoleClaim(ClaimType, ClaimValue).ToString();
         }
 
         /// <inheritdoc/>

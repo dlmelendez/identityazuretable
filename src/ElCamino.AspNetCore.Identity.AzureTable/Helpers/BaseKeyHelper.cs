@@ -130,7 +130,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         }
 
         /// <inheritdoc/>
-        public virtual string GenerateRowKeyIdentityRole(string? plainRoleName)
+        public virtual ReadOnlySpan<char> GenerateRowKeyIdentityRole(string? plainRoleName)
         {
             var hash = ConvertKeyToHash(plainRoleName?.ToUpper());
             return string.Format(FormatterIdentityRole, hash.ToString());
@@ -156,7 +156,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         }
 
         /// <inheritdoc/>
-        public virtual string GenerateRowKeyIdentityRoleClaim(string? claimType, string? claimValue)
+        public virtual ReadOnlySpan<char> GenerateRowKeyIdentityRoleClaim(string? claimType, string? claimValue)
         {
             var strTemp = string.Format("{0}_{1}", claimType?.ToUpper(), claimValue?.ToUpper()).AsSpan();
             var hash = ConvertKeyToHash(strTemp);
