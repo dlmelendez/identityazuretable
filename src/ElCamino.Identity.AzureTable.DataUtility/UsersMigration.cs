@@ -22,7 +22,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         {
             //Get all User key records
             TableQuery tq = new TableQuery();
-            tq.SelectColumns = new List<string>() { "PartitionKey", "RowKey", "KeyVersion" };
+            tq.SelectColumns = ["PartitionKey", "RowKey", "KeyVersion"];
             var partitionFilter = TableQuery.CombineFilters(
                 TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserId),
                 TableOperators.And,
@@ -79,7 +79,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             var keyVersionFilter = TableQuery.GenerateFilterConditionForDouble("KeyVersion", QueryComparisons.LessThan, _keyHelper.KeyVersion);
             tq.FilterString = TableQuery.CombineFilters(partitionKeyFilter, TableOperators.And, keyVersionFilter).ToString();
             var r = sourcesContext.UserTable.Query<TableEntity>(tq.FilterString);
-            return r.ToList();
+            return [.. r];
         }
 
         private (List<TableEntity> targetUserEntities, List<IdentityUserIndex> targetUserIndexes) ConvertToTargetUserEntities(string userId, List<TableEntity> sourceUserEntities)

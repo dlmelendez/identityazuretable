@@ -18,7 +18,9 @@
 using System.Globalization;
 using System.Text;
 
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace Azure.Data.Tables
+#pragma warning restore IDE0130 // Namespace does not match folder structure
 {
     /// <summary>
     /// From https://github.com/Azure/azure-storage-net/blob/v9.3.2/Lib/Common/Table/TableQuery.cs

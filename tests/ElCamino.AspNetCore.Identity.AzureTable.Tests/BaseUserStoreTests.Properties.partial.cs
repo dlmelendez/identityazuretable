@@ -64,7 +64,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             Assert.True(resetAccessFailedCountResult.Succeeded, string.Concat(resetAccessFailedCountResult.Errors));
 
             user = await manager.FindByIdAsync(user.Id).ConfigureAwait(false);
-            Assert.True(user.AccessFailedCount == 0);
+            Assert.Equal<int>(0, user.AccessFailedCount);
 
             await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetAccessFailedCountAsync(null)).ConfigureAwait(false);
             await Assert.ThrowsAsync<ArgumentNullException>(() => store.IncrementAccessFailedCountAsync(null)).ConfigureAwait(false);

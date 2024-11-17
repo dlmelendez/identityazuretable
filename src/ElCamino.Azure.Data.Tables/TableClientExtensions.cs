@@ -3,7 +3,9 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace Azure.Data.Tables
+#pragma warning restore IDE0130 // Namespace does not match folder structure
 {
     /// <summary>
     /// Extensions for the <seealso cref="TableClient"/>

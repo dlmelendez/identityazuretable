@@ -21,7 +21,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         public TableQuery GetSourceTableQuery()
         {
             TableQuery tq = new TableQuery();
-            tq.SelectColumns = new List<string>() { "PartitionKey", "RowKey", "KeyVersion" };
+            tq.SelectColumns = ["PartitionKey", "RowKey", "KeyVersion"];
             var partitionFilter = TableQuery.CombineFilters(
                 TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserId),
                 TableOperators.And,

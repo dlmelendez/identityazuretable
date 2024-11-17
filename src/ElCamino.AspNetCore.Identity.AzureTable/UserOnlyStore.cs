@@ -63,7 +63,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         private readonly TContext _context;
 
         private readonly string FilterString;
-        private static readonly List<string> IndexUserIdSelectColumns = new() { nameof(IdentityUserIndex.Id) };
+        private static readonly List<string> IndexUserIdSelectColumns = [nameof(IdentityUserIndex.Id)];
 
         /// <inheritdoc/>
         public UserOnlyStore(TContext context, IKeyHelper keyHelper) : base(new IdentityErrorDescriber())
@@ -101,11 +101,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         /// <returns></returns>
         public virtual Task CreateTablesIfNotExistsAsync()
         {
-            Task[] tasks = new Task[]
-                    {
+            Task[] tasks =
+                    [
                         _userTable.CreateIfNotExistsAsync(),
                         _indexTable.CreateIfNotExistsAsync(),
-                    };
+                    ];
             return Task.WhenAll(tasks);
         }
 
@@ -114,12 +114,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            if (user is null) throw new ArgumentNullException(nameof(user));
-            if (claims is null) throw new ArgumentNullException(nameof(claims));
+            ArgumentNullException.ThrowIfNull(user);
+            ArgumentNullException.ThrowIfNull(claims);
 
             BatchOperationHelper bHelper = new BatchOperationHelper(_userTable);
 
-            List<Task> tasks = new List<Task>();
+            List<Task> tasks = [];
             string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
             foreach (Claim c in claims)
             {
@@ -135,14 +135,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         public virtual async Task AddClaimAsync(TUser user, Claim claim)
         {
             ThrowIfDisposed();
-            if (user is null) throw new ArgumentNullException(nameof(user));
-            if (claim is null) throw new ArgumentNullException(nameof(claim));
+            ArgumentNullException.ThrowIfNull(user);
+            ArgumentNullException.ThrowIfNull(claim);
 
-            List<Task> tasks = new List<Task>(2)
-            {
+            List<Task> tasks =
+            [
                 _userTable.AddEntityAsync(CreateUserClaim(user, claim)),
                 _indexTable.UpsertEntityAsync(CreateClaimIndex(_keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)), claim.Type, claim.Value), mode: TableUpdateMode.Replace)
-            };
+            ];
 
             await Task.WhenAll(tasks).ConfigureAwait(false);
         }
@@ -152,8 +152,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            if (user is null) throw new ArgumentNullException(nameof(user));
-            if (login is null) throw new ArgumentNullException(nameof(login));
+            ArgumentNullException.ThrowIfNull(user);
+            ArgumentNullException.ThrowIfNull(login);
 
             TUserLogin item = CreateUserLogin(user, login);
 
@@ -168,7 +168,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            if (user is null) throw new ArgumentNullException(nameof(user));
+            ArgumentNullException.ThrowIfNull(user);
 
             ((Model.IGenerateKeys)user).GenerateKeys(_keyHelper);
 
@@ -191,7 +191,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                     tasks.Add(_indexTable.UpsertEntityAsync(index, mode: TableUpdateMode.Replace, cancellationToken: cancellationToken));
                 }
 
-                await Task.WhenAll(tasks.ToArray()).ConfigureAwait(false);
+                await Task.WhenAll([.. tasks]).ConfigureAwait(false);
                 return IdentityResult.Success;
             }
             catch (AggregateException aggex)
@@ -206,7 +206,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            if (user is null) throw new ArgumentNullException(nameof(user));
+            ArgumentNullException.ThrowIfNull(user);
 
             List<Task> tasks = new List<Task>(50);
             string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
@@ -241,7 +241,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             try
             {
-                await Task.WhenAll(tasks.ToArray()).ConfigureAwait(false);
+                await Task.WhenAll([.. tasks]).ConfigureAwait(false);
                 return IdentityResult.Success;
             }
             catch (AggregateException aggex)
@@ -251,10 +251,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
         }
 
-#pragma warning disable CS8609 // Nullability of reference types in return type doesn't match overridden member.
         /// <inheritdoc/>
         protected override Task<TUserLogin?> FindUserLoginAsync(TKey userId, string loginProvider, string providerKey, CancellationToken cancellationToken)
-#pragma warning restore CS8609 // Nullability of reference types in return type doesn't match overridden member.
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -273,10 +271,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return default;
         }
 
-#pragma warning disable CS8609 // Nullability of reference types in return type doesn't match overridden member.
         /// <inheritdoc/>
         protected override async Task<TUserLogin?> FindUserLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken)
-#pragma warning restore CS8609 // Nullability of reference types in return type doesn't match overridden member.
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -303,9 +299,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         /// <param name="providerKey"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-#pragma warning disable CS8609 // Nullability of reference types in return type doesn't match overridden member.
         public override Task<TUser?> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken = default)
-#pragma warning restore CS8609 // Nullability of reference types in return type doesn't match overridden member.
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -316,10 +310,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return GetUserFromIndexQueryAsync(GetUserIdByIndexQuery(partitionKey, rowKey).ToString(), cancellationToken);
         }
 
-#pragma warning disable CS8609 // Nullability of reference types in return type doesn't match overridden member.
         /// <inheritdoc/>
         public override Task<TUser?> FindByEmailAsync(string plainEmail, CancellationToken cancellationToken = default)
-#pragma warning restore CS8609 // Nullability of reference types in return type doesn't match overridden member.
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -335,10 +327,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return users.Where(user => _keyHelper.GenerateRowKeyUserEmail(plainEmail) == _keyHelper.GenerateRowKeyUserEmail(user.Email));
         }
 
-#pragma warning disable CS8609 // Nullability of reference types in return type doesn't match overridden member.
         /// <inheritdoc/>
         protected override Task<TUser?> FindUserAsync(TKey userId, CancellationToken cancellationToken)
-#pragma warning restore CS8609 // Nullability of reference types in return type doesn't match overridden member.
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -401,20 +391,16 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, partitionKey);
         }
 
-#pragma warning disable CS8609 // Nullability of reference types in return type doesn't match overridden member.
         /// <inheritdoc/>
         public override Task<TUser?> FindByIdAsync(string userId, CancellationToken cancellationToken = default)
-#pragma warning restore CS8609 // Nullability of reference types in return type doesn't match overridden member.
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
             return GetUserAsync(_keyHelper.GenerateRowKeyUserId(userId), cancellationToken);
         }
 
-#pragma warning disable CS8609 // Nullability of reference types in return type doesn't match overridden member.
         /// <inheritdoc/>
         public override async Task<TUser?> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken = default)
-#pragma warning restore CS8609 // Nullability of reference types in return type doesn't match overridden member.
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -441,8 +427,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            if (user is null) throw new ArgumentNullException(nameof(user));
-            List<Claim> rClaims = new List<Claim>();
+            ArgumentNullException.ThrowIfNull(user);
+            List<Claim> rClaims = [];
 
             var partitionFilter =
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, user.PartitionKey);
@@ -468,9 +454,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            if (user is null) throw new ArgumentNullException(nameof(user));
+            ArgumentNullException.ThrowIfNull(user);
 
-            List<UserLoginInfo> rLogins = new List<UserLoginInfo>();
+            List<UserLoginInfo> rLogins = [];
 
             var partitionFilter =
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, user.PartitionKey);
@@ -573,7 +559,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             }
 
-            ConcurrentBag<TUser> bag = new ConcurrentBag<TUser>();
+            ConcurrentBag<TUser> bag = [];
 #if DEBUG
             DateTime startUserAggTotal = DateTime.UtcNow;
 #endif
@@ -624,7 +610,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             const double pageSize = 50.0;
             int pages = (int)Math.Ceiling(((double)userIds.Count() / pageSize));
             List<string> listTqs = new List<string>(pages);
-            IEnumerable<string> tempUserIds = Enumerable.Empty<string>();
+            IEnumerable<string> tempUserIds = [];
 
             for (int currentPage = 1; currentPage <= pages; currentPage++)
             {
@@ -662,7 +648,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             }
 
-            ConcurrentBag<TUser> bag = new ConcurrentBag<TUser>();
+            ConcurrentBag<TUser> bag = [];
 #if DEBUG
             DateTime startUserAggTotal = DateTime.UtcNow;
 #endif
@@ -693,9 +679,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
 
             TUser? user = default;
-            IEnumerable<TUserClaim> claims = Enumerable.Empty<TUserClaim>();
-            IEnumerable<TUserLogin> logins = Enumerable.Empty<TUserLogin>();
-            IEnumerable<TUserToken> tokens = Enumerable.Empty<TUserToken>();
+            IEnumerable<TUserClaim> claims = [];
+            IEnumerable<TUserLogin> logins = [];
+            IEnumerable<TUserToken> tokens = [];
 
             var vUser = userResults.Where(u => u.RowKey.Equals(userId) && u.PartitionKey.Equals(userId)).SingleOrDefault();
 
@@ -763,7 +749,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 #if DEBUG
             DateTime startIndex = DateTime.UtcNow;
 #endif
-            ConcurrentBag<IEnumerable<TUser>> lUsers = new ConcurrentBag<IEnumerable<TUser>>();
+            ConcurrentBag<IEnumerable<TUser>> lUsers = [];
             string? token = string.Empty;
             const int takeCount = 30;
             const int taskMax = 10;
@@ -776,7 +762,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             {
                 IAsyncEnumerable<Page<IdentityUserIndex>> pages = _indexTable.QueryAsync<IdentityUserIndex>(indexQuery, takeCount, IndexUserIdSelectColumns, cancellationToken).AsPages(continuationToken: token);
                 Page<IdentityUserIndex>? page = await pages.FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
-                IEnumerable<string> tempUserIds = page?.Values.Where(w => !string.IsNullOrWhiteSpace(w.Id)).Select(u => u.Id!).Distinct() ?? Enumerable.Empty<string>();
+                IEnumerable<string> tempUserIds = page?.Values.Where(w => !string.IsNullOrWhiteSpace(w.Id)).Select(u => u.Id!).Distinct() ?? [];
                 taskBatch.Add(getUsers(tempUserIds, cancellationToken));
                 if (taskBatch.Count % taskMax == 0)
                 {
@@ -802,8 +788,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         public virtual async Task RemoveClaimAsync(TUser user, Claim claim)
         {
             ThrowIfDisposed();
-            if (user is null) throw new ArgumentNullException(nameof(user));
-            if (claim is null) throw new ArgumentNullException(nameof(claim));
+            ArgumentNullException.ThrowIfNull(user);
+            ArgumentNullException.ThrowIfNull(claim);
 
             // Claim ctor doesn't allow Claim.Value to be null. Need to allow string.empty.
 
@@ -830,9 +816,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            if (user is null) throw new ArgumentNullException(nameof(user));
-            if (claim is null) throw new ArgumentNullException(nameof(claim));
-            if (newClaim is null) throw new ArgumentNullException(nameof(newClaim));
+            ArgumentNullException.ThrowIfNull(user);
+            ArgumentNullException.ThrowIfNull(claim);
+            ArgumentNullException.ThrowIfNull(newClaim);
 
             // Claim ctor doesn't allow Claim.Value to be null. Need to allow string.empty.
             BatchOperationHelper bHelper = new BatchOperationHelper(_userTable);
@@ -862,11 +848,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            if (user is null) throw new ArgumentNullException(nameof(user));
-            if (claims is null) throw new ArgumentNullException(nameof(claims));
+            ArgumentNullException.ThrowIfNull(user);
+            ArgumentNullException.ThrowIfNull(claims);
 
             // Claim ctor doesn't allow Claim.Value to be null. Need to allow string.empty.
-            List<Task> tasks = new List<Task>();
+            List<Task> tasks = [];
             string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
             BatchOperationHelper bHelper = new BatchOperationHelper(_userTable);
             var userClaims = await GetClaimsAsync(user, cancellationToken).ConfigureAwait(false);
@@ -914,7 +900,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            if (user is null) throw new ArgumentNullException(nameof(user));
+            ArgumentNullException.ThrowIfNull(user);
             string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
             TUserLogin? item = await FindUserLoginAsync(userPartitionKey, loginProvider, providerKey).ConfigureAwait(false);
 
@@ -931,7 +917,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            if (user is null) throw new ArgumentNullException(nameof(user));
+            ArgumentNullException.ThrowIfNull(user);
 
             //Only remove the username if different
             //The UserManager calls UpdateAsync which will generate the new username index record
@@ -947,7 +933,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            if (user is null) throw new ArgumentNullException(nameof(user));
+            ArgumentNullException.ThrowIfNull(user);
 
             //Only remove the email if different
             //The UserManager calls UpdateAsync which will generate the new email index record
@@ -1052,7 +1038,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            if (user is null) throw new ArgumentNullException(nameof(user));
+            ArgumentNullException.ThrowIfNull(user);
             string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
             List<Task> tasks = new List<Task>(3)
             {
@@ -1069,7 +1055,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             try
             {
-                await Task.WhenAll(tasks.ToArray()).ConfigureAwait(false);
+                await Task.WhenAll([.. tasks]).ConfigureAwait(false);
                 return IdentityResult.Success;
             }
             catch (AggregateException aggex)
@@ -1185,10 +1171,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
 
-            if (claim is null)
-            {
-                throw new ArgumentNullException(nameof(claim));
-            }
+            ArgumentNullException.ThrowIfNull(claim);
 
             string getTableQueryFilterByUserId(string userId)
             {
@@ -1223,15 +1206,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            if (user is null) throw new ArgumentNullException(nameof(user));
+            ArgumentNullException.ThrowIfNull(user);
 
             return Task.FromResult(user.Id is not null ? user.Id.ToString()??string.Empty : string.Empty);
         }
 
-#pragma warning disable CS8609 // Nullability of reference types in return type doesn't match overridden member.
         /// <inheritdoc/>
         protected override async Task<TUserToken?> FindTokenAsync(TUser user, string loginProvider, string name, CancellationToken cancellationToken)
-#pragma warning restore CS8609 // Nullability of reference types in return type doesn't match overridden member.
         {
             return await _userTable.GetEntityOrDefaultAsync<TUserToken>(_keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)),
                     _keyHelper.GenerateRowKeyIdentityUserToken(loginProvider, name), cancellationToken: cancellationToken).ConfigureAwait(false);

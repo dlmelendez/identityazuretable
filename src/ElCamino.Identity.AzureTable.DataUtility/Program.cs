@@ -19,15 +19,15 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         private static int iUserTotal = 0;
         private static int iUserSuccessConvert = 0;
         private static int iUserFailureConvert = 0;
-        private static readonly ConcurrentBag<string> userIdFailures = new();
+        private static readonly ConcurrentBag<string> userIdFailures = [];
 
-        private static readonly List<string> helpTokens = new() { "/?", "/help" };
+        private static readonly List<string> helpTokens = ["/?", "/help"];
         private const string PreviewToken = "/preview:";
         private const string MigrateToken = "/migrate:";
-        private static readonly List<string> validCommands = new() {
+        private static readonly List<string> validCommands = [
             MigrationFactory.Roles,
             MigrationFactory.Users
-        };
+        ];
         private const string NoDeleteToken = "/nodelete";
         private const string MaxDegreesParallelToken = "/maxparallel:";
         private static int iMaxdegreesparallel = Environment.ProcessorCount * 2;
@@ -129,7 +129,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 {
                     if (migrateOption)
                     {
-                        migration.ProcessMigrate(targetContext, sourceContext, sourceResults?.Values.ToList()??new List<TableEntity>(), iMaxdegreesparallel,
+                        migration.ProcessMigrate(targetContext, sourceContext, sourceResults?.Values.ToList() ?? [], iMaxdegreesparallel,
                         () =>
                         {
                             Interlocked.Increment(ref iUserSuccessConvert);
@@ -201,7 +201,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             }
             else
             {
-                List<string> nonHelpTokens = new List<string>() { PreviewToken, MigrateToken, NoDeleteToken, MaxDegreesParallelToken, StartPageToken, FinishPageToken, PageSizeToken };
+                List<string> nonHelpTokens = [PreviewToken, MigrateToken, NoDeleteToken, MaxDegreesParallelToken, StartPageToken, FinishPageToken, PageSizeToken];
                 if (!args.All(a => nonHelpTokens.Any(h => a.StartsWith(h, StringComparison.OrdinalIgnoreCase))))
                 {
                     DisplayInvalidArgs(args.Where(a => !nonHelpTokens.Any(h => h.StartsWith(a, StringComparison.OrdinalIgnoreCase))).ToList());
@@ -211,13 +211,13 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 bool isMigrate = args.Any(a => a.StartsWith(MigrateToken, StringComparison.OrdinalIgnoreCase));
                 if (isPreview && isMigrate)
                 {
-                    DisplayInvalidArgs(new List<string>() { PreviewToken, MigrateToken, "Cannot define /preview and /migrate. Only one can be used." });
+                    DisplayInvalidArgs([PreviewToken, MigrateToken, "Cannot define /preview and /migrate. Only one can be used."]);
                     return false;
                 }
                 bool isNoDelete = args.Any(a => a.Equals(NoDeleteToken, StringComparison.OrdinalIgnoreCase));
                 if (isNoDelete && !isMigrate)
                 {
-                    DisplayInvalidArgs(new List<string>() { NoDeleteToken, "/nodelete must be used with /migrate option." });
+                    DisplayInvalidArgs([NoDeleteToken, "/nodelete must be used with /migrate option."]);
                     return false;
                 }
 
@@ -241,7 +241,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
                 if (iPageSize > 1000)
                 {
-                    DisplayInvalidArgs(new List<string>() { PageSizeToken, string.Format("{0} must be less than 1000", PageSizeToken) });
+                    DisplayInvalidArgs([PageSizeToken, string.Format("{0} must be less than 1000", PageSizeToken)]);
                     return false;
                 }
                 migrateOption = isMigrate;
@@ -264,7 +264,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 }
                 else
                 {
-                    DisplayInvalidArgs(new List<string>() { args, string.Format("{0} must be followed by an int greater than 0. e.g. {0}3", token) });
+                    DisplayInvalidArgs([args, string.Format("{0} must be followed by an int greater than 0. e.g. {0}3", token)]);
                     return false;
                 }
             }
@@ -284,7 +284,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 }
                 else
                 {
-                    DisplayInvalidArgs(new List<string>() { args, string.Format("{0} must be followed by a valid command arg {1}", token, string.Join(",", validCommands.ToArray())) });
+                    DisplayInvalidArgs([args, string.Format("{0} must be followed by a valid command arg {1}", token, string.Join(",", validCommands.ToArray()))]);
                     return false;
                 }
             }

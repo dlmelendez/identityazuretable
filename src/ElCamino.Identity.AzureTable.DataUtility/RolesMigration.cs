@@ -54,7 +54,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         {
             var tr = sourcesContext.RoleTable.GetEntityOrDefaultAsync<TableEntity>(
                 _keyHelper.ParsePartitionKeyIdentityRoleFromRowKey(roleRowKey),
-                roleRowKey, new List<string>() { nameof(IdentityRole.Name), nameof(TableEntity.PartitionKey), nameof(TableEntity.RowKey) }).Result;
+                roleRowKey, [nameof(IdentityRole.Name), nameof(TableEntity.PartitionKey), nameof(TableEntity.RowKey)]).Result;
 
             if (tr != null)
             {

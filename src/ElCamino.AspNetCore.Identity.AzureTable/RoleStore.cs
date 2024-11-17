@@ -127,10 +127,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
         }
 
-#pragma warning disable CS8609 // Nullability of reference types in return type doesn't match overridden member.
         /// <inheritdoc/>
         public override async Task<TRole?> FindByIdAsync(string roleId, CancellationToken cancellationToken = default)
-#pragma warning restore CS8609 // Nullability of reference types in return type doesn't match overridden member.
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -139,10 +137,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 roleId.ToString(), cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
-#pragma warning disable CS8609 // Nullability of reference types in return type doesn't match overridden member.
         /// <inheritdoc/>
         public override async Task<TRole?> FindByNameAsync(string roleName, CancellationToken cancellationToken = default)
-#pragma warning restore CS8609 // Nullability of reference types in return type doesn't match overridden member.
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -156,14 +152,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-#if NET6_0_OR_GREATER
             ArgumentNullException.ThrowIfNull(role);
-#else
-            if (role is null)
-            {
-                throw new ArgumentNullException(nameof(role));
-            }
-#endif
+
             Model.IGenerateKeys? g = role as Model.IGenerateKeys;
             if (g is not null && !g.PeekRowKey(_keyHelper).Equals(role.RowKey, StringComparison.Ordinal))
             {

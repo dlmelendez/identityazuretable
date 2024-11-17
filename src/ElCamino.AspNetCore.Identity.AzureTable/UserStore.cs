@@ -15,9 +15,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 {
     /// <inheritdoc/>
     public class UserStore<TUser, TContext> : UserStore<TUser, Model.IdentityRole, string, Model.IdentityUserLogin, Model.IdentityUserRole, Model.IdentityUserClaim, Model.IdentityUserToken, TContext>
-#pragma warning disable CS8613 // Nullability of reference types in return type doesn't match implicitly implemented member.
        , IUserStore<TUser>
-#pragma warning restore CS8613 // Nullability of reference types in return type doesn't match implicitly implemented member.
        where TUser : Model.IdentityUser<string>, new()
        where TContext : IdentityCloudContext
     {
@@ -32,9 +30,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
     /// <typeparam name="TRole"></typeparam>
     /// <typeparam name="TContext"></typeparam>
     public class UserStore<TUser, TRole, TContext> : UserStore<TUser, TRole, string, Model.IdentityUserLogin, Model.IdentityUserRole, Model.IdentityUserClaim, Model.IdentityUserToken, TContext>
-#pragma warning disable CS8613 // Nullability of reference types in return type doesn't match implicitly implemented member.
         , IUserStore<TUser>
-#pragma warning restore CS8613 // Nullability of reference types in return type doesn't match implicitly implemented member.
         where TUser : Model.IdentityUser<string>, new()
         where TRole : Model.IdentityRole<string, Model.IdentityUserRole>, new()
         where TContext : IdentityCloudContext
@@ -46,9 +42,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
     /// <inheritdoc/>
     public class UserStore<TUser, TRole, TKey, TUserLogin, TUserRole, TUserClaim, TUserToken, TContext> :
         UserOnlyStore<TUser, TContext, TKey, TUserClaim, TUserLogin, TUserToken>
-#pragma warning disable CS8613 // Nullability of reference types in return type doesn't match implicitly implemented member.
         , IUserRoleStore<TUser>
-#pragma warning restore CS8613 // Nullability of reference types in return type doesn't match implicitly implemented member.
         , IDisposable
         where TUser : Model.IdentityUser<TKey>, new()
         where TRole : Model.IdentityRole<TKey, TUserRole>, new()
@@ -77,11 +71,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         public override Task CreateTablesIfNotExistsAsync()
         {
             Task[] tasks =
-                new Task[]
-                {
+                [
                     base.CreateTablesIfNotExistsAsync(),
                     _roleTable.CreateIfNotExistsAsync(),
-                };
+                ];
             return Task.WhenAll(tasks);
         }
 
@@ -90,7 +83,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            if (user is null) throw new ArgumentNullException(nameof(user));
+            ArgumentNullException.ThrowIfNull(user);
             if (string.IsNullOrWhiteSpace(roleName))
             {
                 throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(roleName));
@@ -110,11 +103,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             ((Model.IGenerateKeys)item).GenerateKeys(_keyHelper);
 
-            List<Task> tasks = new List<Task>(2)
-            {
+            List<Task> tasks =
+            [
                 _userTable.AddEntityAsync(item, cancellationToken),
                 _indexTable.UpsertEntityAsync(CreateRoleIndex(userToRole.PartitionKey, roleName), mode: TableUpdateMode.Replace, cancellationToken: cancellationToken)
-            };
+            ];
 
             await Task.WhenAll(tasks).ConfigureAwait(false);
         }
@@ -123,12 +116,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         public virtual async Task<IList<string>> GetRolesAsync(TUser user, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            ConcurrentBag<string> bag = new ConcurrentBag<string>();
+            ConcurrentBag<string> bag = [];
             ThrowIfDisposed();
-            if (user is null)
-            {
-                throw new ArgumentNullException(nameof(user));
-            }
+            ArgumentNullException.ThrowIfNull(user);
 
             if (EqualityComparer<TKey?>.Default.Equals(user!.Id, default))
             {
@@ -179,7 +169,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                         iRoleCounter++;
                     }
                     tasks.Add(
-                        _roleTable.QueryAsync<Model.IdentityRole>(filter: queryTemp, select: new List<string>() { nameof(Model.IdentityRole.Name) }, cancellationToken: cancellationToken)
+                        _roleTable.QueryAsync<Model.IdentityRole>(filter: queryTemp, select: [nameof(Model.IdentityRole.Name)], cancellationToken: cancellationToken)
                         .ForEachAsync((t) =>
                         {
                             if (!string.IsNullOrWhiteSpace(t?.Name))
@@ -192,7 +182,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 await Task.WhenAll(tasks).ConfigureAwait(false);
             }
 
-            return bag.ToList();
+            return [.. bag];
         }
 
         /// <summary>
@@ -250,7 +240,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 }, cancellationToken).ConfigureAwait(false)).ToList();
             }
 
-            return new List<TUser>();
+            return [];
         }
 
         /// <inheritdoc/>
@@ -258,7 +248,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            if (user is null) throw new ArgumentNullException(nameof(user));
+            ArgumentNullException.ThrowIfNull(user);
             if (string.IsNullOrWhiteSpace(roleName))
             {
                 throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(roleName));
@@ -286,7 +276,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         /// <inheritdoc/>
         public Task<bool> RoleExistsAsync(string roleName, CancellationToken cancellationToken = default)
         {
-            return _roleTable.QueryAsync<TableEntity>(filter: BuildRoleQuery(roleName), maxPerPage: 1, select: new List<string>() { nameof(Model.IdentityRole.Name) }, cancellationToken: cancellationToken).AnyAsync(cancellationToken);
+            return _roleTable.QueryAsync<TableEntity>(filter: BuildRoleQuery(roleName), maxPerPage: 1, select: [nameof(Model.IdentityRole.Name)], cancellationToken: cancellationToken).AnyAsync(cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -294,7 +284,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            if (user is null) throw new ArgumentNullException(nameof(user));
+            ArgumentNullException.ThrowIfNull(user);
             if (string.IsNullOrWhiteSpace(roleName))
                 throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(roleName));
 
@@ -337,7 +327,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             const double pageSize = 50.0;
             int pages = (int)Math.Ceiling(((double)userIds.Count() / pageSize));
             List<string> listTqs = new List<string>(pages);
-            IEnumerable<string> tempUserIds = Enumerable.Empty<string>();
+            IEnumerable<string> tempUserIds = [];
 
             for (int currentPage = 1; currentPage <= pages; currentPage++)
             {
@@ -378,7 +368,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             }
 
-            ConcurrentBag<TUser> bag = new ConcurrentBag<TUser>();
+            ConcurrentBag<TUser> bag = [];
 #if DEBUG
             DateTime startUserAggTotal = DateTime.UtcNow;
 #endif
@@ -440,10 +430,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
 
             TUser? user = default;
-            IEnumerable<TUserRole> roles = Enumerable.Empty<TUserRole>();
-            IEnumerable<TUserClaim> claims = Enumerable.Empty<TUserClaim>();
-            IEnumerable<TUserLogin> logins = Enumerable.Empty<TUserLogin>();
-            IEnumerable<TUserToken> tokens = Enumerable.Empty<TUserToken>();
+            IEnumerable<TUserRole> roles = [];
+            IEnumerable<TUserClaim> claims = [];
+            IEnumerable<TUserLogin> logins = [];
+            IEnumerable<TUserToken> tokens = [];
 
             var vUser = userResults.Where(u => u.RowKey.Equals(userId) && u.PartitionKey.Equals(userId)).SingleOrDefault();
 
@@ -490,7 +480,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-            if (user is null) throw new ArgumentNullException(nameof(user));
+            ArgumentNullException.ThrowIfNull(user);
 
             List<Task> tasks = new List<Task>(50);
             string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
@@ -530,7 +520,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             try
             {
-                await Task.WhenAll(tasks.ToArray()).ConfigureAwait(false);
+                await Task.WhenAll([.. tasks]).ConfigureAwait(false);
                 return IdentityResult.Success;
             }
             catch (AggregateException aggex)
