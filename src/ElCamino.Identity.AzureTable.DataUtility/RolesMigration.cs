@@ -53,7 +53,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         private string? GetRoleNameBySourceId(string roleRowKey, IdentityCloudContext sourcesContext)
         {
             var tr = sourcesContext.RoleTable.GetEntityOrDefaultAsync<TableEntity>(
-                _keyHelper.ParsePartitionKeyIdentityRoleFromRowKey(roleRowKey),
+                _keyHelper.ParsePartitionKeyIdentityRoleFromRowKey(roleRowKey).ToString(),
                 roleRowKey, [nameof(IdentityRole.Name), nameof(TableEntity.PartitionKey), nameof(TableEntity.RowKey)]).Result;
 
             if (tr != null)

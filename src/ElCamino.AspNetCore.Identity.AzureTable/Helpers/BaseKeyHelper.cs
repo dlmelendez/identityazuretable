@@ -172,7 +172,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         }
 
         /// <inheritdoc/>
-        public virtual string ParsePartitionKeyIdentityRoleFromRowKey(string rowKey)
+        public virtual ReadOnlySpan<char> ParsePartitionKeyIdentityRoleFromRowKey(string rowKey)
         {
             return rowKey.AsSpan().Slice(PreFixIdentityRole.Length, 1).ToString();
         }

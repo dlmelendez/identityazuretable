@@ -224,7 +224,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// </summary>
         /// <param name="rowKey"></param>
         /// <returns></returns>
-        string ParsePartitionKeyIdentityRoleFromRowKey(string rowKey);
+        ReadOnlySpan<char> ParsePartitionKeyIdentityRoleFromRowKey(string rowKey);
 
         /// <summary>
         /// Key Version

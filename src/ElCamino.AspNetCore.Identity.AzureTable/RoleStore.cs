@@ -133,7 +133,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
 
-            return await _roleTable!.GetEntityOrDefaultAsync<TRole>(_keyHelper.ParsePartitionKeyIdentityRoleFromRowKey(roleId),
+            return await _roleTable!.GetEntityOrDefaultAsync<TRole>(_keyHelper.ParsePartitionKeyIdentityRoleFromRowKey(roleId).ToString(),
                 roleId.ToString(), cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
