@@ -93,7 +93,9 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 string? roleName = roleNameProperty?.ToString();
 
                 targetEntity = new TableEntity(sourceEntity);
-                targetEntity.ResetKeys(_keyHelper.GeneratePartitionKeyIdentityRole(roleName), _keyHelper.GenerateRowKeyIdentityRole(roleName).ToString(), TableConstants.ETagWildcard);
+                targetEntity.ResetKeys(_keyHelper.GeneratePartitionKeyIdentityRole(roleName).ToString(), 
+                    _keyHelper.GenerateRowKeyIdentityRole(roleName).ToString(), 
+                    TableConstants.ETagWildcard);
                 targetEntity["KeyVersion"] = _keyHelper.KeyVersion;
 
             }

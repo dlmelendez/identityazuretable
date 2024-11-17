@@ -20,7 +20,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         public void GenerateKeys(IKeyHelper keyHelper)
         {
             RowKey = PeekRowKey(keyHelper);
-            PartitionKey = keyHelper.GeneratePartitionKeyIdentityRole(Name);
+            PartitionKey = keyHelper.GeneratePartitionKeyIdentityRole(Name).ToString();
             KeyVersion = keyHelper.KeyVersion;
         }
 

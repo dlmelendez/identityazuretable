@@ -185,7 +185,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// </summary>
         /// <param name="plainRoleName"></param>
         /// <returns></returns>
-        string GeneratePartitionKeyIdentityRole(string? plainRoleName);
+        ReadOnlySpan<char> GeneratePartitionKeyIdentityRole(string? plainRoleName);
 
         /// <summary>
         /// Generate key for RowKeyIdentityUserClaim

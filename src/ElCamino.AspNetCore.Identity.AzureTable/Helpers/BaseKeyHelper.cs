@@ -137,7 +137,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         }
 
         /// <inheritdoc/>
-        public virtual string GeneratePartitionKeyIdentityRole(string? plainRoleName)
+        public virtual ReadOnlySpan<char> GeneratePartitionKeyIdentityRole(string? plainRoleName)
         {
             var hash = ConvertKeyToHash(plainRoleName?.ToUpper());
             if(hash.IsEmpty)
