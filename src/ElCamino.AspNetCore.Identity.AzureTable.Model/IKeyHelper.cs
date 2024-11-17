@@ -137,7 +137,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// </summary>
         /// <param name="plainEmail"></param>
         /// <returns></returns>
-        string GenerateRowKeyUserEmail(string? plainEmail);
+        ReadOnlySpan<char> GenerateRowKeyUserEmail(string? plainEmail);
 
         /// <summary>
         /// Generate key for UserId

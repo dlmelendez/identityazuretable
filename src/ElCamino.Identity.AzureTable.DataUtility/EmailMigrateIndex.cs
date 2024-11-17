@@ -83,7 +83,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             return new IdentityUserIndex()
             {
                 Id = userid,
-                PartitionKey = _keyHelper.GenerateRowKeyUserEmail(email),
+                PartitionKey = _keyHelper.GenerateRowKeyUserEmail(email).ToString(),
                 RowKey = userid,
                 KeyVersion = _keyHelper.KeyVersion,
                 ETag = TableConstants.ETagWildcard

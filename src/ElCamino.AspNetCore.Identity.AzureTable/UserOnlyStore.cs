@@ -324,7 +324,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
             IEnumerable<TUser> users = await GetUsersByIndexQueryAsync(FindByEmailIndexQuery(plainEmail).ToString(), GetUserQueryAsync, cancellationToken).ConfigureAwait(false);
-            return users.Where(user => _keyHelper.GenerateRowKeyUserEmail(plainEmail) == _keyHelper.GenerateRowKeyUserEmail(user.Email));
+            return users.Where(user => _keyHelper.GenerateRowKeyUserEmail(plainEmail).Equals(_keyHelper.GenerateRowKeyUserEmail(user.Email), StringComparison.InvariantCultureIgnoreCase));
         }
 
         /// <inheritdoc/>
@@ -386,7 +386,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         /// </summary>
         /// <param name="partitionKey"></param>
         /// <returns>Odata filter query</returns>
-        protected ReadOnlySpan<char> GetUserIdsByIndexQuery(string partitionKey)
+        protected ReadOnlySpan<char> GetUserIdsByIndexQuery(ReadOnlySpan<char> partitionKey)
         {
             return TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, partitionKey);
         }
@@ -1120,7 +1120,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return new Model.IdentityUserIndex()
             {
                 Id = userid,
-                PartitionKey = _keyHelper.GenerateRowKeyUserEmail(email),
+                PartitionKey = _keyHelper.GenerateRowKeyUserEmail(email).ToString(),
                 RowKey = userid,
                 KeyVersion = _keyHelper.KeyVersion,
                 ETag = TableConstants.ETagWildcard

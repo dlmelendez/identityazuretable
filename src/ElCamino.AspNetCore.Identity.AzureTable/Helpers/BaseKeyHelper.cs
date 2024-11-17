@@ -90,7 +90,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         }
 
         /// <inheritdoc/>
-        public virtual string GenerateRowKeyUserEmail(string? plainEmail)
+        public virtual ReadOnlySpan<char> GenerateRowKeyUserEmail(string? plainEmail)
         {
             var hash = ConvertKeyToHash(plainEmail?.ToUpper());
             return string.Format(FormatterIdentityUserEmail, hash.ToString());

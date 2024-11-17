@@ -120,11 +120,11 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                         //Email index - only if email exists
                         if (tgtDte.TryGetValue("Email", out object emailProperty))
                         {
-                            string emailKey = _keyHelper.GenerateRowKeyUserEmail(emailProperty.ToString());
+                            var emailKey = _keyHelper.GenerateRowKeyUserEmail(emailProperty.ToString());
                             IdentityUserIndex emailIndex = new IdentityUserIndex()
                             {
                                 Id = targetUserPartitionKey,
-                                PartitionKey = emailKey,
+                                PartitionKey = emailKey.ToString(),
                                 RowKey = targetUserPartitionKey,
                                 KeyVersion = _keyHelper.KeyVersion,
                                 ETag = TableConstants.ETagWildcard
