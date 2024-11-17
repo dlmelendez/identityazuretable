@@ -2,6 +2,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Azure.Data.Tables;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
 using ElCamino.Web.Identity.AzureTable.Tests.Fixtures;
 using ElCamino.Web.Identity.AzureTable.Tests.ModelTests;
@@ -305,7 +306,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         private UserStore<ApplicationUserV2, IdentityRole, IdentityCloudContext> GetImmutableUserIdStore()
         {
             var config = userFixture.GetConfig();
-            var userStore = userFixture.CreateUserStore(userFixture.GetContext(config.config, new Azure.Data.Tables.TableServiceClient(config.connectionString)));
+            var userStore = userFixture.CreateUserStore(userFixture.GetContext(config.config, new TableServiceClient(config.connectionString)));
             return userStore;
         }
 

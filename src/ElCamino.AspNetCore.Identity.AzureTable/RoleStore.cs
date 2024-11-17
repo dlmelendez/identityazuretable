@@ -69,7 +69,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             FilterString = TableQuery.CombineFilters(
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityRole),
                 TableOperators.And,
-                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.LessThan, _keyHelper.PreFixIdentityRoleUpperBound));
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.LessThan, _keyHelper.PreFixIdentityRoleUpperBound)).ToString();
 
         }
 
@@ -205,13 +205,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 throw new ArgumentNullException(nameof(role));
             }
 #endif
-            string partitionFilter = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, role.Id.ToString() ?? string.Empty);
+            var partitionFilter = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, role.Id.ToString() ?? string.Empty);
 
-            string rowFilter1 = TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserToken);
-            string rowFilter2 = TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.LessThan, _keyHelper.PreFixIdentityUserId);
-            string rowFilter = TableQuery.CombineFilters(rowFilter1, TableOperators.Or, rowFilter2);
+            var rowFilter1 = TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserToken);
+            var rowFilter2 = TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.LessThan, _keyHelper.PreFixIdentityUserId);
+            var rowFilter = TableQuery.CombineFilters(rowFilter1, TableOperators.Or, rowFilter2);
 
-            string filter = TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowFilter);
+            var filter = TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowFilter).ToString();
 
             return
 

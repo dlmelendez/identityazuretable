@@ -50,9 +50,8 @@ namespace Azure.Data.Tables
         /// <param name="operation">A string containing the comparison operator to use.</param>
         /// <param name="givenValue">A string containing the value to compare with the property.</param>
         /// <returns>A string containing the formatted filter condition.</returns>
-        public static string GenerateFilterCondition(string propertyName, string operation, string? givenValue)
+        public static ReadOnlySpan<char> GenerateFilterCondition(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> operation, ReadOnlySpan<char> givenValue)
         {
-            givenValue ??= string.Empty;
             return GenerateFilterCondition(propertyName, operation, givenValue, EdmType.String);
         }
 
@@ -63,7 +62,7 @@ namespace Azure.Data.Tables
         /// <param name="operation">A string containing the comparison operator to use.</param>
         /// <param name="givenValue">A <c>bool</c> containing the value to compare with the property.</param>
         /// <returns>A string containing the formatted filter condition.</returns>
-        public static string GenerateFilterConditionForBool(string propertyName, string operation, bool givenValue)
+        public static ReadOnlySpan<char> GenerateFilterConditionForBool(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> operation, bool givenValue)
         {
             return GenerateFilterCondition(propertyName, operation, givenValue ? OdataTrue : OdataFalse, EdmType.Boolean);
         }
@@ -75,9 +74,9 @@ namespace Azure.Data.Tables
         /// <param name="operation">A string containing the comparison operator to use.  <seealso cref="QueryComparisons.Equal"/> Is Null or <seealso cref="QueryComparisons.NotEqual"/> Not Null</param>
         /// <returns>A string containing the formatted filter condition.</returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public static string GenerateFilterConditionForBoolNull(string propertyName, string operation)
+        public static ReadOnlySpan<char> GenerateFilterConditionForBoolNull(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> operation)
         {
-            string validBoolean = $"({GenerateFilterConditionForBool(propertyName, QueryComparisons.Equal, true)} {TableOperators.Or} {GenerateFilterConditionForBool(propertyName, QueryComparisons.Equal, false)})";
+            ReadOnlySpan<char> validBoolean = $"({GenerateFilterConditionForBool(propertyName, QueryComparisons.Equal, true)} {TableOperators.Or} {GenerateFilterConditionForBool(propertyName, QueryComparisons.Equal, false)})";
             switch (operation)
             {
                 case QueryComparisons.Equal: //isNull
@@ -88,7 +87,7 @@ namespace Azure.Data.Tables
                     break;
             }
 
-            throw new ArgumentOutOfRangeException(nameof(operation), $"{operation ?? string.Empty} is not supported. Only {QueryComparisons.Equal} and {QueryComparisons.NotEqual} operators are supported.");
+            throw new ArgumentOutOfRangeException(nameof(operation), $"{operation} is not supported. Only {QueryComparisons.Equal} and {QueryComparisons.NotEqual} operators are supported.");
         }
 
         /// <summary>
@@ -98,27 +97,12 @@ namespace Azure.Data.Tables
         /// <param name="operation">A string containing the comparison operator to use.</param>
         /// <param name="givenValue">A byte array containing the value to compare with the property.</param>
         /// <returns>A string containing the formatted filter condition.</returns>
-        public static string GenerateFilterConditionForBinary(
-            string propertyName,
-            string operation,
+        public static ReadOnlySpan<char> GenerateFilterConditionForBinary(
+            ReadOnlySpan<char> propertyName,
+            ReadOnlySpan<char> operation,
             byte[] givenValue)
         {
-            string hash;
-
-#if NET6_0_OR_GREATER
-            hash = Convert.ToHexString(givenValue).ToLowerInvariant();
-#else
-            StringBuilder sb = new StringBuilder();
-
-            foreach (byte b in givenValue)
-            {
-                sb.AppendFormat("{0:x2}", b);
-            }
-
-            hash = sb.ToString();
-#endif
-
-            return GenerateFilterCondition(propertyName, operation, hash, EdmType.Binary);
+            return GenerateFilterCondition(propertyName, operation, Convert.ToHexString(givenValue).ToLowerInvariant(), EdmType.Binary);
         }
 
         /// <summary>
@@ -128,7 +112,7 @@ namespace Azure.Data.Tables
         /// <param name="operation">A string containing the comparison operator to use.</param>
         /// <param name="givenValue">A <see cref="DateTimeOffset"/> containing the value to compare with the property.</param>
         /// <returns>A string containing the formatted filter condition.</returns>
-        public static string GenerateFilterConditionForDate(string propertyName, string operation, DateTimeOffset givenValue)
+        public static ReadOnlySpan<char> GenerateFilterConditionForDate(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> operation, DateTimeOffset givenValue)
         {
             return GenerateFilterCondition(propertyName, operation, givenValue.UtcDateTime.ToString("o", CultureInfo.InvariantCulture), EdmType.DateTime);
         }
@@ -140,7 +124,7 @@ namespace Azure.Data.Tables
         /// <param name="operation">A string containing the comparison operator to use.</param>
         /// <param name="givenValue">A <see cref="double"/> containing the value to compare with the property.</param>
         /// <returns>A string containing the formatted filter condition.</returns>
-        public static string GenerateFilterConditionForDouble(string propertyName, string operation, double givenValue)
+        public static ReadOnlySpan<char> GenerateFilterConditionForDouble(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> operation, double givenValue)
         {
             return GenerateFilterCondition(propertyName, operation, Convert.ToString(givenValue, CultureInfo.InvariantCulture), EdmType.Double);
         }
@@ -152,7 +136,7 @@ namespace Azure.Data.Tables
         /// <param name="operation">A string containing the comparison operator to use.</param>
         /// <param name="givenValue">An <see cref="int"/> containing the value to compare with the property.</param>
         /// <returns>A string containing the formatted filter condition.</returns>
-        public static string GenerateFilterConditionForInt(string propertyName, string operation, int givenValue)
+        public static ReadOnlySpan<char> GenerateFilterConditionForInt(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> operation, int givenValue)
         {
             return GenerateFilterCondition(propertyName, operation, Convert.ToString(givenValue, CultureInfo.InvariantCulture), EdmType.Int32);
         }
@@ -164,7 +148,7 @@ namespace Azure.Data.Tables
         /// <param name="operation">A string containing the comparison operator to use.</param>
         /// <param name="givenValue">An <see cref="long"/> containing the value to compare with the property.</param>
         /// <returns>A string containing the formatted filter condition.</returns>
-        public static string GenerateFilterConditionForLong(string propertyName, string operation, long givenValue)
+        public static ReadOnlySpan<char> GenerateFilterConditionForLong(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> operation, long givenValue)
         {
             return GenerateFilterCondition(propertyName, operation, Convert.ToString(givenValue, CultureInfo.InvariantCulture), EdmType.Int64);
         }
@@ -176,7 +160,7 @@ namespace Azure.Data.Tables
         /// <param name="operation">A string containing the comparison operator to use.</param>
         /// <param name="givenValue">A <see cref="Guid"/> containing the value to compare with the property.</param>
         /// <returns>A string containing the formatted filter condition.</returns>
-        public static string GenerateFilterConditionForGuid(string propertyName, string operation, Guid givenValue)
+        public static ReadOnlySpan<char> GenerateFilterConditionForGuid(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> operation, Guid givenValue)
         {
             return GenerateFilterCondition(propertyName, operation, givenValue.ToString(), EdmType.Guid);
         }
@@ -188,9 +172,9 @@ namespace Azure.Data.Tables
         /// <param name="operation">A string containing the comparison operator to use. <seealso cref="QueryComparisons.Equal"/> Is Null or <seealso cref="QueryComparisons.NotEqual"/> Not Null</param>
         /// <returns>A string containing the formatted filter condition.</returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public static string GenerateFilterConditionForStringNull(string propertyName, string operation)
+        public static ReadOnlySpan<char> GenerateFilterConditionForStringNull(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> operation)
         {
-            string validString = $"{propertyName} {QueryComparisons.GreaterThan} ''";
+            ReadOnlySpan<char> validString = $"{propertyName} {QueryComparisons.GreaterThan} ''";
             switch (operation)
             {
                 case QueryComparisons.Equal: //isNull
@@ -201,49 +185,42 @@ namespace Azure.Data.Tables
                     break;
             }
 
-            throw new ArgumentOutOfRangeException(nameof(operation), $"{operation ?? string.Empty} is not supported. Only {QueryComparisons.Equal} and {QueryComparisons.NotEqual} operators are supported.");
+            throw new ArgumentOutOfRangeException(nameof(operation), $"{operation} is not supported. Only {QueryComparisons.Equal} and {QueryComparisons.NotEqual} operators are supported.");
         }
 
-#if NET8_0_OR_GREATER
         /// <summary>
         /// Generate operand value for the given value and <see cref="EdmType"/>.
         /// </summary>
         /// <param name="givenValue"></param>
         /// <param name="edmType"></param>
         /// <returns></returns>
-        private static ReadOnlySpan<char> GenerateValueOperand(string givenValue, EdmType edmType)
+        private static ReadOnlySpan<char> GenerateValueOperand(ReadOnlySpan<char> givenValue, EdmType edmType)
         {
-            switch(edmType)
+            switch (edmType)
             {
                 case EdmType.Boolean:
                 case EdmType.Int32:
-                    return givenValue.AsSpan();
+                    return givenValue;
                 case EdmType.Double:
                     bool isInteger = int.TryParse(givenValue, out _);
                     if (isInteger)
                     {
-                        return $"{givenValue}.0".AsSpan();
+                        return $"{givenValue}.0";
                     }
-                    return givenValue.AsSpan();
+                    return givenValue;
                 case EdmType.Int64:
-                    return $"{givenValue}L".AsSpan();
+                    return $"{givenValue}L";
                 case EdmType.DateTime:
-                    return $"datetime'{givenValue}'".AsSpan();
+                    return $"datetime'{givenValue}'";
                 case EdmType.Guid:
-                    return $"guid'{givenValue}'".AsSpan();
+                    return $"guid'{givenValue}'";
                 case EdmType.Binary:
-                    return $"X'{givenValue}'".AsSpan();
+                    return $"X'{givenValue}'";
             }
             // OData readers expect single quote to be escaped in a param value.
-            return string.Format(CultureInfo.InvariantCulture, "'{0}'", givenValue.Replace("'", "''")).AsSpan();
+            return string.Format(CultureInfo.InvariantCulture, "'{0}'", givenValue.ToString().Replace("'", "''"));
         }
 
-        private static ReadOnlySpan<char> GenerateFilterCondition(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> operation, string givenValue, EdmType edmType)
-        {
-            ReadOnlySpan<char> valueOperand = GenerateValueOperand(givenValue, edmType);
-            return $"{propertyName} {operation} {valueOperand}".AsSpan();
-        }
-#endif
         /// <summary>
         /// Generates a property filter condition string for the <see cref="EdmType"/> value, formatted as the specified <see cref="EdmType"/>.
         /// </summary>
@@ -252,57 +229,10 @@ namespace Azure.Data.Tables
         /// <param name="givenValue">A string containing the value to compare with the property.</param>
         /// <param name="edmType">The <see cref="EdmType"/> to format the value as.</param>
         /// <returns>A string containing the formatted filter condition.</returns>
-        private static string GenerateFilterCondition(string propertyName, string operation, string givenValue, EdmType edmType)
+        private static ReadOnlySpan<char> GenerateFilterCondition(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> operation, ReadOnlySpan<char> givenValue, EdmType edmType)
         {
-#if NET9_0_OR_GREATER
-            return GenerateFilterCondition(propertyName.AsSpan(), operation.AsSpan(), givenValue, edmType).ToString();
-#else
-            string valueOperand;
-            if (edmType == EdmType.Boolean || edmType == EdmType.Int32)
-            {
-                valueOperand = givenValue;
-            }
-            else if (edmType == EdmType.Double)
-            {
-                bool isInteger = int.TryParse(givenValue, out _);
-                valueOperand = isInteger ? string.Format(CultureInfo.InvariantCulture, "{0}.0", givenValue) : givenValue;
-            }
-            else if (edmType == EdmType.Int64)
-            {
-                valueOperand = string.Format(CultureInfo.InvariantCulture, "{0}L", givenValue);
-            }
-            else if (edmType == EdmType.DateTime)
-            {
-                valueOperand = string.Format(CultureInfo.InvariantCulture, "datetime'{0}'", givenValue);
-            }
-            else if (edmType == EdmType.Guid)
-            {
-                valueOperand = string.Format(CultureInfo.InvariantCulture, "guid'{0}'", givenValue);
-            }
-            else if (edmType == EdmType.Binary)
-            {
-                valueOperand = string.Format(CultureInfo.InvariantCulture, "X'{0}'", givenValue);
-            }
-            else
-            {
-                // OData readers expect single quote to be escaped in a param value.
-                valueOperand = string.Format(CultureInfo.InvariantCulture, "'{0}'", givenValue.Replace("'", "''"));
-            }
-
-            return string.Format(CultureInfo.InvariantCulture, "{0} {1} {2}", propertyName, operation, valueOperand);
-#endif
-        }
-
-        /// <summary>
-        /// Creates a filter condition using the specified logical operator on two filter conditions.
-        /// </summary>
-        /// <param name="filterA">A string containing the first formatted filter condition.</param>
-        /// <param name="operatorString">A string containing the operator to use (AND, OR).</param>
-        /// <param name="filterB">A string containing the second formatted filter condition.</param>
-        /// <returns>A string containing the combined filter expression.</returns>
-        public static string CombineFilters(string filterA, string operatorString, string filterB)
-        {
-            return string.Format(CultureInfo.InvariantCulture, "({0}) {1} ({2})", filterA, operatorString, filterB);
+            ReadOnlySpan<char> valueOperand = GenerateValueOperand(givenValue, edmType);
+            return $"{propertyName} {operation} {valueOperand}";
         }
 
         /// <summary>
@@ -312,10 +242,9 @@ namespace Azure.Data.Tables
         /// <param name="operatorString">A string containing the operator to use (AND, OR).</param>
         /// <param name="filterB">A ReadOnlySpan containing the second formatted filter condition.</param>
         /// <returns>A ReadOnlySpan containing the combined filter expression.</returns>
-        public static ReadOnlySpan<char> CombineFilters(ReadOnlySpan<char> filterA, string operatorString, ReadOnlySpan<char> filterB)
+        public static ReadOnlySpan<char> CombineFilters(ReadOnlySpan<char> filterA, ReadOnlySpan<char> operatorString, ReadOnlySpan<char> filterB)
         {
-            return $"({filterA.ToString()}) {operatorString} ({filterB.ToString()})".AsSpan();
+            return $"({filterA}) {operatorString} ({filterB})";
         }
-
     }
 }

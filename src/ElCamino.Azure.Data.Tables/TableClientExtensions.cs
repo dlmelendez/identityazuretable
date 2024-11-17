@@ -96,7 +96,7 @@ namespace Azure.Data.Tables
             var filterString = TableQuery.CombineFilters(
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, partitionKey),
                 TableOperators.And,
-                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, rowKey));
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, rowKey)).ToString();
 
             var page = await table.QueryAsync<T>(filter: filterString, maxPerPage: 1, select: select, cancellationToken)
                         .AsPages(continuationToken: null, pageSizeHint: 1).FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);

@@ -15,46 +15,28 @@
 // </copyright>
 // -----------------------------------------------------------------------------------------
 
-using ElCamino.Azure.Data.Tables;
-
-namespace Azure.Data.Tables
+namespace ElCamino.Azure.Data.Tables
 {
     /// <summary>
+    /// EXPERIMENTAL: Used for TableQueryBuilder
     /// From https://github.com/Azure/azure-storage-net/blob/v9.3.2/Lib/Common/Table/TableOperators.cs
     /// </summary>
-    public static class TableOperators
+    public enum TableOperator : byte
     {
         /// <summary>
         /// Represents the And operator.
         /// </summary>
 
-        public const string And = "and";
+        And,
 
         /// <summary>
         /// Represents the Not operator.
         /// </summary>
-        public const string Not = "not";
+        Not,
 
         /// <summary>
         /// Represents the Or operator.
         /// </summary>
-        public const string Or = "or";
-
-        /// <summary>
-        /// Gets the operator string for the specified <see cref="TableOperator"/>.
-        /// </summary>
-        /// <param name="tableOperator"></param>
-        /// <returns></returns>
-        /// <exception cref="System.ArgumentException"></exception>
-        public static string GetOperator(TableOperator tableOperator)
-        {
-            return tableOperator switch
-            {
-                TableOperator.And => And,
-                TableOperator.Not => Not,
-                TableOperator.Or => Or,
-                _ => throw new ArgumentException($"Invalid table operator: {tableOperator}", nameof(tableOperator)),
-            };
-        }
+        Or
     }
 }

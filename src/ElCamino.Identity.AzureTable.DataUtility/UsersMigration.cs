@@ -23,18 +23,18 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             //Get all User key records
             TableQuery tq = new TableQuery();
             tq.SelectColumns = new List<string>() { "PartitionKey", "RowKey", "KeyVersion" };
-            string partitionFilter = TableQuery.CombineFilters(
+            var partitionFilter = TableQuery.CombineFilters(
                 TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserId),
                 TableOperators.And,
                 TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.LessThan, _keyHelper.PreFixIdentityUserIdUpperBound));
-            string rowFilter = TableQuery.CombineFilters(
+            var rowFilter = TableQuery.CombineFilters(
                 TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserId),
                 TableOperators.And,
                 TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.LessThan, _keyHelper.PreFixIdentityUserIdUpperBound));
-            string keyVersionFilter = TableQuery.GenerateFilterConditionForDouble("KeyVersion", QueryComparisons.LessThan, _keyHelper.KeyVersion);
-            string keysFilter = TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowFilter);
+            var keyVersionFilter = TableQuery.GenerateFilterConditionForDouble("KeyVersion", QueryComparisons.LessThan, _keyHelper.KeyVersion);
+            var keysFilter = TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowFilter);
 
-            tq.FilterString = TableQuery.CombineFilters(keysFilter, TableOperators.And, keyVersionFilter);
+            tq.FilterString = TableQuery.CombineFilters(keysFilter, TableOperators.And, keyVersionFilter).ToString();
             return tq;
         }
 
@@ -75,9 +75,9 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         private List<TableEntity> GetUserEntitiesBySourceId(string userPartitionKey, IdentityCloudContext sourcesContext)
         {
             TableQuery tq = new TableQuery();
-            string partitionKeyFilter = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, userPartitionKey);
-            string keyVersionFilter = TableQuery.GenerateFilterConditionForDouble("KeyVersion", QueryComparisons.LessThan, _keyHelper.KeyVersion);
-            tq.FilterString = TableQuery.CombineFilters(partitionKeyFilter, TableOperators.And, keyVersionFilter);
+            var partitionKeyFilter = TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, userPartitionKey);
+            var keyVersionFilter = TableQuery.GenerateFilterConditionForDouble("KeyVersion", QueryComparisons.LessThan, _keyHelper.KeyVersion);
+            tq.FilterString = TableQuery.CombineFilters(partitionKeyFilter, TableOperators.And, keyVersionFilter).ToString();
             var r = sourcesContext.UserTable.Query<TableEntity>(tq.FilterString);
             return r.ToList();
         }

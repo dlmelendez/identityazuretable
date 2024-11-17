@@ -139,13 +139,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             string userId = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
             // Changing to a live query to mimic EF UserStore in Identity 3.0
 
-            string filterString = TableQuery.CombineFilters(
+            var filterString = TableQuery.CombineFilters(
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, userId),
                 TableOperators.And,
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserRole));
             var selectColumns = new List<string>() { roleName };
             var userRoles =
-                (await _userTable.QueryAsync<TableEntity>(filter: filterString, select: selectColumns, cancellationToken: cancellationToken).ToListAsync(cancellationToken).ConfigureAwait(false))
+                (await _userTable.QueryAsync<TableEntity>(filter: filterString.ToString(), select: selectColumns, cancellationToken: cancellationToken).ToListAsync(cancellationToken).ConfigureAwait(false))
                 .Where(w => w.ContainsKey(roleName))
                 .Select(d => d.GetString(roleName))
                 .Where(di => !string.IsNullOrWhiteSpace(di));
@@ -174,7 +174,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                         }
                         else
                         {
-                            queryTemp = TableQuery.CombineFilters(queryTemp, TableOperators.Or, BuildRoleQuery(urt));
+                            queryTemp = TableQuery.CombineFilters(queryTemp, TableOperators.Or, BuildRoleQuery(urt)).ToString();
                         }
                         iRoleCounter++;
                     }
@@ -202,7 +202,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         /// <returns></returns>
         public string BuildRoleQuery(string normalizedRoleName)
         {
-            string rowFilter =
+            var rowFilter =
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey),
                 QueryComparisons.Equal,
                 _keyHelper.GenerateRowKeyIdentityRole(normalizedRoleName));
@@ -211,7 +211,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey),
                 QueryComparisons.Equal, _keyHelper.GeneratePartitionKeyIdentityRole(normalizedRoleName)),
                 TableOperators.And,
-                rowFilter);
+                rowFilter).ToString();
         }
 
         /// <inheritdoc/>
@@ -228,19 +228,19 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             {
                 string getTableQueryFilterByUserId(string? userId)
                 {
-                    string rowFilter = TableQuery.CombineFilters(
+                    var rowFilter = TableQuery.CombineFilters(
                         TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, userId),
                         TableOperators.Or,
                         TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, _keyHelper.GenerateRowKeyIdentityUserRole(roleName)));
 
-                    string tqFilter = TableQuery.CombineFilters(
+                    var tqFilter = TableQuery.CombineFilters(
                         TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, userId), TableOperators.And,
                         rowFilter);
-                    return tqFilter;
+                    return tqFilter.ToString();
                 }
 
 
-                return (await GetUsersByIndexQueryAsync(GetUserByRoleIndexQuery(roleName!), (userId, cancellationToken) =>
+                return (await GetUsersByIndexQueryAsync(GetUserByRoleIndexQuery(roleName!).ToString(), (userId, cancellationToken) =>
                 {
                     return GetUserAggregateQueryAsync(userId, setFilterByUserId: getTableQueryFilterByUserId, whereClaim: null, whereRole: (ur) =>
                     {
@@ -267,14 +267,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             string userId = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
             // Changing to a live query to mimic EF UserStore in Identity 3.0
 
-            string filterString = TableQuery.CombineFilters(
+            var filterString = TableQuery.CombineFilters(
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, userId),
                 TableOperators.And,
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, _keyHelper.GenerateRowKeyIdentityUserRole(roleName)));
             var selectColumns = new List<string>() { nameof(TableEntity.RowKey) };
             var tasks = new Task<bool>[]
             {
-                _userTable.QueryAsync<TableEntity>(filter: filterString, maxPerPage:1, select: selectColumns, cancellationToken).AnyAsync(cancellationToken),
+                _userTable.QueryAsync<TableEntity>(filter: filterString.ToString(), maxPerPage:1, select: selectColumns, cancellationToken).AnyAsync(cancellationToken),
                 RoleExistsAsync(roleName!, cancellationToken)
             };
 
@@ -355,7 +355,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 foreach (var tempUserId in tempUserIds)
                 {
 
-                    string temp = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, tempUserId);
+                    string temp = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, tempUserId).ToString();
                     if (setFilterByUserId is not null)
                     {
                         temp = setFilterByUserId(tempUserId);
@@ -363,7 +363,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
                     if (i > 0)
                     {
-                        filterString = TableQuery.CombineFilters(filterString, TableOperators.Or, temp);
+                        filterString = TableQuery.CombineFilters(filterString, TableOperators.Or, temp).ToString();
                     }
                     else
                     {

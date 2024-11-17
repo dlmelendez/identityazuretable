@@ -22,24 +22,24 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         {
             TableQuery tq = new TableQuery();
             tq.SelectColumns = new List<string>() { "PartitionKey", "RowKey", "KeyVersion" };
-            string partitionFilter = TableQuery.CombineFilters(
+            var partitionFilter = TableQuery.CombineFilters(
                 TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserId),
                 TableOperators.And,
                 TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.LessThan, _keyHelper.PreFixIdentityUserIdUpperBound));
-            string rowFilterRole = TableQuery.CombineFilters(
+            var rowFilterRole = TableQuery.CombineFilters(
                 TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserRole),
                 TableOperators.And,
                 TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.LessThan, _keyHelper.PreFixIdentityUserRoleUpperBound));
-            string rowFilterClaim = TableQuery.CombineFilters(
+            var rowFilterClaim = TableQuery.CombineFilters(
                 TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserClaim),
                 TableOperators.And,
                 TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.LessThan, _keyHelper.PreFixIdentityUserClaimUpperBound));
 
-            string keyVersionFilter = TableQuery.GenerateFilterConditionForDouble("KeyVersion", QueryComparisons.LessThan, 2.0);
+            var keyVersionFilter = TableQuery.GenerateFilterConditionForDouble("KeyVersion", QueryComparisons.LessThan, 2.0);
 
-            string rowFilter = TableQuery.CombineFilters(rowFilterRole, TableOperators.Or, rowFilterClaim);
-            string keysFilter = TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowFilter);
-            tq.FilterString = TableQuery.CombineFilters(keysFilter, TableOperators.And, keyVersionFilter);
+            var rowFilter = TableQuery.CombineFilters(rowFilterRole, TableOperators.Or, rowFilterClaim);
+            var keysFilter = TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowFilter);
+            tq.FilterString = TableQuery.CombineFilters(keysFilter, TableOperators.And, keyVersionFilter).ToString();
             return tq;
         }
 

@@ -21,9 +21,9 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         {
             //Get all User key records
             TableQuery tq = new TableQuery();
-            string keyVersionFilter = TableQuery.GenerateFilterConditionForDouble("KeyVersion", QueryComparisons.LessThan, _keyHelper.KeyVersion);
+            var keyVersionFilter = TableQuery.GenerateFilterConditionForDouble("KeyVersion", QueryComparisons.LessThan, _keyHelper.KeyVersion);
 
-            tq.FilterString = keyVersionFilter;
+            tq.FilterString = keyVersionFilter.ToString();
             return tq;
         }
 

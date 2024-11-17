@@ -122,7 +122,7 @@ namespace ElCamino.Azure.Data.Tables.Tests
             var partitionKey = "b-" + Guid.NewGuid().ToString("N");
             _output.WriteLine("PartitionKey {0}", partitionKey);
 
-            var filterByPartitionKey = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, partitionKey);
+            string filterByPartitionKey = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, partitionKey).ToString();
             var count = await _tableClient.QueryAsync<TableEntity>(filter: filterByPartitionKey).CountAsync();
             const int maxTestEntities = 1001;
             _output.WriteLine("Entities found {0}", count);
@@ -190,7 +190,7 @@ namespace ElCamino.Azure.Data.Tables.Tests
                 batch.DeleteEntity(te.PartitionKey, te.RowKey, te.ETag);
             }
             await batch.SubmitBatchAsync();
-            count = await _tableClient.QueryAsync<TableEntity>(filter: filterByPartitionKey).CountAsync();
+            count = await _tableClient.QueryAsync<TableEntity>(filter: filterByPartitionKey.ToString()).CountAsync();
             _output.WriteLine("Entities found after batch delete {0}", count);
             Assert.Equal(0, count);
 
