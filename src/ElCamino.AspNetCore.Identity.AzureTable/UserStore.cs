@@ -234,7 +234,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 {
                     return GetUserAggregateQueryAsync(userId, setFilterByUserId: getTableQueryFilterByUserId, whereClaim: null, whereRole: (ur) =>
                     {
-                        return ur.RowKey == _keyHelper.GenerateRowKeyIdentityUserRole(roleName);
+                        return ur.RowKey.AsSpan().Equals(_keyHelper.GenerateRowKeyIdentityUserRole(roleName), StringComparison.OrdinalIgnoreCase);
                     }, cancellationToken: cancellationToken);
 
                 }, cancellationToken).ConfigureAwait(false)).ToList();

@@ -171,7 +171,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// </summary>
         /// <param name="plainRoleName"></param>
         /// <returns></returns>
-        string GenerateRowKeyIdentityUserRole(string? plainRoleName);
+        ReadOnlySpan<char> GenerateRowKeyIdentityUserRole(string? plainRoleName);
 
         /// <summary>
         /// Generate key for RowKeyIdentityRole

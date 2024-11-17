@@ -324,7 +324,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
             IEnumerable<TUser> users = await GetUsersByIndexQueryAsync(FindByEmailIndexQuery(plainEmail).ToString(), GetUserQueryAsync, cancellationToken).ConfigureAwait(false);
-            return users.Where(user => _keyHelper.GenerateRowKeyUserEmail(plainEmail).Equals(_keyHelper.GenerateRowKeyUserEmail(user.Email), StringComparison.InvariantCultureIgnoreCase));
+            return users.Where(user => _keyHelper.GenerateRowKeyUserEmail(plainEmail).Equals(_keyHelper.GenerateRowKeyUserEmail(user.Email), StringComparison.OrdinalIgnoreCase));
         }
 
         /// <inheritdoc/>
@@ -1037,7 +1037,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
             ArgumentNullException.ThrowIfNull(user);
-            var userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
+            string userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)).ToString();
             List<Task> tasks = new List<Task>(3)
             {
                 _userTable.UpdateEntityAsync(user, TableConstants.ETagWildcard, mode: TableUpdateMode.Replace, cancellationToken),
@@ -1100,7 +1100,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return new Model.IdentityUserIndex()
             {
                 Id = userPartitionKey,
-                PartitionKey = _keyHelper.GenerateRowKeyIdentityUserRole(plainRoleName),
+                PartitionKey = _keyHelper.GenerateRowKeyIdentityUserRole(plainRoleName).ToString(),
                 RowKey = userPartitionKey,
                 KeyVersion = _keyHelper.KeyVersion,
                 ETag = TableConstants.ETagWildcard

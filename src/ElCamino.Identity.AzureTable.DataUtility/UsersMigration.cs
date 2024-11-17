@@ -203,9 +203,9 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                         sourceEntity.TryGetValue(nameof(IdentityUserRole<string>.RoleName), out object roleNameProperty);
                         string? roleName = roleNameProperty?.ToString();
 
-                        string targetUserRowKey = _keyHelper.GenerateRowKeyIdentityUserRole(roleName);
+                        var targetUserRowKey = _keyHelper.GenerateRowKeyIdentityUserRole(roleName);
                         TableEntity tgtDte = new TableEntity(sourceEntity);
-                        tgtDte.ResetKeys(targetUserPartitionKey.ToString(), targetUserRowKey, TableConstants.ETagWildcard);
+                        tgtDte.ResetKeys(targetUserPartitionKey.ToString(), targetUserRowKey.ToString(), TableConstants.ETagWildcard);
                         tgtDte["UserId"] = userId;
                         tgtDte["KeyVersion"] = _keyHelper.KeyVersion;
                         targetUserEntities.Add(tgtDte);
@@ -214,7 +214,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                         IdentityUserIndex roleIndex = new IdentityUserIndex()
                         {
                             Id = targetUserPartitionKey.ToString(),
-                            PartitionKey = targetUserRowKey,
+                            PartitionKey = targetUserRowKey.ToString(),
                             RowKey = targetUserPartitionKey.ToString(),
                             KeyVersion = _keyHelper.KeyVersion,
                             ETag = TableConstants.ETagWildcard
