@@ -56,13 +56,9 @@ namespace Microsoft.Extensions.DependencyInjection
             IKeyHelper? keyHelper = null)
             where TContext : IdentityCloudContext
         {
-#if NET6_0_OR_GREATER
             ArgumentNullException.ThrowIfNull(configAction, nameof(configAction));
             ArgumentNullException.ThrowIfNull(tableServiceClientAction, nameof(tableServiceClientAction));
-#else
-            _ = configAction ?? throw new ArgumentNullException(nameof(configAction));
-            _ = tableServiceClientAction ?? throw new ArgumentNullException(nameof(tableServiceClientAction));
-#endif
+
             builder.Services.AddSingleton<IKeyHelper>(keyHelper ?? new DefaultKeyHelper());
 
             builder.Services.AddSingleton<IdentityConfiguration>(configAction);

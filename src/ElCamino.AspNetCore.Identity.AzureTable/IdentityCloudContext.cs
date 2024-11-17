@@ -22,13 +22,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         /// <param name="client">Accepts <see cref="TableServiceClient"/></param>
         public IdentityCloudContext(IdentityConfiguration config, TableServiceClient client)
         {
-#if NET6_0_OR_GREATER
             ArgumentNullException.ThrowIfNull(config, nameof(config));
             ArgumentNullException.ThrowIfNull(client, nameof(client));
-#else
-            _ = config ?? throw new ArgumentNullException(nameof(config));
-            _ = client ?? throw new ArgumentNullException(nameof(client));
-#endif
 
             _client = client;
             _indexTable = _client.GetTableClient(FormatTableNameWithPrefix(config!.TablePrefix, !string.IsNullOrWhiteSpace(config!.IndexTableName) ? config!.IndexTableName! : TableConstants.TableNames.IndexTable));

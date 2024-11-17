@@ -955,11 +955,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
 
-#if NET6_0_OR_GREATER
             ArgumentNullException.ThrowIfNull(user);
-#else
-            if (user is null) throw new ArgumentNullException(nameof(user));
-#endif
 
             var token = await FindTokenAsync(user, loginProvider, name, cancellationToken);
 

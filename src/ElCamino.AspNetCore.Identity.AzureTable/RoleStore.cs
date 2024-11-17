@@ -84,11 +84,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-#if NET6_0_OR_GREATER
             ArgumentNullException.ThrowIfNull(role);
-#else
-            if (role is null) throw new ArgumentNullException(nameof(role));
-#endif
+
             ((Model.IGenerateKeys)role).GenerateKeys(_keyHelper);
 
             // Execute the insert operation.
@@ -101,11 +98,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-#if NET6_0_OR_GREATER
             ArgumentNullException.ThrowIfNull(role);
-#else
-            if (role is null) throw new ArgumentNullException(nameof(role));
-#endif
+
             // Execute the insert operation.
             _ = await _roleTable.DeleteEntityAsync(role.PartitionKey, role.RowKey, TableConstants.ETagWildcard, cancellationToken: cancellationToken).ConfigureAwait(false);
             return IdentityResult.Success;
@@ -187,14 +181,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-#if NET6_0_OR_GREATER
             ArgumentNullException.ThrowIfNull(role);
-#else
-            if (role is null)
-            {
-                throw new ArgumentNullException(nameof(role));
-            }
-#endif
+
             var partitionFilter = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, role.Id.ToString() ?? string.Empty);
 
             var rowFilter1 = TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserToken);
@@ -215,20 +203,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-#if NET6_0_OR_GREATER
+
             ArgumentNullException.ThrowIfNull(role);
             ArgumentNullException.ThrowIfNull(claim);
-#else
 
-            if (role is null)
-            {
-                throw new ArgumentNullException(nameof(role));
-            }
-            if (claim is null)
-            {
-                throw new ArgumentNullException(nameof(claim));
-            }
-#endif
             TRoleClaim item = Activator.CreateInstance<TRoleClaim>();
             item.RoleId = role.Id;
             item.ClaimType = claim.Type;
@@ -243,19 +221,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-#if NET6_0_OR_GREATER
             ArgumentNullException.ThrowIfNull(role);
             ArgumentNullException.ThrowIfNull(claim);
-#else
-            if (role is null)
-            {
-                throw new ArgumentNullException(nameof(role));
-            }
-            if (claim is null)
-            {
-                throw new ArgumentNullException(nameof(claim));
-            }
-#endif
+
             if (string.IsNullOrWhiteSpace(claim.Type))
             {
                 throw new ArgumentException(IdentityResources.ValueCannotBeNullOrEmpty, nameof(claim));
