@@ -7,32 +7,18 @@ using System.Text;
 namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 {
     /// <summary>
-    /// Default Key Helpers users SHA1
+    /// Default Key Helpers users SHA1 with Unicode encoding
     /// </summary>
     public class DefaultKeyHelper : BaseKeyHelper
     {
-#if NET6_0_OR_GREATER
         /// <inheritdoc/>
-        public sealed override string? ConvertKeyToHash(string? input)
+        public sealed override ReadOnlySpan<char> ConvertKeyToHash(ReadOnlySpan<char> input)
         {
-            if (input is not null)
-            {
-                byte[] data = SHA1.HashData(Encoding.Unicode.GetBytes(input));
-                return FormatHashedData(data);
-            }
-            return null;
+            Span<byte> encodedBytes = stackalloc byte[Encoding.Unicode.GetMaxByteCount(input.Length)];
+            int encodedByteCount = Encoding.Unicode.GetBytes([.. input], encodedBytes);
+            Span<byte> hashedBytes = stackalloc byte[SHA1.HashSizeInBytes];
+            int hashedByteCount = SHA1.HashData(encodedBytes.Slice(0, encodedByteCount), hashedBytes);
+            return FormatHashedData(hashedBytes.Slice(0, hashedByteCount));
         }
-#else
-        /// <inheritdoc/>
-        public sealed override string? ConvertKeyToHash(string? input)
-        {
-            if (input is not null)
-            {
-                using SHA1 sha = SHA1.Create();
-                return GetHash(sha, input, Encoding.Unicode, 40);
-            }
-            return null;
-        }
-#endif
     }
 }

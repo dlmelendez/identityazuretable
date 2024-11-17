@@ -7,35 +7,21 @@ using System.Text;
 namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 {
     /// <summary>
-    /// *Experimental* Uses SHA256 for hashing keys. UserId is not hashed for use with row/partition keys
+    /// Uses SHA256 for hashing keys with UTF8 encoding. UserId is not hashed for use with row/partition keys
     /// </summary>
     public class SHA256KeyHelper : BaseKeyHelper
     {
 
-#if NET6_0_OR_GREATER
         /// <inheritdoc/>
-        public sealed override string? ConvertKeyToHash(string? input)
+        public sealed override ReadOnlySpan<char> ConvertKeyToHash(ReadOnlySpan<char> input)
         {
-            if (input is not null)
-            {
-                byte[] data = SHA256.HashData(Encoding.UTF8.GetBytes(input));
-                return FormatHashedData(data);
-            }
-            return null;
+            Span<byte> encodedBytes = stackalloc byte[Encoding.UTF8.GetMaxByteCount(input.Length)];
+            int encodedByteCount = Encoding.UTF8.GetBytes([.. input], encodedBytes);
+            Span<byte> hashedBytes = stackalloc byte[SHA256.HashSizeInBytes];
+            int hashedByteCount = SHA256.HashData(encodedBytes.Slice(0, encodedByteCount), hashedBytes);
+            return FormatHashedData(hashedBytes.Slice(0, hashedByteCount));
         }
 
-#else
-        /// <inheritdoc/>
-        public sealed override string? ConvertKeyToHash(string? input)
-        {
-            if (input is not null)
-            {
-                using SHA256 sha = SHA256.Create();
-                return GetHash(sha, input, Encoding.UTF8, 64);
-            }
-            return null;
-        }
-#endif
         /// <inheritdoc/>
         public override string GenerateRowKeyUserId(string? plainUserId)
         {

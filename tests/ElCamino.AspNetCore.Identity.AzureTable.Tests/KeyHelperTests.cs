@@ -41,7 +41,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
             sw.Reset();
             sw.Start();
-            string returned = _defaultKeyHelper.ConvertKeyToHash(textToHash);
+            string returned = _defaultKeyHelper.ConvertKeyToHash(textToHash).ToString();
             sw.Stop();
             _output.WriteLine($"returned {sw.Elapsed.TotalMilliseconds} ms: {returned}");
             Assert.Equal(expected, returned, StringComparer.InvariantCulture);
@@ -62,7 +62,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
             sw.Reset();
             sw.Start();
-            string returned = _sha256KeyHelper.ConvertKeyToHash(textToHash);
+            string returned = _sha256KeyHelper.ConvertKeyToHash(textToHash).ToString();
             sw.Stop();
             _output.WriteLine($"returned {sw.Elapsed.TotalMilliseconds} ms: {returned}");
             Assert.Equal(expected, returned, StringComparer.InvariantCulture);

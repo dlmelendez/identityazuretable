@@ -18,7 +18,7 @@ namespace ElCamino.Azure.Data.Tables
         /// </summary>
         public TableQueryBuilder() { }
 
-        private StringBuilder _queryBuilder = new StringBuilder();
+        private readonly StringBuilder _queryBuilder = new();
         private uint _filterCount = 0;
         private uint _beginGroupCount = 0;
         private uint _endGroupCount = 0;
