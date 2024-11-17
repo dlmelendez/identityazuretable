@@ -1,5 +1,7 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
+using System;
+
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 {
     /// <summary>
@@ -128,7 +130,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// <param name="plainLoginProvider"></param>
         /// <param name="plainProviderKey"></param>
         /// <returns></returns>
-        string GeneratePartitionKeyIndexByLogin(string plainLoginProvider, string plainProviderKey);
+        ReadOnlySpan<char> GeneratePartitionKeyIndexByLogin(string plainLoginProvider, string plainProviderKey);
 
         /// <summary>
         /// Generate key for RowKeyUserEmail

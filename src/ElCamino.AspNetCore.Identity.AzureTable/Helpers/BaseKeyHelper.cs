@@ -82,7 +82,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         public virtual string FormatterIdentityRoleClaim => TableConstants.RowKeyConstants.FormatterIdentityRoleClaim;
 
         /// <inheritdoc/>
-        public virtual string GeneratePartitionKeyIndexByLogin(string plainLoginProvider, string plainProviderKey)
+        public virtual ReadOnlySpan<char> GeneratePartitionKeyIndexByLogin(string plainLoginProvider, string plainProviderKey)
         {
             var strTemp = string.Format("{0}_{1}", plainLoginProvider?.ToUpper(), plainProviderKey?.ToUpper()).AsSpan();
             var hash = ConvertKeyToHash(strTemp);

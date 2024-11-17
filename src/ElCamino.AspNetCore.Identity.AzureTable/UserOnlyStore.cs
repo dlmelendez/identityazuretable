@@ -278,9 +278,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             ThrowIfDisposed();
 
             string rowKey = _keyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey);
-            string partitionKey = _keyHelper.GeneratePartitionKeyIndexByLogin(loginProvider, providerKey);
+            var partitionKey = _keyHelper.GeneratePartitionKeyIndexByLogin(loginProvider, providerKey);
 
-            IdentityUserIndex? indexInfo = await _indexTable.GetEntityOrDefaultAsync<IdentityUserIndex>(partitionKey, rowKey, IndexUserIdSelectColumns, cancellationToken)
+            IdentityUserIndex? indexInfo = await _indexTable.GetEntityOrDefaultAsync<IdentityUserIndex>(partitionKey.ToString(), rowKey, IndexUserIdSelectColumns, cancellationToken)
                 .ConfigureAwait(false);
 
             if (indexInfo is not null && indexInfo.Id is not null)
@@ -305,9 +305,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             ThrowIfDisposed();
 
             string rowKey = _keyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey);
-            string partitionKey = _keyHelper.GeneratePartitionKeyIndexByLogin(loginProvider, providerKey);
+            var partitionKey = _keyHelper.GeneratePartitionKeyIndexByLogin(loginProvider, providerKey);
 
-            return GetUserFromIndexQueryAsync(GetUserIdByIndexQuery(partitionKey, rowKey).ToString(), cancellationToken);
+            return GetUserFromIndexQueryAsync(GetUserIdByIndexQuery(partitionKey.ToString(), rowKey).ToString(), cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -1157,7 +1157,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return new Model.IdentityUserIndex()
             {
                 Id = userPartitionKey,
-                PartitionKey = _keyHelper.GeneratePartitionKeyIndexByLogin(loginProvider, providerKey),
+                PartitionKey = _keyHelper.GeneratePartitionKeyIndexByLogin(loginProvider, providerKey).ToString(),
                 RowKey = _keyHelper.GenerateRowKeyIdentityUserLogin(loginProvider, providerKey),
                 KeyVersion = _keyHelper.KeyVersion,
                 ETag = TableConstants.ETagWildcard
