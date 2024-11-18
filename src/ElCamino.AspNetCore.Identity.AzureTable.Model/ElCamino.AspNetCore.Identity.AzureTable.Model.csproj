@@ -25,6 +25,7 @@
     <Version>9.0</Version>
     <Nullable>enable</Nullable>
     <PackageProjectUrl>https://dlmelendez.github.io/identityazuretable</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <!--<DebugType>Full</DebugType>-->
     <!-- DebugType Full is needed for test code coverage, but .nuget symbols doesn't like it-->
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -43,11 +44,13 @@
   <ItemGroup Condition=" '$(TargetFramework)' != 'net9.0' ">
     <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="8.0.*" />
   </ItemGroup>
-
+  
   <ItemGroup>
-    <None Include="projectNugetPic.png" Pack="true" PackagePath="\" />
+    <None Include="README.md" Link="README.md">
+      <PackagePath>\</PackagePath>
+      <Pack>True</Pack>
+    </None>
   </ItemGroup>
-
 
 
 </Project>
