@@ -39,14 +39,13 @@
       <PackagePath>\</PackagePath>
       <Pack>True</Pack>
     </None>
+    <None Include="projectNugetPic.png" Pack="true" PackagePath="\" />
+
   </ItemGroup>
   
   <ItemGroup>
     <PackageReference Include="Azure.Data.Tables" Version="12.8.1" />
   </ItemGroup>
   
-  <ItemGroup>
-   <None Include="projectNugetPic.png" Pack="true" PackagePath="\" /> 
-  </ItemGroup>
   
 </Project>
