@@ -1,6 +1,6 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 using System;
-using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Azure.Data.Tables;
 using Xunit;
@@ -41,20 +41,24 @@ namespace ElCamino.Azure.Data.Tables.Tests
             //Execute Add
             var addedEntity = await _tableClient.AddEntityWithHeaderValuesAsync(entity);
 
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             //Execute isNull Query
-            string filterByPartitionKey = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, addedEntity.PartitionKey);
-            string filterByRowKey = TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, addedEntity.PartitionKey);
-            string filterByNullProperty = TableQuery.GenerateFilterConditionForStringNull(propertyName, QueryComparisons.Equal);
-            string filterByNotNullProperty = TableQuery.GenerateFilterConditionForStringNull(propertyName, QueryComparisons.NotEqual);
+            var filterByPartitionKey = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, addedEntity.PartitionKey);
+            var filterByRowKey = TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, addedEntity.PartitionKey);
+            var filterByNullProperty = TableQuery.GenerateFilterConditionForStringNull(propertyName, QueryComparisons.Equal);
+            var filterByNotNullProperty = TableQuery.GenerateFilterConditionForStringNull(propertyName, QueryComparisons.NotEqual);
 
-            string filterNull = TableQuery.CombineFilters(
+            var filterNull = TableQuery.CombineFilters(
                                 TableQuery.CombineFilters(filterByPartitionKey, TableOperators.And, filterByRowKey),
                                 TableOperators.And,
-                                filterByNullProperty);
-            string filterNotNull = TableQuery.CombineFilters(
+                                filterByNullProperty).ToString();
+            sw.Stop();
+            _output.WriteLine($"{nameof(filterNull)}: {sw.Elapsed.TotalMilliseconds}ms");
+            var filterNotNull = TableQuery.CombineFilters(
                     TableQuery.CombineFilters(filterByPartitionKey, TableOperators.And, filterByRowKey),
                     TableOperators.And,
-                    filterByNotNullProperty);
+                    filterByNotNullProperty).ToString();
 
             _output.WriteLine($"{nameof(filterNull)}:{filterNull}");
             _output.WriteLine($"{nameof(filterNotNull)}:{filterNotNull}");
@@ -99,19 +103,19 @@ namespace ElCamino.Azure.Data.Tables.Tests
             var addedEntity = await _tableClient.AddEntityWithHeaderValuesAsync(entity);
 
             //Execute isNull Query
-            string filterByPartitionKey = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, addedEntity.PartitionKey);
-            string filterByRowKey = TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, addedEntity.PartitionKey);
-            string filterByNullProperty = TableQuery.GenerateFilterConditionForBoolNull(propertyName, QueryComparisons.Equal);
-            string filterByNotNullProperty = TableQuery.GenerateFilterConditionForBoolNull(propertyName, QueryComparisons.NotEqual);
+            var filterByPartitionKey = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, addedEntity.PartitionKey);
+            var filterByRowKey = TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, addedEntity.PartitionKey);
+            var filterByNullProperty = TableQuery.GenerateFilterConditionForBoolNull(propertyName, QueryComparisons.Equal);
+            var filterByNotNullProperty = TableQuery.GenerateFilterConditionForBoolNull(propertyName, QueryComparisons.NotEqual);
 
-            string filterNull = TableQuery.CombineFilters(
+            var filterNull = TableQuery.CombineFilters(
                                 TableQuery.CombineFilters(filterByPartitionKey, TableOperators.And, filterByRowKey),
                                 TableOperators.And,
-                                filterByNullProperty);
-            string filterNotNull = TableQuery.CombineFilters(
+                                filterByNullProperty).ToString();
+            var filterNotNull = TableQuery.CombineFilters(
                     TableQuery.CombineFilters(filterByPartitionKey, TableOperators.And, filterByRowKey),
                     TableOperators.And,
-                    filterByNotNullProperty);
+                    filterByNotNullProperty).ToString();
 
             _output.WriteLine($"{nameof(filterNull)}:{filterNull}");
             _output.WriteLine($"{nameof(filterNotNull)}:{filterNotNull}");

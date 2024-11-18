@@ -14,11 +14,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         public string? TablePrefix { get; set; }
 
         /// <summary>
-        /// Storage connection string
-        /// </summary>
-        public string? StorageConnectionString { get; set; }
-
-        /// <summary>
         /// Optional, default value is AspNetIndex
         /// </summary>
         public string? IndexTableName { get; set; }

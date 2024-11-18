@@ -21,16 +21,16 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         public TableQuery GetSourceTableQuery()
         {
             TableQuery tq = new TableQuery();
-            tq.SelectColumns = new List<string>() { "PartitionKey", "RowKey", "Email" };
-            string partitionFilter = TableQuery.CombineFilters(
+            tq.SelectColumns = [ "PartitionKey", "RowKey", "Email" ];
+            var partitionFilter = TableQuery.CombineFilters(
                 TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserId),
                 TableOperators.And,
                 TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.LessThan, _keyHelper.PreFixIdentityUserIdUpperBound));
-            string rowFilter = TableQuery.CombineFilters(
+            var rowFilter = TableQuery.CombineFilters(
                 TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserId),
                 TableOperators.And,
                 TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.LessThan, _keyHelper.PreFixIdentityUserIdUpperBound));
-            tq.FilterString = TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowFilter);
+            tq.FilterString = TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowFilter).ToString();
             return tq;
         }
 
@@ -83,7 +83,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             return new IdentityUserIndex()
             {
                 Id = userid,
-                PartitionKey = _keyHelper.GenerateRowKeyUserEmail(email),
+                PartitionKey = _keyHelper.GenerateRowKeyUserEmail(email).ToString(),
                 RowKey = userid,
                 KeyVersion = _keyHelper.KeyVersion,
                 ETag = TableConstants.ETagWildcard

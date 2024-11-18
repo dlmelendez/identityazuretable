@@ -19,15 +19,15 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         private static int iUserTotal = 0;
         private static int iUserSuccessConvert = 0;
         private static int iUserFailureConvert = 0;
-        private static readonly ConcurrentBag<string> userIdFailures = new();
+        private static readonly ConcurrentBag<string> userIdFailures = [];
 
-        private static readonly List<string> helpTokens = new() { "/?", "/help" };
+        private static readonly List<string> helpTokens = ["/?", "/help"];
         private const string PreviewToken = "/preview:";
         private const string MigrateToken = "/migrate:";
-        private static readonly List<string> validCommands = new() {
+        private static readonly List<string> validCommands = [
             MigrationFactory.Roles,
             MigrationFactory.Users
-        };
+        ];
         private const string NoDeleteToken = "/nodelete";
         private const string MaxDegreesParallelToken = "/maxparallel:";
         private static int iMaxdegreesparallel = Environment.ProcessorCount * 2;
@@ -59,14 +59,14 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
             IdentityConfiguration sourceConfig = new IdentityConfiguration();
             sourceConfig.TablePrefix = Configuration.GetSection("source:IdentityConfiguration:TablePrefix")?.Value;
-            sourceConfig.StorageConnectionString = Configuration.GetSection("source:IdentityConfiguration:StorageConnectionString")?.Value;
+            string sourceStorageConnectionString = Configuration.GetSection("source:IdentityConfiguration:StorageConnectionString")?.Value ?? string.Empty;
             sourceConfig.UserTableName = Configuration.GetSection("source:IdentityConfiguration:UserTableName")?.Value ?? string.Empty;
             sourceConfig.IndexTableName = Configuration.GetSection("source:IdentityConfiguration:IndexTableName")?.Value ?? string.Empty;
             sourceConfig.RoleTableName = Configuration.GetSection("source:IdentityConfiguration:RoleTableName")?.Value ?? string.Empty;
 
             IdentityConfiguration targetConfig = new IdentityConfiguration();
             targetConfig.TablePrefix = Configuration.GetSection("target:IdentityConfiguration:TablePrefix")?.Value;
-            targetConfig.StorageConnectionString = Configuration.GetSection("target:IdentityConfiguration:StorageConnectionString")?.Value;
+            string targetStorageConnectionString = Configuration.GetSection("target:IdentityConfiguration:StorageConnectionString")?.Value ?? string.Empty;
             targetConfig.UserTableName = Configuration.GetSection("target:IdentityConfiguration:UserTableName")?.Value ?? string.Empty;
             targetConfig.IndexTableName = Configuration.GetSection("target:IdentityConfiguration:IndexTableName")?.Value ?? string.Empty;
             targetConfig.RoleTableName = Configuration.GetSection("target:IdentityConfiguration:RoleTableName")?.Value ?? string.Empty;
@@ -77,7 +77,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             Console.WriteLine("MigrateCommand: {0}", MigrateCommand);
 
             var migration = MigrationFactory.CreateMigration(MigrateCommand);
-            IdentityCloudContext targetContext = new IdentityCloudContext(targetConfig);
+            IdentityCloudContext targetContext = new IdentityCloudContext(targetConfig, new TableServiceClient(targetStorageConnectionString));
             
             Task.WhenAll(targetContext.IndexTable.CreateIfNotExistsAsync(),
                         targetContext.UserTable.CreateIfNotExistsAsync(),
@@ -88,7 +88,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
             string entityRecordName = "Users";
 
-            IdentityCloudContext sourceContext = new IdentityCloudContext(sourceConfig);
+            IdentityCloudContext sourceContext = new IdentityCloudContext(sourceConfig, new TableServiceClient(sourceStorageConnectionString));
             Console.WriteLine($"Source IndexTable: {sourceConfig.IndexTableName}");
             Console.WriteLine($"Source UserTable: {sourceConfig.UserTableName}");
             Console.WriteLine($"Source RoleTable: {sourceConfig.RoleTableName}");
@@ -129,7 +129,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 {
                     if (migrateOption)
                     {
-                        migration.ProcessMigrate(targetContext, sourceContext, sourceResults?.Values.ToList()??new List<TableEntity>(), iMaxdegreesparallel,
+                        migration.ProcessMigrate(targetContext, sourceContext, sourceResults?.Values.ToList() ?? [], iMaxdegreesparallel,
                         () =>
                         {
                             Interlocked.Increment(ref iUserSuccessConvert);
@@ -201,7 +201,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             }
             else
             {
-                List<string> nonHelpTokens = new List<string>() { PreviewToken, MigrateToken, NoDeleteToken, MaxDegreesParallelToken, StartPageToken, FinishPageToken, PageSizeToken };
+                List<string> nonHelpTokens = [PreviewToken, MigrateToken, NoDeleteToken, MaxDegreesParallelToken, StartPageToken, FinishPageToken, PageSizeToken];
                 if (!args.All(a => nonHelpTokens.Any(h => a.StartsWith(h, StringComparison.OrdinalIgnoreCase))))
                 {
                     DisplayInvalidArgs(args.Where(a => !nonHelpTokens.Any(h => h.StartsWith(a, StringComparison.OrdinalIgnoreCase))).ToList());
@@ -211,13 +211,13 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 bool isMigrate = args.Any(a => a.StartsWith(MigrateToken, StringComparison.OrdinalIgnoreCase));
                 if (isPreview && isMigrate)
                 {
-                    DisplayInvalidArgs(new List<string>() { PreviewToken, MigrateToken, "Cannot define /preview and /migrate. Only one can be used." });
+                    DisplayInvalidArgs([PreviewToken, MigrateToken, "Cannot define /preview and /migrate. Only one can be used."]);
                     return false;
                 }
                 bool isNoDelete = args.Any(a => a.Equals(NoDeleteToken, StringComparison.OrdinalIgnoreCase));
                 if (isNoDelete && !isMigrate)
                 {
-                    DisplayInvalidArgs(new List<string>() { NoDeleteToken, "/nodelete must be used with /migrate option." });
+                    DisplayInvalidArgs([NoDeleteToken, "/nodelete must be used with /migrate option."]);
                     return false;
                 }
 
@@ -241,7 +241,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
                 if (iPageSize > 1000)
                 {
-                    DisplayInvalidArgs(new List<string>() { PageSizeToken, string.Format("{0} must be less than 1000", PageSizeToken) });
+                    DisplayInvalidArgs([PageSizeToken, string.Format("{0} must be less than 1000", PageSizeToken)]);
                     return false;
                 }
                 migrateOption = isMigrate;
@@ -264,7 +264,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 }
                 else
                 {
-                    DisplayInvalidArgs(new List<string>() { args, string.Format("{0} must be followed by an int greater than 0. e.g. {0}3", token) });
+                    DisplayInvalidArgs([args, string.Format("{0} must be followed by an int greater than 0. e.g. {0}3", token)]);
                     return false;
                 }
             }
@@ -284,7 +284,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 }
                 else
                 {
-                    DisplayInvalidArgs(new List<string>() { args, string.Format("{0} must be followed by a valid command arg {1}", token, string.Join(",", validCommands.ToArray())) });
+                    DisplayInvalidArgs([args, string.Format("{0} must be followed by a valid command arg {1}", token, string.Join(",", validCommands.ToArray()))]);
                     return false;
                 }
             }

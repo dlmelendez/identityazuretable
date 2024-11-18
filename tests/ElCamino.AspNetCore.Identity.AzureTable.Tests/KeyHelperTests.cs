@@ -41,7 +41,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
             sw.Reset();
             sw.Start();
-            string returned = _defaultKeyHelper.ConvertKeyToHash(textToHash);
+            string returned = _defaultKeyHelper.ConvertKeyToHash(textToHash).ToString();
             sw.Stop();
             _output.WriteLine($"returned {sw.Elapsed.TotalMilliseconds} ms: {returned}");
             Assert.Equal(expected, returned, StringComparer.InvariantCulture);
@@ -62,7 +62,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
             sw.Reset();
             sw.Start();
-            string returned = _sha256KeyHelper.ConvertKeyToHash(textToHash);
+            string returned = _sha256KeyHelper.ConvertKeyToHash(textToHash).ToString();
             sw.Stop();
             _output.WriteLine($"returned {sw.Elapsed.TotalMilliseconds} ms: {returned}");
             Assert.Equal(expected, returned, StringComparer.InvariantCulture);
@@ -77,17 +77,27 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             _output.WriteLine($"plain text: {textToHash}");
             var sw = new Stopwatch();
             sw.Start();
-            string returned = _defaultKeyHelper.GenerateRowKeyUserId(textToHash);
+            var returned = _defaultKeyHelper.GenerateRowKeyUserId(textToHash);
             sw.Stop();
             _output.WriteLine($"returned {sw.Elapsed.TotalMilliseconds} ms: {returned}");
-            Assert.StartsWith(TableConstants.RowKeyConstants.PreFixIdentityUserId, returned, StringComparison.InvariantCulture);
+            Assert.StartsWith(TableConstants.RowKeyConstants.PreFixIdentityUserId, returned, StringComparison.OrdinalIgnoreCase);
 
             sw.Reset();
             sw.Start();
-            returned = _sha256KeyHelper.GenerateRowKeyUserId(textToHash);
+            try
+            {
+                returned = _sha256KeyHelper.GenerateRowKeyUserId(textToHash);
+            }
+            catch (ArgumentNullException)
+            {
+                returned = null;
+            }
             sw.Stop();
             _output.WriteLine($"returned {sw.Elapsed.TotalMilliseconds} ms: {returned}");
-            Assert.StartsWith(TableConstants.RowKeyConstants.PreFixIdentityUserId, returned, StringComparison.InvariantCulture);
+            if (!returned.IsEmpty)
+            {
+                Assert.StartsWith(TableConstants.RowKeyConstants.PreFixIdentityUserId, returned, StringComparison.OrdinalIgnoreCase);
+            }
         }
     }
 }

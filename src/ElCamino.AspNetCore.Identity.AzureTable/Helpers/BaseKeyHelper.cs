@@ -82,114 +82,118 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         public virtual string FormatterIdentityRoleClaim => TableConstants.RowKeyConstants.FormatterIdentityRoleClaim;
 
         /// <inheritdoc/>
-        public virtual string GeneratePartitionKeyIndexByLogin(string plainLoginProvider, string plainProviderKey)
+        public virtual ReadOnlySpan<char> GeneratePartitionKeyIndexByLogin(string plainLoginProvider, string plainProviderKey)
         {
-            string strTemp = string.Format("{0}_{1}", plainLoginProvider?.ToUpper(), plainProviderKey?.ToUpper());
-            string? hash = ConvertKeyToHash(strTemp);
-            return string.Format(FormatterIdentityUserLogin, hash);
+            var strTemp = string.Format("{0}_{1}", plainLoginProvider?.ToUpper(), plainProviderKey?.ToUpper()).AsSpan();
+            var hash = ConvertKeyToHash(strTemp);
+            return string.Format(FormatterIdentityUserLogin, hash.ToString());
         }
 
         /// <inheritdoc/>
-        public virtual string GenerateRowKeyUserEmail(string? plainEmail)
+        public virtual ReadOnlySpan<char> GenerateRowKeyUserEmail(string? plainEmail)
         {
-            string? hash = ConvertKeyToHash(plainEmail?.ToUpper());
-            return string.Format(FormatterIdentityUserEmail, hash);
+            var hash = ConvertKeyToHash(plainEmail?.ToUpper());
+            return string.Format(FormatterIdentityUserEmail, hash.ToString());
         }
 
         /// <inheritdoc/>
-        public virtual string GenerateUserId()
+        public virtual ReadOnlySpan<char> GenerateUserId()
         {
             return Guid.NewGuid().ToString("N");
         }
 
         /// <inheritdoc/>
-        public virtual string GenerateRowKeyUserId(string? plainUserId)
+        public virtual ReadOnlySpan<char> GenerateRowKeyUserId(string? plainUserId)
         {
-            string? hash = ConvertKeyToHash(plainUserId?.ToUpper());
-            return string.Format(FormatterIdentityUserId, hash);
+            var hash = ConvertKeyToHash(plainUserId?.ToUpper());
+            return string.Format(FormatterIdentityUserId, hash.ToString());
         }
 
         /// <inheritdoc/>
-        public virtual string GenerateRowKeyUserName(string? plainUserName)
+        public virtual ReadOnlySpan<char> GenerateRowKeyUserName(string? plainUserName)
         {
             return GeneratePartitionKeyUserName(plainUserName);
         }
 
         /// <inheritdoc/>
-        public virtual string GeneratePartitionKeyUserName(string? plainUserName)
+        public virtual ReadOnlySpan<char> GeneratePartitionKeyUserName(string? plainUserName)
         {
-            string? hash = ConvertKeyToHash(plainUserName?.ToUpper());
-            return string.Format(FormatterIdentityUserName, hash);
+            var hash = ConvertKeyToHash(plainUserName?.ToUpper());
+            return string.Format(FormatterIdentityUserName, hash.ToString());
         }
 
         /// <inheritdoc/>
-        public virtual string GenerateRowKeyIdentityUserRole(string? plainRoleName)
+        public virtual ReadOnlySpan<char> GenerateRowKeyIdentityUserRole(string? plainRoleName)
         {
-            string? hash = ConvertKeyToHash(plainRoleName?.ToUpper());
-            return string.Format(FormatterIdentityUserRole, hash);
+            var hash = ConvertKeyToHash(plainRoleName?.ToUpper());
+            return string.Format(FormatterIdentityUserRole, hash.ToString());
         }
 
         /// <inheritdoc/>
-        public virtual string GenerateRowKeyIdentityRole(string? plainRoleName)
+        public virtual ReadOnlySpan<char> GenerateRowKeyIdentityRole(string? plainRoleName)
         {
-            string? hash = ConvertKeyToHash(plainRoleName?.ToUpper());
-            return string.Format(FormatterIdentityRole, hash);
+            var hash = ConvertKeyToHash(plainRoleName?.ToUpper());
+            return string.Format(FormatterIdentityRole, hash.ToString());
         }
 
         /// <inheritdoc/>
-        public virtual string GeneratePartitionKeyIdentityRole(string? plainRoleName)
+        public virtual ReadOnlySpan<char> GeneratePartitionKeyIdentityRole(string? plainRoleName)
         {
-            string? hash = ConvertKeyToHash(plainRoleName?.ToUpper());
-            return hash?.Substring(startIndex: 0, length: 1)??string.Empty;
+            var hash = ConvertKeyToHash(plainRoleName?.ToUpper());
+            if(hash.IsEmpty)
+            {
+                return string.Empty;
+            }
+            return hash.Slice(start: 0, length: 1).ToString();
         }
 
         /// <inheritdoc/>
-        public virtual string GenerateRowKeyIdentityUserClaim(string? claimType, string? claimValue)
+        public virtual ReadOnlySpan<char> GenerateRowKeyIdentityUserClaim(string? claimType, string? claimValue)
         {
-            string strTemp = string.Format("{0}_{1}", claimType?.ToUpper(), claimValue?.ToUpper());
-            string? hash = ConvertKeyToHash(strTemp);
-            return string.Format(FormatterIdentityUserClaim, hash);
+            var strTemp = string.Format("{0}_{1}", claimType?.ToUpper(), claimValue?.ToUpper()).AsSpan();
+            var hash = ConvertKeyToHash(strTemp);
+            return string.Format(FormatterIdentityUserClaim, hash.ToString());
         }
 
         /// <inheritdoc/>
-        public virtual string GenerateRowKeyIdentityRoleClaim(string? claimType, string? claimValue)
+        public virtual ReadOnlySpan<char> GenerateRowKeyIdentityRoleClaim(string? claimType, string? claimValue)
         {
-            string strTemp = string.Format("{0}_{1}", claimType?.ToUpper(), claimValue?.ToUpper());
-            string? hash = ConvertKeyToHash(strTemp);
-            return string.Format(FormatterIdentityRoleClaim, hash);
+            var strTemp = string.Format("{0}_{1}", claimType?.ToUpper(), claimValue?.ToUpper()).AsSpan();
+            var hash = ConvertKeyToHash(strTemp);
+            return string.Format(FormatterIdentityRoleClaim, hash.ToString());
         }
 
         /// <inheritdoc/>
-        public virtual string GenerateRowKeyIdentityUserToken(string? loginProvider, string? name)
+        public virtual ReadOnlySpan<char> GenerateRowKeyIdentityUserToken(string? loginProvider, string? name)
         {
-            string strTemp = string.Format("{0}_{1}", loginProvider?.ToUpper(), name?.ToUpper());
-            string? hash = ConvertKeyToHash(strTemp);
-            return string.Format(FormatterIdentityUserToken, hash);
+            var strTemp = string.Format("{0}_{1}", loginProvider?.ToUpper(), name?.ToUpper()).AsSpan();
+            var hash = ConvertKeyToHash(strTemp);
+            return string.Format(FormatterIdentityUserToken, hash.ToString());
         }
 
         /// <inheritdoc/>
-        public virtual string ParsePartitionKeyIdentityRoleFromRowKey(string rowKey)
+        public virtual ReadOnlySpan<char> ParsePartitionKeyIdentityRoleFromRowKey(string rowKey)
         {
-            return rowKey.Substring(PreFixIdentityRole.Length, 1);
+            return rowKey.AsSpan().Slice(PreFixIdentityRole.Length, 1).ToString();
         }
 
         /// <inheritdoc/>
-        public virtual string GenerateRowKeyIdentityUserLogin(string? loginProvider, string? providerKey)
+        public virtual ReadOnlySpan<char> GenerateRowKeyIdentityUserLogin(string? loginProvider, string? providerKey)
         {
-            string strTemp = string.Format("{0}_{1}", loginProvider?.ToUpper(), providerKey?.ToUpper());
-            string? hash = ConvertKeyToHash(strTemp);
-            return string.Format(FormatterIdentityUserLogin, hash);
+            var strTemp = string.Format("{0}_{1}", loginProvider?.ToUpper(), providerKey?.ToUpper()).AsSpan();
+            var hash = ConvertKeyToHash(strTemp);
+            return string.Format(FormatterIdentityUserLogin, hash.ToString());
         }
 
         /// <inheritdoc/>
-        public double KeyVersion => 8.0;
+        public double KeyVersion => 9.0;
 
         /// <summary>
         /// Convert Key Data to a hex hash string
         /// </summary>
         /// <param name="input">Plain text input</param>
         /// <returns>Returns a hex string</returns>
-        public abstract string? ConvertKeyToHash(string? input);
+        public abstract ReadOnlySpan<char> ConvertKeyToHash(ReadOnlySpan<char> input);
 
         /// <summary>
         /// Left only for backwards compat for older frameworks.
@@ -221,18 +225,16 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
             return sBuilder.ToString();
         }
 
-#if NET6_0_OR_GREATER
         /// <summary>
         /// Format byte array to hex string
         /// </summary>
         /// <param name="hashedData">byte array to format</param>
         /// <returns></returns>
-        protected static string FormatHashedData(byte[] hashedData)
+        protected static string FormatHashedData(ReadOnlySpan<byte> hashedData)
         {
             // Convert the input string to a byte array and compute the hash. 
             return Convert.ToHexString(hashedData).ToLowerInvariant();
         }
-#endif
 
     }
 }

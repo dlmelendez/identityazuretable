@@ -1,5 +1,6 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Azure.Data.Tables;
 using Xunit;
@@ -113,13 +114,15 @@ namespace ElCamino.Azure.Data.Tables.Tests
         [Fact]
         public async Task ExecuteTableQueryTakeCount()
         {
+            var sw = new Stopwatch();
+
             //Create Table
             await SetupTableAsync();
             //Setup Entity
             var partitionKey = "b-" + Guid.NewGuid().ToString("N");
             _output.WriteLine("PartitionKey {0}", partitionKey);
 
-            var filterByPartitionKey = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, partitionKey);
+            string filterByPartitionKey = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, partitionKey).ToString();
             var count = await _tableClient.QueryAsync<TableEntity>(filter: filterByPartitionKey).CountAsync();
             const int maxTestEntities = 1001;
             _output.WriteLine("Entities found {0}", count);
@@ -134,7 +137,11 @@ namespace ElCamino.Azure.Data.Tables.Tests
                     var entity = new TableEntity(partitionKey, rowKey);
                     batch.UpsertEntity(entity, TableUpdateMode.Replace);
                 }
+                sw.Start();
                 await batch.SubmitBatchAsync();
+                sw.Stop();
+                _output.WriteLine($"{nameof(batch.SubmitBatchAsync)}: {sw.Elapsed.Milliseconds} ms");
+
                 count = await _tableClient.QueryAsync<TableEntity>(filter: filterByPartitionKey).CountAsync();
                 _output.WriteLine("Entities found after batch create {0}", count);
             }
@@ -183,7 +190,7 @@ namespace ElCamino.Azure.Data.Tables.Tests
                 batch.DeleteEntity(te.PartitionKey, te.RowKey, te.ETag);
             }
             await batch.SubmitBatchAsync();
-            count = await _tableClient.QueryAsync<TableEntity>(filter: filterByPartitionKey).CountAsync();
+            count = await _tableClient.QueryAsync<TableEntity>(filter: filterByPartitionKey.ToString()).CountAsync();
             _output.WriteLine("Entities found after batch delete {0}", count);
             Assert.Equal(0, count);
 

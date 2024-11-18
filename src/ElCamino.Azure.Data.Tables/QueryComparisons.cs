@@ -16,6 +16,8 @@
 // -----------------------------------------------------------------------------------------
 
 
+using ElCamino.Azure.Data.Tables;
+
 namespace Azure.Data.Tables
 {
     /// <summary>
@@ -52,5 +54,25 @@ namespace Azure.Data.Tables
         /// Represents the Less Than or Equal operator.
         /// </summary>
         public const string LessThanOrEqual = "le";
+
+        /// <summary>
+        /// Gets the OData string representation of the specified comparison operator.
+        /// </summary>
+        /// <param name="comparison"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        public static string GetComparison(QueryComparison comparison)
+        {
+            return comparison switch
+            {
+                QueryComparison.Equal => QueryComparisons.Equal,
+                QueryComparison.NotEqual => QueryComparisons.NotEqual,
+                QueryComparison.GreaterThan => QueryComparisons.GreaterThan,
+                QueryComparison.GreaterThanOrEqual => QueryComparisons.GreaterThanOrEqual,
+                QueryComparison.LessThan => QueryComparisons.LessThan,
+                QueryComparison.LessThanOrEqual => QueryComparisons.LessThanOrEqual,
+                _ => throw new ArgumentException($"Invalid comparison: {comparison}", nameof(comparison)),
+            };
+        }
     }
 }

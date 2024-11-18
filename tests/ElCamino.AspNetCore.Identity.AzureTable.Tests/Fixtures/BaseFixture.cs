@@ -1,20 +1,22 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
 using System;
+using Azure.Data.Tables;
 using ElCamino.AspNetCore.Identity.AzureTable;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using IdentityRole = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityRole;
 using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser<string>;
 using Model = ElCamino.AspNetCore.Identity.AzureTable.Model;
 
-namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
+namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.Fixtures
 {
     public class BaseFixture<TUser, TRole, TContext, TUserStore, TKeyHelper>
-        : BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore, TKeyHelper>
+        : BaseFixture<TUser, TContext, string, IdentityUserClaim, IdentityUserLogin, IdentityUserToken, TUserStore, TKeyHelper>
         where TUser : IdentityUser, new()
         where TRole : IdentityRole, new()
         where TContext : IdentityCloudContext
@@ -51,10 +53,9 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
             id.AddRoles<IdentityRole>();
 
 
-            id = id.AddAzureTableStores<TContext>(new Func<IdentityConfiguration>(() =>
-            {
-                return GetConfig();
-            }), GetKeyHelper());
+            id = id.AddAzureTableStores<TContext>(() => GetConfig().config
+            , () => new TableServiceClient(GetConfig().connectionString)
+            , GetKeyHelper());
 
 
             id.CreateAzureTablesIfNotExists<TContext>();
@@ -84,10 +85,9 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
             //Add the role here to load the correct UserStore
             id.AddRoles<IdentityRole>();
 
-            id = id.AddAzureTableStores<TContext>(new Func<IdentityConfiguration>(() =>
-            {
-                return GetConfig();
-            }), GetKeyHelper());
+            id = id.AddAzureTableStores<TContext>(() => GetConfig().config
+            , () => new TableServiceClient(GetConfig().connectionString)
+            , GetKeyHelper());
 
             id.Services.AddDataProtection();
             id.AddDefaultTokenProviders();
@@ -102,10 +102,10 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
     }
 
     public class BaseFixture<TUser, TContext, TUserStore, TKeyHelper>
-    : BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore, TKeyHelper>
+    : BaseFixture<TUser, TContext, string, IdentityUserClaim, IdentityUserLogin, IdentityUserToken, TUserStore, TKeyHelper>
     where TUser : IdentityUser, new()
     where TContext : IdentityCloudContext
-    where TUserStore : UserOnlyStore<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken>
+    where TUserStore : UserOnlyStore<TUser, TContext, string, IdentityUserClaim, IdentityUserLogin, IdentityUserToken>
     where TKeyHelper : IKeyHelper, new()
     {
 
@@ -151,7 +151,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
             return new TKeyHelper();
         }
 
-        public IdentityConfiguration GetConfig()
+        public (IdentityConfiguration config, string connectionString) GetConfig()
         {
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("config.json", reloadOnChange: true, optional: false);
@@ -160,24 +160,23 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 
             var idconfig = new IdentityConfiguration()
             {
-                StorageConnectionString = root["IdentityAzureTable:identityConfiguration:storageConnectionString"],
                 TablePrefix = root["IdentityAzureTable:identityConfiguration:tablePrefix"],
                 IndexTableName = root["IdentityAzureTable:identityConfiguration:indexTableName"],
                 UserTableName = root["IdentityAzureTable:identityConfiguration:userTableName"],
                 RoleTableName = root["IdentityAzureTable:identityConfiguration:roleTableName"]
             };
 
-            return idconfig;
+            return (config: idconfig, connectionString: root["IdentityAzureTable:identityConfiguration:storageConnectionString"]);
         }
 
         public TContext GetContext()
         {
-            return GetContext(GetConfig());
+            return GetContext(GetConfig().config, new TableServiceClient(GetConfig().connectionString));
         }
 
-        public TContext GetContext(IdentityConfiguration config)
+        public TContext GetContext(IdentityConfiguration config, TableServiceClient client)
         {
-            return Activator.CreateInstance(typeof(TContext), new object[1] { config }) as TContext;
+            return Activator.CreateInstance(typeof(TContext), [config, client]) as TContext;
 
         }
 
@@ -188,7 +187,7 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
 
         public TUserStore CreateUserStore(TContext context)
         {
-            var userStore = Activator.CreateInstance(typeof(TUserStore), new object[2] { context, GetKeyHelper() }) as TUserStore;
+            var userStore = Activator.CreateInstance(typeof(TUserStore), [context, GetKeyHelper()]) as TUserStore;
 
             return userStore;
         }
@@ -209,10 +208,9 @@ namespace ElCamino.Web.Identity.AzureTable.Tests.Fixtures
             });
 
 
-            id = id.AddAzureTableStores<TContext>(new Func<IdentityConfiguration>(() =>
-            {
-                return GetConfig();
-            }), GetKeyHelper());
+            id = id.AddAzureTableStores<TContext>(() => GetConfig().config
+            , () => new TableServiceClient(GetConfig().connectionString)
+            , GetKeyHelper());
 
             id.Services.AddDataProtection();
             id.AddDefaultTokenProviders();

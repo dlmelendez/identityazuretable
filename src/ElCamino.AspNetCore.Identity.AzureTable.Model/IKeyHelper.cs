@@ -1,5 +1,7 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
+using System;
+
 namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 {
     /// <summary>
@@ -128,62 +130,62 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// <param name="plainLoginProvider"></param>
         /// <param name="plainProviderKey"></param>
         /// <returns></returns>
-        string GeneratePartitionKeyIndexByLogin(string plainLoginProvider, string plainProviderKey);
+        ReadOnlySpan<char> GeneratePartitionKeyIndexByLogin(string plainLoginProvider, string plainProviderKey);
 
         /// <summary>
         /// Generate key for RowKeyUserEmail
         /// </summary>
         /// <param name="plainEmail"></param>
         /// <returns></returns>
-        string GenerateRowKeyUserEmail(string? plainEmail);
+        ReadOnlySpan<char> GenerateRowKeyUserEmail(string? plainEmail);
 
         /// <summary>
         /// Generate key for UserId
         /// </summary>
         /// <returns></returns>
-        string GenerateUserId();
+        ReadOnlySpan<char> GenerateUserId();
 
         /// <summary>
         /// Generate key for RowKeyUserName
         /// </summary>
         /// <param name="plainUserName"></param>
         /// <returns></returns>
-        string GenerateRowKeyUserName(string? plainUserName);
+        ReadOnlySpan<char> GenerateRowKeyUserName(string? plainUserName);
 
         /// <summary>
         /// Generate key for PartitionKeyUserName
         /// </summary>
         /// <param name="plainUserName"></param>
         /// <returns></returns>
-        string GeneratePartitionKeyUserName(string? plainUserName);
+        ReadOnlySpan<char> GeneratePartitionKeyUserName(string? plainUserName);
 
         /// <summary>
         /// Generate key for RowKeyUserId
         /// </summary>
         /// <param name="plainUserId"></param>
         /// <returns></returns>
-        string GenerateRowKeyUserId(string? plainUserId);
+        ReadOnlySpan<char> GenerateRowKeyUserId(string? plainUserId);
 
         /// <summary>
         /// Generate key for RowKeyIdentityUserRole
         /// </summary>
         /// <param name="plainRoleName"></param>
         /// <returns></returns>
-        string GenerateRowKeyIdentityUserRole(string? plainRoleName);
+        ReadOnlySpan<char> GenerateRowKeyIdentityUserRole(string? plainRoleName);
 
         /// <summary>
         /// Generate key for RowKeyIdentityRole
         /// </summary>
         /// <param name="plainRoleName"></param>
         /// <returns></returns>
-        string GenerateRowKeyIdentityRole(string? plainRoleName);
+        ReadOnlySpan<char> GenerateRowKeyIdentityRole(string? plainRoleName);
 
         /// <summary>
         /// Generate key for PartitionKeyIdentityRole
         /// </summary>
         /// <param name="plainRoleName"></param>
         /// <returns></returns>
-        string GeneratePartitionKeyIdentityRole(string? plainRoleName);
+        ReadOnlySpan<char> GeneratePartitionKeyIdentityRole(string? plainRoleName);
 
         /// <summary>
         /// Generate key for RowKeyIdentityUserClaim
@@ -191,7 +193,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// <param name="claimType"></param>
         /// <param name="claimValue"></param>
         /// <returns></returns>
-        string GenerateRowKeyIdentityUserClaim(string? claimType, string? claimValue);
+        ReadOnlySpan<char> GenerateRowKeyIdentityUserClaim(string? claimType, string? claimValue);
 
         /// <summary>
         /// Generate key for RowKeyIdentityRoleClaim
@@ -199,7 +201,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// <param name="claimType"></param>
         /// <param name="claimValue"></param>
         /// <returns></returns>
-        string GenerateRowKeyIdentityRoleClaim(string? claimType, string? claimValue);
+        ReadOnlySpan<char> GenerateRowKeyIdentityRoleClaim(string? claimType, string? claimValue);
 
         /// <summary>
         /// Generate key for RowKeyIdentityUserToken
@@ -207,7 +209,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// <param name="loginProvider"></param>
         /// <param name="tokenName"></param>
         /// <returns></returns>
-        string GenerateRowKeyIdentityUserToken(string? loginProvider, string? tokenName);
+        ReadOnlySpan<char> GenerateRowKeyIdentityUserToken(string? loginProvider, string? tokenName);
 
         /// <summary>
         /// Generate key for RowKeyIdentityUserLogin
@@ -215,14 +217,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// <param name="loginProvider"></param>
         /// <param name="providerKey"></param>
         /// <returns></returns>
-        string GenerateRowKeyIdentityUserLogin(string? loginProvider, string? providerKey);
+        ReadOnlySpan<char> GenerateRowKeyIdentityUserLogin(string? loginProvider, string? providerKey);
 
         /// <summary>
         /// Parse PartitionKey From RowKey for IdentityRole
         /// </summary>
         /// <param name="rowKey"></param>
         /// <returns></returns>
-        string ParsePartitionKeyIdentityRoleFromRowKey(string rowKey);
+        ReadOnlySpan<char> ParsePartitionKeyIdentityRoleFromRowKey(string rowKey);
 
         /// <summary>
         /// Key Version

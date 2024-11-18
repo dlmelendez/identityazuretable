@@ -30,7 +30,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// <returns></returns>
         public string PeekRowKey(IKeyHelper keyHelper)
         {
-            return keyHelper.GenerateRowKeyIdentityUserRole(RoleName);
+            return keyHelper.GenerateRowKeyIdentityUserRole(RoleName).ToString();
         }
 
         /// <inheritdoc/>

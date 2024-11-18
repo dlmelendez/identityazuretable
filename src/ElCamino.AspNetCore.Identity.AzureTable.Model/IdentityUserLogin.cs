@@ -32,7 +32,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// <returns></returns>
         public string PeekRowKey(IKeyHelper keyHelper)
         {
-            return keyHelper.GenerateRowKeyIdentityUserLogin(LoginProvider, ProviderKey);
+            return keyHelper.GenerateRowKeyIdentityUserLogin(LoginProvider, ProviderKey).ToString();
         }
 
 

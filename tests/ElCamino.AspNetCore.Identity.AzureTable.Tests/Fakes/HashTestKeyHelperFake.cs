@@ -12,7 +12,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.Fakes
 {
     internal class HashTestKeyHelperFake : BaseKeyHelper
     {
-        public override string ConvertKeyToHash(string input)
+        public override ReadOnlySpan<char> ConvertKeyToHash(ReadOnlySpan<char> input)
         {
             throw new NotImplementedException();
         }

@@ -21,15 +21,15 @@ namespace ElCamino.Identity.AzureTable.DataUtility
         public TableQuery GetSourceTableQuery()
         {
             TableQuery tq = new TableQuery();
-            string partitionFilter = TableQuery.CombineFilters(
+            var partitionFilter = TableQuery.CombineFilters(
                 TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserId),
                 TableOperators.And,
                 TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.LessThan, _keyHelper.PreFixIdentityUserIdUpperBound));
-            string rowFilter = TableQuery.CombineFilters(
+            var rowFilter = TableQuery.CombineFilters(
                 TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserClaim),
                 TableOperators.And,
                 TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.LessThan, _keyHelper.PreFixIdentityUserClaimUpperBound));
-            tq.FilterString = TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowFilter);
+            tq.FilterString = TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowFilter).ToString();
             return tq;
         }
 
@@ -41,7 +41,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
             if (!string.IsNullOrWhiteSpace(claimType))
             {
-                return (d.RowKey != _keyHelper.GenerateRowKeyIdentityUserClaim(claimType, claimValue ?? string.Empty));
+                return (!d.RowKey.AsSpan().Equals(_keyHelper.GenerateRowKeyIdentityUserClaim(claimType, claimValue), StringComparison.OrdinalIgnoreCase));
             }
 
             return false;
@@ -70,7 +70,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
                     var claimNew = new TableEntity(claim);
                     claimNew.ResetKeys(claim.PartitionKey,
-                        _keyHelper.GenerateRowKeyIdentityUserClaim(claim["ClaimType"].ToString(), claim["ClaimValue"].ToString()),
+                        _keyHelper.GenerateRowKeyIdentityUserClaim(claim["ClaimType"].ToString(), claim["ClaimValue"].ToString()).ToString(),
                          TableConstants.ETagWildcard);
                     if (claimNew.ContainsKey(KeyVersion))
                     {
