@@ -239,6 +239,18 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
             await Assert.ThrowsAsync<ArgumentNullException>(() => store.GetTwoFactorEnabledAsync(null)).ConfigureAwait(false);
             await Assert.ThrowsAsync<ArgumentNullException>(() => store.SetTwoFactorEnabledAsync(null, twoFactorEnabled)).ConfigureAwait(false);
+
+            var recoveryCodes = await manager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
+            recoveryCodes.ToList().ForEach(rc => _output.WriteLine($"Recovery Code: {rc}"));
+            Assert.Equal(10, recoveryCodes.Count());
+
+            string recoveryCode = recoveryCodes.First();
+            var redeemptionResult = await manager.RedeemTwoFactorRecoveryCodeAsync(user, recoveryCode);
+            Assert.True(redeemptionResult.Succeeded, string.Concat(redeemptionResult.Errors));
+            _output.WriteLine($"Redeemed Code: {recoveryCode}");
+
+            int codeCount = await manager.CountRecoveryCodesAsync(user);
+            Assert.Equal(9, codeCount);
         }
 
         public virtual async Task PasswordHash()

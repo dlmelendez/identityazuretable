@@ -960,6 +960,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             var token = await FindTokenAsync(user, loginProvider, name, cancellationToken);
 
             token ??= CreateUserToken(user, loginProvider, name, value);
+            token.Value = value;
 
             await AddUserTokenAsync(token);
         }
