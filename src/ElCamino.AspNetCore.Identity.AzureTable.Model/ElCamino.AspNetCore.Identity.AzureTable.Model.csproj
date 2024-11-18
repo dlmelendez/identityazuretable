@@ -50,6 +50,8 @@
       <PackagePath>\</PackagePath>
       <Pack>True</Pack>
     </None>
+    <None Include="projectNugetPic.png" Pack="true" PackagePath="\" />
+
   </ItemGroup>
 
 
