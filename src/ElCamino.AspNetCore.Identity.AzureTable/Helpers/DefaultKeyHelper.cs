@@ -16,8 +16,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         {
             Span<byte> encodedBytes = stackalloc byte[Encoding.Unicode.GetMaxByteCount(input.Length)];
             int encodedByteCount = Encoding.Unicode.GetBytes(input, encodedBytes);
+
             Span<byte> hashedBytes = stackalloc byte[SHA1.HashSizeInBytes];
             int hashedByteCount = SHA1.HashData(encodedBytes.Slice(0, encodedByteCount), hashedBytes);
+
             return FormatHashedData(hashedBytes.Slice(0, hashedByteCount));
         }
     }
