@@ -51,6 +51,37 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         [InlineData("HashTestKeyHelperFake _fakeKeyHelper = new HashTestKeyHelperFake();")]
         [InlineData("thisIs Some Test Text123323 for Hashing")]
         [InlineData("{F1FFCC02-83E0-4347-8377-72D6007E3D93}")]
+        public void SHA1FormatBackwardCompat_MemCheck(string textToHash)
+        {
+            _output.WriteLine($"plain text: {textToHash}");
+            var sw = new Stopwatch();
+            long mem = GC.GetTotalAllocatedBytes();
+            sw.Start();
+            for (int trial = 0; trial < 1000; trial++)
+            {
+                _ = _fakeKeyHelper.ConvertKeyToHashBackwardCompatSHA1(textToHash);
+            }
+            sw.Stop();
+            mem = GC.GetTotalAllocatedBytes() - mem;
+            _output.WriteLine($"expected {sw.Elapsed.TotalMilliseconds}ms, Alloc: {mem / 1024.0 / 1024:N2}mb");
+
+            mem = GC.GetTotalAllocatedBytes();
+            sw.Restart();
+            for (int trial = 0; trial < 1000; trial++)
+            {
+                _ = _defaultKeyHelper.ConvertKeyToHash(textToHash);
+            }
+            sw.Stop();
+            mem = GC.GetTotalAllocatedBytes() - mem;
+            _output.WriteLine($"returned {sw.Elapsed.TotalMilliseconds}ms, Alloc: {mem / 1024.0 / 1024:N2}mb");
+           
+        }
+
+
+        [Theory]
+        [InlineData("HashTestKeyHelperFake _fakeKeyHelper = new HashTestKeyHelperFake();")]
+        [InlineData("thisIs Some Test Text123323 for Hashing")]
+        [InlineData("{F1FFCC02-83E0-4347-8377-72D6007E3D93}")]
         public void SHA256FormatBackwardCompat(string textToHash)
         {
             _output.WriteLine($"plain text: {textToHash}");
