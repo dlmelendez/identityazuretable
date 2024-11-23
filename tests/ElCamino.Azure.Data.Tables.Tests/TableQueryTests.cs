@@ -21,7 +21,56 @@ namespace ElCamino.Azure.Data.Tables.Tests
             await _tableClient.CreateIfNotExistsAsync();
             _output.WriteLine("Table created {0}", TableName);
 
-        }        
+        }
+
+        [Theory]
+        [InlineData("HashTestKeyHelperFake '_fakeKeyHelper' = new HashTestKeyHelperFake();'")]
+        [InlineData("thisIs Some Test 'Text123323' for Hashing")]
+        [InlineData("'{F1FFCC02-83E0-4347-8377-72D6007E3D93}''")]
+        public void QueryPropertyStringWithQuotes_MemCheck(string propertyText)
+        {
+            _output.WriteLine($"plain text: {propertyText}");
+            var sw = new Stopwatch();
+            long mem = GC.GetTotalAllocatedBytes();
+            string filter = string.Empty;
+            sw.Start();
+            for (int trial = 0; trial < 100; trial++)
+            {
+                filter = TableQuery.GenerateFilterCondition("propertyName", QueryComparisons.Equal, propertyText).ToString();
+            }
+            sw.Stop();
+            mem = GC.GetTotalAllocatedBytes() - mem;
+            _output.WriteLine($"expected {sw.Elapsed.TotalMilliseconds}ms, Alloc: {mem / 1024.0 / 1024:N2}mb");
+            int origCount = propertyText.AsSpan().Count('\'');
+            int resultCount = filter.AsSpan().Count('\'');
+            int expectedLength = (origCount * 2) + 2;
+            Assert.Equal(expectedLength, resultCount);
+        }
+
+        [Theory]
+        [InlineData("HashTestKeyHelperFake _fakeKeyHelper = new HashTestKeyHelperFake();")]
+        [InlineData("thisIs Some Test Text123323 for Hashing")]
+        [InlineData("{F1FFCC02-83E0-4347-8377-72D6007E3D93}")]
+        public void QueryPropertyStringWithNoQuotes_MemCheck(string propertyText)
+        {
+            _output.WriteLine($"plain text: {propertyText}");
+            var sw = new Stopwatch();
+            long mem = GC.GetTotalAllocatedBytes();
+            string filter = string.Empty;
+            sw.Start();
+            for (int trial = 0; trial < 100; trial++)
+            {
+                filter = TableQuery.GenerateFilterCondition("propertyName", QueryComparisons.Equal, propertyText).ToString();
+            }
+            sw.Stop();
+            mem = GC.GetTotalAllocatedBytes() - mem;
+            _output.WriteLine($"expected {sw.Elapsed.TotalMilliseconds}ms, Alloc: {mem / 1024.0 / 1024:N2}mb");
+            int origCount = propertyText.AsSpan().Count('\'');
+            Assert.Equal(0, origCount);
+            int resultCount = filter.AsSpan().Count('\'');
+            int expectedLength = 2;
+            Assert.Equal(expectedLength, resultCount);
+        }
 
         [Fact]
         public async Task QueryNullPropertyString()
