@@ -29,6 +29,7 @@ namespace Azure.Data.Tables
     {
         private const string OdataTrue = "true";
         private const string OdataFalse = "false";
+        private static readonly char Whitespace = '\u0020';
 
         /// <summary>
         /// Max take count for a given query
@@ -220,7 +221,34 @@ namespace Azure.Data.Tables
                     return $"X'{givenValue}'";
             }
             // OData readers expect single quote to be escaped in a param value.
-            return string.Format(CultureInfo.InvariantCulture, "'{0}'", givenValue.ToString().Replace("'", "''"));
+            int splitCounter = givenValue.Count('\'');
+            if (splitCounter <= 0)
+            {
+                Span<char> chars = stackalloc char[givenValue.Length + 2];
+                chars[0] = '\'';
+                int outputIndex = 1;
+                for(int givenIndex = 0; givenIndex < givenValue.Length; givenIndex++)
+                {
+                    chars[outputIndex++] = givenValue[givenIndex];
+                }
+                chars[chars.Length - 1] = '\'';
+                return new ReadOnlySpan<char>([.. chars]);
+            }
+
+            Span<char> joinArray = stackalloc char[givenValue.Length + splitCounter + 2];
+            joinArray[0] = '\'';
+            int joinIndex = 1;
+            for (int givenIndex = 0; givenIndex < givenValue.Length; givenIndex++)
+            {
+                char c = givenValue[givenIndex];
+                joinArray[joinIndex++] = c;
+                if (c == '\'')
+                {
+                    joinArray[joinIndex++] = '\'';
+                }
+            }
+            joinArray[joinArray.Length - 1] = '\'';
+            return new ReadOnlySpan<char>([.. joinArray]);
         }
 
         /// <summary>
