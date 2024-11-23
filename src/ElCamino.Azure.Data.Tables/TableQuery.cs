@@ -16,6 +16,7 @@
 // -----------------------------------------------------------------------------------------
 
 using System.Globalization;
+using System.Text;
 
 #pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace Azure.Data.Tables
@@ -28,6 +29,7 @@ namespace Azure.Data.Tables
     {
         private const string OdataTrue = "true";
         private const string OdataFalse = "false";
+        private static readonly char Whitespace = '\u0020';
 
         /// <summary>
         /// Max take count for a given query
@@ -224,10 +226,10 @@ namespace Azure.Data.Tables
             {
                 Span<char> chars = stackalloc char[givenValue.Length + 2];
                 chars[0] = '\'';
-                int index = 1;
-                foreach (char c in givenValue)
+                int outputIndex = 1;
+                for(int givenIndex = 0; givenIndex < givenValue.Length; givenIndex++)
                 {
-                    chars[index++] = c;
+                    chars[outputIndex++] = givenValue[givenIndex];
                 }
                 chars[chars.Length - 1] = '\'';
                 return new ReadOnlySpan<char>([.. chars]);
@@ -235,13 +237,14 @@ namespace Azure.Data.Tables
 
             Span<char> joinArray = stackalloc char[givenValue.Length + splitCounter + 2];
             joinArray[0] = '\'';
-            int indexCounter = 1;
-            foreach (var c in givenValue)
+            int joinIndex = 1;
+            for (int givenIndex = 0; givenIndex < givenValue.Length; givenIndex++)
             {
-                joinArray[indexCounter++] = c;
+                char c = givenValue[givenIndex];
+                joinArray[joinIndex++] = c;
                 if (c == '\'')
                 {
-                    joinArray[indexCounter++] = '\'';
+                    joinArray[joinIndex++] = '\'';
                 }
             }
             joinArray[joinArray.Length - 1] = '\'';
