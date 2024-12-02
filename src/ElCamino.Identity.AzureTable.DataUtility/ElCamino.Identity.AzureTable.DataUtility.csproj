@@ -10,7 +10,7 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <EnableDefaultContentItems>false</EnableDefaultContentItems>
-    <Version>9.0</Version>
+    <Version>9.0.1</Version>
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
