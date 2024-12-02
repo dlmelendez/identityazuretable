@@ -18,7 +18,7 @@ namespace ElCamino.Azure.Data.Tables
         /// </summary>
         public TableQueryBuilder() { }
 
-        private Span<char> _currentQuery = Span<char>.Empty;
+        private Span<char> _currentQuery = [];
         private uint _filterCount = 0;
         private uint _beginGroupCount = 0;
         private uint _endGroupCount = 0;

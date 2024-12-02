@@ -15,7 +15,7 @@ namespace Azure.Data.Tables
         /// </summary>
         public const int MaxEntitiesPerBatch = 100;
 
-        private readonly Dictionary<string, List<TableTransactionAction>> _batches = new();
+        private readonly Dictionary<string, List<TableTransactionAction>> _batches = [];
 
         private readonly TableClient _table;
 
@@ -69,8 +69,8 @@ namespace Azure.Data.Tables
         /// <returns><see cref="IEnumerable{Response}"/> of the <see cref="TableClient.SubmitTransactionAsync"/> calls </returns>
         public virtual async Task<IEnumerable<Response>> SubmitBatchAsync(CancellationToken cancellationToken = default)
         {
-            ConcurrentBag<Response> bag = new ConcurrentBag<Response>();
-            List<Task> batches = new List<Task>();
+            ConcurrentBag<Response> bag = [];
+            List<Task> batches = [];
             foreach (KeyValuePair<string, List<TableTransactionAction>> kv in _batches)
             {
                 int total = kv.Value.Count;
@@ -135,7 +135,7 @@ namespace Azure.Data.Tables
                 return tableTransactionActions;
             }
 
-            _batches.Add(partitionKey, new List<TableTransactionAction>());
+            _batches.Add(partitionKey, []);
 
             return _batches[partitionKey];
         }

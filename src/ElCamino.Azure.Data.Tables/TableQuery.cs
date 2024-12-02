@@ -29,7 +29,6 @@ namespace Azure.Data.Tables
     {
         private const string OdataTrue = "true";
         private const string OdataFalse = "false";
-        private static readonly char Whitespace = '\u0020';
 
         /// <summary>
         /// Max take count for a given query
@@ -231,7 +230,7 @@ namespace Azure.Data.Tables
                 {
                     chars[outputIndex++] = givenValue[givenIndex];
                 }
-                chars[chars.Length - 1] = '\'';
+                chars[^1] = '\'';
                 return new ReadOnlySpan<char>([.. chars]);
             }
 
@@ -247,7 +246,7 @@ namespace Azure.Data.Tables
                     joinArray[joinIndex++] = '\'';
                 }
             }
-            joinArray[joinArray.Length - 1] = '\'';
+            joinArray[^1] = '\'';
             return new ReadOnlySpan<char>([.. joinArray]);
         }
 

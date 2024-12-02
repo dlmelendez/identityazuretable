@@ -125,7 +125,6 @@ namespace ElCamino.Azure.Data.Tables.Tests
             string filterByPartitionKey = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, addedEntity.PartitionKey).ToString();
             string filterByRowKey = TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, addedEntity.PartitionKey).ToString();
             string filterByNullProperty = TableQuery.GenerateFilterConditionForStringNull(propertyName, QueryComparisons.Equal).ToString();
-            string filterByNotNullProperty = TableQuery.GenerateFilterConditionForStringNull(propertyName, QueryComparisons.NotEqual).ToString();
 
             string filterNull = TableQuery.CombineFilters(
                                 TableQuery.CombineFilters(filterByPartitionKey, TableOperators.And, filterByRowKey),
