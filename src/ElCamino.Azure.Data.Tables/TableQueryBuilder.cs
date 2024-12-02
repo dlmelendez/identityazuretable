@@ -11,14 +11,14 @@ namespace ElCamino.Azure.Data.Tables
     /// EXPERIMENTAL: API is subject to change
     /// This class allows for a fluent query builder for Azure Table Storage using OData.
     /// </summary>
-    public class TableQueryBuilder
+    public ref struct TableQueryBuilder
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TableQueryBuilder"/> class for fluent query building for Azure Table Storage using OData.
         /// </summary>
         public TableQueryBuilder() { }
 
-        private readonly StringBuilder _queryBuilder = new();
+        private Span<char> _currentQuery = Span<char>.Empty;
         private uint _filterCount = 0;
         private uint _beginGroupCount = 0;
         private uint _endGroupCount = 0;
@@ -30,10 +30,22 @@ namespace ElCamino.Azure.Data.Tables
 
         private void AppendCondition(ReadOnlySpan<char> condition)
         {
-            AppendBeginGroup();
-            _queryBuilder.Append(condition);
+            if(_currentQuery.IsEmpty)
+            {
+                _currentQuery = new Span<char>(['(', .. condition, ')']);
+            }
+            else
+            {
+                Span<char> temp = stackalloc char[_currentQuery.Length + condition.Length + 2];
+                _currentQuery.CopyTo(temp);
+                temp[_currentQuery.Length] = '(';
+                condition.CopyTo(temp[(_currentQuery.Length + 1)..]);
+                temp[^1] = ')';
+                _currentQuery = new Span<char>(temp.ToArray());
+            }
             _filterCount++;
-            AppendEndGroup();
+            _beginGroupCount++;
+            _endGroupCount++;
         }
 
         /// <summary>
@@ -125,29 +137,43 @@ namespace ElCamino.Azure.Data.Tables
 
         private void AppendBeginGroup()
         {
-            _queryBuilder.Append('(');
+            Span<char> temp = stackalloc char[_currentQuery.Length + 1];
+            _currentQuery.CopyTo(temp);
+            temp[^1] = '(';
+            _currentQuery = new Span<char>(temp.ToArray());
             _beginGroupCount++;
         }
 
         private void AppendEndGroup()
         {
             ThrowIfNoFilter();
-            _queryBuilder.Append(')');
+            Span<char> temp = stackalloc char[_currentQuery.Length + 1];
+            _currentQuery.CopyTo(temp);
+            temp[^1] = ')';
+            _currentQuery = new Span<char>(temp.ToArray());
             _endGroupCount++;
         }
 
         private void PrependAppendGroupAll()
         {
             ThrowIfNoFilter();
-            _queryBuilder.Insert(0, '(');
+            Span<char> temp = stackalloc char[_currentQuery.Length + 2];
+            temp[0] = '(';
+            _currentQuery.CopyTo(temp[1..]);
             _beginGroupCount++;
-            AppendEndGroup();
+            temp[^1] = ')';
+            _endGroupCount++;
+            _currentQuery = new Span<char>(temp.ToArray());
         }
 
         private void AppendTableOperator(TableOperator tableOperator)
         {
             ThrowIfNoFilter();
-            _queryBuilder.Append($" {TableOperators.GetOperator(tableOperator)} ");
+            ReadOnlySpan<char> tableOperatorSpan = $" {TableOperators.GetOperator(tableOperator)} ".AsSpan();
+            Span<char> temp = stackalloc char[_currentQuery.Length + tableOperatorSpan.Length];
+            _currentQuery.CopyTo(temp);
+            tableOperatorSpan.CopyTo(temp[_currentQuery.Length..]);
+            _currentQuery = new Span<char>(temp.ToArray());
         }
 
         private void ThrowIfNoFilter()
@@ -164,7 +190,7 @@ namespace ElCamino.Azure.Data.Tables
         /// <returns>Returns an Odata Azure Table Storage query or an empty string</returns>
         public override string ToString()
         {
-            return _queryBuilder.ToString();
+            return _currentQuery.ToString();
         }
     }
 }

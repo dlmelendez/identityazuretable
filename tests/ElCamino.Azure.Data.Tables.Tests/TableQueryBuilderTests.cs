@@ -44,7 +44,22 @@ namespace ElCamino.Azure.Data.Tables.Tests
             //Execute Add
             var addedEntity = await _tableClient.AddEntityWithHeaderValuesAsync(entity);
             Stopwatch sw = new Stopwatch();
+
             sw.Start();
+            //Execute isNull Query
+            string filterByPartitionKey = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, addedEntity.PartitionKey).ToString();
+            string filterByRowKey = TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, addedEntity.PartitionKey).ToString();
+            string filterByNullProperty = TableQuery.GenerateFilterConditionForStringNull(propertyName, QueryComparisons.Equal).ToString();
+            string filterByNotNullProperty = TableQuery.GenerateFilterConditionForStringNull(propertyName, QueryComparisons.NotEqual).ToString();
+
+            string filterNull = TableQuery.CombineFilters(
+                                TableQuery.CombineFilters(filterByPartitionKey, TableOperators.And, filterByRowKey),
+                                TableOperators.And,
+                                filterByNullProperty).ToString();
+            sw.Stop();
+            _output.WriteLine($"{nameof(filterNull)}: {sw.Elapsed.TotalMilliseconds}ms");
+
+            sw.Restart();
             TableQueryBuilder queryBuilderNull = new TableQueryBuilder();
             string filterNullBuilder = queryBuilderNull
                 .BeginGroup()
@@ -58,20 +73,6 @@ namespace ElCamino.Azure.Data.Tables.Tests
             sw.Stop();
             _output.WriteLine($"{nameof(filterNullBuilder)}: {sw.Elapsed.TotalMilliseconds}ms");
             _output.WriteLine($"{nameof(filterNullBuilder)}:{filterNullBuilder}");
-
-            sw.Restart();
-            //Execute isNull Query
-            string filterByPartitionKey = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, addedEntity.PartitionKey).ToString();
-            string filterByRowKey = TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, addedEntity.PartitionKey).ToString();
-            string filterByNullProperty = TableQuery.GenerateFilterConditionForStringNull(propertyName, QueryComparisons.Equal).ToString();
-            string filterByNotNullProperty = TableQuery.GenerateFilterConditionForStringNull(propertyName, QueryComparisons.NotEqual).ToString();
-
-            string filterNull = TableQuery.CombineFilters(
-                                TableQuery.CombineFilters(filterByPartitionKey, TableOperators.And, filterByRowKey),
-                                TableOperators.And,
-                                filterByNullProperty).ToString();
-            sw.Stop();
-            _output.WriteLine($"{nameof(filterNull)}: {sw.Elapsed.TotalMilliseconds}ms");
 
             string filterNotNull = TableQuery.CombineFilters(
                     TableQuery.CombineFilters(filterByPartitionKey, TableOperators.And, filterByRowKey),
@@ -103,63 +104,72 @@ namespace ElCamino.Azure.Data.Tables.Tests
 
         }
 
-        //[Fact]
-        //public async Task QueryNullPropertyBool()
-        //{
-        //    string propertyName = "newProperty";
+        [Fact]
+        public void QueryBuilderNullMemory()
+        {
+            string propertyName = "newProperty1";
 
-        //    //Create Table
-        //    await SetupTableAsync();
-        //    //Setup Entity
-        //    var key = "a-" + Guid.NewGuid().ToString("N");
-        //    _output.WriteLine("PartitionKey {0}", key);
-        //    _output.WriteLine("RowKey {0}", key);
-        //    var entity = new TableEntity(key, key);
-        //    Assert.Equal(default, entity.ETag);
-        //    Assert.Equal(default, entity.Timestamp);
+            //Setup Entity
+            var key = "b-" + Guid.NewGuid().ToString("N");
+            _output.WriteLine("PartitionKey {0}", key);
+            _output.WriteLine("RowKey {0}", key);
+            var addedEntity = new TableEntity(key, key);
+            Assert.Equal(default, addedEntity.ETag);
+            Assert.Equal(default, addedEntity.Timestamp);
 
-        //    //Execute Add
-        //    var addedEntity = await _tableClient.AddEntityWithHeaderValuesAsync(entity);
+            Stopwatch sw = new Stopwatch();
+            long mem = GC.GetTotalAllocatedBytes();
 
-        //    //Execute isNull Query
-        //    string filterByPartitionKey = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, addedEntity.PartitionKey);
-        //    string filterByRowKey = TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, addedEntity.PartitionKey);
-        //    string filterByNullProperty = TableQuery.GenerateFilterConditionForBoolNull(propertyName, QueryComparisons.Equal);
-        //    string filterByNotNullProperty = TableQuery.GenerateFilterConditionForBoolNull(propertyName, QueryComparisons.NotEqual);
+            sw.Start();
+            //Execute isNull Query
+            string filterByPartitionKey = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, addedEntity.PartitionKey).ToString();
+            string filterByRowKey = TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, addedEntity.PartitionKey).ToString();
+            string filterByNullProperty = TableQuery.GenerateFilterConditionForStringNull(propertyName, QueryComparisons.Equal).ToString();
+            string filterByNotNullProperty = TableQuery.GenerateFilterConditionForStringNull(propertyName, QueryComparisons.NotEqual).ToString();
 
-        //    string filterNull = TableQuery.CombineFilters(
-        //                        TableQuery.CombineFilters(filterByPartitionKey, TableOperators.And, filterByRowKey),
-        //                        TableOperators.And,
-        //                        filterByNullProperty);
-        //    string filterNotNull = TableQuery.CombineFilters(
-        //            TableQuery.CombineFilters(filterByPartitionKey, TableOperators.And, filterByRowKey),
-        //            TableOperators.And,
-        //            filterByNotNullProperty);
+            string filterNull = TableQuery.CombineFilters(
+                                TableQuery.CombineFilters(filterByPartitionKey, TableOperators.And, filterByRowKey),
+                                TableOperators.And,
+                                filterByNullProperty).ToString();
+            for (int trial = 0; trial < 100; trial++)
+            {
+                filterNull = TableQuery.CombineFilters(filterNull, TableOperators.And, filterByNullProperty).ToString();
+            }
+            sw.Stop();
+            mem = GC.GetTotalAllocatedBytes() - mem;
+            _output.WriteLine($"{nameof(filterNull)}: {sw.Elapsed.TotalMilliseconds}ms, Alloc: {mem / 1024.0 / 1024:N2}mb");
+            _output.WriteLine($"{nameof(filterNull)}:{filterNull}");
 
-        //    _output.WriteLine($"{nameof(filterNull)}:{filterNull}");
-        //    _output.WriteLine($"{nameof(filterNotNull)}:{filterNotNull}");
+            mem = GC.GetTotalAllocatedBytes();
+            sw.Restart();
+            TableQueryBuilder queryBuilderNull = new TableQueryBuilder();
 
-        //    //Assert
-        //    Assert.Equal(1, await _tableClient.QueryAsync<TableEntity>(filter: filterNull).CountAsync());
-        //    Assert.Equal(0, await _tableClient.QueryAsync<TableEntity>(filter: filterNotNull).CountAsync());
+            queryBuilderNull = queryBuilderNull
+            .BeginGroup()
+            .AddFilter(new QueryCondition<string>(nameof(TableEntity.PartitionKey), QueryComparison.Equal, addedEntity.PartitionKey))
+            .CombineFilters(TableOperator.And)
+            .AddFilter(new QueryCondition<string>(nameof(TableEntity.RowKey), QueryComparison.Equal, addedEntity.RowKey))
+            .EndGroup()
+            .CombineFilters(TableOperator.And)
+            .AddFilter(new QueryCondition<string>(propertyName, QueryComparison.Equal, null));
+            for (int trial = 0; trial < 100; trial++)
+            {
+                queryBuilderNull = queryBuilderNull
+                .GroupAll()
+                .CombineFilters(TableOperator.And)
+                .AddFilter(new QueryCondition<string>(propertyName, QueryComparison.Equal, null));
+            }
+            string filterNullBuilder = queryBuilderNull.ToString();
+            sw.Stop();
+            mem = GC.GetTotalAllocatedBytes() - mem;
 
-        //    //Modify update
-        //    var updateEntity = new TableEntity(key, key)
-        //    {
-        //        { propertyName, true }
-        //    };
+            _output.WriteLine($"{nameof(filterNullBuilder)}: {sw.Elapsed.TotalMilliseconds}ms, Alloc: {mem / 1024.0 / 1024:N2}mb");
+            _output.WriteLine($"{nameof(filterNullBuilder)}:{filterNullBuilder}");
 
-        //    await Task.Delay(1000); //wait 1 second for timestamp 
+            //Assert
+            Assert.Equal(filterNull, filterNullBuilder);
 
-        //    _ = await _tableClient.UpdateEntityWithHeaderValuesAsync(updateEntity, addedEntity.ETag);
-
-        //    //Assert
-        //    Assert.Equal(0, await _tableClient.QueryAsync<TableEntity>(filter: filterNull).CountAsync());
-        //    Assert.Equal(1, await _tableClient.QueryAsync<TableEntity>(filter: filterNotNull).CountAsync());
-
-
-        //}
-
+        }
 
     }
 }
