@@ -130,7 +130,7 @@ namespace ElCamino.Azure.Data.Tables.Tests
                                 TableQuery.CombineFilters(filterByPartitionKey, TableOperators.And, filterByRowKey),
                                 TableOperators.And,
                                 filterByNullProperty).ToString();
-            for (int trial = 0; trial < 100; trial++)
+            for (int trial = 0; trial < 150; trial++)
             {
                 filterNull = TableQuery.CombineFilters(filterNull, TableOperators.And, filterByNullProperty).ToString();
             }
@@ -151,7 +151,7 @@ namespace ElCamino.Azure.Data.Tables.Tests
             .EndGroup()
             .CombineFilters(TableOperator.And)
             .AddFilter(new QueryCondition<string>(propertyName, QueryComparison.Equal, null));
-            for (int trial = 0; trial < 100; trial++)
+            for (int trial = 0; trial < 150; trial++)
             {
                 queryBuilderNull = queryBuilderNull
                 .GroupAll()
@@ -164,6 +164,7 @@ namespace ElCamino.Azure.Data.Tables.Tests
 
             _output.WriteLine($"{nameof(filterNullBuilder)}: {sw.Elapsed.TotalMilliseconds}ms, Alloc: {mem / 1024.0 / 1024:N2}mb");
             _output.WriteLine($"{nameof(filterNullBuilder)}:{filterNullBuilder}");
+            _output.WriteLine($"{nameof(filterNullBuilder)}:{filterNullBuilder.Length}");
 
             //Assert
             Assert.Equal(filterNull, filterNullBuilder);

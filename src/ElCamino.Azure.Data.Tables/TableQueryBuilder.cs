@@ -18,7 +18,9 @@ namespace ElCamino.Azure.Data.Tables
         /// </summary>
         public TableQueryBuilder() { }
 
-        private Span<char> _currentQuery = [];
+        private const int BufferSize = 1024;
+        private Span<char> _bufferQuery = new(new char[BufferSize]);
+        private int _currentQueryLength = 0;
         private uint _filterCount = 0;
         private uint _beginGroupCount = 0;
         private uint _endGroupCount = 0;
@@ -28,21 +30,42 @@ namespace ElCamino.Azure.Data.Tables
         /// </summary>
         public bool HasFilter => _filterCount > 0;
 
+        /// <summary>
+        /// Gets the current query filter.
+        /// </summary>
+        public ReadOnlySpan<char> QueryFilter => _bufferQuery.Slice(0, _currentQueryLength);
+
+        private void AllocateBuffer(int lengthToAdd)
+        {
+            if ((_currentQueryLength + lengthToAdd > _bufferQuery.Length))
+            {
+                Span<char> newBuffer = stackalloc char[_bufferQuery.Length + BufferSize];
+                QueryFilter.CopyTo(newBuffer);
+                _bufferQuery = new Span<char>([..newBuffer]);
+            }
+        }
+
         private void AppendCondition(ReadOnlySpan<char> condition)
         {
-            if(_currentQuery.IsEmpty)
+            int segmentLength = condition.Length + 2;
+
+            if (_currentQueryLength <= 0)
             {
-                _currentQuery = new Span<char>(['(', .. condition, ')']);
+                _bufferQuery[0] = '(';
+                condition.CopyTo(_bufferQuery[1..]);
+                _bufferQuery[^1] = ')';
             }
             else
             {
-                Span<char> temp = stackalloc char[_currentQuery.Length + condition.Length + 2];
-                _currentQuery.CopyTo(temp);
-                temp[_currentQuery.Length] = '(';
-                condition.CopyTo(temp[(_currentQuery.Length + 1)..]);
+                Span<char> temp = stackalloc char[_currentQueryLength + segmentLength];
+                AllocateBuffer(segmentLength);
+                QueryFilter.CopyTo(temp);
+                temp[_currentQueryLength] = '(';
+                condition.CopyTo(temp[(_currentQueryLength + 1)..]);
                 temp[^1] = ')';
-                _currentQuery = new Span<char>(temp.ToArray());
+                temp.CopyTo(_bufferQuery);
             }
+            _currentQueryLength += segmentLength;
             _filterCount++;
             _beginGroupCount++;
             _endGroupCount++;
@@ -137,43 +160,53 @@ namespace ElCamino.Azure.Data.Tables
 
         private void AppendBeginGroup()
         {
-            Span<char> temp = stackalloc char[_currentQuery.Length + 1];
-            _currentQuery.CopyTo(temp);
+            AllocateBuffer(1);
+            Span<char> temp = stackalloc char[_currentQueryLength + 1];
+            QueryFilter.CopyTo(temp);
             temp[^1] = '(';
-            _currentQuery = new Span<char>(temp.ToArray());
+            temp.CopyTo(_bufferQuery);
+            _currentQueryLength++;
             _beginGroupCount++;
         }
 
         private void AppendEndGroup()
         {
             ThrowIfNoFilter();
-            Span<char> temp = stackalloc char[_currentQuery.Length + 1];
-            _currentQuery.CopyTo(temp);
+            AllocateBuffer(1);
+            Span<char> temp = stackalloc char[_currentQueryLength + 1];
+            QueryFilter.CopyTo(temp);
             temp[^1] = ')';
-            _currentQuery = new Span<char>(temp.ToArray());
+            temp.CopyTo(_bufferQuery);
+            _currentQueryLength++;
             _endGroupCount++;
         }
 
         private void PrependAppendGroupAll()
         {
             ThrowIfNoFilter();
-            Span<char> temp = stackalloc char[_currentQuery.Length + 2];
+            AllocateBuffer(2);
+            Span<char> temp = stackalloc char[_currentQueryLength + 2];
             temp[0] = '(';
-            _currentQuery.CopyTo(temp[1..]);
+            QueryFilter.CopyTo(temp[1..]);
             _beginGroupCount++;
             temp[^1] = ')';
             _endGroupCount++;
-            _currentQuery = new Span<char>(temp.ToArray());
+            temp.CopyTo(_bufferQuery);
+            _currentQueryLength += 2;
         }
 
         private void AppendTableOperator(TableOperator tableOperator)
         {
             ThrowIfNoFilter();
             ReadOnlySpan<char> tableOperatorSpan = $" {TableOperators.GetOperator(tableOperator)} ".AsSpan();
-            Span<char> temp = stackalloc char[_currentQuery.Length + tableOperatorSpan.Length];
-            _currentQuery.CopyTo(temp);
-            tableOperatorSpan.CopyTo(temp[_currentQuery.Length..]);
-            _currentQuery = new Span<char>(temp.ToArray());
+            int segmentLength = tableOperatorSpan.Length;
+            AllocateBuffer(segmentLength);
+
+            Span<char> temp = stackalloc char[_currentQueryLength + segmentLength];
+            QueryFilter.CopyTo(temp);
+            tableOperatorSpan.CopyTo(temp[_currentQueryLength..]);
+            temp.CopyTo(_bufferQuery);
+            _currentQueryLength += segmentLength;
         }
 
         private void ThrowIfNoFilter()
@@ -190,7 +223,7 @@ namespace ElCamino.Azure.Data.Tables
         /// <returns>Returns an Odata Azure Table Storage query or an empty string</returns>
         public override string ToString()
         {
-            return _currentQuery.ToString();
+            return QueryFilter.ToString();
         }
     }
 }
