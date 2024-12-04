@@ -24,7 +24,45 @@ namespace ElCamino.Azure.Data.Tables.Tests
             await _tableClient.CreateIfNotExistsAsync();
             _output.WriteLine("Table created {0}", TableName);
 
-        }        
+        }
+
+        [Fact]
+        public async Task QueryBuilderPropertyString()
+        {
+            string propertyName = "newProperty1";
+
+            //Create Table
+            await SetupTableAsync();
+            //Setup Entity
+            var key = "b-" + Guid.NewGuid().ToString("N");
+            _output.WriteLine("PartitionKey {0}", key);
+            _output.WriteLine("RowKey {0}", key);
+            var entity = new TableEntity(key, key);
+            Assert.Equal(default, entity.ETag);
+            Assert.Equal(default, entity.Timestamp);
+
+            //Execute Add
+            var addedEntity = await _tableClient.AddEntityWithHeaderValuesAsync(entity);
+            Stopwatch sw = new Stopwatch();
+
+            sw.Start();
+            TableQueryBuilder queryBuilderNull = new TableQueryBuilder();
+            string filterNullBuilder = queryBuilderNull
+                .AddFilter(new QueryCondition<string>(nameof(TableEntity.PartitionKey), QueryComparison.Equal, addedEntity.PartitionKey))
+                .CombineFilters(TableOperator.And)
+                .AddFilter(new QueryCondition<string>(nameof(TableEntity.RowKey), QueryComparison.Equal, addedEntity.RowKey))
+                .CombineFilters(TableOperator.And)
+                .AddFilter(new QueryCondition<string>(propertyName, QueryComparison.Equal, null))
+                .ToString();
+            sw.Stop();
+            _output.WriteLine($"{nameof(filterNullBuilder)}: {sw.Elapsed.TotalMilliseconds}ms");
+            _output.WriteLine($"{nameof(filterNullBuilder)}:{filterNullBuilder}");
+
+
+            //Assert
+            Assert.Equal(1, await _tableClient.QueryAsync<TableEntity>(filter: filterNullBuilder).CountAsync());
+
+        }
 
         [Fact]
         public async Task QueryBuilderNullPropertyString()
