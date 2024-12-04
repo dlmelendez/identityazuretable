@@ -53,7 +53,7 @@ namespace ElCamino.Azure.Data.Tables
             {
                 _bufferQuery[0] = '(';
                 condition.CopyTo(_bufferQuery[1..]);
-                _bufferQuery[^1] = ')';
+                _bufferQuery[condition.Length + 1] = ')';
             }
             else
             {
