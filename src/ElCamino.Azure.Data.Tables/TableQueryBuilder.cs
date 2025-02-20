@@ -186,15 +186,11 @@ namespace ElCamino.Azure.Data.Tables
         /// <param name="operation"></param>
         /// <param name="givenValue"></param>
         /// <returns></returns>
-        public TableQueryBuilder AddFilterDate(ReadOnlySpan<char> propertyName, QueryComparison operation, DateTimeOffset? givenValue)
+        public TableQueryBuilder AddFilterDate(ReadOnlySpan<char> propertyName, QueryComparison operation, DateTimeOffset givenValue)
         {
             AppendCondition(
-                !givenValue.HasValue ?
-                TableQuery.GenerateFilterConditionForDateNull(
-                    propertyName, QueryComparisons.GetComparison(operation))
-                :
                 TableQuery.GenerateFilterConditionForDate(
-                propertyName, QueryComparisons.GetComparison(operation), givenValue.Value));
+                propertyName, QueryComparisons.GetComparison(operation), givenValue));
             return this;
         }
 

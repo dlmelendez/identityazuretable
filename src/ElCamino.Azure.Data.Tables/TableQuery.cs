@@ -134,28 +134,29 @@ namespace Azure.Data.Tables
             return GenerateFilterCondition(propertyName, operation, givenValue.UtcDateTime.ToString("o", CultureInfo.InvariantCulture), EdmType.DateTime);
         }
 
-        /// <summary>
-        /// Generates a property filter condition string for a null <see cref="DateTimeOffset"/> value.
-        /// </summary>
-        /// <param name="propertyName">A string containing the name of the property to compare.</param>
-        /// <param name="operation">A string containing the comparison operator to use.  <seealso cref="QueryComparisons.Equal"/> Is Null or <seealso cref="QueryComparisons.NotEqual"/> Not Null</param>
-        /// <returns>A string containing the formatted filter condition.</returns>
-        /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public static ReadOnlySpan<char> GenerateFilterConditionForDateNull(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> operation)
-        {
-            ReadOnlySpan<char> validCondition = $"({GenerateFilterConditionForDate(propertyName, QueryComparisons.GreaterThanOrEqual, DateTimeOffset.MinValue)} {TableOperators.And} {GenerateFilterConditionForDate(propertyName, QueryComparisons.LessThanOrEqual, DateTimeOffset.MaxValue)})";
-            switch (operation)
-            {
-                case QueryComparisons.Equal: //isNull
-                    return $"(not {validCondition})";
-                case QueryComparisons.NotEqual: //notNull
-                    return validCondition;
-                default:
-                    break;
-            }
+        //Checking for null Dates results in Status: 400 (Bad Request) ErrorCode: OutOfRangeInput from the Azure Table Service
+        ///// <summary>
+        ///// Generates a property filter condition string for a null <see cref="DateTimeOffset"/> value.
+        ///// </summary>
+        ///// <param name="propertyName">A string containing the name of the property to compare.</param>
+        ///// <param name="operation">A string containing the comparison operator to use.  <seealso cref="QueryComparisons.Equal"/> Is Null or <seealso cref="QueryComparisons.NotEqual"/> Not Null</param>
+        ///// <returns>A string containing the formatted filter condition.</returns>
+        ///// <exception cref="ArgumentOutOfRangeException"></exception>
+        //public static ReadOnlySpan<char> GenerateFilterConditionForDateNull(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> operation)
+        //{
+        //    ReadOnlySpan<char> validCondition = $"({GenerateFilterConditionForDate(propertyName, QueryComparisons.GreaterThanOrEqual, DateTimeOffset.MinValue)} {TableOperators.And} {GenerateFilterConditionForDate(propertyName, QueryComparisons.LessThanOrEqual, DateTimeOffset.MaxValue)})";
+        //    switch (operation)
+        //    {
+        //        case QueryComparisons.Equal: //isNull
+        //            return $"(not {validCondition})";
+        //        case QueryComparisons.NotEqual: //notNull
+        //            return validCondition;
+        //        default:
+        //            break;
+        //    }
 
-            throw new ArgumentOutOfRangeException(nameof(operation), $"{operation} is not supported. Only {QueryComparisons.Equal} and {QueryComparisons.NotEqual} operators are supported.");
-        }
+        //    throw new ArgumentOutOfRangeException(nameof(operation), $"{operation} is not supported. Only {QueryComparisons.Equal} and {QueryComparisons.NotEqual} operators are supported.");
+        //}
 
 
         /// <summary>

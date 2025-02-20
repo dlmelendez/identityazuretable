@@ -479,10 +479,11 @@ namespace ElCamino.Azure.Data.Tables.Tests
         }
 
         [Fact]
-        public async Task QueryBuilderNullPropertyDate()
+        public async Task QueryBuilderPropertyDate()
         {
             string propertyName = "newPropertyInt";
 
+            DateTimeOffset targetDate = DateTimeOffset.UtcNow;
             //Create Table
             await SetupTableAsync();
             //Setup Entity
@@ -506,7 +507,7 @@ namespace ElCamino.Azure.Data.Tables.Tests
                 .AddFilter(nameof(TableEntity.RowKey), QueryComparison.Equal, addedEntity.RowKey)
                 .EndGroup()
                 .CombineFilters(TableOperator.And)
-                .AddFilterDate(propertyName, QueryComparison.Equal, null)
+                .AddFilterDate(propertyName, QueryComparison.Equal, targetDate)
                 .ToString();
             sw.Stop();
             _output.WriteLine($"{nameof(filterNullBuilder)}: {sw.Elapsed.TotalMilliseconds}ms");
@@ -521,20 +522,20 @@ namespace ElCamino.Azure.Data.Tables.Tests
                 .AddFilter(nameof(TableEntity.RowKey), QueryComparison.Equal, addedEntity.RowKey)
                 .EndGroup()
                 .CombineFilters(TableOperator.And)
-                .AddFilterDate(propertyName, QueryComparison.NotEqual, null)
+                .AddFilterDate(propertyName, QueryComparison.NotEqual, targetDate)
                 .ToString();
             sw.Stop();
             _output.WriteLine($"{nameof(filterNotNullBuilder)}: {sw.Elapsed.TotalMilliseconds}ms");
             _output.WriteLine($"{nameof(filterNotNullBuilder)}:{filterNotNullBuilder}");
 
             //Assert
-            Assert.Equal(1, await _tableClient.QueryAsync<TableEntity>(filter: filterNullBuilder).CountAsync());
-            Assert.Equal(0, await _tableClient.QueryAsync<TableEntity>(filter: filterNotNullBuilder).CountAsync());
+            Assert.Equal(0, await _tableClient.QueryAsync<TableEntity>(filter: filterNullBuilder).CountAsync());
+            Assert.Equal(1, await _tableClient.QueryAsync<TableEntity>(filter: filterNotNullBuilder).CountAsync());
 
             //Modify update
             var updateEntity = new TableEntity(key, key)
             {
-                { propertyName, DateTimeOffset.UtcNow }
+                { propertyName, targetDate }
             };
 
             await Task.Delay(1000); //wait 1 second for timestamp 
@@ -542,8 +543,8 @@ namespace ElCamino.Azure.Data.Tables.Tests
             _ = await _tableClient.UpdateEntityWithHeaderValuesAsync(updateEntity, addedEntity.ETag);
 
             //Assert
-            Assert.Equal(0, await _tableClient.QueryAsync<TableEntity>(filter: filterNullBuilder).CountAsync());
-            Assert.Equal(1, await _tableClient.QueryAsync<TableEntity>(filter: filterNotNullBuilder).CountAsync());
+            Assert.Equal(1, await _tableClient.QueryAsync<TableEntity>(filter: filterNullBuilder).CountAsync());
+            Assert.Equal(0, await _tableClient.QueryAsync<TableEntity>(filter: filterNotNullBuilder).CountAsync());
         }
 
     }
