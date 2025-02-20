@@ -8,7 +8,6 @@ using Azure.Data.Tables;
 namespace ElCamino.Azure.Data.Tables
 {
     /// <summary>
-    /// EXPERIMENTAL: API is subject to change
     /// This class allows for a fluent query builder for Azure Table Storage using OData.
     /// </summary>
     public ref struct TableQueryBuilder
@@ -74,46 +73,176 @@ namespace ElCamino.Azure.Data.Tables
         /// <summary>
         /// Adds a filter condition to the query.
         /// </summary>
-        /// <param name="queryCondition"></param>
+        /// <param name="propertyName"></param>
+        /// <param name="operation"></param>
+        /// <param name="givenValue"></param>
         /// <returns></returns>
-        public TableQueryBuilder AddFilter(QueryCondition<ReadOnlySpan<char>> queryCondition)
+        public TableQueryBuilder AddFilter(ReadOnlySpan<char> propertyName, QueryComparison operation, ReadOnlySpan<char> givenValue)
         {
             AppendCondition(TableQuery.GenerateFilterCondition(
-                queryCondition.PropertyName, QueryComparisons.GetComparison(queryCondition.Operation), queryCondition.GivenValue));
+                propertyName, QueryComparisons.GetComparison(operation), givenValue));
             return this;
         }
 
         /// <summary>
         /// Adds a filter condition to the query.
         /// </summary>
-        /// <param name="queryCondition"></param>
+        /// <param name="propertyName"></param>
+        /// <param name="operation"></param>
+        /// <param name="givenValue"></param>
         /// <returns></returns>
-        public TableQueryBuilder AddFilter(QueryCondition<string?> queryCondition)
+        public TableQueryBuilder AddFilter(ReadOnlySpan<char> propertyName, QueryComparison operation, string? givenValue)
         {
             AppendCondition(
-                queryCondition.GivenValue is null ? 
+                givenValue is null ? 
                 TableQuery.GenerateFilterConditionForStringNull(
-                    queryCondition.PropertyName, QueryComparisons.GetComparison(queryCondition.Operation)) 
+                    propertyName, QueryComparisons.GetComparison(operation)) 
                 :
                 TableQuery.GenerateFilterCondition(
-                queryCondition.PropertyName, QueryComparisons.GetComparison(queryCondition.Operation), queryCondition.GivenValue));
+                propertyName, QueryComparisons.GetComparison(operation), givenValue));
             return this;
         }
 
         /// <summary>
         /// Adds a filter condition to the query.
         /// </summary>
-        /// <param name="queryCondition"></param>
+        /// <param name="propertyName"></param>
+        /// <param name="operation"></param>
+        /// <param name="givenValue"></param>
         /// <returns></returns>
-        public TableQueryBuilder AddFilter(QueryCondition<bool?> queryCondition)
+        public TableQueryBuilder AddFilterBool(ReadOnlySpan<char> propertyName, QueryComparison operation, bool? givenValue)
         {
             AppendCondition(
-                !queryCondition.GivenValue.HasValue ?
+                !givenValue.HasValue ?
                 TableQuery.GenerateFilterConditionForBoolNull(
-                    queryCondition.PropertyName, QueryComparisons.GetComparison(queryCondition.Operation))
+                    propertyName, QueryComparisons.GetComparison(operation))
                 :
                 TableQuery.GenerateFilterConditionForBool(
-                queryCondition.PropertyName, QueryComparisons.GetComparison(queryCondition.Operation), queryCondition.GivenValue.Value));
+                propertyName, QueryComparisons.GetComparison(operation), givenValue.Value));
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a filter condition to the query.
+        /// </summary>
+        /// <param name="propertyName"></param>
+        /// <param name="operation"></param>
+        /// <param name="givenValue"></param>
+        /// <returns></returns>
+        public TableQueryBuilder AddFilterInt(ReadOnlySpan<char> propertyName, QueryComparison operation, int? givenValue)
+        {
+            AppendCondition(
+                !givenValue.HasValue ?
+                TableQuery.GenerateFilterConditionForIntNull(
+                    propertyName, QueryComparisons.GetComparison(operation))
+                :
+                TableQuery.GenerateFilterConditionForInt(
+                propertyName, QueryComparisons.GetComparison(operation), givenValue.Value));
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a filter condition to the query.
+        /// </summary>
+        /// <param name="propertyName"></param>
+        /// <param name="operation"></param>
+        /// <param name="givenValue"></param>
+        /// <returns></returns>
+        public TableQueryBuilder AddFilterDouble(ReadOnlySpan<char> propertyName, QueryComparison operation, double? givenValue)
+        {
+            AppendCondition(
+                !givenValue.HasValue ?
+                TableQuery.GenerateFilterConditionForDoubleNull(
+                    propertyName, QueryComparisons.GetComparison(operation))
+                :
+                TableQuery.GenerateFilterConditionForDouble(
+                propertyName, QueryComparisons.GetComparison(operation), givenValue.Value));
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a filter condition to the query.
+        /// </summary>
+        /// <param name="propertyName"></param>
+        /// <param name="operation"></param>
+        /// <param name="givenValue"></param>
+        /// <returns></returns>
+        public TableQueryBuilder AddFilterLong(ReadOnlySpan<char> propertyName, QueryComparison operation, long? givenValue)
+        {
+            AppendCondition(
+                !givenValue.HasValue ?
+                TableQuery.GenerateFilterConditionForLongNull(
+                    propertyName, QueryComparisons.GetComparison(operation))
+                :
+                TableQuery.GenerateFilterConditionForLong(
+                propertyName, QueryComparisons.GetComparison(operation), givenValue.Value));
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a filter condition to the query.
+        /// </summary>
+        /// <param name="propertyName"></param>
+        /// <param name="operation"></param>
+        /// <param name="givenValue"></param>
+        /// <returns></returns>
+        public TableQueryBuilder AddFilterDate(ReadOnlySpan<char> propertyName, QueryComparison operation, DateTimeOffset? givenValue)
+        {
+            AppendCondition(
+                !givenValue.HasValue ?
+                TableQuery.GenerateFilterConditionForDateNull(
+                    propertyName, QueryComparisons.GetComparison(operation))
+                :
+                TableQuery.GenerateFilterConditionForDate(
+                propertyName, QueryComparisons.GetComparison(operation), givenValue.Value));
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a filter condition to the query.
+        /// </summary>
+        /// <param name="propertyName"></param>
+        /// <param name="operation"></param>
+        /// <param name="givenValue"></param>
+        /// <returns></returns>
+        public TableQueryBuilder AddFilterGuid(ReadOnlySpan<char> propertyName, QueryComparison operation, Guid? givenValue)
+        {
+            AppendCondition(
+                !givenValue.HasValue ?
+                TableQuery.GenerateFilterConditionForGuidNull(
+                    propertyName, QueryComparisons.GetComparison(operation))
+                :
+                TableQuery.GenerateFilterConditionForGuid(
+                propertyName, QueryComparisons.GetComparison(operation), givenValue.Value));
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a filter condition to the query.
+        /// </summary>
+        /// <param name="propertyName"></param>
+        /// <param name="operation"></param>
+        /// <param name="givenValue"></param>
+        /// <returns></returns>
+        public TableQueryBuilder AddFilterBytes(ReadOnlySpan<char> propertyName, QueryComparison operation, ReadOnlySpan<byte> givenValue)
+        {
+            AppendCondition(                
+                TableQuery.GenerateFilterConditionForBinary(propertyName, QueryComparisons.GetComparison(operation), givenValue));
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a filter condition to the query.
+        /// </summary>
+        /// <param name="propertyName"></param>
+        /// <param name="operation"></param>
+        /// <param name="givenValue"></param>
+        /// <returns></returns>
+        public TableQueryBuilder AddFilterBytes(ReadOnlySpan<char> propertyName, QueryComparison operation, byte[] givenValue)
+        {
+            ArgumentNullException.ThrowIfNull(givenValue, nameof(givenValue));
+            AppendCondition(
+                TableQuery.GenerateFilterConditionForBinary(propertyName, QueryComparisons.GetComparison(operation), givenValue));
             return this;
         }
 

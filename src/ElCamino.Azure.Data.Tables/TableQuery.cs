@@ -58,7 +58,7 @@ namespace Azure.Data.Tables
         }
 
         /// <summary>
-        /// Generates a property filter condition string for the boolean value.
+        /// Generates a property filter condition string for the <see cref="bool"/> value.
         /// </summary>
         /// <param name="propertyName">A string containing the name of the property to compare.</param>
         /// <param name="operation">A string containing the comparison operator to use.</param>
@@ -70,7 +70,7 @@ namespace Azure.Data.Tables
         }
 
         /// <summary>
-        /// Generates a property filter condition string for a null boolean value.
+        /// Generates a property filter condition string for a null <see cref="bool"/> value.
         /// </summary>
         /// <param name="propertyName">A string containing the name of the property to compare.</param>
         /// <param name="operation">A string containing the comparison operator to use.  <seealso cref="QueryComparisons.Equal"/> Is Null or <seealso cref="QueryComparisons.NotEqual"/> Not Null</param>
@@ -82,7 +82,7 @@ namespace Azure.Data.Tables
             switch (operation)
             {
                 case QueryComparisons.Equal: //isNull
-                    return $"not {validBoolean}";
+                    return $"(not {validBoolean})";
                 case QueryComparisons.NotEqual: //notNull
                     return validBoolean;
                 default:
@@ -93,7 +93,7 @@ namespace Azure.Data.Tables
         }
 
         /// <summary>
-        /// Generates a property filter condition string for the binary value.
+        /// Generates a property filter condition string for the <see cref="byte"/> array value.
         /// </summary>
         /// <param name="propertyName">A string containing the name of the property to compare.</param>
         /// <param name="operation">A string containing the comparison operator to use.</param>
@@ -103,6 +103,21 @@ namespace Azure.Data.Tables
             ReadOnlySpan<char> propertyName,
             ReadOnlySpan<char> operation,
             byte[] givenValue)
+        {
+            return GenerateFilterCondition(propertyName, operation, Convert.ToHexString(givenValue).ToLowerInvariant(), EdmType.Binary);
+        }
+
+        /// <summary>
+        /// Generates a property filter condition string for the <see cref="byte"/> array value.
+        /// </summary>
+        /// <param name="propertyName">A string containing the name of the property to compare.</param>
+        /// <param name="operation">A string containing the comparison operator to use.</param>
+        /// <param name="givenValue">A byte array containing the value to compare with the property.</param>
+        /// <returns>A string containing the formatted filter condition.</returns>
+        public static ReadOnlySpan<char> GenerateFilterConditionForBinary(
+            ReadOnlySpan<char> propertyName,
+            ReadOnlySpan<char> operation,
+            ReadOnlySpan<byte> givenValue)
         {
             return GenerateFilterCondition(propertyName, operation, Convert.ToHexString(givenValue).ToLowerInvariant(), EdmType.Binary);
         }
@@ -120,6 +135,30 @@ namespace Azure.Data.Tables
         }
 
         /// <summary>
+        /// Generates a property filter condition string for a null <see cref="DateTimeOffset"/> value.
+        /// </summary>
+        /// <param name="propertyName">A string containing the name of the property to compare.</param>
+        /// <param name="operation">A string containing the comparison operator to use.  <seealso cref="QueryComparisons.Equal"/> Is Null or <seealso cref="QueryComparisons.NotEqual"/> Not Null</param>
+        /// <returns>A string containing the formatted filter condition.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public static ReadOnlySpan<char> GenerateFilterConditionForDateNull(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> operation)
+        {
+            ReadOnlySpan<char> validCondition = $"({GenerateFilterConditionForDate(propertyName, QueryComparisons.GreaterThanOrEqual, DateTimeOffset.MinValue)} {TableOperators.And} {GenerateFilterConditionForDate(propertyName, QueryComparisons.LessThanOrEqual, DateTimeOffset.MaxValue)})";
+            switch (operation)
+            {
+                case QueryComparisons.Equal: //isNull
+                    return $"(not {validCondition})";
+                case QueryComparisons.NotEqual: //notNull
+                    return validCondition;
+                default:
+                    break;
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(operation), $"{operation} is not supported. Only {QueryComparisons.Equal} and {QueryComparisons.NotEqual} operators are supported.");
+        }
+
+
+        /// <summary>
         /// Generates a property filter condition string for the <see cref="double"/> value.
         /// </summary>
         /// <param name="propertyName">A string containing the name of the property to compare.</param>
@@ -129,6 +168,29 @@ namespace Azure.Data.Tables
         public static ReadOnlySpan<char> GenerateFilterConditionForDouble(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> operation, double givenValue)
         {
             return GenerateFilterCondition(propertyName, operation, Convert.ToString(givenValue, CultureInfo.InvariantCulture), EdmType.Double);
+        }
+
+        /// <summary>
+        /// Generates a property filter condition string for a null <see cref="double"/> value.
+        /// </summary>
+        /// <param name="propertyName">A string containing the name of the property to compare.</param>
+        /// <param name="operation">A string containing the comparison operator to use.  <seealso cref="QueryComparisons.Equal"/> Is Null or <seealso cref="QueryComparisons.NotEqual"/> Not Null</param>
+        /// <returns>A string containing the formatted filter condition.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public static ReadOnlySpan<char> GenerateFilterConditionForDoubleNull(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> operation)
+        {
+            ReadOnlySpan<char> validCondition = $"({GenerateFilterConditionForDouble(propertyName, QueryComparisons.GreaterThanOrEqual, double.MinValue)} {TableOperators.And} {GenerateFilterConditionForDouble(propertyName, QueryComparisons.LessThanOrEqual, double.MaxValue)})";
+            switch (operation)
+            {
+                case QueryComparisons.Equal: //isNull
+                    return $"(not {validCondition})";
+                case QueryComparisons.NotEqual: //notNull
+                    return validCondition;
+                default:
+                    break;
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(operation), $"{operation} is not supported. Only {QueryComparisons.Equal} and {QueryComparisons.NotEqual} operators are supported.");
         }
 
         /// <summary>
@@ -144,6 +206,29 @@ namespace Azure.Data.Tables
         }
 
         /// <summary>
+        /// Generates a property filter condition string for a null <see cref="int"/> value.
+        /// </summary>
+        /// <param name="propertyName">A string containing the name of the property to compare.</param>
+        /// <param name="operation">A string containing the comparison operator to use.  <seealso cref="QueryComparisons.Equal"/> Is Null or <seealso cref="QueryComparisons.NotEqual"/> Not Null</param>
+        /// <returns>A string containing the formatted filter condition.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public static ReadOnlySpan<char> GenerateFilterConditionForIntNull(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> operation)
+        {
+            ReadOnlySpan<char> validCondition = $"({GenerateFilterConditionForInt(propertyName, QueryComparisons.GreaterThanOrEqual, int.MinValue)} {TableOperators.And} {GenerateFilterConditionForInt(propertyName, QueryComparisons.LessThanOrEqual, int.MaxValue)})";
+            switch (operation)
+            {
+                case QueryComparisons.Equal: //isNull
+                    return $"(not {validCondition})";
+                case QueryComparisons.NotEqual: //notNull
+                    return validCondition;
+                default:
+                    break;
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(operation), $"{operation} is not supported. Only {QueryComparisons.Equal} and {QueryComparisons.NotEqual} operators are supported.");
+        }
+
+        /// <summary>
         /// Generates a property filter condition string for an <see cref="long"/> value.
         /// </summary>
         /// <param name="propertyName">A string containing the name of the property to compare.</param>
@@ -153,6 +238,29 @@ namespace Azure.Data.Tables
         public static ReadOnlySpan<char> GenerateFilterConditionForLong(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> operation, long givenValue)
         {
             return GenerateFilterCondition(propertyName, operation, Convert.ToString(givenValue, CultureInfo.InvariantCulture), EdmType.Int64);
+        }
+
+        /// <summary>
+        /// Generates a property filter condition string for a null <see cref="long"/> value.
+        /// </summary>
+        /// <param name="propertyName">A string containing the name of the property to compare.</param>
+        /// <param name="operation">A string containing the comparison operator to use.  <seealso cref="QueryComparisons.Equal"/> Is Null or <seealso cref="QueryComparisons.NotEqual"/> Not Null</param>
+        /// <returns>A string containing the formatted filter condition.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public static ReadOnlySpan<char> GenerateFilterConditionForLongNull(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> operation)
+        {
+            ReadOnlySpan<char> validCondition = $"({GenerateFilterConditionForLong(propertyName, QueryComparisons.GreaterThanOrEqual, long.MinValue)} {TableOperators.And} {GenerateFilterConditionForLong(propertyName, QueryComparisons.LessThanOrEqual, long.MaxValue)})";
+            switch (operation)
+            {
+                case QueryComparisons.Equal: //isNull
+                    return $"(not {validCondition})";
+                case QueryComparisons.NotEqual: //notNull
+                    return validCondition;
+                default:
+                    break;
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(operation), $"{operation} is not supported. Only {QueryComparisons.Equal} and {QueryComparisons.NotEqual} operators are supported.");
         }
 
         /// <summary>
@@ -168,6 +276,35 @@ namespace Azure.Data.Tables
         }
 
         /// <summary>
+        /// Generates a property filter condition string for a null <see cref="Guid"/> value.
+        /// </summary>
+        /// <param name="propertyName">A string containing the name of the property to compare.</param>
+        /// <param name="operation">A string containing the comparison operator to use.  <seealso cref="QueryComparisons.Equal"/> Is Null or <seealso cref="QueryComparisons.NotEqual"/> Not Null</param>
+        /// <returns>A string containing the formatted filter condition.</returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public static ReadOnlySpan<char> GenerateFilterConditionForGuidNull(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> operation)
+        {
+#if NET9_0_OR_GREATER
+            Guid maxGuid = Guid.AllBitsSet;
+#else
+            Guid maxGuid = Guid.Parse("FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF");
+#endif
+
+            ReadOnlySpan<char> validCondition = $"({GenerateFilterConditionForGuid(propertyName, QueryComparisons.GreaterThanOrEqual, Guid.Empty)} {TableOperators.And} {GenerateFilterConditionForGuid(propertyName, QueryComparisons.LessThanOrEqual, maxGuid)})";
+            switch (operation)
+            {
+                case QueryComparisons.Equal: //isNull
+                    return $"(not {validCondition})";
+                case QueryComparisons.NotEqual: //notNull
+                    return validCondition;
+                default:
+                    break;
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(operation), $"{operation} is not supported. Only {QueryComparisons.Equal} and {QueryComparisons.NotEqual} operators are supported.");
+        }
+
+        /// <summary>
         /// Generates a property filter condition string for a null string value.
         /// </summary>
         /// <param name="propertyName">A string containing the name of the property to compare.</param>
@@ -176,13 +313,13 @@ namespace Azure.Data.Tables
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         public static ReadOnlySpan<char> GenerateFilterConditionForStringNull(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> operation)
         {
-            ReadOnlySpan<char> validString = $"{propertyName} {QueryComparisons.GreaterThan} ''";
+            ReadOnlySpan<char> validCondition = $"{propertyName} {QueryComparisons.GreaterThan} ''";
             switch (operation)
             {
                 case QueryComparisons.Equal: //isNull
-                    return $"not ({validString})";
+                    return $"not ({validCondition})";
                 case QueryComparisons.NotEqual: //notNull
-                    return validString;
+                    return validCondition;
                 default:
                     break;
             }

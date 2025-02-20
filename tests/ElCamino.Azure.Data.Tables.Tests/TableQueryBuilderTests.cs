@@ -48,11 +48,11 @@ namespace ElCamino.Azure.Data.Tables.Tests
             sw.Start();
             TableQueryBuilder queryBuilderNull = new TableQueryBuilder();
             string filterNullBuilder = queryBuilderNull
-                .AddFilter(new QueryCondition<string>(nameof(TableEntity.PartitionKey), QueryComparison.Equal, addedEntity.PartitionKey))
+                .AddFilter(nameof(TableEntity.PartitionKey), QueryComparison.Equal, addedEntity.PartitionKey)
                 .CombineFilters(TableOperator.And)
-                .AddFilter(new QueryCondition<string>(nameof(TableEntity.RowKey), QueryComparison.Equal, addedEntity.RowKey))
+                .AddFilter(nameof(TableEntity.RowKey), QueryComparison.Equal, addedEntity.RowKey)
                 .CombineFilters(TableOperator.And)
-                .AddFilter(new QueryCondition<string>(propertyName, QueryComparison.Equal, null))
+                .AddFilter(propertyName, QueryComparison.Equal, null)
                 .ToString();
             sw.Stop();
             _output.WriteLine($"{nameof(filterNullBuilder)}: {sw.Elapsed.TotalMilliseconds}ms");
@@ -61,84 +61,6 @@ namespace ElCamino.Azure.Data.Tables.Tests
 
             //Assert
             Assert.Equal(1, await _tableClient.QueryAsync<TableEntity>(filter: filterNullBuilder).CountAsync());
-
-        }
-
-        [Fact]
-        public async Task QueryBuilderNullPropertyString()
-        {
-            string propertyName = "newProperty1";
-
-            //Create Table
-            await SetupTableAsync();
-            //Setup Entity
-            var key = "b-" + Guid.NewGuid().ToString("N");
-            _output.WriteLine("PartitionKey {0}", key);
-            _output.WriteLine("RowKey {0}", key);
-            var entity = new TableEntity(key, key);
-            Assert.Equal(default, entity.ETag);
-            Assert.Equal(default, entity.Timestamp);
-
-            //Execute Add
-            var addedEntity = await _tableClient.AddEntityWithHeaderValuesAsync(entity);
-            Stopwatch sw = new Stopwatch();
-
-            sw.Start();
-            //Execute isNull Query
-            string filterByPartitionKey = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, addedEntity.PartitionKey).ToString();
-            string filterByRowKey = TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, addedEntity.PartitionKey).ToString();
-            string filterByNullProperty = TableQuery.GenerateFilterConditionForStringNull(propertyName, QueryComparisons.Equal).ToString();
-            string filterByNotNullProperty = TableQuery.GenerateFilterConditionForStringNull(propertyName, QueryComparisons.NotEqual).ToString();
-
-            string filterNull = TableQuery.CombineFilters(
-                                TableQuery.CombineFilters(filterByPartitionKey, TableOperators.And, filterByRowKey),
-                                TableOperators.And,
-                                filterByNullProperty).ToString();
-            sw.Stop();
-            _output.WriteLine($"{nameof(filterNull)}: {sw.Elapsed.TotalMilliseconds}ms");
-
-            sw.Restart();
-            TableQueryBuilder queryBuilderNull = new TableQueryBuilder();
-            string filterNullBuilder = queryBuilderNull
-                .BeginGroup()
-                .AddFilter(new QueryCondition<string>(nameof(TableEntity.PartitionKey), QueryComparison.Equal, addedEntity.PartitionKey))
-                .CombineFilters(TableOperator.And)
-                .AddFilter(new QueryCondition<string>(nameof(TableEntity.RowKey), QueryComparison.Equal, addedEntity.RowKey))
-                .EndGroup()
-                .CombineFilters(TableOperator.And)
-                .AddFilter(new QueryCondition<string>(propertyName, QueryComparison.Equal, null))
-                .ToString();
-            sw.Stop();
-            _output.WriteLine($"{nameof(filterNullBuilder)}: {sw.Elapsed.TotalMilliseconds}ms");
-            _output.WriteLine($"{nameof(filterNullBuilder)}:{filterNullBuilder}");
-
-            string filterNotNull = TableQuery.CombineFilters(
-                    TableQuery.CombineFilters(filterByPartitionKey, TableOperators.And, filterByRowKey),
-                    TableOperators.And,
-                    filterByNotNullProperty).ToString();
-
-            _output.WriteLine($"{nameof(filterNull)}:{filterNull}");
-            _output.WriteLine($"{nameof(filterNotNull)}:{filterNotNull}");
-
-            //Assert
-            Assert.Equal(1, await _tableClient.QueryAsync<TableEntity>(filter: filterNullBuilder).CountAsync());
-            Assert.Equal(1, await _tableClient.QueryAsync<TableEntity>(filter: filterNull).CountAsync());
-            Assert.Equal(0, await _tableClient.QueryAsync<TableEntity>(filter: filterNotNull).CountAsync());
-
-            //Modify update
-            var updateEntity = new TableEntity(key, key)
-            {
-                { propertyName, propertyName }
-            };
-
-            await Task.Delay(1000); //wait 1 second for timestamp 
-
-            _ = await _tableClient.UpdateEntityWithHeaderValuesAsync(updateEntity, addedEntity.ETag);
-
-            //Assert
-            Assert.Equal(0, await _tableClient.QueryAsync<TableEntity>(filter: filterNull).CountAsync());
-            Assert.Equal(1, await _tableClient.QueryAsync<TableEntity>(filter: filterNotNull.ToString()).CountAsync());
-
 
         }
 
@@ -183,18 +105,18 @@ namespace ElCamino.Azure.Data.Tables.Tests
 
             queryBuilderNull = queryBuilderNull
             .BeginGroup()
-            .AddFilter(new QueryCondition<string>(nameof(TableEntity.PartitionKey), QueryComparison.Equal, addedEntity.PartitionKey))
+            .AddFilter(nameof(TableEntity.PartitionKey), QueryComparison.Equal, addedEntity.PartitionKey)
             .CombineFilters(TableOperator.And)
-            .AddFilter(new QueryCondition<string>(nameof(TableEntity.RowKey), QueryComparison.Equal, addedEntity.RowKey))
+            .AddFilter(nameof(TableEntity.RowKey), QueryComparison.Equal, addedEntity.RowKey)
             .EndGroup()
             .CombineFilters(TableOperator.And)
-            .AddFilter(new QueryCondition<string>(propertyName, QueryComparison.Equal, null));
+            .AddFilter(propertyName, QueryComparison.Equal, null);
             for (int trial = 0; trial < 150; trial++)
             {
                 queryBuilderNull = queryBuilderNull
                 .GroupAll()
                 .CombineFilters(TableOperator.And)
-                .AddFilter(new QueryCondition<string>(propertyName, QueryComparison.Equal, null));
+                .AddFilter(propertyName, QueryComparison.Equal, null);
             }
             string filterNullBuilder = queryBuilderNull.ToString();
             sw.Stop();
@@ -207,6 +129,421 @@ namespace ElCamino.Azure.Data.Tables.Tests
             //Assert
             Assert.Equal(filterNull, filterNullBuilder);
 
+        }
+        
+        [Fact]
+        public async Task QueryBuilderNullPropertyString()
+        {
+            string propertyName = "newPropertyString";
+
+            //Create Table
+            await SetupTableAsync();
+            //Setup Entity
+            var key = "b-" + Guid.NewGuid().ToString("N");
+            _output.WriteLine("PartitionKey {0}", key);
+            _output.WriteLine("RowKey {0}", key);
+            var entity = new TableEntity(key, key);
+            Assert.Equal(default, entity.ETag);
+            Assert.Equal(default, entity.Timestamp);
+
+            //Execute Add
+            var addedEntity = await _tableClient.AddEntityWithHeaderValuesAsync(entity);
+            Stopwatch sw = new Stopwatch();
+
+            sw.Start();
+            //Execute isNull Query
+            string filterByPartitionKey = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, addedEntity.PartitionKey).ToString();
+            string filterByRowKey = TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, addedEntity.PartitionKey).ToString();
+            string filterByNullProperty = TableQuery.GenerateFilterConditionForStringNull(propertyName, QueryComparisons.Equal).ToString();
+            string filterByNotNullProperty = TableQuery.GenerateFilterConditionForStringNull(propertyName, QueryComparisons.NotEqual).ToString();
+
+            string filterNull = TableQuery.CombineFilters(
+                                TableQuery.CombineFilters(filterByPartitionKey, TableOperators.And, filterByRowKey),
+                                TableOperators.And,
+                                filterByNullProperty).ToString();
+            sw.Stop();
+            _output.WriteLine($"{nameof(filterNull)}: {sw.Elapsed.TotalMilliseconds}ms");
+
+            sw.Restart();
+            TableQueryBuilder queryBuilderNull = new TableQueryBuilder();
+            string filterNullBuilder = queryBuilderNull
+                .BeginGroup()
+                .AddFilter(nameof(TableEntity.PartitionKey), QueryComparison.Equal, addedEntity.PartitionKey)
+                .CombineFilters(TableOperator.And)
+                .AddFilter(nameof(TableEntity.RowKey), QueryComparison.Equal, addedEntity.RowKey)
+                .EndGroup()
+                .CombineFilters(TableOperator.And)
+                .AddFilter(propertyName, QueryComparison.Equal, null)
+                .ToString();
+            sw.Stop();
+            _output.WriteLine($"{nameof(filterNullBuilder)}: {sw.Elapsed.TotalMilliseconds}ms");
+            _output.WriteLine($"{nameof(filterNullBuilder)}:{filterNullBuilder}");
+
+            string filterNotNull = TableQuery.CombineFilters(
+                    TableQuery.CombineFilters(filterByPartitionKey, TableOperators.And, filterByRowKey),
+                    TableOperators.And,
+                    filterByNotNullProperty).ToString();
+
+            _output.WriteLine($"{nameof(filterNull)}:{filterNull}");
+            _output.WriteLine($"{nameof(filterNotNull)}:{filterNotNull}");
+
+            //Assert
+            Assert.Equal(1, await _tableClient.QueryAsync<TableEntity>(filter: filterNullBuilder).CountAsync());
+            Assert.Equal(1, await _tableClient.QueryAsync<TableEntity>(filter: filterNull).CountAsync());
+            Assert.Equal(0, await _tableClient.QueryAsync<TableEntity>(filter: filterNotNull).CountAsync());
+
+            //Modify update
+            var updateEntity = new TableEntity(key, key)
+            {
+                { propertyName, propertyName }
+            };
+
+            await Task.Delay(1000); //wait 1 second for timestamp 
+
+            _ = await _tableClient.UpdateEntityWithHeaderValuesAsync(updateEntity, addedEntity.ETag);
+
+            //Assert
+            Assert.Equal(0, await _tableClient.QueryAsync<TableEntity>(filter: filterNull).CountAsync());
+            Assert.Equal(1, await _tableClient.QueryAsync<TableEntity>(filter: filterNotNull.ToString()).CountAsync());
+
+
+        }
+
+        [Fact]
+        public async Task QueryBuilderNullPropertyInt()
+        {
+            string propertyName = "newPropertyInt";
+
+            //Create Table
+            await SetupTableAsync();
+            //Setup Entity
+            var key = "b-" + Guid.NewGuid().ToString("N");
+            _output.WriteLine("PartitionKey {0}", key);
+            _output.WriteLine("RowKey {0}", key);
+            var entity = new TableEntity(key, key);
+            Assert.Equal(default, entity.ETag);
+            Assert.Equal(default, entity.Timestamp);
+
+            //Execute Add
+            var addedEntity = await _tableClient.AddEntityWithHeaderValuesAsync(entity);
+            Stopwatch sw = new Stopwatch();
+
+            sw.Start();
+            TableQueryBuilder queryBuilderNull = new TableQueryBuilder();
+            string filterNullBuilder = queryBuilderNull
+                .BeginGroup()
+                .AddFilter(nameof(TableEntity.PartitionKey), QueryComparison.Equal, addedEntity.PartitionKey)
+                .CombineFilters(TableOperator.And)
+                .AddFilter(nameof(TableEntity.RowKey), QueryComparison.Equal, addedEntity.RowKey)
+                .EndGroup()
+                .CombineFilters(TableOperator.And)
+                .AddFilterInt(propertyName, QueryComparison.Equal, null)
+                .ToString();
+            sw.Stop();
+            _output.WriteLine($"{nameof(filterNullBuilder)}: {sw.Elapsed.TotalMilliseconds}ms");
+            _output.WriteLine($"{nameof(filterNullBuilder)}:{filterNullBuilder}");
+
+            sw.Restart();
+            TableQueryBuilder queryBuilderNotNull = new TableQueryBuilder();
+            string filterNotNullBuilder = queryBuilderNotNull
+                .BeginGroup()
+                .AddFilter(nameof(TableEntity.PartitionKey), QueryComparison.Equal, addedEntity.PartitionKey)
+                .CombineFilters(TableOperator.And)
+                .AddFilter(nameof(TableEntity.RowKey), QueryComparison.Equal, addedEntity.RowKey)
+                .EndGroup()
+                .CombineFilters(TableOperator.And)
+                .AddFilterInt(propertyName, QueryComparison.NotEqual, null)
+                .ToString();
+            sw.Stop();
+            _output.WriteLine($"{nameof(filterNotNullBuilder)}: {sw.Elapsed.TotalMilliseconds}ms");
+            _output.WriteLine($"{nameof(filterNotNullBuilder)}:{filterNotNullBuilder}");
+
+            //Assert
+            Assert.Equal(1, await _tableClient.QueryAsync<TableEntity>(filter: filterNullBuilder).CountAsync());
+            Assert.Equal(0, await _tableClient.QueryAsync<TableEntity>(filter: filterNotNullBuilder).CountAsync());
+
+            //Modify update
+            var updateEntity = new TableEntity(key, key)
+            {
+                { propertyName, -10 }
+            };
+
+            await Task.Delay(1000); //wait 1 second for timestamp 
+
+            _ = await _tableClient.UpdateEntityWithHeaderValuesAsync(updateEntity, addedEntity.ETag);
+
+            //Assert
+            Assert.Equal(0, await _tableClient.QueryAsync<TableEntity>(filter: filterNullBuilder).CountAsync());
+            Assert.Equal(1, await _tableClient.QueryAsync<TableEntity>(filter: filterNotNullBuilder).CountAsync());
+        }
+
+        [Fact]
+        public async Task QueryBuilderNullPropertyLong()
+        {
+            string propertyName = "newPropertyLong";
+
+            //Create Table
+            await SetupTableAsync();
+            //Setup Entity
+            var key = "b-" + Guid.NewGuid().ToString("N");
+            _output.WriteLine("PartitionKey {0}", key);
+            _output.WriteLine("RowKey {0}", key);
+            var entity = new TableEntity(key, key);
+            Assert.Equal(default, entity.ETag);
+            Assert.Equal(default, entity.Timestamp);
+
+            //Execute Add
+            var addedEntity = await _tableClient.AddEntityWithHeaderValuesAsync(entity);
+            Stopwatch sw = new Stopwatch();
+
+            sw.Start();
+            TableQueryBuilder queryBuilderNull = new TableQueryBuilder();
+            string filterNullBuilder = queryBuilderNull
+                .BeginGroup()
+                .AddFilter(nameof(TableEntity.PartitionKey), QueryComparison.Equal, addedEntity.PartitionKey)
+                .CombineFilters(TableOperator.And)
+                .AddFilter(nameof(TableEntity.RowKey), QueryComparison.Equal, addedEntity.RowKey)
+                .EndGroup()
+                .CombineFilters(TableOperator.And)
+                .AddFilterLong(propertyName, QueryComparison.Equal, null)
+                .ToString();
+            sw.Stop();
+            _output.WriteLine($"{nameof(filterNullBuilder)}: {sw.Elapsed.TotalMilliseconds}ms");
+            _output.WriteLine($"{nameof(filterNullBuilder)}:{filterNullBuilder}");
+
+            sw.Restart();
+            TableQueryBuilder queryBuilderNotNull = new TableQueryBuilder();
+            string filterNotNullBuilder = queryBuilderNotNull
+                .BeginGroup()
+                .AddFilter(nameof(TableEntity.PartitionKey), QueryComparison.Equal, addedEntity.PartitionKey)
+                .CombineFilters(TableOperator.And)
+                .AddFilter(nameof(TableEntity.RowKey), QueryComparison.Equal, addedEntity.RowKey)
+                .EndGroup()
+                .CombineFilters(TableOperator.And)
+                .AddFilterLong(propertyName, QueryComparison.NotEqual, null)
+                .ToString();
+            sw.Stop();
+            _output.WriteLine($"{nameof(filterNotNullBuilder)}: {sw.Elapsed.TotalMilliseconds}ms");
+            _output.WriteLine($"{nameof(filterNotNullBuilder)}:{filterNotNullBuilder}");
+
+            //Assert
+            Assert.Equal(1, await _tableClient.QueryAsync<TableEntity>(filter: filterNullBuilder).CountAsync());
+            Assert.Equal(0, await _tableClient.QueryAsync<TableEntity>(filter: filterNotNullBuilder).CountAsync());
+
+            //Modify update
+            var updateEntity = new TableEntity(key, key);
+            updateEntity.Add(propertyName, 90000000L);
+            await Task.Delay(1000); //wait 1 second for timestamp 
+
+            _ = await _tableClient.UpdateEntityWithHeaderValuesAsync(updateEntity, addedEntity.ETag);
+
+            //Assert
+            Assert.Equal(0, await _tableClient.QueryAsync<TableEntity>(filter: filterNullBuilder).CountAsync());
+            Assert.Equal(1, await _tableClient.QueryAsync<TableEntity>(filter: filterNotNullBuilder).CountAsync());
+        }
+
+        [Fact]
+        public async Task QueryBuilderNullPropertyGuid()
+        {
+            string propertyName = "newPropertyGuid";
+
+            //Create Table
+            await SetupTableAsync();
+            //Setup Entity
+            var key = "b-" + Guid.NewGuid().ToString("N");
+            _output.WriteLine("PartitionKey {0}", key);
+            _output.WriteLine("RowKey {0}", key);
+            var entity = new TableEntity(key, key);
+            Assert.Equal(default, entity.ETag);
+            Assert.Equal(default, entity.Timestamp);
+
+            //Execute Add
+            var addedEntity = await _tableClient.AddEntityWithHeaderValuesAsync(entity);
+            Stopwatch sw = new Stopwatch();
+
+            sw.Start();
+            TableQueryBuilder queryBuilderNull = new TableQueryBuilder();
+            string filterNullBuilder = queryBuilderNull
+                .BeginGroup()
+                .AddFilter(nameof(TableEntity.PartitionKey), QueryComparison.Equal, addedEntity.PartitionKey)
+                .CombineFilters(TableOperator.And)
+                .AddFilter(nameof(TableEntity.RowKey), QueryComparison.Equal, addedEntity.RowKey)
+                .EndGroup()
+                .CombineFilters(TableOperator.And)
+                .AddFilterGuid(propertyName, QueryComparison.Equal, null)
+                .ToString();
+            sw.Stop();
+            _output.WriteLine($"{nameof(filterNullBuilder)}: {sw.Elapsed.TotalMilliseconds}ms");
+            _output.WriteLine($"{nameof(filterNullBuilder)}:{filterNullBuilder}");
+
+            sw.Restart();
+            TableQueryBuilder queryBuilderNotNull = new TableQueryBuilder();
+            string filterNotNullBuilder = queryBuilderNotNull
+                .BeginGroup()
+                .AddFilter(nameof(TableEntity.PartitionKey), QueryComparison.Equal, addedEntity.PartitionKey)
+                .CombineFilters(TableOperator.And)
+                .AddFilter(nameof(TableEntity.RowKey), QueryComparison.Equal, addedEntity.RowKey)
+                .EndGroup()
+                .CombineFilters(TableOperator.And)
+                .AddFilterGuid(propertyName, QueryComparison.NotEqual, null)
+                .ToString();
+            sw.Stop();
+            _output.WriteLine($"{nameof(filterNotNullBuilder)}: {sw.Elapsed.TotalMilliseconds}ms");
+            _output.WriteLine($"{nameof(filterNotNullBuilder)}:{filterNotNullBuilder}");
+
+            //Assert
+            Assert.Equal(1, await _tableClient.QueryAsync<TableEntity>(filter: filterNullBuilder).CountAsync());
+            Assert.Equal(0, await _tableClient.QueryAsync<TableEntity>(filter: filterNotNullBuilder).CountAsync());
+
+            //Modify update
+            var updateEntity = new TableEntity(key, key)
+            {
+                { propertyName, Guid.NewGuid() }
+            };
+
+            await Task.Delay(1000); //wait 1 second for timestamp 
+
+            _ = await _tableClient.UpdateEntityWithHeaderValuesAsync(updateEntity, addedEntity.ETag);
+
+            //Assert
+            Assert.Equal(0, await _tableClient.QueryAsync<TableEntity>(filter: filterNullBuilder).CountAsync());
+            Assert.Equal(1, await _tableClient.QueryAsync<TableEntity>(filter: filterNotNullBuilder).CountAsync());
+        }
+
+        [Fact]
+        public async Task QueryBuilderNullPropertyBool()
+        {
+            string propertyName = "newPropertyBool";
+
+            //Create Table
+            await SetupTableAsync();
+            //Setup Entity
+            var key = "b-" + Guid.NewGuid().ToString("N");
+            _output.WriteLine("PartitionKey {0}", key);
+            _output.WriteLine("RowKey {0}", key);
+            var entity = new TableEntity(key, key);
+            Assert.Equal(default, entity.ETag);
+            Assert.Equal(default, entity.Timestamp);
+
+            //Execute Add
+            var addedEntity = await _tableClient.AddEntityWithHeaderValuesAsync(entity);
+            Stopwatch sw = new Stopwatch();
+
+            sw.Start();
+            TableQueryBuilder queryBuilderNull = new TableQueryBuilder();
+            string filterNullBuilder = queryBuilderNull
+                .BeginGroup()
+                .AddFilter(nameof(TableEntity.PartitionKey), QueryComparison.Equal, addedEntity.PartitionKey)
+                .CombineFilters(TableOperator.And)
+                .AddFilter(nameof(TableEntity.RowKey), QueryComparison.Equal, addedEntity.RowKey)
+                .EndGroup()
+                .CombineFilters(TableOperator.And)
+                .AddFilterBool(propertyName, QueryComparison.Equal, null)
+                .ToString();
+            sw.Stop();
+            _output.WriteLine($"{nameof(filterNullBuilder)}: {sw.Elapsed.TotalMilliseconds}ms");
+            _output.WriteLine($"{nameof(filterNullBuilder)}:{filterNullBuilder}");
+
+            sw.Restart();
+            TableQueryBuilder queryBuilderNotNull = new TableQueryBuilder();
+            string filterNotNullBuilder = queryBuilderNotNull
+                .BeginGroup()
+                .AddFilter(nameof(TableEntity.PartitionKey), QueryComparison.Equal, addedEntity.PartitionKey)
+                .CombineFilters(TableOperator.And)
+                .AddFilter(nameof(TableEntity.RowKey), QueryComparison.Equal, addedEntity.RowKey)
+                .EndGroup()
+                .CombineFilters(TableOperator.And)
+                .AddFilterBool(propertyName, QueryComparison.NotEqual, null)
+                .ToString();
+            sw.Stop();
+            _output.WriteLine($"{nameof(filterNotNullBuilder)}: {sw.Elapsed.TotalMilliseconds}ms");
+            _output.WriteLine($"{nameof(filterNotNullBuilder)}:{filterNotNullBuilder}");
+
+            //Assert
+            Assert.Equal(1, await _tableClient.QueryAsync<TableEntity>(filter: filterNullBuilder).CountAsync());
+            Assert.Equal(0, await _tableClient.QueryAsync<TableEntity>(filter: filterNotNullBuilder).CountAsync());
+
+            //Modify update
+            var updateEntity = new TableEntity(key, key)
+            {
+                { propertyName, true }
+            };
+
+            await Task.Delay(1000); //wait 1 second for timestamp 
+
+            _ = await _tableClient.UpdateEntityWithHeaderValuesAsync(updateEntity, addedEntity.ETag);
+
+            //Assert
+            Assert.Equal(0, await _tableClient.QueryAsync<TableEntity>(filter: filterNullBuilder).CountAsync());
+            Assert.Equal(1, await _tableClient.QueryAsync<TableEntity>(filter: filterNotNullBuilder).CountAsync());
+        }
+
+        [Fact]
+        public async Task QueryBuilderNullPropertyDate()
+        {
+            string propertyName = "newPropertyInt";
+
+            //Create Table
+            await SetupTableAsync();
+            //Setup Entity
+            var key = "b-" + Guid.NewGuid().ToString("N");
+            _output.WriteLine("PartitionKey {0}", key);
+            _output.WriteLine("RowKey {0}", key);
+            var entity = new TableEntity(key, key);
+            Assert.Equal(default, entity.ETag);
+            Assert.Equal(default, entity.Timestamp);
+
+            //Execute Add
+            var addedEntity = await _tableClient.AddEntityWithHeaderValuesAsync(entity);
+            Stopwatch sw = new Stopwatch();
+
+            sw.Start();
+            TableQueryBuilder queryBuilderNull = new TableQueryBuilder();
+            string filterNullBuilder = queryBuilderNull
+                .BeginGroup()
+                .AddFilter(nameof(TableEntity.PartitionKey), QueryComparison.Equal, addedEntity.PartitionKey)
+                .CombineFilters(TableOperator.And)
+                .AddFilter(nameof(TableEntity.RowKey), QueryComparison.Equal, addedEntity.RowKey)
+                .EndGroup()
+                .CombineFilters(TableOperator.And)
+                .AddFilterDate(propertyName, QueryComparison.Equal, null)
+                .ToString();
+            sw.Stop();
+            _output.WriteLine($"{nameof(filterNullBuilder)}: {sw.Elapsed.TotalMilliseconds}ms");
+            _output.WriteLine($"{nameof(filterNullBuilder)}:{filterNullBuilder}");
+
+            sw.Restart();
+            TableQueryBuilder queryBuilderNotNull = new TableQueryBuilder();
+            string filterNotNullBuilder = queryBuilderNotNull
+                .BeginGroup()
+                .AddFilter(nameof(TableEntity.PartitionKey), QueryComparison.Equal, addedEntity.PartitionKey)
+                .CombineFilters(TableOperator.And)
+                .AddFilter(nameof(TableEntity.RowKey), QueryComparison.Equal, addedEntity.RowKey)
+                .EndGroup()
+                .CombineFilters(TableOperator.And)
+                .AddFilterDate(propertyName, QueryComparison.NotEqual, null)
+                .ToString();
+            sw.Stop();
+            _output.WriteLine($"{nameof(filterNotNullBuilder)}: {sw.Elapsed.TotalMilliseconds}ms");
+            _output.WriteLine($"{nameof(filterNotNullBuilder)}:{filterNotNullBuilder}");
+
+            //Assert
+            Assert.Equal(1, await _tableClient.QueryAsync<TableEntity>(filter: filterNullBuilder).CountAsync());
+            Assert.Equal(0, await _tableClient.QueryAsync<TableEntity>(filter: filterNotNullBuilder).CountAsync());
+
+            //Modify update
+            var updateEntity = new TableEntity(key, key)
+            {
+                { propertyName, DateTimeOffset.UtcNow }
+            };
+
+            await Task.Delay(1000); //wait 1 second for timestamp 
+
+            _ = await _tableClient.UpdateEntityWithHeaderValuesAsync(updateEntity, addedEntity.ETag);
+
+            //Assert
+            Assert.Equal(0, await _tableClient.QueryAsync<TableEntity>(filter: filterNullBuilder).CountAsync());
+            Assert.Equal(1, await _tableClient.QueryAsync<TableEntity>(filter: filterNotNullBuilder).CountAsync());
         }
 
     }
