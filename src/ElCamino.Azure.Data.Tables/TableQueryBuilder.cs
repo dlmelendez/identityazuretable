@@ -1,5 +1,4 @@
-﻿#if NET9_0_OR_GREATER
-
+﻿
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,7 +9,7 @@ namespace ElCamino.Azure.Data.Tables
     /// <summary>
     /// This class allows for a fluent query builder for Azure Table Storage using OData.
     /// </summary>
-    public ref struct TableQueryBuilder
+    public class TableQueryBuilder
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TableQueryBuilder"/> class for fluent query building for Azure Table Storage using OData.
@@ -18,7 +17,7 @@ namespace ElCamino.Azure.Data.Tables
         public TableQueryBuilder() { }
 
         private const int BufferSize = 1024;
-        private Span<char> _bufferQuery = new(new char[BufferSize]);
+        private char[] _bufferQuery = new char[BufferSize];
         private int _currentQueryLength = 0;
         private uint _filterCount = 0;
         private uint _beginGroupCount = 0;
@@ -32,7 +31,7 @@ namespace ElCamino.Azure.Data.Tables
         /// <summary>
         /// Gets the current query filter.
         /// </summary>
-        public ReadOnlySpan<char> QueryFilter => _bufferQuery.Slice(0, _currentQueryLength);
+        public ReadOnlySpan<char> QueryFilter => _bufferQuery.AsSpan().Slice(0, _currentQueryLength);
 
         private void AllocateBuffer(int lengthToAdd)
         {
@@ -40,7 +39,7 @@ namespace ElCamino.Azure.Data.Tables
             {
                 Span<char> newBuffer = stackalloc char[_bufferQuery.Length + BufferSize];
                 QueryFilter.CopyTo(newBuffer);
-                _bufferQuery = new Span<char>([..newBuffer]);
+                _bufferQuery = [..newBuffer];
             }
         }
 
@@ -51,7 +50,7 @@ namespace ElCamino.Azure.Data.Tables
             if (_currentQueryLength <= 0)
             {
                 _bufferQuery[0] = '(';
-                condition.CopyTo(_bufferQuery[1..]);
+                condition.CopyTo(_bufferQuery.AsSpan()[1..]);
                 _bufferQuery[condition.Length + 1] = ')';
             }
             else
@@ -352,4 +351,3 @@ namespace ElCamino.Azure.Data.Tables
         }
     }
 }
-#endif
