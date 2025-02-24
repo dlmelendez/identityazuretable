@@ -1,5 +1,4 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
-#if NET9_0_OR_GREATER
 
 using System;
 using System.Collections.Concurrent;
@@ -431,15 +430,16 @@ namespace ElCamino.Azure.Data.Tables.Tests
 
             sw.Start();
             TableQueryBuilder queryBuilderNull = new TableQueryBuilder();
-            string filterNullBuilder = queryBuilderNull
+            string filterNullBuilder = string.Empty;
+            queryBuilderNull
                 .BeginGroup()
                 .AddFilter(nameof(TableEntity.PartitionKey), QueryComparison.Equal, addedEntity.PartitionKey)
                 .CombineFilters(TableOperator.And)
                 .AddFilter(nameof(TableEntity.RowKey), QueryComparison.Equal, addedEntity.RowKey)
-                .EndGroup()
-                .CombineFilters(TableOperator.And)
-                .AddFilterBool(propertyName, QueryComparison.Equal, null)
-                .ToString();
+                .EndGroup().ToString();
+            queryBuilderNull.CombineFilters(TableOperator.And)
+                .AddFilterBool(propertyName, QueryComparison.Equal, null);
+            filterNullBuilder = queryBuilderNull.ToString();
             sw.Stop();
             _output.WriteLine($"{nameof(filterNullBuilder)}: {sw.Elapsed.TotalMilliseconds}ms");
             _output.WriteLine($"{nameof(filterNullBuilder)}:{filterNullBuilder}");
@@ -550,4 +550,3 @@ namespace ElCamino.Azure.Data.Tables.Tests
 
     }
 }
-#endif
