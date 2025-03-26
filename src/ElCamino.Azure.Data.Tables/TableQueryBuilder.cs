@@ -70,6 +70,18 @@ namespace ElCamino.Azure.Data.Tables
         }
 
         /// <summary>
+        /// Adds a filter condition to the query. Use if you have a well formed OData condition to start.
+        /// Otherwise, use the <see cref="CombineFilters(TableOperator, ReadOnlySpan{char})"/> method.
+        /// </summary>
+        /// <param name="condition"></param>
+        /// <returns></returns>
+        public TableQueryBuilder AddFilter(ReadOnlySpan<char> condition)
+        {
+            AppendCondition(condition);
+            return this;
+        }
+
+        /// <summary>
         /// Adds a filter condition to the query.
         /// </summary>
         /// <param name="propertyName"></param>
@@ -249,6 +261,19 @@ namespace ElCamino.Azure.Data.Tables
         public TableQueryBuilder CombineFilters(TableOperator tableOperator)
         {
             AppendTableOperator(tableOperator);
+            return this;
+        }
+
+        /// <summary>
+        /// Combines filters using the specified table operator.
+        /// </summary>
+        /// <param name="tableOperator"></param>
+        /// <param name="condition">Assumes, well formed odata condtion</param>
+        /// <returns></returns>
+        public TableQueryBuilder CombineFilters(TableOperator tableOperator, ReadOnlySpan<char> condition)
+        {
+            AppendTableOperator(tableOperator);
+            AppendCondition(condition);
             return this;
         }
 

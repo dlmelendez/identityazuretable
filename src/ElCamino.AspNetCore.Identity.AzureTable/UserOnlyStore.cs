@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Azure;
 using Azure.Data.Tables;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
+using ElCamino.Azure.Data.Tables;
 using Microsoft.AspNetCore.Identity;
 
 
@@ -530,35 +531,74 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                     tempUserIds = userIds.Take((int)pageSize);
                 }
 
-                string filterString = string.Empty;
-                int i = 0;
-                foreach (var tempUserId in tempUserIds)
+#if DEBUG
+                DateTime startQueryBuilderDate = DateTime.UtcNow;
+#endif
+                int userIdCount = tempUserIds.Count();
+                if (userIdCount > 1)
                 {
+                    TableQueryBuilder queryBuilder = new TableQueryBuilder();
 
-                    string temp = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, tempUserId).ToString();
-                    if (setFilterByUserId is not null)
+                    int i = 0;
+                    foreach (var tempUserId in tempUserIds)
                     {
-                        temp = setFilterByUserId(tempUserId);
-                    }
+                        if (setFilterByUserId is not null)
+                        {
+                            if (i > 0)
+                            {
+                                queryBuilder.CombineFilters(TableOperator.Or, setFilterByUserId(tempUserId));
+                            }
+                            else
+                            {
+                                queryBuilder.AddFilter(setFilterByUserId(tempUserId));
+                            }
+                        }
+                        else
+                        {
+                            if (i > 0)
+                            {
+                                queryBuilder.CombineFilters(TableOperator.Or);
+                                queryBuilder.AddFilter(nameof(TableEntity.PartitionKey), QueryComparison.Equal, tempUserId.AsSpan());
+                            }
+                            else
+                            {
+                                queryBuilder.AddFilter(nameof(TableEntity.PartitionKey), QueryComparison.Equal, tempUserId.AsSpan());
+                            }
+                        }
 
-                    if (i > 0)
-                    {
-                        filterString = TableQuery.CombineFilters(filterString, TableOperators.Or, temp).ToString();
+                        i++;
                     }
-                    else
+                    if (queryBuilder.HasFilter)
                     {
-                        filterString = temp;
+                        listTqs.Add(queryBuilder.ToString());
                     }
-                    i++;
-                }
-                if (!string.IsNullOrWhiteSpace(filterString))
+#if DEBUG
+                    Debug.WriteLine("GetUserAggregateQuery (TableQueryBuilder): {0} ms", (DateTime.UtcNow - startQueryBuilderDate).TotalMilliseconds);
+#endif
+
+                }//end if 
+                else
                 {
-                    listTqs.Add(filterString);
+#if DEBUG
+                    DateTime startCondition = DateTime.UtcNow;
+#endif
+                    string? tempUserId = tempUserIds.FirstOrDefault();
+                    if (tempUserId is not null)
+                    {
+                        listTqs.Add(TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, tempUserId.AsSpan()).ToString());
+                    }
+#if DEBUG
+                    Debug.WriteLine("GetUserAggregateQuery (Single Condition): {0} ms", (DateTime.UtcNow - startCondition).TotalMilliseconds);
+#endif
                 }
-
             }
 
             ConcurrentBag<TUser> bag = [];
+            //Short Circuit if no userids
+            if (listTqs.Count < 1)
+            {
+                return bag;
+            }
 #if DEBUG
             DateTime startUserAggTotal = DateTime.UtcNow;
 #endif
@@ -590,7 +630,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             });
             await Task.WhenAll(tasks).ConfigureAwait(false);
 #if DEBUG
-            Debug.WriteLine("GetUserAggregateQuery (GetUserAggregateTotal): {0} seconds", (DateTime.UtcNow - startUserAggTotal).TotalSeconds);
+            Debug.WriteLine("GetUserAggregateQuery (GetUserAggregateTotal): {0} ms", (DateTime.UtcNow - startUserAggTotal).TotalMilliseconds);
             Debug.WriteLine("GetUserAggregateQuery (Return Count): {0} userIds", bag.Count);
 #endif
             return bag;
@@ -658,7 +698,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             });
             await Task.WhenAll(tasks).ConfigureAwait(false);
 #if DEBUG
-            Debug.WriteLine("GetUserAggregateQuery (GetUserAggregateTotal): {0} seconds", (DateTime.UtcNow - startUserAggTotal).TotalSeconds);
+            Debug.WriteLine("GetUserAggregateQuery (GetUserAggregateTotal): {0} ms", (DateTime.UtcNow - startUserAggTotal).TotalMilliseconds);
 #endif
             return bag;
         }
@@ -775,7 +815,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 taskBatch.Clear();
             }
 #if DEBUG
-            Debug.WriteLine("GetUsersAggregateByIndexQueryAsync (Index query): {0} seconds", (DateTime.UtcNow - startIndex).TotalSeconds);
+            Debug.WriteLine("GetUsersAggregateByIndexQueryAsync (Index query): {0} ms", (DateTime.UtcNow - startIndex).TotalMilliseconds);
 #endif
 
             return lUsers.SelectMany(u => u);
