@@ -645,7 +645,31 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         protected virtual async Task<IEnumerable<TUser>> GetUserQueryAsync(IEnumerable<string> userIds, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            //Create hot path for single or no userids
+            int userIdCount = userIds.Count();
+            if (userIdCount < 2)
+            {
+#if DEBUG
+                DateTime startUserSingleOrNone = DateTime.UtcNow;
+#endif
 
+                var userId = userIds.FirstOrDefault();
+                if (userId is not null)
+                {
+                    var user = await GetUserAsync(userId, cancellationToken).ConfigureAwait(false);
+                    if (user is not null)
+                    {
+#if DEBUG
+                        Debug.WriteLine("GetUserQueryAsync (QueryAsync Single): {0} ms {1} users", (DateTime.UtcNow - startUserSingleOrNone).TotalMilliseconds, 1);
+#endif
+                        return [user];
+                    }
+                }
+#if DEBUG
+                Debug.WriteLine("GetUserQueryAsync (QueryAsync None): {0} ms {1} users", (DateTime.UtcNow - startUserSingleOrNone).TotalMilliseconds, 0);
+#endif
+                return [];
+            }
             const double pageSize = 50.0;
             int pages = (int)Math.Ceiling(((double)userIds.Count() / pageSize));
             List<string> listTqs = new List<string>(pages);
@@ -662,32 +686,41 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                     tempUserIds = userIds.Take((int)pageSize);
                 }
 
-                string filterString = string.Empty;
                 int tempUserCounter = 0;
+                TableQueryBuilder queryBuilder = new TableQueryBuilder();
                 foreach (string tempUserId in tempUserIds)
                 {
 
-                    var temp = TableQuery.CombineFilters(
-                        TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, tempUserId), TableOperators.And,
-                        TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, tempUserId));
                     if (tempUserCounter > 0)
                     {
-                        filterString = TableQuery.CombineFilters(filterString, TableOperators.Or, temp).ToString();
+                        queryBuilder.CombineFilters(TableOperator.Or);
+                        queryBuilder.BeginGroup();
+                        queryBuilder.AddFilter(nameof(TableEntity.PartitionKey), QueryComparison.Equal, tempUserId);
+                        queryBuilder.CombineFilters(TableOperator.And);
+                        queryBuilder.AddFilter(nameof(TableEntity.RowKey), QueryComparison.Equal, tempUserId);
+                        queryBuilder.EndGroup();
                     }
                     else
                     {
-                        filterString = temp.ToString();
+                        queryBuilder.AddFilter(nameof(TableEntity.PartitionKey), QueryComparison.Equal, tempUserId);
+                        queryBuilder.CombineFilters(TableOperator.And);
+                        queryBuilder.AddFilter(nameof(TableEntity.RowKey), QueryComparison.Equal, tempUserId);
+                        queryBuilder.GroupAll();
                     }
                     tempUserCounter++;
                 }
-                if (!string.IsNullOrWhiteSpace(filterString))
+                if (queryBuilder.HasFilter)
                 {
-                    listTqs.Add(filterString);
+                    listTqs.Add(queryBuilder.ToString());
                 }
 
             }
 
             ConcurrentBag<TUser> bag = [];
+            if(listTqs.Count < 1)
+            {
+                return bag;
+            }
 #if DEBUG
             DateTime startUserAggTotal = DateTime.UtcNow;
 #endif
@@ -698,7 +731,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             });
             await Task.WhenAll(tasks).ConfigureAwait(false);
 #if DEBUG
-            Debug.WriteLine("GetUserAggregateQuery (GetUserAggregateTotal): {0} ms", (DateTime.UtcNow - startUserAggTotal).TotalMilliseconds);
+            Debug.WriteLine("GetUserQueryAsync (QueryAsync Batch): {0} ms {1} users", (DateTime.UtcNow - startUserAggTotal).TotalMilliseconds, bag.Count);
 #endif
             return bag;
         }
@@ -815,7 +848,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 taskBatch.Clear();
             }
 #if DEBUG
-            Debug.WriteLine("GetUsersAggregateByIndexQueryAsync (Index query): {0} ms", (DateTime.UtcNow - startIndex).TotalMilliseconds);
+            Debug.WriteLine("GetUsersByIndexQueryAsync (Index query): {0} ms", (DateTime.UtcNow - startIndex).TotalMilliseconds);
 #endif
 
             return lUsers.SelectMany(u => u);
