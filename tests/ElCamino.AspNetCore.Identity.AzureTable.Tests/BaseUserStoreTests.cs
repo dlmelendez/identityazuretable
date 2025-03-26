@@ -808,13 +808,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             Assert.Equal(user.Email, findUserResult.Email);
         }
 
-        public virtual async Task FindUsersByEmail()
+        public virtual async Task FindUsersByEmail(int createdCount)
         {
             string strEmail = Guid.NewGuid().ToString() + "@live.com";
 
             using var store = userFixture.CreateUserStore();
             using var manager = userFixture.CreateUserManager();
-            int createdCount = 51;
             for (int i = 0; i < createdCount; i++)
             {
                 await CreateTestUserLiteAsync(true, true, strEmail).ConfigureAwait(false);
@@ -1048,13 +1047,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             Assert.True(userClaim.Succeeded, string.Concat(userClaim.Errors.Select(e => e.Code)));
         }
 
-        public virtual async Task GetUsersByClaim()
+        public virtual async Task GetUsersByClaim(int userCount)
         {
             var claim = GenUserClaim();
             using var store = userFixture.CreateUserStore();
             using (var manager = userFixture.CreateUserManager())
             {
-                int userCount = 101;
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
                 TUser tempUser = null;
@@ -1065,13 +1063,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
                 }
                 sw.Stop();
                 _output.WriteLine("GenerateUsers(): {0} user count", userCount);
-                _output.WriteLine("GenerateUsers(): {0} seconds", sw.Elapsed.TotalSeconds);
+                _output.WriteLine("GenerateUsers(): {0} ms", sw.Elapsed.TotalMilliseconds);
 
                 sw.Reset();
                 sw.Start();
                 var users = await manager.GetUsersForClaimAsync(claim).ConfigureAwait(false);
                 sw.Stop();
-                _output.WriteLine($"{nameof(manager.GetUsersForClaimAsync)}: {sw.Elapsed.TotalSeconds} seconds");
+                _output.WriteLine($"{nameof(manager.GetUsersForClaimAsync)}: {sw.Elapsed.TotalMilliseconds} ms");
                 _output.WriteLine($"{nameof(manager.GetUsersForClaimAsync)}: {users.Count} user count");
                 Assert.Equal(userCount, users.Count);
             }

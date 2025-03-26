@@ -137,11 +137,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             return base.FindUserByName();
         }
 
-        [Fact(DisplayName = "FindUsersByEmail")]
+        [Theory(DisplayName = "FindUsersByEmail")]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(51)]
         [Trait(UserStoreTrait, "")]
-        public override Task FindUsersByEmail()
+        public override Task FindUsersByEmail(int createdCount)
         {
-            return base.FindUsersByEmail();
+            return base.FindUsersByEmail(createdCount);
         }
 
         //[Fact(DisplayName = "GenerateUsers", Skip = "true")]
@@ -151,11 +154,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         //    return base.GenerateUsers();
         //}
 
-        [Fact(DisplayName = "GetUsersByClaim")]
+        [Theory(DisplayName = "GetUsersByClaim")]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(101)]
         [Trait(UserStoreTrait, "")]
-        public override Task GetUsersByClaim()
+        public override Task GetUsersByClaim(int userCount)
         {
-            return base.GetUsersByClaim();
+            return base.GetUsersByClaim(userCount);
         }
 
         [Fact(DisplayName = "GetUsersByRole")]
