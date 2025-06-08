@@ -264,8 +264,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             var selectColumns = new List<string>() { nameof(TableEntity.RowKey) };
             var tasks = new Task<bool>[]
             {
-                _userTable.QueryAsync<TableEntity>(filter: filterString.ToString(), maxPerPage:1, select: selectColumns, cancellationToken).AnyAsync(cancellationToken),
-                RoleExistsAsync(roleName!, cancellationToken)
+                _userTable.QueryAsync<TableEntity>(filter: filterString.ToString(), maxPerPage:1, select: selectColumns, cancellationToken).AnyAsync(cancellationToken).AsTask(),
+                RoleExistsAsync(roleName!, cancellationToken).AsTask()
             };
 
             await Task.WhenAll(tasks).ConfigureAwait(false);
@@ -274,7 +274,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         }
 
         /// <inheritdoc/>
-        public Task<bool> RoleExistsAsync(string roleName, CancellationToken cancellationToken = default)
+        public ValueTask<bool> RoleExistsAsync(string roleName, CancellationToken cancellationToken = default)
         {
             return _roleTable.QueryAsync<TableEntity>(filter: BuildRoleQuery(roleName), maxPerPage: 1, select: [nameof(Model.IdentityRole.Name)], cancellationToken: cancellationToken).AnyAsync(cancellationToken);
         }
@@ -376,6 +376,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             {
                 return
                 _userTable.QueryAsync<TableEntity>(filter: q, cancellationToken: cancellationToken).ToListAsync(cancellationToken)
+                     .AsTask()
                      .ContinueWith((taskResults) =>
                      {
                          //ContinueWith returns completed task. Calling .Result is safe here.

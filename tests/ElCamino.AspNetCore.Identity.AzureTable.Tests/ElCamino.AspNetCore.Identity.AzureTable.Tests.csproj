@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>Testing</Description>
     <Authors>David Melendez</Authors>
-    <TargetFrameworks>net9.0</TargetFrameworks>
+    <TargetFrameworks>net10.0</TargetFrameworks>
     <LangVersion>13.0</LangVersion>
     <AssemblyName>ElCamino.AspNetCore.Identity.AzureTable.Tests</AssemblyName>
     <IsPackable>false</IsPackable>
@@ -32,14 +32,14 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="9.0.*" />
-    <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="9.0.*" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.*" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.*" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.*" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.*" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.*" />
-    <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="9.0.*" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="10.0.0-preview*" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="10.0.0-preview*" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0-preview*" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.0-preview*" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.0-preview*" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.0-preview*" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.0-preview*" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="10.0.0-preview*" />
   </ItemGroup>
 
   <ItemGroup>

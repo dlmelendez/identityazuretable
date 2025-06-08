@@ -1,7 +1,4 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
-
-using System.Collections.Generic;
-
 namespace Azure.Data.Tables
 {
     /// <summary>
@@ -9,6 +6,7 @@ namespace Azure.Data.Tables
     /// </summary>
     public static class IAsyncEnumerableExtensions
     {
+#if !NET10_0_OR_GREATER
         /// <summary>
         /// FirstOrDefaultAsync{T}
         /// </summary>
@@ -49,26 +47,6 @@ namespace Azure.Data.Tables
         }
 
         /// <summary>
-        /// ForEachAsync{T}
-        /// </summary>
-        /// <typeparam name="T">Generic type</typeparam>
-        /// <param name="asyncEnumerable"><see cref="IAsyncEnumerable{T}"/></param>
-        /// <param name="action"><see cref="Action{T}"/> Action for element T</param>
-        /// <param name="cancellationToken"><see cref="CancellationToken"/>Optional, default </param>
-        /// <returns>A <see cref="Task"/></returns>
-        public static async Task ForEachAsync<T>(
-            this IAsyncEnumerable<T> asyncEnumerable,
-            Action<T> action,
-            CancellationToken cancellationToken = default)
-        {
-            await using var enumerator = asyncEnumerable.GetAsyncEnumerator(cancellationToken);
-            while (await enumerator.MoveNextAsync().ConfigureAwait(false))
-            {
-                action(enumerator.Current);
-            }
-        }
-
-        /// <summary>
         /// AnyAsync{T}
         /// </summary>
         /// <typeparam name="T">Generic type</typeparam>
@@ -102,5 +80,26 @@ namespace Azure.Data.Tables
             }
             return counter;
         }
+#endif
+        /// <summary>
+        /// ForEachAsync{T}
+        /// </summary>
+        /// <typeparam name="T">Generic type</typeparam>
+        /// <param name="asyncEnumerable"><see cref="IAsyncEnumerable{T}"/></param>
+        /// <param name="action"><see cref="Action{T}"/> Action for element T</param>
+        /// <param name="cancellationToken"><see cref="CancellationToken"/>Optional, default </param>
+        /// <returns>A <see cref="Task"/></returns>
+        public static async Task ForEachAsync<T>(
+            this IAsyncEnumerable<T> asyncEnumerable,
+            Action<T> action,
+            CancellationToken cancellationToken = default)
+        {
+            await using var enumerator = asyncEnumerable.GetAsyncEnumerator(cancellationToken);
+            while (await enumerator.MoveNextAsync().ConfigureAwait(false))
+            {
+                action(enumerator.Current);
+            }
+        }
+
     }
 }
