@@ -40,11 +40,6 @@
 
   <ItemGroup>
     <PackageReference Include="Azure.Data.Tables" Version="12.8.1" />
-    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="9.0.*" />
-    <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="9.0.*" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.*" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.*" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.*" />
   </ItemGroup>
 
   <ItemGroup>
