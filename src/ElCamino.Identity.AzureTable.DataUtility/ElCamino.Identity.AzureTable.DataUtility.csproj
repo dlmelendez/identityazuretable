@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <LangVersion>13.0</LangVersion>
     <AssemblyName>ElCamino.Identity.AzureTable.DataUtility</AssemblyName>
     <OutputType>Exe</OutputType>
     <PackageId>ElCamino.Identity.AzureTable.DataUtility</PackageId>
@@ -10,7 +9,7 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
     <EnableDefaultContentItems>false</EnableDefaultContentItems>
-    <Version>9.0.5</Version>
+    <Version>10.0</Version>
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
