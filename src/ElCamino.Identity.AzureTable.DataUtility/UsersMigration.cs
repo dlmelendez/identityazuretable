@@ -200,7 +200,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                     {
                         //New User Role
                         //Add Role Index
-                        sourceEntity.TryGetValue(nameof(IdentityUserRole<string>.RoleName), out object roleNameProperty);
+                        sourceEntity.TryGetValue(nameof(IdentityUserRole<>.RoleName), out object roleNameProperty);
                         string? roleName = roleNameProperty?.ToString();
 
                         var targetUserRowKey = _keyHelper.GenerateRowKeyIdentityUserRole(roleName);

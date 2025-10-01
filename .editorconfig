@@ -144,6 +144,8 @@ csharp_style_prefer_primary_constructors = false:suggestion
 csharp_prefer_system_threading_lock = true:suggestion
 csharp_style_expression_bodied_lambdas = true:silent
 csharp_style_expression_bodied_local_functions = false:silent
+csharp_style_prefer_simple_property_accessors = true:suggestion
+dotnet_diagnostic.xUnit1033.severity = none
 
 [*.vb]
 # Modifier preferences

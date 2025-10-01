@@ -125,7 +125,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 throw new ArgumentNullException(nameof(user));
             }
 
-            const string roleName = nameof(Model.IdentityUserRole<string>.RoleName);
+            const string roleName = nameof(Model.IdentityUserRole<>.RoleName);
             var userId = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
             // Changing to a live query to mimic EF UserStore in Identity 3.0
 
@@ -230,14 +230,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 }
 
 
-                return (await GetUsersByIndexQueryAsync(GetUserByRoleIndexQuery(roleName!).ToString(), (userId, cancellationToken) =>
+                return [.. (await GetUsersByIndexQueryAsync(GetUserByRoleIndexQuery(roleName!).ToString(), (userId, cancellationToken) =>
                 {
                     return GetUserAggregateQueryAsync(userId, setFilterByUserId: getTableQueryFilterByUserId, whereClaim: null, whereRole: (ur) =>
                     {
                         return ur.RowKey.AsSpan().Equals(_keyHelper.GenerateRowKeyIdentityUserRole(roleName), StringComparison.OrdinalIgnoreCase);
                     }, cancellationToken: cancellationToken);
 
-                }, cancellationToken).ConfigureAwait(false)).ToList();
+                }, cancellationToken).ConfigureAwait(false))];
             }
 
             return [];

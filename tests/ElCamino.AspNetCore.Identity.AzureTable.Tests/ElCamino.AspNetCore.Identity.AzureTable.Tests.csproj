@@ -31,14 +31,14 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="10.0.0-preview*" />
-    <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="10.0.0-preview*" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0-preview*" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.0-preview*" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.0-preview*" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.0-preview*" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.0-preview*" />
-    <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="10.0.0-preview*" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="10.0.0-rc*" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="10.0.0-rc*" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0-rc*" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.0-rc*" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.0-rc*" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.0-rc*" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.0-rc*" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="10.0.0-rc*" />
   </ItemGroup>
 
   <ItemGroup>

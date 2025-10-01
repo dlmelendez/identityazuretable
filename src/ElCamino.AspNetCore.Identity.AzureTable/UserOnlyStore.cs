@@ -1254,14 +1254,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 return tqFilter.ToString();
             }
 
-            return (await GetUsersByIndexQueryAsync(GetUserByClaimIndexQuery(claim).ToString(), (userId, ct) =>
+            return [.. (await GetUsersByIndexQueryAsync(GetUserByClaimIndexQuery(claim).ToString(), (userId, ct) =>
             {
                 return GetUserAggregateQueryAsync(userId, setFilterByUserId: getTableQueryFilterByUserId, whereClaim: (uc) =>
                 {
                     return uc.RowKey.AsSpan().Equals(_keyHelper.GenerateRowKeyIdentityUserClaim(claim.Type, claim.Value), StringComparison.OrdinalIgnoreCase);
                 }, cancellationToken);
 
-            }, cancellationToken).ConfigureAwait(false)).ToList();
+            }, cancellationToken).ConfigureAwait(false))];
         }
 
         /// <summary>

@@ -1,5 +1,7 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace Azure.Data.Tables
+#pragma warning restore IDE0130 // Namespace does not match folder structure
 {
     /// <summary>
     /// Extensions for <see cref="IAsyncEnumerable{T}"/>

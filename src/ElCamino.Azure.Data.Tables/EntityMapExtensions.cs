@@ -4,7 +4,9 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using System.Runtime.Serialization;
 
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace Azure.Data.Tables
+#pragma warning restore IDE0130 // Namespace does not match folder structure
 {
     /// <summary>
     /// Extensions for mapping <see cref="TableEntity"/> to a class that implements <see cref="ITableEntity"/>
@@ -23,13 +25,9 @@ namespace Azure.Data.Tables
             if (type.FullName is not null)
             {
                 return TypeProperties.GetOrAdd(type.FullName,
-                    (name) => type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty)
-                    .Where(w => w.GetCustomAttribute(typeof(IgnoreDataMemberAttribute)) == null)
-                    .ToArray());
+                    (name) => [.. type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty).Where(w => w.GetCustomAttribute<IgnoreDataMemberAttribute>() == null)]);
             }
-            return type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty)
-                    .Where(w => w.GetCustomAttribute(typeof(IgnoreDataMemberAttribute)) == null)
-                    .ToArray();
+            return [.. type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty).Where(w => w.GetCustomAttribute<IgnoreDataMemberAttribute>() == null)];
         }
 
         /// <summary>

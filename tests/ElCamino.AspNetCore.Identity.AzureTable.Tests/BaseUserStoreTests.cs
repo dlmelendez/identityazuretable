@@ -33,7 +33,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             : base(userFix, output)
         {
             userFixture = userFix;
-
         }
 
         public async Task AddUserRoleAsyncHelper(TUser user, string roleName)

@@ -204,7 +204,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 List<string> nonHelpTokens = [PreviewToken, MigrateToken, NoDeleteToken, MaxDegreesParallelToken, StartPageToken, FinishPageToken, PageSizeToken];
                 if (!args.All(a => nonHelpTokens.Any(h => a.StartsWith(h, StringComparison.OrdinalIgnoreCase))))
                 {
-                    DisplayInvalidArgs(args.Where(a => !nonHelpTokens.Any(h => h.StartsWith(a, StringComparison.OrdinalIgnoreCase))).ToList());
+                    DisplayInvalidArgs([.. args.Where(a => !nonHelpTokens.Any(h => h.StartsWith(a, StringComparison.OrdinalIgnoreCase)))]);
                     return false;
                 }
                 bool isPreview = args.Any(a => a.StartsWith(PreviewToken, StringComparison.OrdinalIgnoreCase));
