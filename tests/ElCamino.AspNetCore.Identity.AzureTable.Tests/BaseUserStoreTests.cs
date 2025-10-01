@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Security.Claims;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Azure.Data.Tables;
@@ -41,7 +42,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             {
                 var userRole = await rstore.FindByNameAsync(roleName).ConfigureAwait(false);
 
-                if (userRole == null)
+                if (userRole is null)
                 {
                     var r = (TRole)Activator.CreateInstance(typeof(TRole), [roleName]);
 
@@ -369,6 +370,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
         protected BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore, TKeyHelper> userFixture;
 
+        protected readonly JsonSerializerOptions JsonOptions = new()
+        {
+            WriteIndented = true
+        };
+
         public BaseUserStoreTests(BaseFixture<TUser, TContext, string, Model.IdentityUserClaim, Model.IdentityUserLogin, Model.IdentityUserToken, TUserStore, TKeyHelper> userFix, ITestOutputHelper output)
         {
             userFixture = userFix;
@@ -393,7 +399,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         protected void WriteLineObject<T>(T obj) where T : class
         {
             _output.WriteLine(typeof(T).Name);
-            string strLine = obj == null ? "Null" : Newtonsoft.Json.JsonConvert.SerializeObject(obj, Newtonsoft.Json.Formatting.Indented);
+            string strLine = obj is null ? "Null" : JsonSerializer.Serialize(obj, JsonOptions);
             _output.WriteLine("{0}", strLine);
         }
 

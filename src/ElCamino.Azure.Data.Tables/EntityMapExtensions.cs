@@ -25,9 +25,9 @@ namespace Azure.Data.Tables
             if (type.FullName is not null)
             {
                 return TypeProperties.GetOrAdd(type.FullName,
-                    (name) => [.. type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty).Where(w => w.GetCustomAttribute<IgnoreDataMemberAttribute>() == null)]);
+                    (name) => [.. type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty).Where(w => w.GetCustomAttribute<IgnoreDataMemberAttribute>() is null)]);
             }
-            return [.. type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty).Where(w => w.GetCustomAttribute<IgnoreDataMemberAttribute>() == null)];
+            return [.. type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty).Where(w => w.GetCustomAttribute<IgnoreDataMemberAttribute>() is null)];
         }
 
         /// <summary>

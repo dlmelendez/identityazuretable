@@ -19,7 +19,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.Fakes
 
         public string ConvertKeyToHashBackwardCompatSHA1(string input)
         {
-            if (input != null)
+            if (input is not null)
             {
                 using SHA1 sha = SHA1.Create();
                 return GetHash(sha, input, Encoding.Unicode, 40);
@@ -29,7 +29,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.Fakes
 
         public string ConvertKeyToHashBackwardCompatSHA256(string input)
         {
-            if (input != null)
+            if (input is not null)
             {
                 using SHA256 sha = SHA256.Create();
                 return GetHash(sha, input, Encoding.UTF8, 64);
