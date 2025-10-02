@@ -605,7 +605,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             var tasks = listTqs.Select((q) =>
             {
                 return _userTable.QueryAsync<TableEntity>(filter: q, cancellationToken:cancellationToken).ToListAsync(cancellationToken)
+#if NET10_0_OR_GREATER
                      .AsTask()
+#endif
                      .ContinueWith((taskResults) =>
                      {
                          //ContinueWith returns completed task. Calling .Result is safe here.

@@ -5,8 +5,9 @@
     <Copyright>Copyright ©  David Melendez, MIT License</Copyright>
     <AssemblyTitle>Azure Table Storage Provider for ASP.NET Identity Core Models</AssemblyTitle>
     <Authors>David Melendez</Authors>
-    <TargetFrameworks>net10.0</TargetFrameworks>
-    <AssemblyName>ElCamino.AspNetCore.Identity.AzureTable.Model</AssemblyName>
+	<TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+	<LangVersion>14.0</LangVersion>
+	<AssemblyName>ElCamino.AspNetCore.Identity.AzureTable.Model</AssemblyName>
     <AssemblyOriginatorKeyFile>../../tools/key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
