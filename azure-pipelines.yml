@@ -6,10 +6,7 @@
 trigger:
 - master
 
-variables:
-  BuildVersionExpanded: '$(BuildVersion).$(Date:yyMMdd).$(Rev:r)'
-
-name: $(BuildVersionExpanded)
+name: $(BuildVersion)
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -40,7 +37,7 @@ steps:
   displayName: 'dotnet build'
   inputs:
     projects: '**/ElCamino.AspNetCore.Identity.AzureTable.sln'
-    arguments: '-c $(BuildConfiguration) -p:Version=$(BuildVersionExpanded)'
+    arguments: '-c $(BuildConfiguration) -p:Version=$(BuildVersion)'
 
 - task: DotNetCoreCLI@2
   inputs:
