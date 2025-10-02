@@ -7,7 +7,7 @@ trigger:
 - master
 
 variables:
-  BuildVersionExpanded: '$(BuildVersion).$(Date:yyMMdd).$(Rev:r)'
+  BuildVersionExpanded: '$(BuildVersion).$(Date:yyMMdd)$(Rev:r)'
 
 name: $(BuildVersionExpanded)
 
