@@ -8,7 +8,7 @@ namespace Azure.Data.Tables
     /// </summary>
     public static class IAsyncEnumerableExtensions
     {
-#if !NET9_0_OR_GREATER
+#if !NET10_0_OR_GREATER
         /// <summary>
         /// FirstOrDefaultAsync{T}
         /// </summary>
