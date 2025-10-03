@@ -9,7 +9,7 @@ trigger:
 variables:
   BuildVersionExpanded: $(BuildVersion).$(Date:yyMMdd).$(Rev:r)
 
-name: $(BuildVersionExpanded)
+name: $(BuildVersion).$(Date:yyMMdd).$(Rev:r)
 
 pool:
   vmImage: 'ubuntu-latest'
