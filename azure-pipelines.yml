@@ -6,10 +6,10 @@
 trigger:
 - master
 
-variables:
-  BuildVersionExpanded: $(BuildVersion).$(Date:yyMMdd).$(Rev:r)
-
 name: $(BuildVersion).$(Date:yyMMdd).$(Rev:r)
+
+variables:
+  BuildVersionExpanded: '$(BuildVersion).$(Date:yyMMdd).$(Rev:r)'
 
 pool:
   vmImage: 'ubuntu-latest'
