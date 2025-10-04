@@ -125,7 +125,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 throw new ArgumentNullException(nameof(user));
             }
 
-            const string roleName = nameof(Model.IdentityUserRole<string>.RoleName);
+            const string roleName = nameof(Model.IdentityUserRole<>.RoleName);
             var userId = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
             // Changing to a live query to mimic EF UserStore in Identity 3.0
 
@@ -230,14 +230,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 }
 
 
-                return (await GetUsersByIndexQueryAsync(GetUserByRoleIndexQuery(roleName!).ToString(), (userId, cancellationToken) =>
+                return [.. (await GetUsersByIndexQueryAsync(GetUserByRoleIndexQuery(roleName!).ToString(), (userId, cancellationToken) =>
                 {
                     return GetUserAggregateQueryAsync(userId, setFilterByUserId: getTableQueryFilterByUserId, whereClaim: null, whereRole: (ur) =>
                     {
                         return ur.RowKey.AsSpan().Equals(_keyHelper.GenerateRowKeyIdentityUserRole(roleName), StringComparison.OrdinalIgnoreCase);
                     }, cancellationToken: cancellationToken);
 
-                }, cancellationToken).ConfigureAwait(false)).ToList();
+                }, cancellationToken).ConfigureAwait(false))];
             }
 
             return [];
@@ -264,8 +264,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             var selectColumns = new List<string>() { nameof(TableEntity.RowKey) };
             var tasks = new Task<bool>[]
             {
-                _userTable.QueryAsync<TableEntity>(filter: filterString.ToString(), maxPerPage:1, select: selectColumns, cancellationToken).AnyAsync(cancellationToken),
+                _userTable.QueryAsync<TableEntity>(filter: filterString.ToString(), maxPerPage:1, select: selectColumns, cancellationToken).AnyAsync(cancellationToken)
+#if NET10_0_OR_GREATER
+                .AsTask()
+#endif
+                ,
                 RoleExistsAsync(roleName!, cancellationToken)
+#if NET10_0_OR_GREATER
+                .AsTask()
+#endif
             };
 
             await Task.WhenAll(tasks).ConfigureAwait(false);
@@ -273,12 +280,21 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             return tasks.All(t => t.Result);
         }
 
+#if NET10_0_OR_GREATER
+        /// <inheritdoc/>
+        public ValueTask<bool> RoleExistsAsync(string roleName, CancellationToken cancellationToken = default)
+        {
+            return _roleTable.QueryAsync<TableEntity>(filter: BuildRoleQuery(roleName), maxPerPage: 1, select: [nameof(Model.IdentityRole.Name)], cancellationToken: cancellationToken).AnyAsync(cancellationToken);
+        }
+#else
+
         /// <inheritdoc/>
         public Task<bool> RoleExistsAsync(string roleName, CancellationToken cancellationToken = default)
         {
             return _roleTable.QueryAsync<TableEntity>(filter: BuildRoleQuery(roleName), maxPerPage: 1, select: [nameof(Model.IdentityRole.Name)], cancellationToken: cancellationToken).AnyAsync(cancellationToken);
         }
 
+#endif
         /// <inheritdoc/>
         public virtual async Task RemoveFromRoleAsync(TUser user, string? roleName, CancellationToken cancellationToken = default)
         {
@@ -376,6 +392,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             {
                 return
                 _userTable.QueryAsync<TableEntity>(filter: q, cancellationToken: cancellationToken).ToListAsync(cancellationToken)
+#if NET10_0_OR_GREATER
+                     .AsTask()
+#endif
                      .ContinueWith((taskResults) =>
                      {
                          //ContinueWith returns completed task. Calling .Result is safe here.

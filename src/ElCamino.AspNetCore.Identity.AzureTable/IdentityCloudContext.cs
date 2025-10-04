@@ -26,9 +26,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             ArgumentNullException.ThrowIfNull(client, nameof(client));
 
             _client = client;
-            _indexTable = _client.GetTableClient(FormatTableNameWithPrefix(config!.TablePrefix, !string.IsNullOrWhiteSpace(config!.IndexTableName) ? config!.IndexTableName! : TableConstants.TableNames.IndexTable));
-            _roleTable = _client.GetTableClient(FormatTableNameWithPrefix(config!.TablePrefix, !string.IsNullOrWhiteSpace(config!.RoleTableName) ? config!.RoleTableName! : TableConstants.TableNames.RolesTable));
-            _userTable = _client.GetTableClient(FormatTableNameWithPrefix(config!.TablePrefix, !string.IsNullOrWhiteSpace(config!.UserTableName) ? config!.UserTableName! : TableConstants.TableNames.UsersTable));
+            _indexTable = _client.GetTableClient(FormatTableNameWithPrefix(config.TablePrefix, !string.IsNullOrWhiteSpace(config.IndexTableName) ? config.IndexTableName : TableConstants.TableNames.IndexTable));
+            _roleTable = _client.GetTableClient(FormatTableNameWithPrefix(config.TablePrefix, !string.IsNullOrWhiteSpace(config.RoleTableName) ? config.RoleTableName : TableConstants.TableNames.RolesTable));
+            _userTable = _client.GetTableClient(FormatTableNameWithPrefix(config.TablePrefix, !string.IsNullOrWhiteSpace(config.UserTableName) ? config.UserTableName : TableConstants.TableNames.UsersTable));
         }
 
 
@@ -36,7 +36,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             if (!string.IsNullOrWhiteSpace(tablePrefix))
             {
-                return string.Format("{0}{1}", tablePrefix!, baseTableName);
+                return string.Format("{0}{1}", tablePrefix, baseTableName);
             }
             return baseTableName;
         }

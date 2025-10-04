@@ -1,8 +1,8 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using Azure.Data.Tables;
 using Xunit;
@@ -330,7 +330,9 @@ namespace ElCamino.Azure.Data.Tables.Tests
             Assert.Equal(0, await _tableClient.QueryAsync<TableEntity>(filter: filterNotNullBuilder).CountAsync());
 
             //Modify update
+#pragma warning disable IDE0028 // Simplify collection initialization
             var updateEntity = new TableEntity(key, key);
+#pragma warning restore IDE0028 // Simplify collection initialization
             updateEntity.Add(propertyName, 90000000L);
             await Task.Delay(1000); //wait 1 second for timestamp 
 
@@ -430,7 +432,6 @@ namespace ElCamino.Azure.Data.Tables.Tests
 
             sw.Start();
             TableQueryBuilder queryBuilderNull = new TableQueryBuilder();
-            string filterNullBuilder = string.Empty;
             queryBuilderNull
                 .BeginGroup()
                 .AddFilter(nameof(TableEntity.PartitionKey), QueryComparison.Equal, addedEntity.PartitionKey)
@@ -439,7 +440,7 @@ namespace ElCamino.Azure.Data.Tables.Tests
                 .EndGroup().ToString();
             queryBuilderNull.CombineFilters(TableOperator.And)
                 .AddFilterBool(propertyName, QueryComparison.Equal, null);
-            filterNullBuilder = queryBuilderNull.ToString();
+            string filterNullBuilder = queryBuilderNull.ToString();
             sw.Stop();
             _output.WriteLine($"{nameof(filterNullBuilder)}: {sw.Elapsed.TotalMilliseconds}ms");
             _output.WriteLine($"{nameof(filterNullBuilder)}:{filterNullBuilder}");

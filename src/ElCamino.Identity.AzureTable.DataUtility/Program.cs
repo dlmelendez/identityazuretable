@@ -104,7 +104,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
             int iSkippedUserCount = 0;
             int iSkippedPageCount = 0;
             int iPageCounter = 0;
-            while (continueToken != null)
+            while (continueToken is not null)
             {
                 DateTime batchStart = DateTime.UtcNow;
 
@@ -204,7 +204,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 List<string> nonHelpTokens = [PreviewToken, MigrateToken, NoDeleteToken, MaxDegreesParallelToken, StartPageToken, FinishPageToken, PageSizeToken];
                 if (!args.All(a => nonHelpTokens.Any(h => a.StartsWith(h, StringComparison.OrdinalIgnoreCase))))
                 {
-                    DisplayInvalidArgs(args.Where(a => !nonHelpTokens.Any(h => h.StartsWith(a, StringComparison.OrdinalIgnoreCase))).ToList());
+                    DisplayInvalidArgs([.. args.Where(a => !nonHelpTokens.Any(h => h.StartsWith(a, StringComparison.OrdinalIgnoreCase)))]);
                     return false;
                 }
                 bool isPreview = args.Any(a => a.StartsWith(PreviewToken, StringComparison.OrdinalIgnoreCase));
@@ -293,7 +293,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
         private static void DisplayInvalidArgs(List<string> args)
         {
-            if (args != null && args.Count > 0)
+            if (args is not null && args.Count > 0)
             {
                 foreach (string a in args)
                 {

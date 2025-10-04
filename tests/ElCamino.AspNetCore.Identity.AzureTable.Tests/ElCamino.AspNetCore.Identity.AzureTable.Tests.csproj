@@ -3,11 +3,11 @@
   <PropertyGroup>
     <Description>Testing</Description>
     <Authors>David Melendez</Authors>
-    <TargetFrameworks>net9.0</TargetFrameworks>
-    <LangVersion>13.0</LangVersion>
+    <TargetFrameworks>net10.0</TargetFrameworks>
+    <LangVersion>14.0</LangVersion>
     <AssemblyName>ElCamino.AspNetCore.Identity.AzureTable.Tests</AssemblyName>
     <IsPackable>false</IsPackable>
-    <Version>9.0.5</Version>
+    <Version>10.0</Version>
     <Nullable>disable</Nullable>
     <DebugType>Full</DebugType>
 
@@ -28,27 +28,26 @@
     <ProjectReference Include="..\..\src\ElCamino.AspNetCore.Identity.AzureTable\ElCamino.AspNetCore.Identity.AzureTable.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="coverlet.collector" Version="6.0.2">
+    <PackageReference Include="coverlet.collector" Version="6.0.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="9.0.*" />
-    <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="9.0.*" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.*" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.*" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.*" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="9.0.*" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.*" />
-    <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="9.0.*" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="10.0.0-rc*" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="10.0.0-rc*" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0-rc*" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.0-rc*" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.0-rc*" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.0-rc*" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.0-rc*" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="10.0.0-rc*" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Azure.Data.Tables" Version="12.8.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="System.Diagnostics.TraceSource" Version="4.3.0" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

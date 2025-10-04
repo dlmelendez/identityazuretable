@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "storage1": {
+      "secretStore": "LocalSecretsFile",
+      "type": "storage.emulator",
+      "connectionId": "StorageConnection",
+      "dynamicId": null
+    }
+  }
+}

@@ -4,6 +4,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Azure.Data.Tables;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
@@ -22,6 +23,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
     {
         private readonly ITestOutputHelper _output;
         private readonly RoleFixture<Model.IdentityUser, IdentityRole, IdentityCloudContext, TKeyHelper> roleFixture;
+        private readonly JsonSerializerOptions JsonOptions = new()
+        {
+            WriteIndented = true
+        };
+
         public BaseRoleStoreTests(RoleFixture<Model.IdentityUser, IdentityRole, IdentityCloudContext, TKeyHelper> roleFix, ITestOutputHelper output)
         {
             _output = output;
@@ -111,7 +117,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             ServiceCollection services = new ServiceCollection();
             // Adding coverage for CreateAzureTablesIfNotExists();
             services.AddIdentityCore<IdentityUser>()
-                .AddAzureTableStores<IdentityCloudContext>(() => roleFixture.GetConfig().config 
+                .AddAzureTableStores<IdentityCloudContext>(() => roleFixture.GetConfig().config
                 , () => new TableServiceClient(roleFixture.GetConfig().connectionString)
                 , roleFixture.GetKeyHelper())
                 .CreateAzureTablesIfNotExists<IdentityCloudContext>();
@@ -251,7 +257,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         private void WriteLineObject<T>(T obj) where T : class
         {
             _output.WriteLine(typeof(T).Name);
-            string strLine = obj == null ? "Null" : Newtonsoft.Json.JsonConvert.SerializeObject(obj, Newtonsoft.Json.Formatting.Indented);
+            string strLine = obj is null ? "Null" : JsonSerializer.Serialize(obj, JsonOptions);
             _output.WriteLine("{0}", strLine);
         }
     }

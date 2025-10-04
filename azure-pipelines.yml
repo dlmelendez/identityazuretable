@@ -8,10 +8,16 @@ trigger:
 
 name: $(BuildVersion).$(Date:yyMMdd).$(Rev:r)
 
+variables:
+  buildNumberVersion: '$(build.buildnumber)'
+
 pool:
   vmImage: 'ubuntu-latest'
 
 steps:
+- bash: echo 'Starting Build..'
+- bash: echo $(buildNumberVersion)
+
 - task: PowerShell@2
   inputs:
     targetType: 'inline'
@@ -28,15 +34,16 @@ steps:
     version: 8.x
 
 - task: UseDotNet@2
-  displayName: 'Use .Net Core sdk 9.x'
+  displayName: 'Use .NET 10 SDK'
   inputs:
-    version: 9.x
+    version: 10.0.x
+    includePreviewVersions: true
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet build'
   inputs:
     projects: '**/ElCamino.AspNetCore.Identity.AzureTable.sln'
-    arguments: '-c $(BuildConfiguration) -p:Version=$(BuildVersion)'
+    arguments: '-c $(BuildConfiguration) -p:Version=$(buildNumberVersion)'
 
 - task: DotNetCoreCLI@2
   inputs:
