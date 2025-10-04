@@ -1,5 +1,4 @@
-using ElCamino.AspNetCore.Identity.AzureTable;
-using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser;
+﻿using IdentityUser = ElCamino.AspNetCore.Identity.AzureTable.Model.IdentityUser;
 using ElCamino.AspNetCore.Identity.AzureTable.Model;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
@@ -17,13 +17,16 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
 {
     IdentityConfiguration idconfig = new IdentityConfiguration();
     idconfig.TablePrefix = builder.Configuration.GetSection("IdentityAzureTable:IdentityConfiguration:TablePrefix").Value;
-    idconfig.StorageConnectionString = builder.Configuration.GetSection("IdentityAzureTable:IdentityConfiguration:StorageConnectionString").Value;
     idconfig.IndexTableName = builder.Configuration.GetSection("IdentityAzureTable:IdentityConfiguration:IndexTableName").Value; // default: AspNetIndex
     idconfig.RoleTableName = builder.Configuration.GetSection("IdentityAzureTable:IdentityConfiguration:RoleTableName").Value;   // default: AspNetRoles
     idconfig.UserTableName = builder.Configuration.GetSection("IdentityAzureTable:IdentityConfiguration:UserTableName").Value;   // default: AspNetUsers
     return idconfig;
+}), new Func<Azure.Data.Tables.TableServiceClient>(() =>
+{
+    string connectionString = builder.Configuration.GetSection("IdentityAzureTable:IdentityConfiguration:StorageConnectionString").Value!;
+    return new Azure.Data.Tables.TableServiceClient(connectionString);
 }))
-//Can remove .CreateAzureTablesIfNotExists() after first run 
+//Can remove .CreateAzureTablesIfNotExists() after first run
 .CreateAzureTablesIfNotExists<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
 
