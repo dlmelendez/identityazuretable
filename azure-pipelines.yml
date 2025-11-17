@@ -37,13 +37,12 @@ steps:
   displayName: 'Use .NET 10 SDK'
   inputs:
     version: 10.0.x
-    includePreviewVersions: true
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet build'
   inputs:
     projects: '**/ElCamino.AspNetCore.Identity.AzureTable.sln'
-    arguments: '-c $(BuildConfiguration) -p:Version=$(buildNumberVersion)'
+    arguments: '-c $(BuildConfiguration) -p:Version=$(BuildVersion)'
 
 - task: DotNetCoreCLI@2
   inputs:
