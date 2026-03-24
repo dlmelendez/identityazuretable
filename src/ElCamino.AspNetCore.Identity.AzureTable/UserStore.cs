@@ -53,6 +53,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         where TUserToken : Model.IdentityUserToken<TKey>, new()
         where TContext : IdentityCloudContext
     {
+        private static readonly List<string> UserRoleNameSelectColumns = [nameof(Model.IdentityUserRole<TKey>.RoleName)];
+        private static readonly List<string> TableRowKeySelectColumns = [nameof(TableEntity.RowKey)];
+        private static readonly List<string> RoleNameOnlySelectColumns = [nameof(Model.IdentityRole.Name)];
+
         /// <summary>
         /// Access to the Role Table
         /// </summary>
@@ -70,12 +74,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         /// <returns></returns>
         public override Task CreateTablesIfNotExistsAsync()
         {
-            Task[] tasks =
-                [
-                    base.CreateTablesIfNotExistsAsync(),
-                    _roleTable.CreateIfNotExistsAsync(),
-                ];
-            return Task.WhenAll(tasks);
+            return Task.WhenAll(base.CreateTablesIfNotExistsAsync(), _roleTable.CreateIfNotExistsAsync());
         }
 
         /// <inheritdoc/>
@@ -103,13 +102,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             ((Model.IGenerateKeys)item).GenerateKeys(_keyHelper);
 
-            List<Task> tasks =
-            [
+            await Task.WhenAll(
                 _userTable.AddEntityAsync(item, cancellationToken),
                 _indexTable.UpsertEntityAsync(CreateRoleIndex(userToRole.PartitionKey, roleName), mode: TableUpdateMode.Replace, cancellationToken: cancellationToken)
-            ];
-
-            await Task.WhenAll(tasks).ConfigureAwait(false);
+            ).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
@@ -133,43 +129,52 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, userId),
                 TableOperators.And,
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserRole));
-            var selectColumns = new List<string>() { roleName };
-            var userRoles =
-                (await _userTable.QueryAsync<TableEntity>(filter: filterString.ToString(), select: selectColumns, cancellationToken: cancellationToken).ToListAsync(cancellationToken).ConfigureAwait(false))
-                .Where(w => w.ContainsKey(roleName))
-                .Select(d => d.GetString(roleName))
-                .Where(di => !string.IsNullOrWhiteSpace(di));
+            List<string> userRoles = [];
+            await foreach (var userRoleEntity in _userTable.QueryAsync<TableEntity>(filter: filterString.ToString(), select: UserRoleNameSelectColumns, cancellationToken: cancellationToken).ConfigureAwait(false))
+            {
+                if (userRoleEntity.ContainsKey(roleName))
+                {
+                    var role = userRoleEntity.GetString(roleName);
+                    if (!string.IsNullOrWhiteSpace(role))
+                    {
+                        userRoles.Add(role);
+                    }
+                }
+            }
 
-            int userRoleTotalCount = userRoles.Count();
+            int userRoleTotalCount = userRoles.Count;
             if (userRoleTotalCount > 0)
             {
-                const double pageSize = 10d;
-                double maxPages = Math.Ceiling((double)userRoleTotalCount / pageSize);
+                const int pageSize = 10;
+                int maxPages = (int)Math.Ceiling((double)userRoleTotalCount / pageSize);
 
-                List<Task> tasks = new List<Task>((int)maxPages);
+                List<Task> tasks = new List<Task>(maxPages);
 
-                for (int iPageIndex = 0; iPageIndex < maxPages; iPageIndex++)
+                for (int offset = 0; offset < userRoleTotalCount; offset += pageSize)
                 {
-                    int skip = (int)(iPageIndex * pageSize);
-                    IEnumerable<string> userRolesTemp = skip > 0 ? userRoles.Skip(skip).Take((int)pageSize) :
-                        userRoles.Take((int)pageSize); ;
-
-                    string queryTemp = string.Empty;
-                    int iRoleCounter = 0;
-                    foreach (var urt in userRolesTemp)
+                    int currentPageCount = Math.Min(pageSize, userRoleTotalCount - offset);
+                    string? queryTemp = null;
+                    for (int iRoleCounter = 0; iRoleCounter < currentPageCount; iRoleCounter++)
                     {
+                        var urt = userRoles[offset + iRoleCounter];
+                        var roleQuery = BuildRoleQuery(urt);
                         if (iRoleCounter == 0)
                         {
-                            queryTemp = BuildRoleQuery(urt);
+                            queryTemp = roleQuery;
                         }
                         else
                         {
-                            queryTemp = TableQuery.CombineFilters(queryTemp, TableOperators.Or, BuildRoleQuery(urt)).ToString();
+                            queryTemp = TableQuery.CombineFilters(queryTemp!, TableOperators.Or, roleQuery).ToString();
                         }
-                        iRoleCounter++;
                     }
+
+                    if (queryTemp is null)
+                    {
+                        continue;
+                    }
+
                     tasks.Add(
-                        _roleTable.QueryAsync<Model.IdentityRole>(filter: queryTemp, select: [nameof(Model.IdentityRole.Name)], cancellationToken: cancellationToken)
+                        _roleTable.QueryAsync<Model.IdentityRole>(filter: queryTemp, select: RoleNameOnlySelectColumns, cancellationToken: cancellationToken)
                         .ForEachAsync((t) =>
                         {
                             if (!string.IsNullOrWhiteSpace(t?.Name))
@@ -261,23 +266,20 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, userId),
                 TableOperators.And,
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, _keyHelper.GenerateRowKeyIdentityUserRole(roleName)));
-            var selectColumns = new List<string>() { nameof(TableEntity.RowKey) };
-            var tasks = new Task<bool>[]
-            {
-                _userTable.QueryAsync<TableEntity>(filter: filterString.ToString(), maxPerPage:1, select: selectColumns, cancellationToken).AnyAsync(cancellationToken)
+            var userRoleTask = _userTable.QueryAsync<TableEntity>(filter: filterString.ToString(), maxPerPage: 1, select: TableRowKeySelectColumns, cancellationToken).AnyAsync(cancellationToken)
 #if NET10_0_OR_GREATER
                 .AsTask()
 #endif
-                ,
-                RoleExistsAsync(roleName!, cancellationToken)
+                ;
+            var roleExistsTask = RoleExistsAsync(roleName!, cancellationToken)
 #if NET10_0_OR_GREATER
                 .AsTask()
 #endif
-            };
+                ;
 
-            await Task.WhenAll(tasks).ConfigureAwait(false);
+            await Task.WhenAll(userRoleTask, roleExistsTask).ConfigureAwait(false);
 
-            return tasks.All(t => t.Result);
+            return userRoleTask.Result && roleExistsTask.Result;
         }
 
 #if NET10_0_OR_GREATER
@@ -340,26 +342,18 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         Func<TUserClaim, bool>? whereClaim = null,
         CancellationToken cancellationToken = default)
         {
-            const double pageSize = 50.0;
-            int pages = (int)Math.Ceiling(((double)userIds.Count() / pageSize));
+            string[] userIdArray = userIds as string[] ?? [.. userIds];
+            const int pageSize = 50;
+            int pages = (int)Math.Ceiling((double)userIdArray.Length / pageSize);
             List<string> listTqs = new List<string>(pages);
-            IEnumerable<string> tempUserIds = [];
 
-            for (int currentPage = 1; currentPage <= pages; currentPage++)
+            for (int offset = 0; offset < userIdArray.Length; offset += pageSize)
             {
-                if (currentPage > 1)
-                {
-                    tempUserIds = userIds.Skip(((currentPage - 1) * (int)pageSize)).Take((int)pageSize);
-                }
-                else
-                {
-                    tempUserIds = userIds.Take((int)pageSize);
-                }
-
                 string filterString = string.Empty;
-                int i = 0;
-                foreach (var tempUserId in tempUserIds)
+                int currentPageCount = Math.Min(pageSize, userIdArray.Length - offset);
+                for (int i = 0; i < currentPageCount; i++)
                 {
+                    var tempUserId = userIdArray[offset + i];
 
                     string temp = TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, tempUserId).ToString();
                     if (setFilterByUserId is not null)
@@ -375,7 +369,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                     {
                         filterString = temp;
                     }
-                    i++;
                 }
                 if (!string.IsNullOrWhiteSpace(filterString))
                 {
@@ -388,43 +381,41 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 #if DEBUG
             DateTime startUserAggTotal = DateTime.UtcNow;
 #endif
-            var tasks = listTqs.Select((q) =>
+            List<Task> tasks = new List<Task>(listTqs.Count);
+            foreach (var q in listTqs)
             {
-                return
-                _userTable.QueryAsync<TableEntity>(filter: q, cancellationToken: cancellationToken).ToListAsync(cancellationToken)
+                tasks.Add(ProcessAggregateQueryAsync(q, cancellationToken));
+            }
+
+            async Task ProcessAggregateQueryAsync(string query, CancellationToken ct)
+            {
+                var queryResults = await _userTable.QueryAsync<TableEntity>(filter: query, cancellationToken: ct).ToListAsync(ct)
 #if NET10_0_OR_GREATER
-                     .AsTask()
+                    .AsTask()
 #endif
-                     .ContinueWith((taskResults) =>
-                     {
-                         //ContinueWith returns completed task. Calling .Result is safe here.
+                    .ConfigureAwait(false);
 
-                         foreach (var s in taskResults.Result.GroupBy(g => g.PartitionKey))
-                         {
-                             var userAgg = MapUserAggregate(s.Key, s);
-                             bool addUser = true;
-                             if (whereClaim is not null)
-                             {
-                                 if (!userAgg.Claims.Any(whereClaim))
-                                 {
-                                     addUser = false;
-                                 }
-                             }
-                             if (whereRole is not null)
-                             {
-                                 if (!userAgg.Roles.Any(whereRole))
-                                 {
-                                     addUser = false;
-                                 }
-                             }
-                             if (userAgg.User is not null && addUser)
-                             {
-                                 bag.Add(userAgg.User);
-                             }
-                         }
-                     });
+                foreach (var s in queryResults.GroupBy(g => g.PartitionKey))
+                {
+                    var userAgg = MapUserAggregate(s.Key, s);
+                    bool addUser = true;
+                    if (whereClaim is not null && !userAgg.Claims.Any(whereClaim))
+                    {
+                        addUser = false;
+                    }
 
-            });
+                    if (whereRole is not null && !userAgg.Roles.Any(whereRole))
+                    {
+                        addUser = false;
+                    }
+
+                    if (userAgg.User is not null && addUser)
+                    {
+                        bag.Add(userAgg.User);
+                    }
+                }
+            }
+
             await Task.WhenAll(tasks).ConfigureAwait(false);
 #if DEBUG
             Debug.WriteLine("GetUserAggregateQuery (GetUserAggregateTotal): {0} seconds", (DateTime.UtcNow - startUserAggTotal).TotalSeconds);
@@ -449,48 +440,48 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
 
             TUser? user = default;
-            IEnumerable<TUserRole> roles = [];
-            IEnumerable<TUserClaim> claims = [];
-            IEnumerable<TUserLogin> logins = [];
-            IEnumerable<TUserToken> tokens = [];
+            List<TUserRole> roles = [];
+            List<TUserClaim> claims = [];
+            List<TUserLogin> logins = [];
+            List<TUserToken> tokens = [];
 
-            var vUser = userResults.Where(u => u.RowKey.Equals(userId) && u.PartitionKey.Equals(userId)).SingleOrDefault();
-
-            if (vUser is not null)
+            foreach (var userResult in userResults)
             {
-                //User
-                user = vUser.MapTableEntity<TUser>();
+                if (!userResult.PartitionKey.Equals(userId))
+                {
+                    continue;
+                }
 
-                //Roles
-                roles = userResults.Where(u => u.RowKey.StartsWith(_keyHelper.PreFixIdentityUserRole)
-                    && u.PartitionKey.Equals(userId))
-                    .Select((log) =>
-                    {
-                        return log.MapTableEntity<TUserRole>();
-                    });
-                //Claims
-                claims = userResults.Where(u => u.RowKey.StartsWith(_keyHelper.PreFixIdentityUserClaim)
-                     && u.PartitionKey.Equals(userId))
-                    .Select((log) =>
-                    {
-                        return log.MapTableEntity<TUserClaim>();
-                    });
-                //Logins
-                logins = userResults.Where(u => u.RowKey.StartsWith(_keyHelper.PreFixIdentityUserLogin)
-                    && u.PartitionKey.Equals(userId))
-                    .Select((log) =>
-                    {
-                        return log.MapTableEntity<TUserLogin>();
-                    });
+                if (userResult.RowKey.Equals(userId))
+                {
+                    user = userResult.MapTableEntity<TUser>();
+                    continue;
+                }
 
-                //Tokens
-                tokens = userResults.Where(u => u.RowKey.StartsWith(_keyHelper.PreFixIdentityUserToken)
-                     && u.PartitionKey.Equals(userId))
-                    .Select((log) =>
-                    {
-                        return log.MapTableEntity<TUserToken>();
-                    });
+                if (userResult.RowKey.StartsWith(_keyHelper.PreFixIdentityUserRole))
+                {
+                    roles.Add(userResult.MapTableEntity<TUserRole>());
+                    continue;
+                }
+
+                if (userResult.RowKey.StartsWith(_keyHelper.PreFixIdentityUserClaim))
+                {
+                    claims.Add(userResult.MapTableEntity<TUserClaim>());
+                    continue;
+                }
+
+                if (userResult.RowKey.StartsWith(_keyHelper.PreFixIdentityUserLogin))
+                {
+                    logins.Add(userResult.MapTableEntity<TUserLogin>());
+                    continue;
+                }
+
+                if (userResult.RowKey.StartsWith(_keyHelper.PreFixIdentityUserToken))
+                {
+                    tokens.Add(userResult.MapTableEntity<TUserToken>());
+                }
             }
+
             return (user, roles, claims, logins, tokens);
         }
 
@@ -539,7 +530,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             try
             {
-                await Task.WhenAll([.. tasks]).ConfigureAwait(false);
+                await Task.WhenAll(tasks).ConfigureAwait(false);
                 return IdentityResult.Success;
             }
             catch (AggregateException aggex)
