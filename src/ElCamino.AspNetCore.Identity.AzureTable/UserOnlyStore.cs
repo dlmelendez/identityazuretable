@@ -176,23 +176,28 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             try
             {
                 var userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
-                List<Task> tasks = new List<Task>(3)
-                {
-                    _userTable.AddEntityAsync(user, cancellationToken)
-                };
+                var userName = user.UserName;
+                var email = user.Email;
 
-                if (!string.IsNullOrWhiteSpace(user?.UserName))
+                Task[] tasks =
+                [
+                    _userTable.AddEntityAsync(user, cancellationToken),
+                    Task.CompletedTask,
+                    Task.CompletedTask
+                ];
+
+                if (!string.IsNullOrWhiteSpace(userName))
                 {
-                    tasks.Add(_indexTable.AddEntityAsync(CreateUserNameIndex(userPartitionKey, user!.UserName!), cancellationToken));
+                    tasks[1] = _indexTable.AddEntityAsync(CreateUserNameIndex(userPartitionKey, userName), cancellationToken);
                 }
 
-                if (!string.IsNullOrWhiteSpace(user?.Email))
+                if (!string.IsNullOrWhiteSpace(email))
                 {
-                    Model.IdentityUserIndex index = CreateEmailIndex(userPartitionKey, user!.Email!);
-                    tasks.Add(_indexTable.UpsertEntityAsync(index, mode: TableUpdateMode.Replace, cancellationToken: cancellationToken));
+                    Model.IdentityUserIndex index = CreateEmailIndex(userPartitionKey, email);
+                    tasks[2] = _indexTable.UpsertEntityAsync(index, mode: TableUpdateMode.Replace, cancellationToken: cancellationToken);
                 }
 
-                await Task.WhenAll([.. tasks]).ConfigureAwait(false);
+                await Task.WhenAll(tasks).ConfigureAwait(false);
                 return IdentityResult.Success;
             }
             catch (AggregateException aggex)
