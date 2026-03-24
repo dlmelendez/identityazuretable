@@ -247,7 +247,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             try
             {
-                await Task.WhenAll([.. tasks]).ConfigureAwait(false);
+                await Task.WhenAll(tasks).ConfigureAwait(false);
                 return IdentityResult.Success;
             }
             catch (AggregateException aggex)
@@ -520,33 +520,24 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            const double pageSize = 50.0;
-            int pages = (int)Math.Ceiling(((double)userIds.Count() / pageSize));
+            string[] userIdArray = userIds as string[] ?? [.. userIds];
+            const int pageSize = 50;
+            int pages = (int)Math.Ceiling((double)userIdArray.Length / pageSize);
             List<string> listTqs = new List<string>(pages);
-            IEnumerable<string>? tempUserIds = null;
 
-            for (int currentPage = 1; currentPage <= pages; currentPage++)
+            for (int offset = 0; offset < userIdArray.Length; offset += pageSize)
             {
-                if (currentPage > 1)
-                {
-                    tempUserIds = userIds.Skip(((currentPage - 1) * (int)pageSize)).Take((int)pageSize);
-                }
-                else
-                {
-                    tempUserIds = userIds.Take((int)pageSize);
-                }
-
 #if DEBUG
                 DateTime startQueryBuilderDate = DateTime.UtcNow;
 #endif
-                int userIdCount = tempUserIds.Count();
+                int userIdCount = Math.Min(pageSize, userIdArray.Length - offset);
                 if (userIdCount > 1)
                 {
                     TableQueryBuilder queryBuilder = new TableQueryBuilder();
 
-                    int i = 0;
-                    foreach (var tempUserId in tempUserIds)
+                    for (int i = 0; i < userIdCount; i++)
                     {
+                        var tempUserId = userIdArray[offset + i];
                         if (setFilterByUserId is not null)
                         {
                             if (i > 0)
@@ -570,8 +561,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                                 queryBuilder.AddFilter(nameof(TableEntity.PartitionKey), QueryComparison.Equal, tempUserId.AsSpan());
                             }
                         }
-
-                        i++;
                     }
                     if (queryBuilder.HasFilter)
                     {
@@ -587,7 +576,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 #if DEBUG
                     DateTime startCondition = DateTime.UtcNow;
 #endif
-                    string? tempUserId = tempUserIds.FirstOrDefault();
+                    string? tempUserId = userIdArray[offset];
                     if (tempUserId is not null)
                     {
                         listTqs.Add(TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, tempUserId.AsSpan()).ToString());
@@ -607,35 +596,36 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 #if DEBUG
             DateTime startUserAggTotal = DateTime.UtcNow;
 #endif
-            var tasks = listTqs.Select((q) =>
+            List<Task> tasks = new List<Task>(listTqs.Count);
+            foreach (var q in listTqs)
             {
-                return _userTable.QueryAsync<TableEntity>(filter: q, cancellationToken:cancellationToken).ToListAsync(cancellationToken)
+                tasks.Add(ProcessAggregateQueryAsync(q, cancellationToken));
+            }
+
+            async Task ProcessAggregateQueryAsync(string query, CancellationToken ct)
+            {
+                var queryResult = await _userTable.QueryAsync<TableEntity>(filter: query, cancellationToken: ct).ToListAsync(ct)
 #if NET10_0_OR_GREATER
-                     .AsTask()
+                    .AsTask()
 #endif
-                     .ContinueWith((taskResults) =>
-                     {
-                         //ContinueWith returns completed task. Calling .Result is safe here.
+                    .ConfigureAwait(false);
 
-                         foreach (var s in taskResults.Result.GroupBy(g => g.PartitionKey))
-                         {
-                             var userAgg = MapUserAggregate(s.Key, s);
-                             bool addUser = true;
-                             if (whereClaim is not null)
-                             {
-                                 if (!userAgg.Claims.Any(whereClaim))
-                                 {
-                                     addUser = false;
-                                 }
-                             }
-                             if (userAgg.User is not null && addUser)
-                             {
-                                 bag.Add(userAgg.User);
-                             }
-                         }
-                     });
+                foreach (var s in queryResult.GroupBy(g => g.PartitionKey))
+                {
+                    var userAgg = MapUserAggregate(s.Key, s);
+                    bool addUser = true;
+                    if (whereClaim is not null && !userAgg.Claims.Any(whereClaim))
+                    {
+                        addUser = false;
+                    }
 
-            });
+                    if (userAgg.User is not null && addUser)
+                    {
+                        bag.Add(userAgg.User);
+                    }
+                }
+            }
+
             await Task.WhenAll(tasks).ConfigureAwait(false);
 #if DEBUG
             Debug.WriteLine("GetUserAggregateQuery (GetUserAggregateTotal): {0} ms", (DateTime.UtcNow - startUserAggTotal).TotalMilliseconds);
@@ -653,15 +643,16 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         protected virtual async Task<IEnumerable<TUser>> GetUserQueryAsync(IEnumerable<string> userIds, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            string[] userIdArray = userIds as string[] ?? [.. userIds];
             //Create hot path for single or no userids
-            int userIdCount = userIds.Count();
+            int userIdCount = userIdArray.Length;
             if (userIdCount < 2)
             {
 #if DEBUG
                 DateTime startUserSingleOrNone = DateTime.UtcNow;
 #endif
 
-                var userId = userIds.FirstOrDefault();
+                var userId = userIdCount == 1 ? userIdArray[0] : null;
                 if (userId is not null)
                 {
                     var user = await GetUserAsync(userId, cancellationToken).ConfigureAwait(false);
@@ -678,26 +669,17 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 #endif
                 return [];
             }
-            const double pageSize = 50.0;
-            int pages = (int)Math.Ceiling(((double)userIds.Count() / pageSize));
+            const int pageSize = 50;
+            int pages = (int)Math.Ceiling((double)userIdArray.Length / pageSize);
             List<string> listTqs = new List<string>(pages);
-            IEnumerable<string> tempUserIds = [];
 
-            for (int currentPage = 1; currentPage <= pages; currentPage++)
+            for (int offset = 0; offset < userIdArray.Length; offset += pageSize)
             {
-                if (currentPage > 1)
-                {
-                    tempUserIds = userIds.Skip(((currentPage - 1) * (int)pageSize)).Take((int)pageSize);
-                }
-                else
-                {
-                    tempUserIds = userIds.Take((int)pageSize);
-                }
-
-                int tempUserCounter = 0;
+                int currentPageCount = Math.Min(pageSize, userIdArray.Length - offset);
                 TableQueryBuilder queryBuilder = new TableQueryBuilder();
-                foreach (string tempUserId in tempUserIds)
+                for (int tempUserCounter = 0; tempUserCounter < currentPageCount; tempUserCounter++)
                 {
+                    string tempUserId = userIdArray[offset + tempUserCounter];
 
                     if (tempUserCounter > 0)
                     {
@@ -715,7 +697,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                         queryBuilder.AddFilter(nameof(TableEntity.RowKey), QueryComparison.Equal, tempUserId);
                         queryBuilder.GroupAll();
                     }
-                    tempUserCounter++;
                 }
                 if (queryBuilder.HasFilter)
                 {
@@ -732,11 +713,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 #if DEBUG
             DateTime startUserAggTotal = DateTime.UtcNow;
 #endif
-            IEnumerable<Task> tasks = listTqs.Select((q) =>
+            List<Task> tasks = new List<Task>(listTqs.Count);
+            foreach (var q in listTqs)
             {
-                return _userTable.QueryAsync<TUser>(filter: q, cancellationToken: cancellationToken)
-                    .ForEachAsync((user) => { bag.Add(user); }, cancellationToken);
-            });
+                tasks.Add(_userTable.QueryAsync<TUser>(filter: q, cancellationToken: cancellationToken)
+                    .ForEachAsync((user) => { bag.Add(user); }, cancellationToken));
+            }
+
             await Task.WhenAll(tasks).ConfigureAwait(false);
 #if DEBUG
             Debug.WriteLine("GetUserQueryAsync (QueryAsync Batch): {0} ms {1} users", (DateTime.UtcNow - startUserAggTotal).TotalMilliseconds, bag.Count);
@@ -1130,7 +1113,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             try
             {
-                await Task.WhenAll([.. tasks]).ConfigureAwait(false);
+                await Task.WhenAll(tasks).ConfigureAwait(false);
                 return IdentityResult.Success;
             }
             catch (AggregateException aggex)
