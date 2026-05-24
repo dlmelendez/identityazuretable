@@ -1,4 +1,4 @@
-using Azure;
+﻿using Azure;
 using Azure.Data.Tables;
 using BenchmarkDotNet.Attributes;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;

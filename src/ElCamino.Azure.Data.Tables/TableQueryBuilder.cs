@@ -39,7 +39,7 @@ namespace ElCamino.Azure.Data.Tables
             {
                 Span<char> newBuffer = stackalloc char[_bufferQuery.Length + BufferSize];
                 QueryFilter.CopyTo(newBuffer);
-                _bufferQuery = [..newBuffer];
+                _bufferQuery = [.. newBuffer];
             }
         }
 
@@ -105,9 +105,9 @@ namespace ElCamino.Azure.Data.Tables
         public TableQueryBuilder AddFilter(ReadOnlySpan<char> propertyName, QueryComparison operation, string? givenValue)
         {
             AppendCondition(
-                givenValue is null ? 
+                givenValue is null ?
                 TableQuery.GenerateFilterConditionForStringNull(
-                    propertyName, QueryComparisons.GetComparison(operation)) 
+                    propertyName, QueryComparisons.GetComparison(operation))
                 :
                 TableQuery.GenerateFilterCondition(
                 propertyName, QueryComparisons.GetComparison(operation), givenValue));
@@ -233,7 +233,7 @@ namespace ElCamino.Azure.Data.Tables
         /// <returns></returns>
         public TableQueryBuilder AddFilterBytes(ReadOnlySpan<char> propertyName, QueryComparison operation, ReadOnlySpan<byte> givenValue)
         {
-            AppendCondition(                
+            AppendCondition(
                 TableQuery.GenerateFilterConditionForBinary(propertyName, QueryComparisons.GetComparison(operation), givenValue));
             return this;
         }
@@ -292,7 +292,7 @@ namespace ElCamino.Azure.Data.Tables
         /// </summary>
         /// <returns></returns>
         public TableQueryBuilder EndGroup()
-        {     
+        {
             AppendEndGroup();
             return this;
         }

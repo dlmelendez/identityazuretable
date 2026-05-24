@@ -78,7 +78,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
 
             var migration = MigrationFactory.CreateMigration(MigrateCommand);
             IdentityCloudContext targetContext = new IdentityCloudContext(targetConfig, new TableServiceClient(targetStorageConnectionString));
-            
+
             Task.WhenAll(targetContext.IndexTable.CreateIfNotExistsAsync(),
                         targetContext.UserTable.CreateIfNotExistsAsync(),
                         targetContext.RoleTable.CreateIfNotExistsAsync()).Wait();
@@ -119,7 +119,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                 continueToken = sourceResults?.ContinuationToken;
 
 
-                int batchCount = sourceResults?.Values.Count(migration.UserWhereFilter)??0;
+                int batchCount = sourceResults?.Values.Count(migration.UserWhereFilter) ?? 0;
                 iUserTotal += batchCount;
                 iPageCounter++;
 

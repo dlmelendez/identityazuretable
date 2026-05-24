@@ -82,7 +82,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
 
         /// <inheritdoc/>
         [IgnoreDataMember]
-        public override TKey Id 
+        public override TKey Id
         {
             get { return base.Id; }
             set { base.Id = value; }

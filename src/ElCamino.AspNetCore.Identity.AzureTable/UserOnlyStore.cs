@@ -706,7 +706,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             }
 
             ConcurrentBag<TUser> bag = [];
-            if(listTqs.Count < 1)
+            if (listTqs.Count < 1)
             {
                 return bag;
             }
@@ -920,8 +920,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             foreach (Claim claim in claims)
             {
                 Claim? local = (from uc in userClaims
-                               where uc.Type == claim.Type && uc.Value == claim.Value
-                               select uc).FirstOrDefault();
+                                where uc.Type == claim.Type && uc.Value == claim.Value
+                                select uc).FirstOrDefault();
                 if (local is not null)
                 {
                     var deleteUserClaim = CreateUserClaim(user, local);
@@ -1266,7 +1266,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             ThrowIfDisposed();
             ArgumentNullException.ThrowIfNull(user);
 
-            return Task.FromResult(user.Id is not null ? user.Id.ToString()??string.Empty : string.Empty);
+            return Task.FromResult(user.Id is not null ? user.Id.ToString() ?? string.Empty : string.Empty);
         }
 
         /// <inheritdoc/>
