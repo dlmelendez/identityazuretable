@@ -30,6 +30,17 @@ namespace Azure.Data.Tables
             return [.. type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.SetProperty).Where(w => w.GetCustomAttribute<IgnoreDataMemberAttribute>() is null)];
         }
 
+        private static bool CanAssignValue(Type propertyType, object? value)
+        {
+            if (value is null)
+            {
+                return false;
+            }
+
+            Type assignablePropertyType = Nullable.GetUnderlyingType(propertyType) ?? propertyType;
+            return assignablePropertyType.IsAssignableFrom(value.GetType());
+        }
+
         /// <summary>
         /// Maps <see cref="TableEntity"/> to a class that implements <see cref="ITableEntity"/>
         /// </summary>
@@ -45,7 +56,7 @@ namespace Azure.Data.Tables
                 {
                     // Only set the value if the property type matches the value type. 
                     // #138
-                    if (prop.PropertyType == obj?.GetType())
+                    if (CanAssignValue(prop.PropertyType, obj))
                     {
                         prop.SetValue(t, obj);
                     }
