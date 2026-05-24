@@ -43,7 +43,12 @@ namespace Azure.Data.Tables
             {
                 if (dte.TryGetValue(prop.Name, out object obj))
                 {
-                    prop.SetValue(t, obj);
+                    // Only set the value if the property type matches the value type. 
+                    // #138
+                    if (prop.PropertyType == obj?.GetType())
+                    {
+                        prop.SetValue(t, obj);
+                    }
                 }
             }
 
