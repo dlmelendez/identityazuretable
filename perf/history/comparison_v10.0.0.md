@@ -4,17 +4,17 @@
 Current Source: LocalProject
 Baseline Source: NuGet(10.0.*)
 Local CSV files:
-- C:\Users\dave\source\repos\identityazuretable\perf\artifacts\local\results\ElCamino.AspNetCore.Identity.AzureTable.Benchmark.UserAggregateMapBenchmarks-report.csv
-- C:\Users\dave\source\repos\identityazuretable\perf\artifacts\local\results\ElCamino.AspNetCore.Identity.AzureTable.Benchmark.UserOnlyStoreCreateBenchmarks-report.csv
-- C:\Users\dave\source\repos\identityazuretable\perf\artifacts\local\results\ElCamino.AspNetCore.Identity.AzureTable.Benchmark.UserOnlyStoreDeleteBenchmarks-report.csv
-- C:\Users\dave\source\repos\identityazuretable\perf\artifacts\local\results\ElCamino.AspNetCore.Identity.AzureTable.Benchmark.UserOnlyStoreGetUserQueryBenchmarks-report.csv
-- C:\Users\dave\source\repos\identityazuretable\perf\artifacts\local\results\ElCamino.AspNetCore.Identity.AzureTable.Benchmark.UserStoreAddToRoleBenchmarks-report.csv
+- perf/artifacts/local/results/ElCamino.AspNetCore.Identity.AzureTable.Benchmark.UserAggregateMapBenchmarks-report.csv
+- perf/artifacts/local/results/ElCamino.AspNetCore.Identity.AzureTable.Benchmark.UserOnlyStoreCreateBenchmarks-report.csv
+- perf/artifacts/local/results/ElCamino.AspNetCore.Identity.AzureTable.Benchmark.UserOnlyStoreDeleteBenchmarks-report.csv
+- perf/artifacts/local/results/ElCamino.AspNetCore.Identity.AzureTable.Benchmark.UserOnlyStoreGetUserQueryBenchmarks-report.csv
+- perf/artifacts/local/results/ElCamino.AspNetCore.Identity.AzureTable.Benchmark.UserStoreAddToRoleBenchmarks-report.csv
 NuGet CSV files:
-- C:\Users\dave\source\repos\identityazuretable\perf\artifacts\nuget\results\ElCamino.AspNetCore.Identity.AzureTable.Benchmark.UserAggregateMapBenchmarks-report.csv
-- C:\Users\dave\source\repos\identityazuretable\perf\artifacts\nuget\results\ElCamino.AspNetCore.Identity.AzureTable.Benchmark.UserOnlyStoreCreateBenchmarks-report.csv
-- C:\Users\dave\source\repos\identityazuretable\perf\artifacts\nuget\results\ElCamino.AspNetCore.Identity.AzureTable.Benchmark.UserOnlyStoreDeleteBenchmarks-report.csv
-- C:\Users\dave\source\repos\identityazuretable\perf\artifacts\nuget\results\ElCamino.AspNetCore.Identity.AzureTable.Benchmark.UserOnlyStoreGetUserQueryBenchmarks-report.csv
-- C:\Users\dave\source\repos\identityazuretable\perf\artifacts\nuget\results\ElCamino.AspNetCore.Identity.AzureTable.Benchmark.UserStoreAddToRoleBenchmarks-report.csv
+- perf/artifacts/nuget/results/ElCamino.AspNetCore.Identity.AzureTable.Benchmark.UserAggregateMapBenchmarks-report.csv
+- perf/artifacts/nuget/results/ElCamino.AspNetCore.Identity.AzureTable.Benchmark.UserOnlyStoreCreateBenchmarks-report.csv
+- perf/artifacts/nuget/results/ElCamino.AspNetCore.Identity.AzureTable.Benchmark.UserOnlyStoreDeleteBenchmarks-report.csv
+- perf/artifacts/nuget/results/ElCamino.AspNetCore.Identity.AzureTable.Benchmark.UserOnlyStoreGetUserQueryBenchmarks-report.csv
+- perf/artifacts/nuget/results/ElCamino.AspNetCore.Identity.AzureTable.Benchmark.UserStoreAddToRoleBenchmarks-report.csv
 
 | UserOnlyStore_CreateAsync |  | LocalProject | NuGet(10.0.*) | 412.0 μs | 398.0 μs | 3.52 | 51.61 KB | 51.61 KB | 0 |
 | UserOnlyStore_DeleteAsync |  | LocalProject | NuGet(10.0.*) | 67.04 μs | 68.79 μs | -2.54 | 18 KB | 18.02 KB | -0.11 |
