@@ -1,6 +1,6 @@
 param(
     [string]$ProjectPath = "perf/ElCamino.AspNetCore.Identity.AzureTable.Benchmark/ElCamino.AspNetCore.Identity.AzureTable.Benchmark.csproj",
-    [string]$Filter = "*UserAggregateMapBenchmarks*",
+    [string]$Filter = "*Benchmarks*",
     [string]$PackageVersion = "10.0.*",
     [string]$ArtifactsRoot = "perf/artifacts",
     [switch]$SkipRun
@@ -33,16 +33,13 @@ function Parse-BdnMetric {
     return [pscustomobject]@{ Number = $null; Unit = $null; Raw = $text }
 }
 
-function Get-LatestBenchmarkCsv {
+function Get-BenchmarkCsvs {
     param(
         [Parameter(Mandatory)][string]$Root
     )
 
-    $csv = Get-ChildItem -Path $Root -Recurse -Filter '*-report.csv' -File |
-        Sort-Object LastWriteTimeUtc -Descending |
-        Select-Object -First 1
-
-    return $csv
+    return @(Get-ChildItem -Path $Root -Recurse -Filter '*-report.csv' -File |
+        Sort-Object FullName)
 }
 
 function Invoke-BenchmarkRun {
@@ -88,14 +85,31 @@ function Get-JoinKey {
         'Op/s', 'Ratio', 'RatioSD', 'Rank', 'Baseline', 'Origin'
     )
 
-    $paramColumns = $Row.PSObject.Properties.Name |
-        Where-Object { $_ -notin $exclude }
+    $paramParts = @(Get-ParameterParts -Row $Row)
+
+    return "Method=$($Row.Method)|$([string]::Join(';', $paramParts))"
+}
+
+function Get-ParameterParts {
+    param(
+        [Parameter(Mandatory)]$Row
+    )
+
+    $columns = @($Row.PSObject.Properties.Name)
+    $start = [Array]::IndexOf($columns, 'WarmupCount') + 1
+    $end = [Array]::IndexOf($columns, 'Mean')
+
+    if ($start -le 0 -or $end -le $start) {
+        return @()
+    }
+
+    $paramColumns = $columns[$start..($end - 1)]
 
     $paramParts = foreach ($col in $paramColumns) {
         "$col=$($Row.$col)"
     }
 
-    return "Method=$($Row.Method)|$([string]::Join(';', $paramParts))"
+    return $paramParts
 }
 
 $localArtifacts = Join-Path $ArtifactsRoot 'local'
@@ -116,22 +130,29 @@ if (-not $SkipRun) {
     Invoke-BenchmarkRun -Project $ProjectPath -FilterValue $Filter -ArtifactsPath $nugetArtifacts -UseNuget -NugetVersion $PackageVersion
 }
 
-$localCsv = Get-LatestBenchmarkCsv -Root $localArtifacts
-$nugetCsv = Get-LatestBenchmarkCsv -Root $nugetArtifacts
+$localCsvs = Get-BenchmarkCsvs -Root $localArtifacts
+$nugetCsvs = Get-BenchmarkCsvs -Root $nugetArtifacts
 
-if ($null -eq $localCsv) {
+if ($localCsvs.Count -lt 1) {
     throw "Could not find local benchmark CSV in '$localArtifacts'."
 }
 
-if ($null -eq $nugetCsv) {
+if ($nugetCsvs.Count -lt 1) {
     throw "Could not find NuGet benchmark CSV in '$nugetArtifacts'."
 }
 
-Write-Host "Using local CSV: $($localCsv.FullName)"
-Write-Host "Using NuGet CSV: $($nugetCsv.FullName)"
+Write-Host "Using local CSV files:"
+$localCsvs | ForEach-Object { Write-Host "  $($_.FullName)" }
+Write-Host "Using NuGet CSV files:"
+$nugetCsvs | ForEach-Object { Write-Host "  $($_.FullName)" }
 
-$localRows = Import-Csv -Path $localCsv.FullName
-$nugetRows = Import-Csv -Path $nugetCsv.FullName
+$localRows = foreach ($csv in $localCsvs) {
+    Import-Csv -Path $csv.FullName
+}
+
+$nugetRows = foreach ($csv in $nugetCsvs) {
+    Import-Csv -Path $csv.FullName
+}
 
 $localByKey = @{}
 foreach ($row in $localRows) {
@@ -151,10 +172,11 @@ $comparison = foreach ($key in $allKeys) {
 
     $method = if ($local) { $local.Method } elseif ($nuget) { $nuget.Method } else { '' }
 
-    $meanLocal = Parse-BdnMetric -Value $local.Mean
-    $meanNuget = Parse-BdnMetric -Value $nuget.Mean
-    $allocLocal = Parse-BdnMetric -Value $local.Allocated
-    $allocNuget = Parse-BdnMetric -Value $nuget.Allocated
+    $meanLocal = Parse-BdnMetric -Value $(if ($local) { $local.Mean } else { $null })
+    $meanNuget = Parse-BdnMetric -Value $(if ($nuget) { $nuget.Mean } else { $null })
+    $allocLocal = Parse-BdnMetric -Value $(if ($local) { $local.Allocated } else { $null })
+    $allocNuget = Parse-BdnMetric -Value $(if ($nuget) { $nuget.Allocated } else { $null })
+    $parameterText = if ($key -match '^Method=[^|]+\|(?<params>.*)$') { $Matches['params'] } else { '' }
 
     $meanDeltaPct = $null
     if ($meanNuget.Number -ne $null -and [math]::Abs($meanNuget.Number) -gt [double]::Epsilon -and $meanLocal.Number -ne $null) {
@@ -169,6 +191,7 @@ $comparison = foreach ($key in $allKeys) {
     [pscustomobject]@{
         Key                 = $key
         Method              = $method
+        Parameters          = $parameterText
         Current_Source      = $currentSource
         Baseline_Source     = $baselineSource
         Mean_Current        = $meanLocal.Raw
@@ -187,18 +210,20 @@ $comparison |
     Sort-Object Method, Key |
     Export-Csv -Path $comparisonCsv -NoTypeInformation -Encoding UTF8
 
-$header = "| Method | Current Source | Baseline Source | Mean (Current) | Mean (NuGet) | Mean Δ% | Alloc (Current) | Alloc (NuGet) | Alloc Δ% |"
-$separator = "|---|---|---|---:|---:|---:|---:|---:|---:|"
+$header = "| Method | Parameters | Current Source | Baseline Source | Mean (Current) | Mean (NuGet) | Mean Δ% | Alloc (Current) | Alloc (NuGet) | Alloc Δ% |"
+$separator = "|---|---|---|---|---:|---:|---:|---:|---:|---:|"
 
 $lines = @($header, $separator)
 $lines += ""
 $lines += "Current Source: $currentSource"
 $lines += "Baseline Source: $baselineSource"
-$lines += "Local CSV: $($localCsv.FullName)"
-$lines += "NuGet CSV: $($nugetCsv.FullName)"
+$lines += "Local CSV files:"
+$lines += $localCsvs | ForEach-Object { "- $($_.FullName)" }
+$lines += "NuGet CSV files:"
+$lines += $nugetCsvs | ForEach-Object { "- $($_.FullName)" }
 $lines += ""
 foreach ($row in ($comparison | Sort-Object Method, Key)) {
-    $lines += "| $($row.Method) | $($row.Current_Source) | $($row.Baseline_Source) | $($row.Mean_Current) | $($row.Mean_NuGet) | $($row.Mean_DeltaPct) | $($row.Allocated_Current) | $($row.Allocated_NuGet) | $($row.Allocated_DeltaPct) |"
+    $lines += "| $($row.Method) | $($row.Parameters) | $($row.Current_Source) | $($row.Baseline_Source) | $($row.Mean_Current) | $($row.Mean_NuGet) | $($row.Mean_DeltaPct) | $($row.Allocated_Current) | $($row.Allocated_NuGet) | $($row.Allocated_DeltaPct) |"
 }
 
 $lines | Set-Content -Path $comparisonMd -Encoding UTF8

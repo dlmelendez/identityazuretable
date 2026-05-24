@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.5.11612.153 insiders
+VisualStudioVersion = 18.6.11723.189 insiders
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElCamino.AspNetCore.Identity.AzureTable", "src\ElCamino.AspNetCore.Identity.AzureTable\ElCamino.AspNetCore.Identity.AzureTable.csproj", "{5FBD2375-18B4-426A-A875-7D99521A4DD0}"
 EndProject
