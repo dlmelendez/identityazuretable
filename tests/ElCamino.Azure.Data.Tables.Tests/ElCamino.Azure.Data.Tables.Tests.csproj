@@ -7,7 +7,7 @@
     <LangVersion>14.0</LangVersion>
     <AssemblyName>ElCamino.Azure.Data.Tables.Tests</AssemblyName>
     <IsPackable>false</IsPackable>
-    <Version>10.0</Version>
+    <Version>10.1</Version>
     <Nullable>disable</Nullable>
     <DebugType>Full</DebugType>
 

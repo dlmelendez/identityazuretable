@@ -180,7 +180,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                         targetUserEntities.Add(tgtDte);
 
                         //Logon index
-                        if (!string.IsNullOrWhiteSpace(loginProvider) 
+                        if (!string.IsNullOrWhiteSpace(loginProvider)
                             && !string.IsNullOrWhiteSpace(providerKey))
                         {
                             IdentityUserIndex logonIndex = new IdentityUserIndex()
@@ -231,7 +231,7 @@ namespace ElCamino.Identity.AzureTable.DataUtility
                         sourceEntity.TryGetValue("TokenName", out object tokenNameProperty);
                         string? tokenName = tokenNameProperty?.ToString();
 
-                        if (!string.IsNullOrWhiteSpace(loginProvider) 
+                        if (!string.IsNullOrWhiteSpace(loginProvider)
                             && !string.IsNullOrWhiteSpace(tokenName))
                         {
                             var targetUserRowKey = _keyHelper.GenerateRowKeyIdentityUserToken(loginProvider, tokenName);

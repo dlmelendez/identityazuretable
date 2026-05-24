@@ -1,7 +1,7 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 using System;
-using System.Linq;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using Azure.Data.Tables;
 using Xunit;
@@ -22,7 +22,7 @@ namespace ElCamino.Azure.Data.Tables.Tests
             await _tableClient.CreateIfNotExistsAsync();
             _output.WriteLine("Table created {0}", TableName);
 
-        }        
+        }
 
         [Fact]
         public async Task AddUpdateGetEntityWithHeaderValues()

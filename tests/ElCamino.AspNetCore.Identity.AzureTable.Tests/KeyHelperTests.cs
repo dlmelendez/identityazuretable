@@ -21,7 +21,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         private readonly HashTestKeyHelperFake _fakeKeyHelper = new();
         protected readonly ITestOutputHelper _output;
 
-        public KeyHelperTests(ITestOutputHelper output) 
+        public KeyHelperTests(ITestOutputHelper output)
         {
             _output = output;
         }
@@ -74,7 +74,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             sw.Stop();
             mem = GC.GetTotalAllocatedBytes() - mem;
             _output.WriteLine($"returned {sw.Elapsed.TotalMilliseconds}ms, Alloc: {mem / 1024.0 / 1024:N2}mb");
-           
+
         }
 
 

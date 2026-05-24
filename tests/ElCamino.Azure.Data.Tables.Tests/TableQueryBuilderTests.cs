@@ -129,7 +129,7 @@ namespace ElCamino.Azure.Data.Tables.Tests
             Assert.Equal(filterNull, filterNullBuilder);
 
         }
-        
+
         [Fact]
         public async Task QueryBuilderNullPropertyString()
         {

@@ -31,13 +31,13 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="tableServiceClientAction"><see cref="TableServiceClient"/></param>
         /// <param name="keyHelper">Use <see cref="DefaultKeyHelper"/> that uses SHA1, <see cref="SHA256KeyHelper"/> or a custom keyhelper that implements <see cref="IKeyHelper"/> </param>
         /// <returns><see cref="IdentityBuilder"/></returns>
-        public static IdentityBuilder AddAzureTableStores<TContext>(this IdentityBuilder builder, 
+        public static IdentityBuilder AddAzureTableStores<TContext>(this IdentityBuilder builder,
             Func<IdentityConfiguration> configAction,
             Func<TableServiceClient> tableServiceClientAction,
             IKeyHelper? keyHelper = null)
             where TContext : IdentityCloudContext
         {
-             return builder.AddAzureTableStores<TContext>(_ => configAction(), _ => tableServiceClientAction(), keyHelper);
+            return builder.AddAzureTableStores<TContext>(_ => configAction(), _ => tableServiceClientAction(), keyHelper);
         }
 
         /// <summary>
@@ -62,12 +62,12 @@ namespace Microsoft.Extensions.DependencyInjection
             builder.Services.AddSingleton<IKeyHelper>(keyHelper ?? new DefaultKeyHelper());
 
             builder.Services.AddSingleton<IdentityConfiguration>(configAction);
-                
+
             Type contextType = typeof(TContext);
 
             builder.Services.AddKeyedSingleton<TableServiceClient>(IdentityAzureTableServiceClientKey, (sp, o) => tableServiceClientAction(sp));
-            builder.Services.AddSingleton(contextType, sp => 
-            { 
+            builder.Services.AddSingleton(contextType, sp =>
+            {
                 return Activator.CreateInstance(contextType, [sp.GetRequiredService<IdentityConfiguration>(), sp.GetRequiredKeyedService<TableServiceClient>(IdentityAzureTableServiceClientKey)]) as TContext
                     ?? throw new InvalidOperationException($"Unable to create instance of {contextType.FullName}. Must have a constructor that accepts {nameof(IdentityConfiguration)}, {nameof(TableServiceClient)}");
             });

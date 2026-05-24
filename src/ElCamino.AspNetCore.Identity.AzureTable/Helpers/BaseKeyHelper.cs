@@ -140,7 +140,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         public virtual ReadOnlySpan<char> GeneratePartitionKeyIdentityRole(string? plainRoleName)
         {
             var hash = ConvertKeyToHash(plainRoleName?.ToUpper());
-            if(hash.IsEmpty)
+            if (hash.IsEmpty)
             {
                 return string.Empty;
             }
@@ -186,7 +186,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         }
 
         /// <inheritdoc/>
-        public double KeyVersion => 10.0;
+        public double KeyVersion => 10.1;
 
         /// <summary>
         /// Convert Key Data to a hex hash string

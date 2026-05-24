@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.32112.339
+# Visual Studio Version 18
+VisualStudioVersion = 18.6.11723.189 insiders
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElCamino.AspNetCore.Identity.AzureTable", "src\ElCamino.AspNetCore.Identity.AzureTable\ElCamino.AspNetCore.Identity.AzureTable.csproj", "{5FBD2375-18B4-426A-A875-7D99521A4DD0}"
 EndProject
@@ -25,6 +25,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElCamino.Azure.Data.Tables", "src\ElCamino.Azure.Data.Tables\ElCamino.Azure.Data.Tables.csproj", "{DAF57676-8534-4A62-BC7B-317753F2A275}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElCamino.Azure.Data.Tables.Tests", "tests\ElCamino.Azure.Data.Tables.Tests\ElCamino.Azure.Data.Tables.Tests.csproj", "{7A71EC75-781D-42AB-BDF0-C2B6D4EF2B10}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElCamino.AspNetCore.Identity.AzureTable.Benchmark", "perf\ElCamino.AspNetCore.Identity.AzureTable.Benchmark\ElCamino.AspNetCore.Identity.AzureTable.Benchmark.csproj", "{48EA8112-6A4C-5EDD-E898-815F6DDD68BA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -75,6 +77,12 @@ Global
 		{7A71EC75-781D-42AB-BDF0-C2B6D4EF2B10}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7A71EC75-781D-42AB-BDF0-C2B6D4EF2B10}.Signed|Any CPU.ActiveCfg = Debug|Any CPU
 		{7A71EC75-781D-42AB-BDF0-C2B6D4EF2B10}.Signed|Any CPU.Build.0 = Debug|Any CPU
+		{48EA8112-6A4C-5EDD-E898-815F6DDD68BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48EA8112-6A4C-5EDD-E898-815F6DDD68BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48EA8112-6A4C-5EDD-E898-815F6DDD68BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48EA8112-6A4C-5EDD-E898-815F6DDD68BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48EA8112-6A4C-5EDD-E898-815F6DDD68BA}.Signed|Any CPU.ActiveCfg = Release|Any CPU
+		{48EA8112-6A4C-5EDD-E898-815F6DDD68BA}.Signed|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

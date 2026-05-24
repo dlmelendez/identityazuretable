@@ -364,7 +364,7 @@ namespace Azure.Data.Tables
                 Span<char> chars = stackalloc char[givenValue.Length + 2];
                 chars[0] = '\'';
                 int outputIndex = 1;
-                for(int givenIndex = 0; givenIndex < givenValue.Length; givenIndex++)
+                for (int givenIndex = 0; givenIndex < givenValue.Length; givenIndex++)
                 {
                     chars[outputIndex++] = givenValue[givenIndex];
                 }
