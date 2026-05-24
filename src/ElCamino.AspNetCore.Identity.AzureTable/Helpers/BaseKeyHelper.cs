@@ -186,7 +186,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         }
 
         /// <inheritdoc/>
-        public double KeyVersion => 10.0;
+        public double KeyVersion => 10.1;
 
         /// <summary>
         /// Convert Key Data to a hex hash string
