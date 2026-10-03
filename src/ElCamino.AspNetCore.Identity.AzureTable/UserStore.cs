@@ -267,36 +267,21 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 TableOperators.And,
                 TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.Equal, _keyHelper.GenerateRowKeyIdentityUserRole(roleName)));
             var userRoleTask = _userTable.QueryAsync<TableEntity>(filter: filterString.ToString(), maxPerPage: 1, select: TableRowKeySelectColumns, cancellationToken).AnyAsync(cancellationToken)
-#if NET10_0_OR_GREATER
-                .AsTask()
-#endif
-                ;
+                .AsTask();
             var roleExistsTask = RoleExistsAsync(roleName!, cancellationToken)
-#if NET10_0_OR_GREATER
-                .AsTask()
-#endif
-                ;
+                .AsTask();
 
             await Task.WhenAll(userRoleTask, roleExistsTask).ConfigureAwait(false);
 
             return userRoleTask.Result && roleExistsTask.Result;
         }
 
-#if NET10_0_OR_GREATER
         /// <inheritdoc/>
         public ValueTask<bool> RoleExistsAsync(string roleName, CancellationToken cancellationToken = default)
         {
             return _roleTable.QueryAsync<TableEntity>(filter: BuildRoleQuery(roleName), maxPerPage: 1, select: [nameof(Model.IdentityRole.Name)], cancellationToken: cancellationToken).AnyAsync(cancellationToken);
         }
-#else
 
-        /// <inheritdoc/>
-        public Task<bool> RoleExistsAsync(string roleName, CancellationToken cancellationToken = default)
-        {
-            return _roleTable.QueryAsync<TableEntity>(filter: BuildRoleQuery(roleName), maxPerPage: 1, select: [nameof(Model.IdentityRole.Name)], cancellationToken: cancellationToken).AnyAsync(cancellationToken);
-        }
-
-#endif
         /// <inheritdoc/>
         public virtual async Task RemoveFromRoleAsync(TUser user, string? roleName, CancellationToken cancellationToken = default)
         {
@@ -390,9 +375,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             async Task ProcessAggregateQueryAsync(string query, CancellationToken ct)
             {
                 var queryResults = await _userTable.QueryAsync<TableEntity>(filter: query, cancellationToken: ct).ToListAsync(ct)
-#if NET10_0_OR_GREATER
                     .AsTask()
-#endif
                     .ConfigureAwait(false);
 
                 foreach (var s in queryResults.GroupBy(g => g.PartitionKey))

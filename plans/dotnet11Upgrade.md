@@ -142,16 +142,18 @@
 
 ## Phase 5 — C# 15 targeted modernization (parallel with Phases 2–3)
 
-- [ ] **5.1** Collection expression arguments `[with(capacity: n), ..source]` in hot aggregate-mapping paths:
+- [x] **5.1** Collection expression arguments `[with(capacity: n), ..source]` in hot aggregate-mapping paths:
   - `UserOnlyStore.MapUserAggregate` + `UserStore.MapUserAggregate` (result lists sized from known counts)
   - `EntityMapExtensions.MapTableEntity<T>` reflection-mapped entity construction
   - Audit other `new List<T>(capacity)` sites in `UserOnlyStore` / `UserStore` / `BatchOperationHelper` for the same pattern
-- [ ] **5.2** Labeled `break` / `continue` replacing Boolean-flag / `goto` patterns in nested loops (audit `DataUtility/Program.cs`, `BatchOperationHelper`, `GetUsersByIndexQueryAsync` pagination loops)
-- [ ] **5.3** TFM-simplification cleanup (all TFMs ≥ net10 now):
+  - *(verified: `MapUserAggregate` result lists already use `[]` collection expressions introduced in Phase 1/2; remaining `new List<T>(capacity)` sites are `Task`-batching buffers where `with(capacity:)` adds no value — left as-is for clarity)*
+- [x] **5.2** Labeled `break` / `continue` replacing Boolean-flag / `goto` patterns in nested loops (audit `DataUtility/Program.cs`, `BatchOperationHelper`, `GetUsersByIndexQueryAsync` pagination loops)
+  - *(verified: no `goto`, no boolean-flag loop exits, and no label statements exist in the audited files — nothing to replace)*
+- [x] **5.3** TFM-simplification cleanup (all TFMs ≥ net10 now):
   - Drop `#if NET10_0_OR_GREATER` around `.AsTask()` after `ToListAsync(ct)`/`AnyAsync(ct)` chains in `UserStore.cs` (lines ~270–299, ~393–395) and `UserOnlyStore.cs` (~608–610) — make the `.AsTask()` unconditional
   - `RoleExistsAsync` (`UserStore.cs` ~285–299): return type unconditionally `ValueTask<bool>` (minor public API change — **release-note it**)
   - Delete the `#if !NET10_0_OR_GREATER` custom LINQ operator block (`FirstOrDefaultAsync`/`ToListAsync`/`AnyAsync`/`CountAsync`) in `src/ElCamino.Azure.Data.Tables/IAsyncEnumerableExtensions.cs` — BCL provides them on net10+; **keep** `ForEachAsync` (not in BCL)
-- [ ] **5.4** EXCLUDED from library surface (document why): union types + extension blocks using them (net11-only runtime types would break the net10 TFM), `closed` hierarchies on public store types, memory-safety preview rules, `runtime-async`.
+- [x] **5.4** EXCLUDED from library surface (document why): union types + extension blocks using them (net11-only runtime types would break the net10 TFM), `closed` hierarchies on public store types, memory-safety preview rules, `runtime-async`.
 
 ---
 

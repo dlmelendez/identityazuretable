@@ -614,9 +614,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             async Task ProcessAggregateQueryAsync(string query, CancellationToken ct)
             {
                 var queryResult = await _userTable.QueryAsync<TableEntity>(filter: query, cancellationToken: ct).ToListAsync(ct)
-#if NET10_0_OR_GREATER
                     .AsTask()
-#endif
                     .ConfigureAwait(false);
 
                 foreach (var s in queryResult.GroupBy(g => g.PartitionKey))
