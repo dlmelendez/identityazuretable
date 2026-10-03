@@ -81,6 +81,16 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             public const string PreFixIdentityUserToken = "T_";
 
             /// <summary>
+            /// Default Key PreFix for IdentityUserPasskey
+            /// </summary>
+            public const string PreFixIdentityUserPasskey = "K_";
+
+            /// <summary>
+            /// Default Key PreFix for IdentityUserPasskeyUpperBound
+            /// </summary>
+            public const string PreFixIdentityUserPasskeyUpperBound = "O_";
+
+            /// <summary>
             /// Default Key PreFix for IdentityUserId
             /// </summary>
             public const string PreFixIdentityUserId = "U_";
@@ -119,6 +129,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             /// Default Key Formatter for IdentityUserToken
             /// </summary>
             public const string FormatterIdentityUserToken = PreFixIdentityUserToken + "{0}";
+
+            /// <summary>
+            /// Default Key Formatter for IdentityUserPasskey
+            /// </summary>
+            public const string FormatterIdentityUserPasskey = PreFixIdentityUserPasskey + "{0}";
 
             /// <summary>
             /// Default Key Formatter for IdentityUserId

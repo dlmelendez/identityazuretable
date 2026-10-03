@@ -37,6 +37,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         public virtual string PreFixIdentityUserToken => TableConstants.RowKeyConstants.PreFixIdentityUserToken;
 
         /// <inheritdoc/>
+        public virtual string PreFixIdentityUserPasskey => TableConstants.RowKeyConstants.PreFixIdentityUserPasskey;
+
+        /// <inheritdoc/>
+        public virtual string PreFixIdentityUserPasskeyUpperBound => TableConstants.RowKeyConstants.PreFixIdentityUserPasskeyUpperBound;
+
+        /// <inheritdoc/>
         public virtual string PreFixIdentityUserId => TableConstants.RowKeyConstants.PreFixIdentityUserId;
 
         /// <inheritdoc/>
@@ -59,6 +65,9 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
 
         /// <inheritdoc/>
         public virtual string FormatterIdentityUserToken => TableConstants.RowKeyConstants.FormatterIdentityUserToken;
+
+        /// <inheritdoc/>
+        public virtual string FormatterIdentityUserPasskey => TableConstants.RowKeyConstants.FormatterIdentityUserPasskey;
 
         /// <inheritdoc/>
         public virtual string FormatterIdentityUserId => TableConstants.RowKeyConstants.FormatterIdentityUserId;
@@ -186,7 +195,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         }
 
         /// <inheritdoc/>
-        public double KeyVersion => 10.1;
+        public double KeyVersion => 11.0;
 
         /// <summary>
         /// Convert Key Data to a hex hash string

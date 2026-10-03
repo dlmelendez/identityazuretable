@@ -49,7 +49,7 @@
 
 ## Phase 2 — Passkey store implementation (no JSON; new `IKeyHelper` row properties)
 
-- [ ] **2.1** **New file** `src/ElCamino.AspNetCore.Identity.AzureTable.Model/IdentityUserPasskey.cs`
+- [x] **2.1** **New file** `src/ElCamino.AspNetCore.Identity.AzureTable.Model/IdentityUserPasskey.cs` *(implemented: typed columns + lossless `FromPasskeyInfo`/`ToPasskeyInfo` converters with `#if NET11_0_OR_GREATER` Aaguid guard; `Base64Url.EncodeToString` (BCL, .NET 9+) for credentialId row keys; property-representation test deferred to Phase 3 with the other tests per plan structure)*
   - `public class IdentityUserPasskey : IGenerateKeys, ITableEntity` (mirrors `IdentityUser.cs` shape)
   - `IGenerateKeys` members: `GenerateKeys(IKeyHelper)` (RowKey = `string.Format(keyHelper.FormatterIdentityUserPasskey, Base64Url(CredentialId))`; PartitionKey = hashed user id), `PeekRowKey(IKeyHelper)`, `KeyVersion`
   - `ITableEntity` members: `PartitionKey`, `RowKey`, `Timestamp`, `ETag` (defaults: `string.Empty` / `ETag.All`)
@@ -72,7 +72,7 @@
     - Additional properties on `IdentityUserPasskey` (`UserId`, `PartitionKey`, `RowKey`, `Timestamp`, `ETag`, `KeyVersion`) are **allowed** — no reverse check
     - Test project compiles with `<Nullable>disable</Nullable>`, so compare CLR types (`PropertyType`); nullability annotations are not compared
     - **TFM adaptation:** `UserPasskeyInfo`'s property set differs per Identity version — Identity 10 (net10.0 TFM) lacks `Aaguid`; Identity 11 (net11.0 TFM) adds it. Because the test reflects over the compiled-against Identity type, it adapts automatically on each TFM with no `#if` in the test — and a future Identity property addition will fail the test until the matching column is added (nothing can be silently unrepresented)
-- [ ] **2.2** `IKeyHelper` + key helpers + `TableConstants` — add new passkey row properties:
+- [x] **2.2** `IKeyHelper` + key helpers + `TableConstants` — add new passkey row properties:
   - `src/ElCamino.AspNetCore.Identity.AzureTable.Model/IKeyHelper.cs`: add interface properties (following the existing prefix/formatter pattern):
     - `string PreFixIdentityUserPasskey { get; }`
     - `string PreFixIdentityUserPasskeyUpperBound { get; }`
@@ -82,7 +82,7 @@
   - `DefaultKeyHelper` / `SHA256KeyHelper`: inherit the new properties automatically — verify no overrides needed
   - Update `tests/ElCamino.AspNetCore.Identity.AzureTable.Tests/Fakes/HashTestKeyHelperFake.cs` for the new interface members (inherits `BaseKeyHelper` → likely compiles unchanged; verify)
   - **Breaking-change note for release notes:** custom `IKeyHelper` implementations must add the three new properties (interface additions are compile-time breaking)
-- [ ] **2.3** `src/ElCamino.AspNetCore.Identity.AzureTable/UserOnlyStore.cs` — declare `IUserPasskeyStore<TUser>` (no new generic type params → store signatures and DI wiring unchanged) and implement the 5 methods following existing store patterns:
+- [x] **2.3** `src/ElCamino.AspNetCore.Identity.AzureTable/UserOnlyStore.cs` — declare `IUserPasskeyStore<TUser>` (no new generic type params → store signatures and DI wiring unchanged) and implement the 5 methods following existing store patterns:
   - `AddOrUpdatePasskeyAsync(TUser, UserPasskeyInfo, CancellationToken)`:
     - `FromPasskeyInfo(passkey, hashedUserId)` → upsert user-table row (partition = `_keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id))`, row = `string.Format(_keyHelper.FormatterIdentityUserPasskey, Base64Url(credentialId))`) via `BatchOperationHelper`/upsert
     - Upsert index-table row (partition = `GeneratePartitionKeyIndexByLogin("Passkey", Base64Url(credentialId))`, row = `GenerateRowKeyIdentityUserLogin("Passkey", Base64Url(credentialId))`, `Id` = hashed user id) — enables username-less sign-in
@@ -91,10 +91,10 @@
   - `FindByPasskeyIdAsync(byte[] credentialId, CancellationToken)`: index lookup → `GetUserFromIndexQueryAsync` pattern (mirrors `FindByLoginAsync`)
   - `RemovePasskeyAsync(TUser, byte[] credentialId, CancellationToken)`: delete user-table row + matching index row (`TableConstants.ETagWildcard`) in parallel
   - XML doc comments on all new public members
-- [ ] **2.4** `src/ElCamino.AspNetCore.Identity.AzureTable/UserOnlyStore.cs` — `DeleteAsync`: extend the existing login/claim index-deletion loops with passkey-index cleanup (iterate the user's passkeys via the `PreFixIdentityUserPasskey`/`PreFixIdentityUserPasskeyUpperBound` range before `DeleteAllUserRowsAsync`, add `DeleteEntityAsync` tasks for each passkey index row). User-table passkey rows are already removed by the partition-scope row delete.
-- [ ] **2.5** `src/ElCamino.AspNetCore.Identity.AzureTable/UserStore.cs` — **no edits needed**: role store variant inherits passkey support from `UserOnlyStore`. Verify no collision with existing `IUserRoleStore<TUser>` declaration.
-- [ ] **2.6** Confirm `MapUserAggregate` untouched: passkey rows live in the user partition but are excluded from the claims/logins/tokens prefix filters — no collision with `C_/D_/R_/S_/L_/M_/E_/T_/U_/V_/N_/K_/O_`.
-- [ ] **2.7** Verify the remaining untouched files: `Helpers/DefaultKeyHelper.cs` / `Helpers/SHA256KeyHelper.cs` (inherit new properties from `BaseKeyHelper` — no overrides), `IdentityAzureTableBuilderExtensions.cs` (DI registration unchanged). Update `Fakes/HashTestKeyHelperFake.cs` if needed per 2.2.
+- [x] **2.4** `src/ElCamino.AspNetCore.Identity.AzureTable/UserOnlyStore.cs` — `DeleteAsync`: extend the existing login/claim index-deletion loops with passkey-index cleanup (iterate the user's passkeys via the `PreFixIdentityUserPasskey`/`PreFixIdentityUserPasskeyUpperBound` range before `DeleteAllUserRowsAsync`, add `DeleteEntityAsync` tasks for each passkey index row). User-table passkey rows are already removed by the partition-scope row delete.
+- [x] **2.5** `src/ElCamino.AspNetCore.Identity.AzureTable/UserStore.cs` — **no edits needed**: role store variant inherits passkey support from `UserOnlyStore`. Verify no collision with existing `IUserRoleStore<TUser>` declaration. *(verified: role variant compiles unchanged on both TFMs)*
+- [x] **2.6** Confirm `MapUserAggregate` untouched: passkey rows live in the user partition but are excluded from the claims/logins/tokens prefix filters — no collision with `C_/D_/R_/S_/L_/M_/E_/T_/U_/V_/N_/K_/O_`. *(verified: aggregate code untouched; passkey rows enumerated via separate range query)*
+- [x] **2.7** Verify the remaining untouched files: `Helpers/DefaultKeyHelper.cs` / `Helpers/SHA256KeyHelper.cs` (inherit new properties from `BaseKeyHelper` — no overrides), `IdentityAzureTableBuilderExtensions.cs` (DI registration unchanged). Update `Fakes/HashTestKeyHelperFake.cs` if needed per 2.2. *(verified: both compile unchanged — `HashTestKeyHelperFake` inherits virtual properties from `BaseKeyHelper`)*
 
 ---
 

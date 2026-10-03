@@ -50,6 +50,16 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         string PreFixIdentityUserToken { get; }
 
         /// <summary>
+        /// Key prefix for IdentityUserPasskey
+        /// </summary>
+        string PreFixIdentityUserPasskey { get; }
+
+        /// <summary>
+        /// Key prefix for IdentityUserPasskeyUpperBound
+        /// </summary>
+        string PreFixIdentityUserPasskeyUpperBound { get; }
+
+        /// <summary>
         /// Key prefix for IdentityUserId
         /// </summary>
         string PreFixIdentityUserId { get; }
@@ -88,6 +98,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// Key Formatter for IdentityUserToken
         /// </summary>
         string FormatterIdentityUserToken { get; }
+
+        /// <summary>
+        /// Key Formatter for IdentityUserPasskey
+        /// </summary>
+        string FormatterIdentityUserPasskey { get; }
 
         /// <summary>
         /// Key Formatter for IdentityUserId
