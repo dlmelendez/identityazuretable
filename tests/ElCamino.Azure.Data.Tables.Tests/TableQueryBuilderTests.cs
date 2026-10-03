@@ -531,8 +531,8 @@ namespace ElCamino.Azure.Data.Tables.Tests
 
             //Assert
             Assert.Equal(0, await _tableClient.QueryAsync<TableEntity>(filter: filterNullBuilder).CountAsync());
-            //This is a bug in the emulator, this should pass on real storage account
-            Assert.Equal(0, await _tableClient.QueryAsync<TableEntity>(filter: filterNotNullBuilder).CountAsync());
+            //ne matches entities where the property is absent (matches real storage accounts and current Azurite)
+            Assert.Equal(1, await _tableClient.QueryAsync<TableEntity>(filter: filterNotNullBuilder).CountAsync());
 
             //Modify update
             var updateEntity = new TableEntity(key, key)

@@ -271,3 +271,9 @@ __pycache__/
 !/src/Web/wwwroot/out-tsc/
 /src/Web/wwwroot/
 *.stackdump
+
+# Azurite local storage
+__azurite_db_table__.json
+__azurite_db_account__.json
+__blobstorage__/
+__queuestorage__/

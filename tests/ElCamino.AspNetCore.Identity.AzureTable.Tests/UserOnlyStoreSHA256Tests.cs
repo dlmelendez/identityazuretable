@@ -40,6 +40,41 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             return base.AddRemoveUserToken();
         }
 
+        [Fact(DisplayName = "AddGetFindRemoveUserPasskey")]
+        [Trait(UserOnlyStoreTrait, "")]
+        public override Task AddGetFindRemoveUserPasskey()
+        {
+            return base.AddGetFindRemoveUserPasskey();
+        }
+
+        [Fact(DisplayName = "UpdateUserPasskey")]
+        [Trait(UserOnlyStoreTrait, "")]
+        public override Task UpdateUserPasskey()
+        {
+            return base.UpdateUserPasskey();
+        }
+
+        [Fact(DisplayName = "FindUserByPasskeyId")]
+        [Trait(UserOnlyStoreTrait, "")]
+        public override Task FindUserByPasskeyId()
+        {
+            return base.FindUserByPasskeyId();
+        }
+
+        [Fact(DisplayName = "DeleteUserPasskeyIndexCleanup")]
+        [Trait(UserOnlyStoreTrait, "")]
+        public override Task DeleteUserPasskeyIndexCleanup()
+        {
+            return base.DeleteUserPasskeyIndexCleanup();
+        }
+
+        [Fact(DisplayName = "UserPasskeyArgumentNullChecks")]
+        [Trait(UserOnlyStoreTrait, "")]
+        public override Task UserPasskeyArgumentNullChecks()
+        {
+            return base.UserPasskeyArgumentNullChecks();
+        }
+
         [Fact(DisplayName = "AddReplaceRemoveUserClaim")]
         [Trait(UserOnlyStoreTrait, "")]
         public override Task AddReplaceRemoveUserClaim()
