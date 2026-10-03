@@ -115,7 +115,7 @@
 
 ## Phase 4 — Ancillary projects, CI, versioning (parallel with Phases 2–3 after Phase 1)
 
-- [ ] **4.1** Templates: `templates/templates/StarterWebMvc-CSharp/` + `templates/templates/StarterWebRazorPages-CSharp/`
+- [x] **4.1** Templates: `templates/templates/StarterWebMvc-CSharp/` + `templates/templates/StarterWebRazorPages-CSharp/`
   - **Remove the direct EF Core package references** from both template csprojs (`samplemvccore.csproj` + `samplerazorpagescore.csproj`) — the apps use Azure Table stores, not EF:
     - Delete `<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" ... />`
     - Delete `<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" ... />`
@@ -129,14 +129,14 @@
   - `Microsoft.AspNetCore.Identity.UI` ref → `11.0-*` (GA: `11.0.*`) — not an EF package, keep it
   - `Microsoft.VisualStudio.Web.CodeGeneration.Design` ref → `11.0-*` (GA: `11.0.*`) — design-time scaffolding tool, keep it (it is not a *direct* EF reference; its transitive design-time deps are acceptable)
   - `Microsoft.Extensions.Azure` stays `1.11.0` (bump only if a net11-compatible newer version exists)
-- [ ] **4.2** `templates/ElCamino.AspNetCore.Identity.AzureTable.Templates.csproj`: `<Version>` → `11.0` (TFM already irrelevant — `IncludeBuildOutput=false`, but bump for consistency)
-- [ ] **4.3** `perf/ElCamino.AspNetCore.Identity.AzureTable.Benchmark/ElCamino.AspNetCore.Identity.AzureTable.Benchmark.csproj`: TFM → `net11.0`; verify BenchmarkDotNet 0.14.0 runs on a net11 host (bump BDN if it needs an update for the new runtime); `BenchmarkPackageVersion` default → `11.0.*`
-- [ ] **4.4** `perf/compare.ps1`: default `-BenchmarkPackageVersion` → `11.0.*` (package-comparison mode)
-- [ ] **4.5** `azure-pipelines.yml`:
+- [x] **4.2** `templates/ElCamino.AspNetCore.Identity.AzureTable.Templates.csproj`: `<Version>` → `11.0` (TFM already irrelevant — `IncludeBuildOutput=false`, but bump for consistency)
+- [x] **4.3** `perf/ElCamino.AspNetCore.Identity.AzureTable.Benchmark/ElCamino.AspNetCore.Identity.AzureTable.Benchmark.csproj`: TFM → `net11.0`; verify BenchmarkDotNet 0.14.0 runs on a net11 host (bump BDN if it needs an update for the new runtime); `BenchmarkPackageVersion` default → `11.0.*`
+- [x] **4.4** `perf/compare.ps1`: default `-BenchmarkPackageVersion` → `11.0.*` (package-comparison mode)
+- [x] **4.5** `azure-pipelines.yml`:
   - Replace the `UseDotNet@2` SDK `8.x` step with `11.0.x` **+ `includePreviewVersions: true`** (until GA)
   - Keep the SDK `10.0.x` step (tests build/run on both TFMs via `dotnet test`)
   - No other pipeline changes: tests run against real Azure storage via `$(StorageConnection)` config-rewrite step; `GeneratePackageOnBuild` still produces nupkgs during build
-- [ ] **4.6** `<Version>` `10.1` → `11.0` in all carrying csprojs: main lib, Model, Data.Tables, DataUtility, both test projects, templates pack, benchmark (8 files).
+- [x] **4.6** `<Version>` `10.1` → `11.0` in all carrying csprojs: main lib, Model, Data.Tables, DataUtility, both test projects, templates pack, benchmark (8 files).
 
 ---
 

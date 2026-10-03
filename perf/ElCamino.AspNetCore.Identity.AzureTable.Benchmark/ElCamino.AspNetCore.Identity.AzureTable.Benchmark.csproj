@@ -2,13 +2,13 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net11.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <LangVersion>14.0</LangVersion>
+    <LangVersion>15.0</LangVersion>
     <UseLocalProject Condition="'$(UseLocalProject)' == ''">true</UseLocalProject>
-    <BenchmarkPackageVersion Condition="'$(BenchmarkPackageVersion)' == ''">10.0.*</BenchmarkPackageVersion>
-    <Version>10.1</Version>
+    <BenchmarkPackageVersion Condition="'$(BenchmarkPackageVersion)' == ''">11.0.*</BenchmarkPackageVersion>
+    <Version>11.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

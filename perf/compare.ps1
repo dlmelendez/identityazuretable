@@ -1,7 +1,7 @@
 param(
     [string]$ProjectPath = "perf/ElCamino.AspNetCore.Identity.AzureTable.Benchmark/ElCamino.AspNetCore.Identity.AzureTable.Benchmark.csproj",
     [string]$Filter = "*Benchmarks*",
-    [string]$PackageVersion = "10.0.*",
+    [string]$PackageVersion = "11.0.*",
     [string]$ArtifactsRoot = "perf/artifacts",
     [switch]$SkipRun
 )
