@@ -159,12 +159,12 @@
 
 ## Phase 6 — Verification, docs, GA checklist
 
-- [ ] **6.1** Build: workspace `build` task green; confirm `net10.0` and `net11.0` assets in `bin/`
-- [ ] **6.2** Tests: `dotnet test` on both test projects × both TFMs against Azurite (table endpoint 10002); all passkey tests + existing suite green
-- [ ] **6.3** Perf: run `perf/compare.ps1` (local project vs. NuGet `11.0.*` package mode) — no significant regressions vs. `perf/history/comparison_v10.0.0` baseline in `MapUserAggregate` / `GetUserQueryAsync`; record results in `perf/history/`
-- [ ] **6.4** Pack inspection: `GeneratePackageOnBuild` nupkgs contain `net10.0` + `net11.0` lib folders, snupkg symbols, strong-name signature intact, XML docs present
-- [ ] **6.5** API-diff review vs. 10.1 nupkg: changes must be additive only (passkey class + 5 store methods + 3 `IKeyHelper` properties) + TFM removals + `RoleExistsAsync` `ValueTask` note. Update README support matrix, template READMEs, and release notes (net8/9 drop, passkey support, **`IKeyHelper` additions — breaking for custom implementers**, `KeyVersion` 11.0)
-- [ ] **6.6** **GA checklist (Nov 2026):**
+- [x] **6.1** Build: workspace `build` task green; `net10.0` + `net11.0` assets confirmed in `bin/` for all shipped projects
+- [x] **6.2** Tests: both test projects × both TFMs green against Azurite (214 + 28 per TFM; 0 failures). Passkey round-trip, index lookup, DeleteAsync cleanup, and property-representation tests all pass on net10.0 and net11.0. **Combined line coverage = 90.91%** (2050/2255) — above the 85% target
+- [ ] **6.3** Perf: **GA-gated** — the *package-comparison* mode of `perf/compare.ps1` compares local build vs. a published `11.0.*` NuGet package, but `11.0.*` is not published yet (latest on NuGet is `10.1.0`). The local benchmark harness was smoke-tested on a net11 host in Phase 4 (BDN 0.14.0 runs, 8 Dry benchmarks executed). Re-run `perf/compare.ps1` after the 11.0.x package is published and record results in `perf/history/`
+- [x] **6.4** Pack inspection: `ElCamino.AspNetCore.Identity.AzureTable.11.0.0.nupkg` + `.Model.11.0.0.nupkg` + `.Templates.11.0.0.nupkg` contain `net10.0` + `net11.0` lib folders, XML docs, and a `.snupkg` symbols package; `SignAssembly=true` with `tools/key.snk` (strong-name intact)
+- [x] **6.5** API-diff review: changes are additive only (new `IdentityUserPasskey` class, 5 `IUserPasskeyStore` methods, 3 `IKeyHelper` properties) + TFM removals + `RoleExistsAsync` → `ValueTask<bool>`. READMEs use auto-updating NuGet version badges (no hardcoded framework matrix); release notes live on GitHub Releases. Breaking-change note for the release notes: **custom `IKeyHelper` implementers must add `PreFixIdentityUserPasskey`, `PreFixIdentityUserPasskeyUpperBound`, `FormatterIdentityUserPasskey`**; `KeyVersion` bumped 10.1 → 11.0
+- [ ] **6.6** **GA checklist (Nov 2026) — PENDING, do at .NET 11 GA:**
   - Swap `11.0-*` → `11.0.*` in all csprojs + templates
   - Drop `includePreviewVersions: true` from `azure-pipelines.yml`
   - Full re-test both TFMs; re-run perf comparison
