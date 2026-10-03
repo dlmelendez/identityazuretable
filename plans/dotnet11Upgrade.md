@@ -28,22 +28,22 @@
 
 ## Phase 1 — Foundation: TFMs, packages, language version
 
-- [ ] **1.1** `src/ElCamino.AspNetCore.Identity.AzureTable/ElCamino.AspNetCore.Identity.AzureTable.csproj`
+- [x] **1.1** `src/ElCamino.AspNetCore.Identity.AzureTable/ElCamino.AspNetCore.Identity.AzureTable.csproj`
   - `<TargetFrameworks>` → `net10.0;net11.0`
   - `<LangVersion>` → `15.0`
   - Keep the `net10.0` conditional ItemGroup (`Microsoft.Extensions.Identity.Core` / `Microsoft.Extensions.Identity.Stores` / `Microsoft.Extensions.DependencyInjection` at `10.0.*`)
   - Add `net11.0` conditional ItemGroup → same three packages at `11.0-*` (floating prerelease; `11.0.*` at GA)
   - Delete the `net9.0` and `net8.0` conditional ItemGroups
   - Delete the dead `netstandard2.0` ItemGroup (`Microsoft.CSharp` 4.7.0)
-- [ ] **1.2** `src/ElCamino.AspNetCore.Identity.AzureTable.Model/ElCamino.AspNetCore.Identity.AzureTable.Model.csproj`
+- [x] **1.2** `src/ElCamino.AspNetCore.Identity.AzureTable.Model/ElCamino.AspNetCore.Identity.AzureTable.Model.csproj`
   - `<TargetFrameworks>` → `net10.0;net11.0`; `<LangVersion>` → `15.0`
   - Keep `net10.0` → `Microsoft.Extensions.Identity.Stores` `10.0.*`; add `net11.0` → `11.0-*`
   - Delete `net9.0` / `net8.0` conditional ItemGroups
-- [ ] **1.3** `src/ElCamino.Azure.Data.Tables/ElCamino.Azure.Data.Tables.csproj`
+- [x] **1.3** `src/ElCamino.Azure.Data.Tables/ElCamino.Azure.Data.Tables.csproj`
   - `<TargetFrameworks>` → `net10.0;net11.0`; `<LangVersion>` → `15.0`
-- [ ] **1.4** `src/ElCamino.Identity.AzureTable.DataUtility/ElCamino.Identity.AzureTable.DataUtility.csproj`
+- [x] **1.4** `src/ElCamino.Identity.AzureTable.DataUtility/ElCamino.Identity.AzureTable.DataUtility.csproj`
   - `<TargetFramework>` → `net11.0`; `<LangVersion>` → `15.0`
-- [ ] **1.5** Build the solution (workspace `build` task: `dotnet build ElCamino.AspNetCore.Identity.AzureTable.sln`); confirm both `net10.0` and `net11.0` assets compile. Existing `#if NET10_0_OR_GREATER` / `#if NET9_0_OR_GREATER` guards already cover `net11.0`. Fix any C# 15 analyzer fallout.
+- [x] **1.5** Build the solution (workspace `build` task: `dotnet build ElCamino.AspNetCore.Identity.AzureTable.sln`); confirm both `net10.0` and `net11.0` assets compile. Existing `#if NET10_0_OR_GREATER` / `#if NET9_0_OR_GREATER` guards already cover `net11.0`. Fix any C# 15 analyzer fallout. *(Completed: 0 errors/0 warnings; test-project TFM alignment from 3.1/3.2 pulled into this phase because the solution cannot build until test TFMs match the retargeted libraries. Identity 11.0.0-rc.1 resolved for net11.0.)*
 
 ---
 
@@ -100,8 +100,8 @@
 
 ## Phase 3 — Tests
 
-- [ ] **3.1** `tests/ElCamino.AspNetCore.Identity.AzureTable.Tests/ElCamino.AspNetCore.Identity.AzureTable.Tests.csproj`: `<TargetFrameworks>` → `net10.0;net11.0`
-- [ ] **3.2** `tests/ElCamino.Azure.Data.Tables.Tests/ElCamino.Azure.Data.Tables.Tests.csproj`: `<TargetFrameworks>` `net8.0;net10.0` → `net10.0;net11.0`; `Microsoft.Extensions.*` refs stay `10.0.*` or move to `11.0-*` (keep consistent per TFM if conditionals are added — currently unconditional, bump to `11.0-*`)
+- [x] **3.1** `tests/ElCamino.AspNetCore.Identity.AzureTable.Tests/ElCamino.AspNetCore.Identity.AzureTable.Tests.csproj`: `<TargetFrameworks>` → `net10.0;net11.0` *(TFM/LangVersion done in Phase 1 so the solution builds; passkey test code remains in Phase 3)*
+- [x] **3.2** `tests/ElCamino.Azure.Data.Tables.Tests/ElCamino.Azure.Data.Tables.Tests.csproj`: `<TargetFrameworks>` `net8.0;net10.0` → `net10.0;net11.0`; `Microsoft.Extensions.*` refs bumped to `11.0-*` *(csproj changes done in Phase 1; test code unchanged)*
 - [ ] **3.3** `tests/ElCamino.AspNetCore.Identity.AzureTable.Tests/BaseUserStoreTests.cs` + `BaseUserStoreTests.Properties.partial.cs` — add passkey tests following existing `CreateTestUserAsync`/fixture style (Azurite locally via `UseDevelopmentStorage=true`):
   - AddOrUpdate → Get → Find → Remove round-trip (assert all `UserPasskeyInfo` fields survive losslessly: `CredentialId`, `PublicKey`, `Name`, `CreatedAt`, `SignCount`, `Transports`, `IsUserVerified`, `IsBackupEligible`, `IsBackedUp`, `AttestationObject`, `ClientDataJson`, `Aaguid` — with `Aaguid` asserted only under `#if NET11_0_OR_GREATER`, matching the converter guard in 2.1)
   - Update-same-credentialId path (e.g. `SignCount`/`Name` update via second `AddOrUpdatePasskeyAsync`)
