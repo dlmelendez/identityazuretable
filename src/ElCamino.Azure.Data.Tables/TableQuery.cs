@@ -31,6 +31,12 @@ namespace Azure.Data.Tables
         private const string OdataFalse = "false";
 
         /// <summary>
+        /// Largest string operand, in chars, built on the stack.
+        /// A filter value can be caller supplied text of any length, so larger operands must use the heap.
+        /// </summary>
+        private const int MaxStackallocChars = 1024;
+
+        /// <summary>
         /// Max take count for a given query
         /// </summary>
         public int? TakeCount { get; set; }
@@ -333,8 +339,9 @@ namespace Azure.Data.Tables
         /// </summary>
         /// <param name="givenValue"></param>
         /// <param name="edmType"></param>
+        /// <param name="stringOperand">Where a <see cref="EdmType.String"/> operand is written. Its length is the value's length, plus 1 for each single quote in the value, plus 2.</param>
         /// <returns></returns>
-        private static ReadOnlySpan<char> GenerateValueOperand(ReadOnlySpan<char> givenValue, EdmType edmType)
+        private static ReadOnlySpan<char> GenerateValueOperand(ReadOnlySpan<char> givenValue, EdmType edmType, Span<char> stringOperand)
         {
             switch (edmType)
             {
@@ -358,34 +365,25 @@ namespace Azure.Data.Tables
                     return $"X'{givenValue}'";
             }
             // OData readers expect single quote to be escaped in a param value.
-            int splitCounter = givenValue.Count('\'');
-            if (splitCounter <= 0)
+            stringOperand[0] = '\'';
+            stringOperand[^1] = '\'';
+            if (stringOperand.Length == givenValue.Length + 2)
             {
-                Span<char> chars = stackalloc char[givenValue.Length + 2];
-                chars[0] = '\'';
-                int outputIndex = 1;
-                for (int givenIndex = 0; givenIndex < givenValue.Length; givenIndex++)
-                {
-                    chars[outputIndex++] = givenValue[givenIndex];
-                }
-                chars[^1] = '\'';
-                return new ReadOnlySpan<char>([.. chars]);
+                givenValue.CopyTo(stringOperand[1..]);
+                return stringOperand;
             }
 
-            Span<char> joinArray = stackalloc char[givenValue.Length + splitCounter + 2];
-            joinArray[0] = '\'';
-            int joinIndex = 1;
+            int operandIndex = 1;
             for (int givenIndex = 0; givenIndex < givenValue.Length; givenIndex++)
             {
                 char c = givenValue[givenIndex];
-                joinArray[joinIndex++] = c;
+                stringOperand[operandIndex++] = c;
                 if (c == '\'')
                 {
-                    joinArray[joinIndex++] = '\'';
+                    stringOperand[operandIndex++] = '\'';
                 }
             }
-            joinArray[^1] = '\'';
-            return new ReadOnlySpan<char>([.. joinArray]);
+            return stringOperand;
         }
 
         /// <summary>
@@ -398,7 +396,12 @@ namespace Azure.Data.Tables
         /// <returns>A string containing the formatted filter condition.</returns>
         private static ReadOnlySpan<char> GenerateFilterCondition(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> operation, ReadOnlySpan<char> givenValue, EdmType edmType)
         {
-            ReadOnlySpan<char> valueOperand = GenerateValueOperand(givenValue, edmType);
+            // A string operand is only needed here, to build the condition, so it is on the stack unless the value,
+            // which can be caller supplied text of any length, makes it large.
+            int stringOperandLength = edmType == EdmType.String ? givenValue.Length + givenValue.Count('\'') + 2 : 0;
+            Span<char> stringOperand = stringOperandLength <= MaxStackallocChars ? stackalloc char[stringOperandLength] : new char[stringOperandLength];
+
+            ReadOnlySpan<char> valueOperand = GenerateValueOperand(givenValue, edmType, stringOperand);
             return $"{propertyName} {operation} {valueOperand}";
         }
 

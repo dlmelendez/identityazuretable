@@ -1,6 +1,6 @@
 # ElCamino.AspNetCore.Identity.AzureTable.Benchmark
 
-This project benchmarks core allocation-sensitive mapping paths and mocked store operation paths for `UserOnlyStore` and `UserStore`.
+This project benchmarks core allocation-sensitive mapping paths and mocked store operation paths for `UserOnlyStore` and `UserStore`, and `TableQuery` filter condition generation.
 
 ## Run against local source (current branch)
 
@@ -12,6 +12,12 @@ Run the mocked store operation benchmarks:
 
 ```powershell
 dotnet run -c Release --project perf/ElCamino.AspNetCore.Identity.AzureTable.Benchmark -- --filter *Store*Benchmarks*
+```
+
+Run the `TableQuery` filter condition benchmarks:
+
+```powershell
+dotnet run -c Release --project perf/ElCamino.AspNetCore.Identity.AzureTable.Benchmark -- --filter *TableQuery*Benchmarks*
 ```
 
 Run all benchmark classes:

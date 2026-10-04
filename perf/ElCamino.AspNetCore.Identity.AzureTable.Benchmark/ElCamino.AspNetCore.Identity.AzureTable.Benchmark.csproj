@@ -15,6 +15,12 @@
     <PackageReference Include="BenchmarkDotNet" Version="0.14.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Read by Program.cs: BenchmarkDotNet builds this project again and has to be given the same library reference. -->
+    <AssemblyMetadata Include="UseLocalProject" Value="$(UseLocalProject)" />
+    <AssemblyMetadata Include="BenchmarkPackageVersion" Value="$(BenchmarkPackageVersion)" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(UseLocalProject)' == 'true'">
     <ProjectReference Include="..\..\src\ElCamino.AspNetCore.Identity.AzureTable\ElCamino.AspNetCore.Identity.AzureTable.csproj" />
   </ItemGroup>

@@ -20,11 +20,23 @@ function Parse-BdnMetric {
 
     $text = $Value.Trim()
 
-    if ($text -match '^(?<num>[-+]?\d+(?:\.\d+)?)\s*(?<unit>.*)$') {
-        $num = $Matches['num']
+    if ($text -match '^(?<num>[-+]?[\d,]+(?:\.\d+)?)\s*(?<unit>.*)$') {
+        $num = $Matches['num'] -replace ',', ''
         $unit = $Matches['unit'].Trim()
+
+        # BenchmarkDotNet picks the unit per report, so the two runs can differ. Number is in ns or bytes.
+        $scale = switch -Regex ($unit) {
+            '^[\u03BC\u00B5u]s$' { 1e3; break }
+            '^ms$' { 1e6; break }
+            '^s$' { 1e9; break }
+            '^KB$' { 1024; break }
+            '^MB$' { 1024 * 1024; break }
+            '^GB$' { 1024 * 1024 * 1024; break }
+            default { 1 }
+        }
+
         return [pscustomobject]@{
-            Number = [double]::Parse($num, [System.Globalization.CultureInfo]::InvariantCulture)
+            Number = [double]::Parse($num, [System.Globalization.CultureInfo]::InvariantCulture) * $scale
             Unit   = $unit
             Raw    = $text
         }
@@ -110,6 +122,33 @@ function Get-ParameterParts {
     }
 
     return $paramParts
+}
+
+function Format-MarkdownTable {
+    param(
+        [Parameter(Mandatory)][string[]]$Titles,
+        [Parameter(Mandatory)][AllowEmptyCollection()][object[]]$Rows,
+        [Parameter(Mandatory)][int]$FirstRightAlignedColumn
+    )
+
+    $columns = 0..($Titles.Count - 1)
+
+    # Cells are padded to the column width so the table also reads as plain text.
+    $widths = foreach ($column in $columns) {
+        [int](@($Titles[$column]) + @($Rows | ForEach-Object { $_[$column] }) | Measure-Object -Property Length -Maximum).Maximum
+    }
+
+    $rule = foreach ($column in $columns) {
+        if ($column -ge $FirstRightAlignedColumn) { ('-' * ($widths[$column] - 1)) + ':' } else { '-' * $widths[$column] }
+    }
+
+    foreach ($cells in @(, $Titles) + @(, $rule) + $Rows) {
+        $padded = foreach ($column in $columns) {
+            if ($column -ge $FirstRightAlignedColumn) { $cells[$column].PadLeft($widths[$column]) } else { $cells[$column].PadRight($widths[$column]) }
+        }
+
+        "| $($padded -join ' | ') |"
+    }
 }
 
 $localArtifacts = Join-Path $ArtifactsRoot 'local'
@@ -206,25 +245,42 @@ $comparison = foreach ($key in $allKeys) {
 $comparisonCsv = Join-Path $comparisonArtifacts 'comparison.csv'
 $comparisonMd = Join-Path $comparisonArtifacts 'comparison.md'
 
-$comparison |
-    Sort-Object Method, Key |
-    Export-Csv -Path $comparisonCsv -NoTypeInformation -Encoding UTF8
+# Numbers in the key are padded for the sort, so ValueLength=42 comes before ValueLength=1022.
+$sorted = @($comparison | Sort-Object Method, { [regex]::Replace($_.Key, '\d+', { param($number) $number.Value.PadLeft(12, '0') }) })
 
-$header = "| Method | Parameters | Current Source | Baseline Source | Mean (Current) | Mean (NuGet) | Mean Δ% | Alloc (Current) | Alloc (NuGet) | Alloc Δ% |"
-$separator = "|---|---|---|---|---:|---:|---:|---:|---:|---:|"
+$sorted | Export-Csv -Path $comparisonCsv -NoTypeInformation -Encoding UTF8
 
-$lines = @($header, $separator)
+$tableColumns = [ordered]@{
+    'Method'          = 'Method'
+    'Parameters'      = 'Parameters'
+    'Current Source'  = 'Current_Source'
+    'Baseline Source' = 'Baseline_Source'
+    'Mean (Current)'  = 'Mean_Current'
+    'Mean (NuGet)'    = 'Mean_NuGet'
+    'Mean Δ%'         = 'Mean_DeltaPct'
+    'Alloc (Current)' = 'Allocated_Current'
+    'Alloc (NuGet)'   = 'Allocated_NuGet'
+    'Alloc Δ%'        = 'Allocated_DeltaPct'
+}
+
+$tableRows = @(foreach ($row in $sorted) {
+    , @($tableColumns.Values | ForEach-Object { "$($row.$_)" })
+})
+
+# The table is one block, a blank line or other text between its rows stops it rendering as a table.
+$lines = @(Format-MarkdownTable -Titles @($tableColumns.Keys) -Rows $tableRows -FirstRightAlignedColumn 4)
 $lines += ""
 $lines += "Current Source: $currentSource"
-$lines += "Baseline Source: $baselineSource"
-$lines += "Local CSV files:"
-$lines += $localCsvs | ForEach-Object { "- $($_.FullName)" }
-$lines += "NuGet CSV files:"
-$lines += $nugetCsvs | ForEach-Object { "- $($_.FullName)" }
 $lines += ""
-foreach ($row in ($comparison | Sort-Object Method, Key)) {
-    $lines += "| $($row.Method) | $($row.Parameters) | $($row.Current_Source) | $($row.Baseline_Source) | $($row.Mean_Current) | $($row.Mean_NuGet) | $($row.Mean_DeltaPct) | $($row.Allocated_Current) | $($row.Allocated_NuGet) | $($row.Allocated_DeltaPct) |"
-}
+$lines += "Baseline Source: $baselineSource"
+$lines += ""
+$lines += "Local CSV files:"
+$lines += ""
+$lines += $localCsvs | ForEach-Object { "- $($_.FullName)" }
+$lines += ""
+$lines += "NuGet CSV files:"
+$lines += ""
+$lines += $nugetCsvs | ForEach-Object { "- $($_.FullName)" }
 
 $lines | Set-Content -Path $comparisonMd -Encoding UTF8
 
