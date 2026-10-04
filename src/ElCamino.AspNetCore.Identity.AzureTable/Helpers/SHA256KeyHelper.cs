@@ -15,7 +15,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         /// <inheritdoc/>
         public sealed override ReadOnlySpan<char> ConvertKeyToHash(ReadOnlySpan<char> input)
         {
-            Span<byte> encodedBytes = stackalloc byte[Encoding.UTF8.GetMaxByteCount(input.Length)];
+            int maxByteCount = Encoding.UTF8.GetMaxByteCount(input.Length);
+            Span<byte> encodedBytes = maxByteCount <= MaxStackallocBytes ? stackalloc byte[maxByteCount] : new byte[maxByteCount];
             int encodedByteCount = Encoding.UTF8.GetBytes(input, encodedBytes);
 
             Span<byte> hashedBytes = stackalloc byte[SHA256.HashSizeInBytes];

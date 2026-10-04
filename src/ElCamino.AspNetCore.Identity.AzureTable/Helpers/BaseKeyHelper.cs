@@ -12,6 +12,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
     /// <inheritdoc/>
     public abstract class BaseKeyHelper : IKeyHelper
     {
+        /// <summary>
+        /// Largest key, in encoded bytes, hashed from a stack buffer.
+        /// Keys are built from caller supplied text of any length, so larger keys must use the heap.
+        /// </summary>
+        protected const int MaxStackallocBytes = 1024;
+
         /// <inheritdoc/>
         public virtual string PreFixIdentityUserClaim => TableConstants.RowKeyConstants.PreFixIdentityUserClaim;
 

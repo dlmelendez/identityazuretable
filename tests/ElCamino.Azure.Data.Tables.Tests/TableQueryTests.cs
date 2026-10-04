@@ -73,6 +73,26 @@ namespace ElCamino.Azure.Data.Tables.Tests
             Assert.Equal(expectedLength, resultCount);
         }
 
+        /// <summary>
+        /// Filter values can be caller supplied text of any length: a value larger than the stack must be quoted, not overflow it.
+        /// The smaller values straddle the 1024 chars at which the quoted value moves from the stack to the heap.
+        /// </summary>
+        [Theory]
+        [InlineData("a", 1022)]
+        [InlineData("a", 1023)]
+        [InlineData("a'b", 255)]
+        [InlineData("a'b", 256)]
+        [InlineData("a", 2 * 1024 * 1024)]
+        [InlineData("a'b", 2 * 1024 * 1024)]
+        public void QueryPropertyStringLargeValue(string segment, int count)
+        {
+            string propertyText = string.Concat(Enumerable.Repeat(segment, count));
+
+            string filter = TableQuery.GenerateFilterCondition("propertyName", QueryComparisons.Equal, propertyText).ToString();
+
+            Assert.Equal($"propertyName eq '{propertyText.Replace("'", "''")}'", filter);
+        }
+
         [Fact]
         public async Task QueryNullPropertyString()
         {
