@@ -33,36 +33,33 @@ namespace ElCamino.Azure.Data.Tables
         /// </summary>
         public ReadOnlySpan<char> QueryFilter => _bufferQuery.AsSpan().Slice(0, _currentQueryLength);
 
+        /// <summary>
+        /// Makes room in the buffer for the given length after the current query.
+        /// A query is built from caller supplied conditions of any length and number, so it is only ever held on the heap.
+        /// </summary>
         private void AllocateBuffer(int lengthToAdd)
         {
-            if ((_currentQueryLength + lengthToAdd > _bufferQuery.Length))
+            int requiredLength = checked(_currentQueryLength + lengthToAdd);
+            if (requiredLength > _bufferQuery.Length)
             {
-                Span<char> newBuffer = stackalloc char[_bufferQuery.Length + BufferSize];
-                QueryFilter.CopyTo(newBuffer);
-                _bufferQuery = [.. newBuffer];
+                // At least doubling keeps the copying linear in the query length, however many appends build it.
+                int doubledLength = (int)Math.Min((long)_bufferQuery.Length * 2, Array.MaxLength);
+                Array.Resize(ref _bufferQuery, Math.Max(requiredLength, doubledLength));
             }
         }
 
         private void AppendCondition(ReadOnlySpan<char> condition)
         {
             int segmentLength = condition.Length + 2;
+            AllocateBuffer(segmentLength);
 
-            if (_currentQueryLength <= 0)
-            {
-                _bufferQuery[0] = '(';
-                condition.CopyTo(_bufferQuery.AsSpan()[1..]);
-                _bufferQuery[condition.Length + 1] = ')';
-            }
-            else
-            {
-                Span<char> temp = stackalloc char[_currentQueryLength + segmentLength];
-                AllocateBuffer(segmentLength);
-                QueryFilter.CopyTo(temp);
-                temp[_currentQueryLength] = '(';
-                condition.CopyTo(temp[(_currentQueryLength + 1)..]);
-                temp[^1] = ')';
-                temp.CopyTo(_bufferQuery);
-            }
+            // The condition can be a span over this builder's buffer, such as QueryFilter.
+            // It is then before the segment written here or, when the buffer has grown, in the buffer that was replaced.
+            Span<char> segment = _bufferQuery.AsSpan(_currentQueryLength, segmentLength);
+            segment[0] = '(';
+            condition.CopyTo(segment[1..]);
+            segment[^1] = ')';
+
             _currentQueryLength += segmentLength;
             _filterCount++;
             _beginGroupCount++;
@@ -310,10 +307,7 @@ namespace ElCamino.Azure.Data.Tables
         private void AppendBeginGroup()
         {
             AllocateBuffer(1);
-            Span<char> temp = stackalloc char[_currentQueryLength + 1];
-            QueryFilter.CopyTo(temp);
-            temp[^1] = '(';
-            temp.CopyTo(_bufferQuery);
+            _bufferQuery[_currentQueryLength] = '(';
             _currentQueryLength++;
             _beginGroupCount++;
         }
@@ -322,10 +316,7 @@ namespace ElCamino.Azure.Data.Tables
         {
             ThrowIfNoFilter();
             AllocateBuffer(1);
-            Span<char> temp = stackalloc char[_currentQueryLength + 1];
-            QueryFilter.CopyTo(temp);
-            temp[^1] = ')';
-            temp.CopyTo(_bufferQuery);
+            _bufferQuery[_currentQueryLength] = ')';
             _currentQueryLength++;
             _endGroupCount++;
         }
@@ -334,27 +325,26 @@ namespace ElCamino.Azure.Data.Tables
         {
             ThrowIfNoFilter();
             AllocateBuffer(2);
-            Span<char> temp = stackalloc char[_currentQueryLength + 2];
-            temp[0] = '(';
-            QueryFilter.CopyTo(temp[1..]);
+            // Moves the query up by one char in place, CopyTo allows for the source and destination overlapping.
+            QueryFilter.CopyTo(_bufferQuery.AsSpan(1));
+            _bufferQuery[0] = '(';
             _beginGroupCount++;
-            temp[^1] = ')';
+            _bufferQuery[_currentQueryLength + 1] = ')';
             _endGroupCount++;
-            temp.CopyTo(_bufferQuery);
             _currentQueryLength += 2;
         }
 
         private void AppendTableOperator(TableOperator tableOperator)
         {
             ThrowIfNoFilter();
-            ReadOnlySpan<char> tableOperatorSpan = $" {TableOperators.GetOperator(tableOperator)} ".AsSpan();
-            int segmentLength = tableOperatorSpan.Length;
+            string tableOperatorText = TableOperators.GetOperator(tableOperator);
+            int segmentLength = tableOperatorText.Length + 2;
             AllocateBuffer(segmentLength);
 
-            Span<char> temp = stackalloc char[_currentQueryLength + segmentLength];
-            QueryFilter.CopyTo(temp);
-            tableOperatorSpan.CopyTo(temp[_currentQueryLength..]);
-            temp.CopyTo(_bufferQuery);
+            Span<char> segment = _bufferQuery.AsSpan(_currentQueryLength, segmentLength);
+            segment[0] = ' ';
+            tableOperatorText.CopyTo(segment[1..]);
+            segment[^1] = ' ';
             _currentQueryLength += segmentLength;
         }
 

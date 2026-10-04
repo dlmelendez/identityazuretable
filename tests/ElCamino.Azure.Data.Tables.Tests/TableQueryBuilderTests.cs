@@ -3,6 +3,7 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Azure.Data.Tables;
 using Xunit;
@@ -128,6 +129,102 @@ namespace ElCamino.Azure.Data.Tables.Tests
             //Assert
             Assert.Equal(filterNull, filterNullBuilder);
 
+        }
+
+        /// <summary>
+        /// Conditions can be caller supplied text of any length: a condition larger than the builder's buffer or the stack must be appended, not throw or overflow the stack.
+        /// The smaller conditions straddle the 1022 chars that fit, with their parentheses, in the builder's initial 1024 char buffer.
+        /// </summary>
+        [Theory]
+        [InlineData(1022)]
+        [InlineData(1023)]
+        [InlineData(1024)]
+        [InlineData(4096)]
+        [InlineData(2 * 1024 * 1024)]
+        public void QueryBuilderLargeCondition(int conditionLength)
+        {
+            string condition = new string('a', conditionLength);
+
+            string firstFilter = new TableQueryBuilder()
+                .AddFilter(condition)
+                .ToString();
+            string laterFilter = new TableQueryBuilder()
+                .AddFilter(nameof(TableEntity.PartitionKey), QueryComparison.Equal, "a")
+                .CombineFilters(TableOperator.And)
+                .AddFilter(condition)
+                .ToString();
+
+            Assert.Equal($"({condition})", firstFilter);
+            Assert.Equal($"(PartitionKey eq 'a') and ({condition})", laterFilter);
+        }
+
+        /// <summary>
+        /// The number of filters is up to the caller: a query larger than the stack must keep taking filters, operators and groups, not overflow the stack.
+        /// </summary>
+        [Fact]
+        public void QueryBuilderLargeQuery()
+        {
+            const int filterCount = 50_000;
+            TableQueryBuilder queryBuilder = new TableQueryBuilder();
+            StringBuilder expectedFilters = new StringBuilder();
+
+            for (int filterIndex = 0; filterIndex < filterCount; filterIndex++)
+            {
+                string rowKey = filterIndex.ToString("D8");
+                if (filterIndex > 0)
+                {
+                    queryBuilder.CombineFilters(TableOperator.Or);
+                    expectedFilters.Append(" or ");
+                }
+                queryBuilder.AddFilter(nameof(TableEntity.RowKey), QueryComparison.Equal, rowKey);
+                expectedFilters.Append("(RowKey eq '").Append(rowKey).Append("')");
+            }
+
+            string filter = queryBuilder
+                .GroupAll()
+                .CombineFilters(TableOperator.And)
+                .BeginGroup()
+                .AddFilter(nameof(TableEntity.PartitionKey), QueryComparison.Equal, "a")
+                .EndGroup()
+                .ToString();
+
+            Assert.Equal($"({expectedFilters}) and ((PartitionKey eq 'a'))", filter);
+        }
+
+        /// <summary>
+        /// Each kind of append has to grow the buffer when it is the one to pass the end of it.
+        /// A first condition of 1022 chars fills the builder's initial 1024 char buffer, the shorter ones leave room for 1 and 2 more chars.
+        /// </summary>
+        [Theory]
+        [InlineData(1020)]
+        [InlineData(1021)]
+        [InlineData(1022)]
+        public void QueryBuilderAppendAtBufferEnd(int conditionLength)
+        {
+            string condition = new string('a', conditionLength);
+
+            Assert.Equal($"(({condition}))", new TableQueryBuilder().AddFilter(condition).GroupAll().ToString());
+            Assert.Equal($"({condition})(", new TableQueryBuilder().AddFilter(condition).BeginGroup().ToString());
+            Assert.Equal($"({condition}))", new TableQueryBuilder().AddFilter(condition).EndGroup().ToString());
+            Assert.Equal($"({condition}) and ", new TableQueryBuilder().AddFilter(condition).CombineFilters(TableOperator.And).ToString());
+            Assert.Equal($"({condition}) or ({condition})", new TableQueryBuilder().AddFilter(condition).CombineFilters(TableOperator.Or, condition).ToString());
+        }
+
+        /// <summary>
+        /// A condition can be a span over the builder's own buffer, such as its <see cref="TableQueryBuilder.QueryFilter"/>.
+        /// With 600 chars the append grows the buffer that the condition is read from, with 10 chars it does not.
+        /// </summary>
+        [Theory]
+        [InlineData(10)]
+        [InlineData(600)]
+        public void QueryBuilderAppendOwnQueryFilter(int conditionLength)
+        {
+            string condition = new string('a', conditionLength);
+            TableQueryBuilder queryBuilder = new TableQueryBuilder().AddFilter(condition);
+
+            queryBuilder.CombineFilters(TableOperator.Or, queryBuilder.QueryFilter);
+
+            Assert.Equal($"({condition}) or (({condition}))", queryBuilder.ToString());
         }
 
         [Fact]

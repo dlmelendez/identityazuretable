@@ -398,8 +398,9 @@ namespace Azure.Data.Tables
         {
             // A string operand is only needed here, to build the condition, so it is on the stack unless the value,
             // which can be caller supplied text of any length, makes it large.
+            // The length is compared unsigned, so one that has overflowed to a negative number fails on the heap instead of overflowing the stack.
             int stringOperandLength = edmType == EdmType.String ? givenValue.Length + givenValue.Count('\'') + 2 : 0;
-            Span<char> stringOperand = stringOperandLength <= MaxStackallocChars ? stackalloc char[stringOperandLength] : new char[stringOperandLength];
+            Span<char> stringOperand = (uint)stringOperandLength <= MaxStackallocChars ? stackalloc char[stringOperandLength] : new char[stringOperandLength];
 
             ReadOnlySpan<char> valueOperand = GenerateValueOperand(givenValue, edmType, stringOperand);
             return $"{propertyName} {operation} {valueOperand}";
