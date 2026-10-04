@@ -1272,13 +1272,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             ArgumentNullException.ThrowIfNull(user);
             ArgumentNullException.ThrowIfNull(credentialId);
 
-            if (!IsStorable(credentialId))
-            {
-                return null;
-            }
-
             var userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)).ToString();
-            var rowKey = Model.IdentityUserPasskey.GenerateRowKey(_keyHelper, credentialId);
+            var rowKey = _keyHelper.GenerateRowKeyIdentityUserPasskey(credentialId).ToString();
 
             var entity = await _userTable.GetEntityOrDefaultAsync<Model.IdentityUserPasskey>(userPartitionKey, rowKey, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
@@ -1293,13 +1288,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             ThrowIfDisposed();
             ArgumentNullException.ThrowIfNull(credentialId);
 
-            if (!IsStorable(credentialId))
-            {
-                return Task.FromResult<TUser?>(null);
-            }
-
             //A passkey index row is keyed by the passkey row key, see CreatePasskeyIndex
-            var passkeyRowKey = Model.IdentityUserPasskey.GenerateRowKey(_keyHelper, credentialId);
+            var passkeyRowKey = _keyHelper.GenerateRowKeyIdentityUserPasskey(credentialId).ToString();
 
             return GetUserFromIndexQueryAsync(GetUserIdByIndexQuery(passkeyRowKey, passkeyRowKey).ToString(), cancellationToken);
         }
@@ -1312,13 +1302,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             ArgumentNullException.ThrowIfNull(user);
             ArgumentNullException.ThrowIfNull(credentialId);
 
-            if (!IsStorable(credentialId))
-            {
-                return;
-            }
-
             var userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)).ToString();
-            var rowKey = Model.IdentityUserPasskey.GenerateRowKey(_keyHelper, credentialId);
+            var rowKey = _keyHelper.GenerateRowKeyIdentityUserPasskey(credentialId).ToString();
 
             //The index row is keyed by the credential id alone, only delete it with a passkey this user owns
             var item = await _userTable.GetEntityOrDefaultAsync<TableEntity>(userPartitionKey, rowKey, [nameof(TableEntity.RowKey)], cancellationToken).ConfigureAwait(false);
@@ -1332,12 +1317,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 ).ConfigureAwait(false);
             }
         }
-
-        /// <summary>
-        /// A credential id too long to store can never match a stored passkey. Credential ids are caller supplied
-        /// at sign in, so the lookups reject them up front instead of generating keys and queries from them.
-        /// </summary>
-        private static bool IsStorable(byte[] credentialId) => credentialId.Length <= Model.IdentityUserPasskey.MaxCredentialIdLength;
 
         /// <summary>
         /// Deletes the passkey index rows for the passkey rows in a user's partition.
@@ -1356,16 +1335,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
         /// <summary>
         /// Creates an IdentityUserIndex for a passkey credential suitable for a crud operation.
         /// Enables finding a user by passkey credential id alone.
-        /// The index is keyed by the passkey row key, not by a key the KeyHelper generates like the login index:
-        /// those are hashed from upper cased text, which would give credential ids that differ only by the casing
-        /// of their encoding the same index row, and a login key would let a login lookup find a passkey.
+        /// Both keys are the passkey row key. Its prefix keeps passkey index rows apart from login index rows,
+        /// so a login lookup can never find a passkey.
         /// </summary>
         /// <param name="userPartitionKey">Formatted UserId from the KeyHelper</param>
         /// <param name="credentialId">The passkey credential id bytes</param>
         /// <returns></returns>
         protected Model.IdentityUserIndex CreatePasskeyIndex(string userPartitionKey, byte[] credentialId)
         {
-            var passkeyRowKey = Model.IdentityUserPasskey.GenerateRowKey(_keyHelper, credentialId);
+            var passkeyRowKey = _keyHelper.GenerateRowKeyIdentityUserPasskey(credentialId).ToString();
             return new Model.IdentityUserIndex()
             {
                 Id = userPartitionKey,

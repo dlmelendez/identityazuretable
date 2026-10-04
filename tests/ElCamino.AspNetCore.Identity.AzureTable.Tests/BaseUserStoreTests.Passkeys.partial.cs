@@ -295,31 +295,27 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         }
 
         /// <summary>
-        /// Credential ids are caller supplied at sign in: one too long to store is never found or stored, whatever its size.
-        /// The largest storable credential id round-trips.
+        /// The keys hold a hash of the credential id, so the largest credential id WebAuthn allows (1023 bytes) round-trips.
+        /// Credential ids are caller supplied at sign in: one of any size is looked up, and not found, without error.
         /// </summary>
-        public virtual async Task UserPasskeyCredentialIdLengthLimit()
+        public virtual async Task UserPasskeyLargeCredentialId()
         {
             using var store = userFixture.CreateUserStore();
             var user = await CreateTestUserLiteAsync().ConfigureAwait(false);
             var cancellationToken = new CancellationToken();
 
-            foreach (int length in new[] { Model.IdentityUserPasskey.MaxCredentialIdLength + 1, 4 * 1024 * 1024 })
-            {
-                var oversizedId = new byte[length];
-                Assert.Null(await store.FindPasskeyAsync(user, oversizedId, cancellationToken).ConfigureAwait(false));
-                Assert.Null(await store.FindByPasskeyIdAsync(oversizedId, cancellationToken).ConfigureAwait(false));
-                await store.RemovePasskeyAsync(user, oversizedId, cancellationToken).ConfigureAwait(false);
-                await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => store.AddOrUpdatePasskeyAsync(user, GenTestPasskey(oversizedId), cancellationToken)).ConfigureAwait(false);
-            }
-
-            var largestId = RandomNumberGenerator.GetBytes(Model.IdentityUserPasskey.MaxCredentialIdLength);
+            var largestId = RandomNumberGenerator.GetBytes(1023);
             var passkey = GenTestPasskey(largestId);
             await store.AddOrUpdatePasskeyAsync(user, passkey, cancellationToken).ConfigureAwait(false);
             AssertPasskeyEqual(passkey, await store.FindPasskeyAsync(user, largestId, cancellationToken).ConfigureAwait(false));
             Assert.Equal(user.Id, (await store.FindByPasskeyIdAsync(largestId, cancellationToken).ConfigureAwait(false))?.Id);
             await store.RemovePasskeyAsync(user, largestId, cancellationToken).ConfigureAwait(false);
             Assert.Null(await store.FindPasskeyAsync(user, largestId, cancellationToken).ConfigureAwait(false));
+
+            var oversizedId = new byte[4 * 1024 * 1024];
+            Assert.Null(await store.FindPasskeyAsync(user, oversizedId, cancellationToken).ConfigureAwait(false));
+            Assert.Null(await store.FindByPasskeyIdAsync(oversizedId, cancellationToken).ConfigureAwait(false));
+            await store.RemovePasskeyAsync(user, oversizedId, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>

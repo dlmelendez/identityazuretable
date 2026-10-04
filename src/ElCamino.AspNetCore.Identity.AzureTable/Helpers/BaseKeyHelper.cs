@@ -201,6 +201,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Helpers
         }
 
         /// <inheritdoc/>
+        public virtual ReadOnlySpan<char> GenerateRowKeyIdentityUserPasskey(ReadOnlySpan<byte> credentialId)
+        {
+            //Hex gives the credential id bytes a single text form to hash. A case sensitive encoding such as Base64 must not be
+            //used with the upper casing the other keys apply to their text: different credential ids would get the same key.
+            var hash = ConvertKeyToHash(Convert.ToHexString(credentialId));
+            return string.Format(FormatterIdentityUserPasskey, hash.ToString());
+        }
+
+        /// <inheritdoc/>
         public double KeyVersion => 11.0;
 
         /// <summary>

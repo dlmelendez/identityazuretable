@@ -235,6 +235,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         ReadOnlySpan<char> GenerateRowKeyIdentityUserLogin(string? loginProvider, string? providerKey);
 
         /// <summary>
+        /// Generate key for RowKeyIdentityUserPasskey
+        /// </summary>
+        /// <param name="credentialId"></param>
+        /// <returns></returns>
+        ReadOnlySpan<char> GenerateRowKeyIdentityUserPasskey(ReadOnlySpan<byte> credentialId);
+
+        /// <summary>
         /// Parse PartitionKey From RowKey for IdentityRole
         /// </summary>
         /// <param name="rowKey"></param>

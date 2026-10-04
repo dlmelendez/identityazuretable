@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using ElCamino.AspNetCore.Identity.AzureTable.Helpers;
@@ -115,6 +116,24 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
 
             Assert.Equal(_fakeKeyHelper.ConvertKeyToHashBackwardCompatSHA1(textToHash), _defaultKeyHelper.ConvertKeyToHash(textToHash).ToString());
             Assert.Equal(_fakeKeyHelper.ConvertKeyToHashBackwardCompatSHA256(textToHash), _sha256KeyHelper.ConvertKeyToHash(textToHash).ToString());
+        }
+
+        /// <summary>
+        /// The passkey row key is the prefix + the key helper's hash of the hex of the credential id bytes:
+        /// its size does not depend on the size of the credential id.
+        /// </summary>
+        [Theory]
+        [InlineData(0)]
+        [InlineData(32)]
+        [InlineData(1023)]
+        public void GenerateRowKeyIdentityUserPasskey(int credentialIdLength)
+        {
+            byte[] credentialId = RandomNumberGenerator.GetBytes(credentialIdLength);
+            string hex = Convert.ToHexString(credentialId);
+            const string prefix = TableConstants.RowKeyConstants.PreFixIdentityUserPasskey;
+
+            Assert.Equal(prefix + _fakeKeyHelper.ConvertKeyToHashBackwardCompatSHA1(hex), _defaultKeyHelper.GenerateRowKeyIdentityUserPasskey(credentialId).ToString());
+            Assert.Equal(prefix + _fakeKeyHelper.ConvertKeyToHashBackwardCompatSHA256(hex), _sha256KeyHelper.GenerateRowKeyIdentityUserPasskey(credentialId).ToString());
         }
 
         [Theory]

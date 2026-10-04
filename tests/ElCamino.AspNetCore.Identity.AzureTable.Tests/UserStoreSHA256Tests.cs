@@ -116,11 +116,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             return base.UserPasskeyIndexIsNotALoginIndex();
         }
 
-        [Fact(DisplayName = "UserPasskeyCredentialIdLengthLimit")]
+        [Fact(DisplayName = "UserPasskeyLargeCredentialId")]
         [Trait(UserStoreTrait, "")]
-        public override Task UserPasskeyCredentialIdLengthLimit()
+        public override Task UserPasskeyLargeCredentialId()
         {
-            return base.UserPasskeyCredentialIdLengthLimit();
+            return base.UserPasskeyLargeCredentialId();
         }
 
         [Fact(DisplayName = "AddReplaceRemoveUserClaim")]
