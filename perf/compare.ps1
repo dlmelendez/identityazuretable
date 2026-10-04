@@ -130,8 +130,8 @@ if (-not $SkipRun) {
     Invoke-BenchmarkRun -Project $ProjectPath -FilterValue $Filter -ArtifactsPath $nugetArtifacts -UseNuget -NugetVersion $PackageVersion
 }
 
-$localCsvs = Get-BenchmarkCsvs -Root $localArtifacts
-$nugetCsvs = Get-BenchmarkCsvs -Root $nugetArtifacts
+$localCsvs = @(Get-BenchmarkCsvs -Root $localArtifacts)
+$nugetCsvs = @(Get-BenchmarkCsvs -Root $nugetArtifacts)
 
 if ($localCsvs.Count -lt 1) {
     throw "Could not find local benchmark CSV in '$localArtifacts'."

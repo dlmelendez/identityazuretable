@@ -73,6 +73,21 @@ namespace ElCamino.Azure.Data.Tables.Tests
             Assert.Equal(expectedLength, resultCount);
         }
 
+        /// <summary>
+        /// Filter values can be caller supplied text of any length: a value larger than the stack must be quoted, not overflow it.
+        /// </summary>
+        [Theory]
+        [InlineData("a")]
+        [InlineData("a'b")]
+        public void QueryPropertyStringLargeValue(string segment)
+        {
+            string propertyText = string.Concat(Enumerable.Repeat(segment, 2 * 1024 * 1024));
+
+            string filter = TableQuery.GenerateFilterCondition("propertyName", QueryComparisons.Equal, propertyText).ToString();
+
+            Assert.Equal($"propertyName eq '{propertyText.Replace("'", "''")}'", filter);
+        }
+
         [Fact]
         public async Task QueryNullPropertyString()
         {
@@ -402,8 +417,9 @@ namespace ElCamino.Azure.Data.Tables.Tests
 
             //Assert
             Assert.Equal(0, await _tableClient.QueryAsync<TableEntity>(filter: filterNull).CountAsync());
-            //ne matches entities where the property is absent (matches real storage accounts and current Azurite)
-            Assert.Equal(1, await _tableClient.QueryAsync<TableEntity>(filter: filterNotNull).CountAsync());
+            //ne does not match an entity without the property on a real storage account or current Azurite.
+            //Old Azurite versions (3.22) wrongly return the entity: upgrade Azurite if this fails locally.
+            Assert.Equal(0, await _tableClient.QueryAsync<TableEntity>(filter: filterNotNull).CountAsync());
 
             //Modify update
             var updateEntity = new TableEntity(key, key)

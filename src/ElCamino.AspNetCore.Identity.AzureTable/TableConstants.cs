@@ -88,7 +88,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             /// <summary>
             /// Default Key PreFix for IdentityUserPasskeyUpperBound
             /// </summary>
-            public const string PreFixIdentityUserPasskeyUpperBound = "O_";
+            public const string PreFixIdentityUserPasskeyUpperBound = "L_";
 
             /// <summary>
             /// Default Key PreFix for IdentityUserId

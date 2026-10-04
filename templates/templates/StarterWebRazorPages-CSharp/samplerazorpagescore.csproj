@@ -10,7 +10,7 @@
   <ItemGroup>
     <PackageReference Include="ElCamino.AspNetCore.Identity.AzureTable" Version="11.0-*" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="11.0-*" />
-    <PackageReference Include="Microsoft.Extensions.Azure" Version="1.11.0" />
+    <PackageReference Include="Microsoft.Extensions.Azure" Version="1.14.1" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="11.0-*" />
   </ItemGroup>
 

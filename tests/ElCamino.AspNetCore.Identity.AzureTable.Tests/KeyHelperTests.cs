@@ -99,6 +99,24 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             Assert.Equal(expected, returned, StringComparer.InvariantCulture);
         }
 
+        /// <summary>
+        /// Keys are hashed from caller supplied text of any length: a key larger than the stack must hash, not overflow it.
+        /// 340/341 and 511/512 chars straddle the stack buffer limit for the UTF8 and Unicode encoded keys.
+        /// </summary>
+        [Theory]
+        [InlineData(340)]
+        [InlineData(341)]
+        [InlineData(511)]
+        [InlineData(512)]
+        [InlineData(4 * 1024 * 1024)]
+        public void LargeKeyFormatBackwardCompat(int keyLength)
+        {
+            string textToHash = new string('a', keyLength);
+
+            Assert.Equal(_fakeKeyHelper.ConvertKeyToHashBackwardCompatSHA1(textToHash), _defaultKeyHelper.ConvertKeyToHash(textToHash).ToString());
+            Assert.Equal(_fakeKeyHelper.ConvertKeyToHashBackwardCompatSHA256(textToHash), _sha256KeyHelper.ConvertKeyToHash(textToHash).ToString());
+        }
+
         [Theory]
         [InlineData("HashTestKeyHelperFake _fakeKeyHelper = new HashTestKeyHelperFake();")]
         [InlineData("thisIs Some Test Text123323 for Hashing")]

@@ -285,13 +285,7 @@ namespace Azure.Data.Tables
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         public static ReadOnlySpan<char> GenerateFilterConditionForGuidNull(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> operation)
         {
-#if NET9_0_OR_GREATER
-            Guid maxGuid = Guid.AllBitsSet;
-#else
-            Guid maxGuid = Guid.Parse("FFFFFFFF-FFFF-FFFF-FFFF-FFFFFFFFFFFF");
-#endif
-
-            ReadOnlySpan<char> validCondition = $"({GenerateFilterConditionForGuid(propertyName, QueryComparisons.GreaterThanOrEqual, Guid.Empty)} {TableOperators.And} {GenerateFilterConditionForGuid(propertyName, QueryComparisons.LessThanOrEqual, maxGuid)})";
+            ReadOnlySpan<char> validCondition = $"({GenerateFilterConditionForGuid(propertyName, QueryComparisons.GreaterThanOrEqual, Guid.Empty)} {TableOperators.And} {GenerateFilterConditionForGuid(propertyName, QueryComparisons.LessThanOrEqual, Guid.AllBitsSet)})";
             switch (operation)
             {
                 case QueryComparisons.Equal: //isNull
@@ -358,34 +352,27 @@ namespace Azure.Data.Tables
                     return $"X'{givenValue}'";
             }
             // OData readers expect single quote to be escaped in a param value.
-            int splitCounter = givenValue.Count('\'');
-            if (splitCounter <= 0)
+            // The value can be caller supplied text of any length, so it is built on the heap.
+            int quoteCount = givenValue.Count('\'');
+            char[] operand = new char[givenValue.Length + quoteCount + 2];
+            operand[0] = '\'';
+            operand[^1] = '\'';
+            if (quoteCount == 0)
             {
-                Span<char> chars = stackalloc char[givenValue.Length + 2];
-                chars[0] = '\'';
-                int outputIndex = 1;
-                for (int givenIndex = 0; givenIndex < givenValue.Length; givenIndex++)
-                {
-                    chars[outputIndex++] = givenValue[givenIndex];
-                }
-                chars[^1] = '\'';
-                return new ReadOnlySpan<char>([.. chars]);
+                givenValue.CopyTo(operand.AsSpan(1));
+                return operand;
             }
 
-            Span<char> joinArray = stackalloc char[givenValue.Length + splitCounter + 2];
-            joinArray[0] = '\'';
-            int joinIndex = 1;
-            for (int givenIndex = 0; givenIndex < givenValue.Length; givenIndex++)
+            int operandIndex = 1;
+            foreach (char c in givenValue)
             {
-                char c = givenValue[givenIndex];
-                joinArray[joinIndex++] = c;
+                operand[operandIndex++] = c;
                 if (c == '\'')
                 {
-                    joinArray[joinIndex++] = '\'';
+                    operand[operandIndex++] = '\'';
                 }
             }
-            joinArray[^1] = '\'';
-            return new ReadOnlySpan<char>([.. joinArray]);
+            return operand;
         }
 
         /// <summary>

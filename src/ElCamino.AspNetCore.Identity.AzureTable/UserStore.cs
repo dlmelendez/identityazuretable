@@ -374,9 +374,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             async Task ProcessAggregateQueryAsync(string query, CancellationToken ct)
             {
-                var queryResults = await _userTable.QueryAsync<TableEntity>(filter: query, cancellationToken: ct).ToListAsync(ct)
-                    .AsTask()
-                    .ConfigureAwait(false);
+                var queryResults = await _userTable.QueryAsync<TableEntity>(filter: query, cancellationToken: ct).ToListAsync(ct).ConfigureAwait(false);
 
                 foreach (var s in queryResults.GroupBy(g => g.PartitionKey))
                 {
@@ -504,6 +502,8 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 var deleteIndex = CreateClaimIndex(userPartitionKey, userClaim.ClaimType, userClaim.ClaimValue);
                 tasks.Add(_indexTable.DeleteEntityAsync(deleteIndex.PartitionKey, deleteIndex.RowKey, TableConstants.ETagWildcard, cancellationToken: cancellationToken));
             }
+
+            tasks.Add(DeletePasskeyIndexesAsync(userRows, cancellationToken));
 
             if (!string.IsNullOrWhiteSpace(user?.Email))
             {

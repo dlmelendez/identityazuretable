@@ -74,6 +74,41 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             return base.UserPasskeyArgumentNullChecks();
         }
 
+        [Fact(DisplayName = "GetUserPasskeysExcludesOtherUserRows")]
+        [Trait(UserOnlyStoreTrait, "")]
+        public override Task GetUserPasskeysExcludesOtherUserRows()
+        {
+            return base.GetUserPasskeysExcludesOtherUserRows();
+        }
+
+        [Fact(DisplayName = "RemoveUserPasskeyRequiresOwnership")]
+        [Trait(UserOnlyStoreTrait, "")]
+        public override Task RemoveUserPasskeyRequiresOwnership()
+        {
+            return base.RemoveUserPasskeyRequiresOwnership();
+        }
+
+        [Fact(DisplayName = "UserPasskeyCredentialIdIsCaseSensitive")]
+        [Trait(UserOnlyStoreTrait, "")]
+        public override Task UserPasskeyCredentialIdIsCaseSensitive()
+        {
+            return base.UserPasskeyCredentialIdIsCaseSensitive();
+        }
+
+        [Fact(DisplayName = "UserPasskeyIndexIsNotALoginIndex")]
+        [Trait(UserOnlyStoreTrait, "")]
+        public override Task UserPasskeyIndexIsNotALoginIndex()
+        {
+            return base.UserPasskeyIndexIsNotALoginIndex();
+        }
+
+        [Fact(DisplayName = "UserPasskeyCredentialIdLengthLimit")]
+        [Trait(UserOnlyStoreTrait, "")]
+        public override Task UserPasskeyCredentialIdLengthLimit()
+        {
+            return base.UserPasskeyCredentialIdLengthLimit();
+        }
+
         [Fact(DisplayName = "AddReplaceRemoveUserClaim")]
         [Trait(UserOnlyStoreTrait, "")]
         public override Task AddReplaceRemoveUserClaim()

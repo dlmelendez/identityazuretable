@@ -1,6 +1,7 @@
-// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
+﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
 using System;
+using System.Buffers.Text;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
@@ -48,7 +49,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         private static void AssertPasskeyEqual(UserPasskeyInfo expected, UserPasskeyInfo actual)
         {
             Assert.NotNull(actual);
-            Assert.Equal(expected.CredentialId, actual!.CredentialId);
+            Assert.Equal(expected.CredentialId, actual.CredentialId);
             Assert.Equal(expected.PublicKey, actual.PublicKey);
             Assert.Equal(expected.Name, actual.Name);
             Assert.Equal(expected.CreatedAt, actual.CreatedAt);
@@ -69,7 +70,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         /// </summary>
         public virtual async Task AddGetFindRemoveUserPasskey()
         {
-            using var store = userFixture.CreateUserStore();
             using var manager = userFixture.CreateUserManager();
             var user = await CreateTestUserLiteAsync().ConfigureAwait(false);
             WriteLineObject<IdentityUser>(user);
@@ -108,7 +108,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         /// </summary>
         public virtual async Task UpdateUserPasskey()
         {
-            using var store = userFixture.CreateUserStore();
             using var manager = userFixture.CreateUserManager();
             var user = await CreateTestUserLiteAsync().ConfigureAwait(false);
 
@@ -117,15 +116,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             var addResult = await manager.AddOrUpdatePasskeyAsync(user, passkey).ConfigureAwait(false);
             Assert.True(addResult.Succeeded, string.Concat(addResult.Errors));
 
-            // Update sign count and name on the same credential id
-            passkey.SignCount = 42;
+            // Update sign count and name on the same credential id. The sign count is stored as a long: use the largest uint.
+            passkey.SignCount = uint.MaxValue;
             passkey.Name = "Updated passkey";
             var updateResult = await manager.AddOrUpdatePasskeyAsync(user, passkey).ConfigureAwait(false);
             Assert.True(updateResult.Succeeded, string.Concat(updateResult.Errors));
 
             var passkeys = await manager.GetPasskeysAsync(user).ConfigureAwait(false);
             var stored = Assert.Single(passkeys);
-            Assert.Equal(42u, stored.SignCount);
+            Assert.Equal(uint.MaxValue, stored.SignCount);
             Assert.Equal("Updated passkey", stored.Name);
 
             // Remove via manager
@@ -140,7 +139,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         /// </summary>
         public virtual async Task FindUserByPasskeyId()
         {
-            using var store = userFixture.CreateUserStore();
             using var manager = userFixture.CreateUserManager();
             var user = await CreateTestUserLiteAsync().ConfigureAwait(false);
 
@@ -152,7 +150,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             // Passwordless lookup by credential id alone
             var foundUser = await manager.FindByPasskeyIdAsync(credentialId).ConfigureAwait(false);
             Assert.NotNull(foundUser);
-            Assert.Equal(user.Id, foundUser!.Id);
+            Assert.Equal(user.Id, foundUser.Id);
 
             // Negative: unknown credential id
             var notFound = await manager.FindByPasskeyIdAsync(GenCredentialId()).ConfigureAwait(false);
@@ -166,11 +164,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
         }
 
         /// <summary>
-        /// DeleteAsync cleans up passkey index rows: lookup by credential id returns null after user delete.
+        /// DeleteAsync cleans up passkey index rows: the index row is deleted, not left pointing at the deleted user.
         /// </summary>
         public virtual async Task DeleteUserPasskeyIndexCleanup()
         {
-            using var store = userFixture.CreateUserStore();
             using var manager = userFixture.CreateUserManager();
             var user = await CreateTestUserLiteAsync().ConfigureAwait(false);
 
@@ -186,9 +183,143 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests
             var userDeletionResult = await manager.DeleteAsync(user).ConfigureAwait(false);
             Assert.True(userDeletionResult.Succeeded, string.Concat(userDeletionResult.Errors));
 
-            // Index row must be gone
             var foundAfterDelete = await manager.FindByPasskeyIdAsync(credentialId).ConfigureAwait(false);
             Assert.Null(foundAfterDelete);
+
+            // An orphaned index row also gives null above, so prove the row itself is gone:
+            // a new user with the deleted user's id must not be found by the deleted user's credential id
+            var recreatedUser = GenTestUser();
+            recreatedUser.Id = user.Id;
+            var recreateResult = await manager.CreateAsync(recreatedUser).ConfigureAwait(false);
+            Assert.True(recreateResult.Succeeded, string.Concat(recreateResult.Errors));
+            Assert.Null(await manager.FindByPasskeyIdAsync(credentialId).ConfigureAwait(false));
+        }
+
+        /// <summary>
+        /// GetPasskeysAsync returns only passkey rows: other rows in the user's partition are not passkeys.
+        /// </summary>
+        public virtual async Task GetUserPasskeysExcludesOtherUserRows()
+        {
+            using var manager = userFixture.CreateUserManager();
+            var user = await CreateTestUserLiteAsync().ConfigureAwait(false);
+
+            // Login row keys sort directly after passkey row keys
+            var loginResult = await manager.AddLoginAsync(user, new UserLoginInfo("Google", Guid.NewGuid().ToString("N"), "Google")).ConfigureAwait(false);
+            Assert.True(loginResult.Succeeded, string.Concat(loginResult.Errors));
+            var claimResult = await manager.AddClaimAsync(user, GenUserClaim()).ConfigureAwait(false);
+            Assert.True(claimResult.Succeeded, string.Concat(claimResult.Errors));
+            var tokenResult = await manager.SetAuthenticationTokenAsync(user, "Google", "access_token", Guid.NewGuid().ToString("N")).ConfigureAwait(false);
+            Assert.True(tokenResult.Succeeded, string.Concat(tokenResult.Errors));
+
+            var passkey = GenTestPasskey(GenCredentialId());
+            var addResult = await manager.AddOrUpdatePasskeyAsync(user, passkey).ConfigureAwait(false);
+            Assert.True(addResult.Succeeded, string.Concat(addResult.Errors));
+
+            var stored = Assert.Single(await manager.GetPasskeysAsync(user).ConfigureAwait(false));
+            AssertPasskeyEqual(passkey, stored);
+        }
+
+        /// <summary>
+        /// Removing a credential id the user does not own must not touch the owner's passkey or its index row.
+        /// </summary>
+        public virtual async Task RemoveUserPasskeyRequiresOwnership()
+        {
+            using var manager = userFixture.CreateUserManager();
+            var owner = await CreateTestUserLiteAsync().ConfigureAwait(false);
+            var otherUser = await CreateTestUserLiteAsync().ConfigureAwait(false);
+
+            var credentialId = GenCredentialId();
+            var passkey = GenTestPasskey(credentialId);
+            var addResult = await manager.AddOrUpdatePasskeyAsync(owner, passkey).ConfigureAwait(false);
+            Assert.True(addResult.Succeeded, string.Concat(addResult.Errors));
+
+            var removeResult = await manager.RemovePasskeyAsync(otherUser, credentialId).ConfigureAwait(false);
+            Assert.True(removeResult.Succeeded, string.Concat(removeResult.Errors));
+
+            var foundUser = await manager.FindByPasskeyIdAsync(credentialId).ConfigureAwait(false);
+            Assert.Equal(owner.Id, foundUser?.Id);
+            AssertPasskeyEqual(passkey, await manager.GetPasskeyAsync(owner, credentialId).ConfigureAwait(false));
+        }
+
+        /// <summary>
+        /// Credential ids are binary: ids whose Base64Url encodings differ only by letter casing are different credentials.
+        /// </summary>
+        public virtual async Task UserPasskeyCredentialIdIsCaseSensitive()
+        {
+            using var manager = userFixture.CreateUserManager();
+            var user = await CreateTestUserLiteAsync().ConfigureAwait(false);
+            var otherUser = await CreateTestUserLiteAsync().ConfigureAwait(false);
+
+            // 48 bytes encode to 64 chars without a partial block, so every case variant decodes
+            var credentialId = RandomNumberGenerator.GetBytes(48);
+            var caseVariantId = Base64Url.DecodeFromChars(string.Concat(
+                Base64Url.EncodeToString(credentialId).Select(c => char.IsLower(c) ? char.ToUpperInvariant(c) : char.ToLowerInvariant(c))));
+            Assert.NotEqual(credentialId, caseVariantId);
+
+            var passkey = GenTestPasskey(credentialId);
+            var addResult = await manager.AddOrUpdatePasskeyAsync(user, passkey).ConfigureAwait(false);
+            Assert.True(addResult.Succeeded, string.Concat(addResult.Errors));
+
+            Assert.Null(await manager.FindByPasskeyIdAsync(caseVariantId).ConfigureAwait(false));
+            Assert.Null(await manager.GetPasskeyAsync(user, caseVariantId).ConfigureAwait(false));
+
+            // The case variant belongs to whoever registers it and never takes over the original's index row
+            var caseVariantPasskey = GenTestPasskey(caseVariantId);
+            var addVariantResult = await manager.AddOrUpdatePasskeyAsync(otherUser, caseVariantPasskey).ConfigureAwait(false);
+            Assert.True(addVariantResult.Succeeded, string.Concat(addVariantResult.Errors));
+            Assert.Equal(user.Id, (await manager.FindByPasskeyIdAsync(credentialId).ConfigureAwait(false))?.Id);
+            Assert.Equal(otherUser.Id, (await manager.FindByPasskeyIdAsync(caseVariantId).ConfigureAwait(false))?.Id);
+
+            var removeVariantResult = await manager.RemovePasskeyAsync(otherUser, caseVariantId).ConfigureAwait(false);
+            Assert.True(removeVariantResult.Succeeded, string.Concat(removeVariantResult.Errors));
+            Assert.Equal(user.Id, (await manager.FindByPasskeyIdAsync(credentialId).ConfigureAwait(false))?.Id);
+            AssertPasskeyEqual(passkey, await manager.GetPasskeyAsync(user, credentialId).ConfigureAwait(false));
+        }
+
+        /// <summary>
+        /// Passkey index rows share the index table with external login index rows but never resolve as a login.
+        /// </summary>
+        public virtual async Task UserPasskeyIndexIsNotALoginIndex()
+        {
+            using var manager = userFixture.CreateUserManager();
+            var user = await CreateTestUserLiteAsync().ConfigureAwait(false);
+
+            var credentialId = GenCredentialId();
+            var addResult = await manager.AddOrUpdatePasskeyAsync(user, GenTestPasskey(credentialId)).ConfigureAwait(false);
+            Assert.True(addResult.Succeeded, string.Concat(addResult.Errors));
+
+            // Guards against keying the passkey index with the login key generation under a passkey provider name
+            string encodedCredentialId = Base64Url.EncodeToString(credentialId);
+            Assert.Null(await manager.FindByLoginAsync("Passkey", encodedCredentialId).ConfigureAwait(false));
+            Assert.Null(await manager.FindByLoginAsync(nameof(Model.IdentityUserPasskey), encodedCredentialId).ConfigureAwait(false));
+        }
+
+        /// <summary>
+        /// Credential ids are caller supplied at sign in: one too long to store is never found or stored, whatever its size.
+        /// The largest storable credential id round-trips.
+        /// </summary>
+        public virtual async Task UserPasskeyCredentialIdLengthLimit()
+        {
+            using var store = userFixture.CreateUserStore();
+            var user = await CreateTestUserLiteAsync().ConfigureAwait(false);
+            var cancellationToken = new CancellationToken();
+
+            foreach (int length in new[] { Model.IdentityUserPasskey.MaxCredentialIdLength + 1, 4 * 1024 * 1024 })
+            {
+                var oversizedId = new byte[length];
+                Assert.Null(await store.FindPasskeyAsync(user, oversizedId, cancellationToken).ConfigureAwait(false));
+                Assert.Null(await store.FindByPasskeyIdAsync(oversizedId, cancellationToken).ConfigureAwait(false));
+                await store.RemovePasskeyAsync(user, oversizedId, cancellationToken).ConfigureAwait(false);
+                await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => store.AddOrUpdatePasskeyAsync(user, GenTestPasskey(oversizedId), cancellationToken)).ConfigureAwait(false);
+            }
+
+            var largestId = RandomNumberGenerator.GetBytes(Model.IdentityUserPasskey.MaxCredentialIdLength);
+            var passkey = GenTestPasskey(largestId);
+            await store.AddOrUpdatePasskeyAsync(user, passkey, cancellationToken).ConfigureAwait(false);
+            AssertPasskeyEqual(passkey, await store.FindPasskeyAsync(user, largestId, cancellationToken).ConfigureAwait(false));
+            Assert.Equal(user.Id, (await store.FindByPasskeyIdAsync(largestId, cancellationToken).ConfigureAwait(false))?.Id);
+            await store.RemovePasskeyAsync(user, largestId, cancellationToken).ConfigureAwait(false);
+            Assert.Null(await store.FindPasskeyAsync(user, largestId, cancellationToken).ConfigureAwait(false));
         }
 
         /// <summary>

@@ -1,6 +1,5 @@
 ﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 using System;
-using System.Buffers.Text;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -241,12 +240,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
                 tasks.Add(_indexTable.DeleteEntityAsync(deleteClaimIndex.PartitionKey, deleteClaimIndex.RowKey, TableConstants.ETagWildcard, cancellationToken));
             }
 
-            //Delete passkey index rows
-            await foreach (var userPasskey in GetUserPasskeyQueryAsync(userPartitionKey, cancellationToken).ConfigureAwait(false))
-            {
-                var deletePasskeyIndex = CreatePasskeyIndex(userPartitionKey, userPasskey.CredentialId);
-                tasks.Add(_indexTable.DeleteEntityAsync(deletePasskeyIndex.PartitionKey, deletePasskeyIndex.RowKey, TableConstants.ETagWildcard, cancellationToken));
-            }
+            tasks.Add(DeletePasskeyIndexesAsync(userRows, cancellationToken));
 
             if (!string.IsNullOrWhiteSpace(user?.Email))
             {
@@ -613,9 +607,7 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             async Task ProcessAggregateQueryAsync(string query, CancellationToken ct)
             {
-                var queryResult = await _userTable.QueryAsync<TableEntity>(filter: query, cancellationToken: ct).ToListAsync(ct)
-                    .AsTask()
-                    .ConfigureAwait(false);
+                var queryResult = await _userTable.QueryAsync<TableEntity>(filter: query, cancellationToken: ct).ToListAsync(ct).ConfigureAwait(false);
 
                 foreach (var s in queryResult.GroupBy(g => g.PartitionKey))
                 {
@@ -1230,14 +1222,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
         }
 
-        #region IUserPasskeyStore<TUser>
-
-        /// <summary>
-        /// Literal login provider used to derive passkey index keys.
-        /// Reuses the login index key generation so passkeys get the same partition/row key shape.
-        /// </summary>
-        protected const string PasskeyIndexProvider = nameof(Model.IdentityUserPasskey);
-
         /// <inheritdoc/>
         public virtual async Task AddOrUpdatePasskeyAsync(TUser user, UserPasskeyInfo passkey, CancellationToken cancellationToken)
         {
@@ -1250,13 +1234,10 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             var entity = Model.IdentityUserPasskey.FromPasskeyInfo(passkey, userPartitionKey);
             entity.GenerateKeys(_keyHelper);
 
-            List<Task> tasks =
-            [
+            await Task.WhenAll(
                 _userTable.UpsertEntityAsync(entity, mode: TableUpdateMode.Replace, cancellationToken: cancellationToken),
-                _indexTable.UpsertEntityAsync(CreatePasskeyIndex(userPartitionKey, passkey.CredentialId), mode: TableUpdateMode.Replace, cancellationToken: cancellationToken),
-            ];
-
-            await Task.WhenAll(tasks).ConfigureAwait(false);
+                _indexTable.UpsertEntityAsync(CreatePasskeyIndex(userPartitionKey, passkey.CredentialId), mode: TableUpdateMode.Replace, cancellationToken: cancellationToken)
+            ).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
@@ -1268,10 +1249,16 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
 
             List<UserPasskeyInfo> passkeys = [];
 
-            var userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)).ToString();
-            await foreach (var entity in GetUserPasskeyQueryAsync(userPartitionKey, cancellationToken).ConfigureAwait(false))
+            var partitionFilter =
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)));
+            var rowFilter = TableQuery.CombineFilters(
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserPasskey),
+                TableOperators.And,
+                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.LessThan, _keyHelper.PreFixIdentityUserPasskeyUpperBound));
+            var filterString = TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowFilter);
+            await foreach (var passkey in _userTable.QueryAsync<Model.IdentityUserPasskey>(filter: filterString.ToString(), cancellationToken: cancellationToken).ConfigureAwait(false))
             {
-                passkeys.Add(entity.ToPasskeyInfo());
+                passkeys.Add(passkey.ToPasskeyInfo());
             }
 
             return passkeys;
@@ -1285,10 +1272,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             ArgumentNullException.ThrowIfNull(user);
             ArgumentNullException.ThrowIfNull(credentialId);
 
-            var userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
-            var rowKey = string.Format(_keyHelper.FormatterIdentityUserPasskey, Base64Url.EncodeToString(credentialId));
+            if (!IsStorable(credentialId))
+            {
+                return null;
+            }
 
-            var entity = await _userTable.GetEntityOrDefaultAsync<Model.IdentityUserPasskey>(userPartitionKey.ToString(), rowKey, cancellationToken: cancellationToken)
+            var userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)).ToString();
+            var rowKey = Model.IdentityUserPasskey.GenerateRowKey(_keyHelper, credentialId);
+
+            var entity = await _userTable.GetEntityOrDefaultAsync<Model.IdentityUserPasskey>(userPartitionKey, rowKey, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
 
             return entity?.ToPasskeyInfo();
@@ -1301,12 +1293,15 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             ThrowIfDisposed();
             ArgumentNullException.ThrowIfNull(credentialId);
 
-            var encodedCredentialId = Base64Url.EncodeToString(credentialId);
-            var partitionKey = _keyHelper.GeneratePartitionKeyIndexByLogin(PasskeyIndexProvider, encodedCredentialId);
-            var rowKey = _keyHelper.GenerateRowKeyIdentityUserLogin(PasskeyIndexProvider, encodedCredentialId);
+            if (!IsStorable(credentialId))
+            {
+                return Task.FromResult<TUser?>(null);
+            }
 
-            return GetUserFromIndexQueryAsync(
-                GetUserIdByIndexQuery(partitionKey.ToString(), rowKey.ToString()).ToString(), cancellationToken);
+            //A passkey index row is keyed by the passkey row key, see CreatePasskeyIndex
+            var passkeyRowKey = Model.IdentityUserPasskey.GenerateRowKey(_keyHelper, credentialId);
+
+            return GetUserFromIndexQueryAsync(GetUserIdByIndexQuery(passkeyRowKey, passkeyRowKey).ToString(), cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -1317,62 +1312,69 @@ namespace ElCamino.AspNetCore.Identity.AzureTable
             ArgumentNullException.ThrowIfNull(user);
             ArgumentNullException.ThrowIfNull(credentialId);
 
-            var userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id));
-            var rowKey = string.Format(_keyHelper.FormatterIdentityUserPasskey, Base64Url.EncodeToString(credentialId));
+            if (!IsStorable(credentialId))
+            {
+                return;
+            }
 
-            var deletePasskeyIndex = CreatePasskeyIndex(userPartitionKey.ToString(), credentialId);
+            var userPartitionKey = _keyHelper.GenerateRowKeyUserId(ConvertIdToString(user.Id)).ToString();
+            var rowKey = Model.IdentityUserPasskey.GenerateRowKey(_keyHelper, credentialId);
 
-            List<Task> tasks =
-            [
-                _userTable.DeleteEntityAsync(userPartitionKey.ToString(), rowKey, TableConstants.ETagWildcard, cancellationToken),
-                _indexTable.DeleteEntityAsync(deletePasskeyIndex.PartitionKey, deletePasskeyIndex.RowKey, TableConstants.ETagWildcard, cancellationToken),
-            ];
+            //The index row is keyed by the credential id alone, only delete it with a passkey this user owns
+            var item = await _userTable.GetEntityOrDefaultAsync<TableEntity>(userPartitionKey, rowKey, [nameof(TableEntity.RowKey)], cancellationToken).ConfigureAwait(false);
 
-            await Task.WhenAll(tasks).ConfigureAwait(false);
+            if (item is not null)
+            {
+                var deletePasskeyIndex = CreatePasskeyIndex(userPartitionKey, credentialId);
+                await Task.WhenAll(
+                    _userTable.DeleteEntityAsync(userPartitionKey, rowKey, TableConstants.ETagWildcard, cancellationToken),
+                    _indexTable.DeleteEntityAsync(deletePasskeyIndex.PartitionKey, deletePasskeyIndex.RowKey, TableConstants.ETagWildcard, cancellationToken)
+                ).ConfigureAwait(false);
+            }
         }
 
         /// <summary>
-        /// Queries all passkey entities for a user partition.
+        /// A credential id too long to store can never match a stored passkey. Credential ids are caller supplied
+        /// at sign in, so the lookups reject them up front instead of generating keys and queries from them.
         /// </summary>
-        /// <param name="userPartitionKey">Formatted UserId from the KeyHelper</param>
+        private static bool IsStorable(byte[] credentialId) => credentialId.Length <= Model.IdentityUserPasskey.MaxCredentialIdLength;
+
+        /// <summary>
+        /// Deletes the passkey index rows for the passkey rows in a user's partition.
+        /// </summary>
+        /// <param name="userRows">Rows from the user's partition</param>
         /// <param name="cancellationToken"></param>
-        /// <returns>Async enumerable of passkey entities</returns>
-        protected IAsyncEnumerable<Model.IdentityUserPasskey> GetUserPasskeyQueryAsync(string userPartitionKey, CancellationToken cancellationToken = default)
+        /// <returns></returns>
+        protected Task DeletePasskeyIndexesAsync(IEnumerable<TableEntity> userRows, CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var partitionFilter =
-                TableQuery.GenerateFilterCondition(nameof(TableEntity.PartitionKey), QueryComparisons.Equal, userPartitionKey);
-            var rowFilter = TableQuery.CombineFilters(
-                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.GreaterThanOrEqual, _keyHelper.PreFixIdentityUserPasskey),
-                TableOperators.And,
-                TableQuery.GenerateFilterCondition(nameof(TableEntity.RowKey), QueryComparisons.LessThan, _keyHelper.PreFixIdentityUserPasskeyUpperBound));
-            var filterString = TableQuery.CombineFilters(partitionFilter, TableOperators.And, rowFilter);
-
-            return _userTable.QueryAsync<Model.IdentityUserPasskey>(filter: filterString.ToString(), cancellationToken: cancellationToken);
+            //A passkey index row is keyed by the passkey row key, see CreatePasskeyIndex
+            return Task.WhenAll(userRows
+                .Where(u => u.RowKey.StartsWith(_keyHelper.PreFixIdentityUserPasskey, StringComparison.Ordinal))
+                .Select(u => _indexTable.DeleteEntityAsync(u.RowKey, u.RowKey, TableConstants.ETagWildcard, cancellationToken)));
         }
 
         /// <summary>
         /// Creates an IdentityUserIndex for a passkey credential suitable for a crud operation.
-        /// Enables finding a user by passkey credential id alone (username-less sign-in).
+        /// Enables finding a user by passkey credential id alone.
+        /// The index is keyed by the passkey row key, not by a key the KeyHelper generates like the login index:
+        /// those are hashed from upper cased text, which would give credential ids that differ only by the casing
+        /// of their encoding the same index row, and a login key would let a login lookup find a passkey.
         /// </summary>
         /// <param name="userPartitionKey">Formatted UserId from the KeyHelper</param>
         /// <param name="credentialId">The passkey credential id bytes</param>
         /// <returns></returns>
         protected Model.IdentityUserIndex CreatePasskeyIndex(string userPartitionKey, byte[] credentialId)
         {
-            var encodedCredentialId = Base64Url.EncodeToString(credentialId);
+            var passkeyRowKey = Model.IdentityUserPasskey.GenerateRowKey(_keyHelper, credentialId);
             return new Model.IdentityUserIndex()
             {
                 Id = userPartitionKey,
-                PartitionKey = _keyHelper.GeneratePartitionKeyIndexByLogin(PasskeyIndexProvider, encodedCredentialId).ToString(),
-                RowKey = _keyHelper.GenerateRowKeyIdentityUserLogin(PasskeyIndexProvider, encodedCredentialId).ToString(),
+                PartitionKey = passkeyRowKey,
+                RowKey = passkeyRowKey,
                 KeyVersion = _keyHelper.KeyVersion,
                 ETag = TableConstants.ETagWildcard
             };
         }
-
-        #endregion
 
         /// <inheritdoc/>
         public override async Task<IList<TUser>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken = default)

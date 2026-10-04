@@ -531,8 +531,9 @@ namespace ElCamino.Azure.Data.Tables.Tests
 
             //Assert
             Assert.Equal(0, await _tableClient.QueryAsync<TableEntity>(filter: filterNullBuilder).CountAsync());
-            //ne matches entities where the property is absent (matches real storage accounts and current Azurite)
-            Assert.Equal(1, await _tableClient.QueryAsync<TableEntity>(filter: filterNotNullBuilder).CountAsync());
+            //ne does not match an entity without the property on a real storage account or current Azurite.
+            //Old Azurite versions (3.22) wrongly return the entity: upgrade Azurite if this fails locally.
+            Assert.Equal(0, await _tableClient.QueryAsync<TableEntity>(filter: filterNotNullBuilder).CountAsync());
 
             //Modify update
             var updateEntity = new TableEntity(key, key)

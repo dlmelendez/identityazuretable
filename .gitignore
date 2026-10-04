@@ -273,7 +273,6 @@ __pycache__/
 *.stackdump
 
 # Azurite local storage
-__azurite_db_table__.json
-__azurite_db_account__.json
+__azurite_db_*__.json
 __blobstorage__/
 __queuestorage__/

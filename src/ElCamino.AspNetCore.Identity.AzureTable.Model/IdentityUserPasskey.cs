@@ -1,4 +1,4 @@
-// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
+﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
 using System;
 using System.Buffers.Text;
@@ -19,6 +19,13 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// Separator used to pack <see cref="UserPasskeyInfo.Transports"/> into the <see cref="Transports"/> string column.
         /// </summary>
         public const string TransportsSeparator = ";";
+
+        /// <summary>
+        /// The largest credential id, in bytes, that can be stored. WebAuthn allows up to 1023 bytes, but the credential id
+        /// is Base64Url encoded into the row key. 382 bytes keeps the row key within 512 characters, the key size the
+        /// Azurite emulator accepts. Azure Table Storage documents a limit of 1024 characters.
+        /// </summary>
+        public const int MaxCredentialIdLength = 382;
 
         /// <summary>
         /// The user id (hashed) that owns this passkey. Same value as the user row's partition key.
@@ -124,7 +131,20 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// <returns></returns>
         public string PeekRowKey(IKeyHelper keyHelper)
         {
-            return string.Format(keyHelper.FormatterIdentityUserPasskey, Base64Url.EncodeToString(CredentialId));
+            return GenerateRowKey(keyHelper, CredentialId);
+        }
+
+        /// <summary>
+        /// Generates the RowKey for a credential id: the passkey prefix + Base64Url(credentialId).
+        /// The other keys are hashed from upper cased text. A credential id is a case sensitive binary value,
+        /// so it is encoded instead to keep the key exact.
+        /// </summary>
+        /// <param name="keyHelper"></param>
+        /// <param name="credentialId">The passkey credential id.</param>
+        /// <returns></returns>
+        public static string GenerateRowKey(IKeyHelper keyHelper, ReadOnlySpan<byte> credentialId)
+        {
+            return string.Format(keyHelper.FormatterIdentityUserPasskey, Base64Url.EncodeToString(credentialId));
         }
 
         /// <summary>
@@ -134,12 +154,14 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// <param name="passkey">The passkey info to convert.</param>
         /// <param name="hashedUserId">The hashed user id used as the partition key.</param>
         /// <returns>A new <see cref="IdentityUserPasskey"/> with all fields mapped.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">The credential id is longer than <see cref="MaxCredentialIdLength"/>.</exception>
         public static IdentityUserPasskey FromPasskeyInfo(UserPasskeyInfo passkey, string hashedUserId)
         {
             ArgumentNullException.ThrowIfNull(passkey);
             ArgumentException.ThrowIfNullOrEmpty(hashedUserId);
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(passkey.CredentialId.Length, MaxCredentialIdLength);
 
-            var entity = new IdentityUserPasskey
+            return new IdentityUserPasskey
             {
                 UserId = hashedUserId,
                 CredentialId = passkey.CredentialId,
@@ -157,7 +179,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
                 Aaguid = passkey.Aaguid,
 #endif
             };
-            return entity;
         }
 
         /// <summary>
@@ -166,12 +187,12 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
         /// <returns>A new <see cref="UserPasskeyInfo"/> populated from the stored columns.</returns>
         public UserPasskeyInfo ToPasskeyInfo()
         {
-            var passkeyInfo = new UserPasskeyInfo(
+            return new UserPasskeyInfo(
                 credentialId: CredentialId,
                 publicKey: PublicKey,
                 createdAt: CreatedAt,
                 signCount: checked((uint)SignCount),
-                transports: UnpackTransports(),
+                transports: string.IsNullOrEmpty(Transports) ? null : Transports.Split(TransportsSeparator),
                 isUserVerified: IsUserVerified,
                 isBackupEligible: IsBackupEligible,
                 isBackedUp: IsBackedUp,
@@ -183,16 +204,6 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Model
                 Aaguid = Aaguid,
 #endif
             };
-            return passkeyInfo;
-        }
-
-        private string[]? UnpackTransports()
-        {
-            if (string.IsNullOrEmpty(Transports))
-            {
-                return null;
-            }
-            return Transports.Split(TransportsSeparator);
         }
     }
 }

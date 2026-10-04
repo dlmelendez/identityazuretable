@@ -1,4 +1,4 @@
-// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
+﻿// MIT License Copyright 2020 (c) David Melendez. All rights reserved. See License.txt in the project root for license information.
 
 using System;
 using System.Collections.Generic;
@@ -29,11 +29,11 @@ namespace ElCamino.AspNetCore.Identity.AzureTable.Tests.ModelTests
         {
             var passkeyInfoProperties = typeof(UserPasskeyInfo)
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .ToDictionary(p => p.Name, p => p);
+                .ToDictionary(p => p.Name);
 
             var entityProperties = typeof(Model.IdentityUserPasskey)
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .ToDictionary(p => p.Name, p => p);
+                .ToDictionary(p => p.Name);
 
             Assert.NotEmpty(passkeyInfoProperties);
 
